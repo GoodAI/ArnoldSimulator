@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props')" />
+  <Import Project="..\..\packages\xunit.core.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.core.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{67A9C165-4327-49AC-A9F4-FE6365A34FBB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GoodAI.Net.ConverseSharp</RootNamespace>
+    <AssemblyName>ConverseSharpTests</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.core, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.extensibility.core.2.1.0\lib\portable-net45+win8+wp8+wpa81\xunit.core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.execution.desktop, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.extensibility.execution.2.1.0\lib\net45\xunit.execution.desktop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssertExtensions.cs" />
+    <Compile Include="Asserts\Assert.cs" />
+    <Compile Include="Asserts\BooleanAsserts.cs" />
+    <Compile Include="Asserts\CollectionAsserts.cs" />
+    <Compile Include="Asserts\Comparers.cs" />
+    <Compile Include="Asserts\EqualityAsserts.cs" />
+    <Compile Include="Asserts\ExceptionAsserts.cs" />
+    <Compile Include="Asserts\Guards.cs" />
+    <Compile Include="Asserts\IdentityAsserts.cs" />
+    <Compile Include="Asserts\NullAsserts.cs" />
+    <Compile Include="Asserts\PropertyAsserts.cs" />
+    <Compile Include="Asserts\RangeAsserts.cs" />
+    <Compile Include="Asserts\Record.cs" />
+    <Compile Include="Asserts\Sdk\ArgumentFormatter.cs" />
+    <Compile Include="Asserts\Sdk\AssertComparer.cs" />
+    <Compile Include="Asserts\Sdk\AssertEqualityComparer.cs" />
+    <Compile Include="Asserts\Sdk\AssertEqualityComparerAdapter.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\AllException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\AssertActualExpectedException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\AssertCollectionCountException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\CollectionException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\ContainsException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\DoesNotContainException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\DoesNotMatchException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\EmptyException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\EndsWithException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\EqualException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\FalseException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\InRangeException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\IsAssignableFromException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\IsNotTypeException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\IsTypeException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\MatchesException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\NotEmptyException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\NotEqualException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\NotInRangeException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\NotNullException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\NotSameException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\NullException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\ParameterCountMismatchException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\ProperSubsetException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\ProperSupersetException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\PropertyChangedException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\SameException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\SingleException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\StartsWithException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\SubsetException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\SupersetException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\ThrowsException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\TrueException.cs" />
+    <Compile Include="Asserts\Sdk\Exceptions\XunitException.cs" />
+    <Compile Include="Asserts\SetAsserts.cs" />
+    <Compile Include="Asserts\StringAsserts.cs" />
+    <Compile Include="Asserts\TypeAsserts.cs" />
+    <Compile Include="ConverseClientTests.cs" />
+    <Compile Include="ConverseProtoBufClientTests.cs" />
+    <Compile Include="ConverseReaderTests.cs" />
+    <Compile Include="ConverseWriterTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ConverseSharp\ConverseSharp.csproj">
+      <Project>{6d704040-e839-41dd-9aa2-36eeadefb0c9}</Project>
+      <Name>ConverseSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\xunit.core.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.core.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.core.props'))" />
+    <Error Condition="!Exists('..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
