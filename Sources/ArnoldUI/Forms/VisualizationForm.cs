@@ -124,8 +124,7 @@ namespace GoodAI.Arnold.Forms
 
             glControl_Resize(glControl, EventArgs.Empty);
 
-            // TODO: obsolete, change (render in a different thread + sleep)
-            glControl.Context.VSync = true;
+            glControl.Context.SwapInterval = 1;
 
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
@@ -301,12 +300,6 @@ namespace GoodAI.Arnold.Forms
             UpdateFrame(elapsedMs);
 
             RenderFrame(elapsedMs);
-
-            // TODO: Do this properly - move the visualization into a different thread than UI.
-            // VSync deals with this.
-            //double wait = FrameMilliseconds - elapsed;
-            //if (wait > 0)
-            //    Thread.Sleep((int) wait);
         }
 
         private void glControl_Resize(object sender, EventArgs e)
