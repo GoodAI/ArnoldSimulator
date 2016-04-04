@@ -86,12 +86,12 @@
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Graphics\Blender.cs" />
-    <Compile Include="Graphics\BrainModel.cs" />
+    <Compile Include="Graphics\Models\BrainModel.cs" />
     <Compile Include="Graphics\Camera.cs" />
-    <Compile Include="Graphics\GridModel.cs" />
+    <Compile Include="Graphics\Models\GridModel.cs" />
     <Compile Include="Graphics\ModelBase.cs" />
     <Compile Include="Graphics\PickRay.cs" />
-    <Compile Include="Graphics\SynapseModel.cs" />
+    <Compile Include="Graphics\Models\SynapseModel.cs" />
     <Compile Include="OpenTKExtensions\Vector3Extensions.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">
@@ -122,8 +122,8 @@
     <Compile Include="Project\Body.cs" />
     <Compile Include="Project\Region.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Graphics\ExpertModel.cs" />
-    <Compile Include="Graphics\RegionModel.cs" />
+    <Compile Include="Graphics\Models\ExpertModel.cs" />
+    <Compile Include="Graphics\Models\RegionModel.cs" />
     <Compile Include="Simulation\Simulation.cs" />
     <Compile Include="Simulation\SimulationHandler.cs" />
     <Compile Include="Graphics\Visualization.cs" />

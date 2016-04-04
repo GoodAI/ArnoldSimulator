@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArnoldUI.Properties;
 using GoodAI.Arnold.Graphics;
+using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.Properties;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.OpenTKExtensions;

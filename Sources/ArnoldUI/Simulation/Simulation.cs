@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GoodAI.Arnold.Graphics;
+using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.Project;
 using OpenTK;
 using OpenTK.Platform.Windows;

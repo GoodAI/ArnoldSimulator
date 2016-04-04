@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-namespace GoodAI.Arnold.Graphics
+namespace GoodAI.Arnold.Graphics.Models
 {
     public class SynapseModel : ModelBase
     {
