@@ -360,7 +360,7 @@ namespace QuickFont
             float tx2 = (float)(glyph.rect.X + glyph.rect.Width) / sheet.Width;
             float ty2 = (float)(glyph.rect.Y + glyph.rect.Height) / sheet.Height;
 
-            GL.Begin(BeginMode.Quads);
+            GL.Begin(PrimitiveType.Quads);
                 GL.TexCoord2(tx1, ty1); GL.Vertex2(x, y + glyph.yOffset);
                 GL.TexCoord2(tx1, ty2); GL.Vertex2(x, y + glyph.yOffset + glyph.rect.Height);
                 GL.TexCoord2(tx2, ty2); GL.Vertex2(x + glyph.rect.Width, y + glyph.yOffset + glyph.rect.Height);

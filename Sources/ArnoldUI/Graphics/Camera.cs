@@ -79,7 +79,8 @@ namespace GoodAI.Arnold.Graphics
             offset += y * up;
             //offset.Y += y;
 
-            offset.Normalize();
+            if (offset != Vector3.Zero)
+                offset.Normalize();
 
             float speed = MoveSpeed;
             if (slow)
