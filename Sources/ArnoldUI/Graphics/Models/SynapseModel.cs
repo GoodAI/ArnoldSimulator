@@ -42,7 +42,7 @@ namespace GoodAI.Arnold.Graphics.Models
             m_alpha = SpikeAlpha;
         }
 
-        public override Matrix4 TranslationMatrix
+        protected override Matrix4 TranslationMatrix
         {
             // The experts are indexed from 0 now (not centered within the region).
             // Therefore we need to translate them to the region's corner of origin.

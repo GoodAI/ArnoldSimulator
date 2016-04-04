@@ -16,37 +16,40 @@ namespace GoodAI.Arnold.Graphics
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Vector3 Scale { get; set; } = Vector3.One;
 
+        /// <summary>
+        /// Translucent models get rendered in the second pass, when all opaque models have already been done.
+        /// </summary>
         public bool Translucent { get; set; }
 
         public bool Visible { get; set; } = true;
 
         // The matrices' calculations are virtual because some objects might want to 
-        // do freaky stuff - e.g. sprite banners have camera rotation based on camera.
+        // do freaky stuff - e.g. sprite banners have rotation based on camera.
 
-        public virtual Matrix4 RotationMatrix =>
-                Matrix4.CreateRotationX(Rotation.X)*Matrix4.CreateRotationY(Rotation.Y)*
-                Matrix4.CreateRotationZ(Rotation.Z);
+        protected virtual Matrix4 RotationMatrix =>
+            Matrix4.CreateRotationX(Rotation.X)*
+            Matrix4.CreateRotationY(Rotation.Y)*
+            Matrix4.CreateRotationZ(Rotation.Z);
 
-        public virtual Matrix4 ScaleMatrix => Matrix4.CreateScale(Scale);
+        protected virtual Matrix4 ScaleMatrix => Matrix4.CreateScale(Scale);
 
-        public virtual Matrix4 TranslationMatrix => Matrix4.CreateTranslation(Position);
+        protected virtual Matrix4 TranslationMatrix => Matrix4.CreateTranslation(Position);
 
-        public virtual Matrix4 OwnerCurrentFrameMatrix
-        {
-            get
-            {
-                if (Owner != null)
-                    return Owner.CurrentFrameMatrix;
+        protected virtual Matrix4 OwnerWorldMatrix => Owner?.CurrentWorldMatrix ?? Matrix4.Identity;
 
-                return Matrix4.Identity;
-            }
-        }
+        /// <summary>
+        /// Used for calculation of the world matrix.
+        /// Models can override this, but should not use it inside Render. For rendering purposes, the
+        /// current world matrix is cached in CurrentWorldMatrix.
+        /// </summary>
+        protected virtual Matrix4 WorldMatrix => ScaleMatrix*RotationMatrix*TranslationMatrix*OwnerWorldMatrix;
 
-        protected virtual Matrix4 ModelViewMatrix
-            => ScaleMatrix*RotationMatrix*TranslationMatrix*OwnerCurrentFrameMatrix;
-
-        internal Matrix4 CurrentFrameMatrix { get; private set; }
-        internal void UpdateCurrentFrameMatrix() => CurrentFrameMatrix = ModelViewMatrix;
+        /// <summary>
+        /// After all models are Updated, this will hold the world matrix for the current frame.
+        /// Use this inside your Render methods if needed.
+        /// </summary>
+        internal Matrix4 CurrentWorldMatrix { get; private set; }
+        internal void UpdateCurrentWorldMatrix() => CurrentWorldMatrix = WorldMatrix;
 
         internal virtual void Update(float elapsedMs)
         {
@@ -59,7 +62,7 @@ namespace GoodAI.Arnold.Graphics
         {
             GL.PushMatrix();
 
-            var modelViewMatrix = CurrentFrameMatrix;
+            Matrix4 modelViewMatrix = CurrentWorldMatrix;
             GL.MultMatrix(ref modelViewMatrix);
 
             RenderModel(elapsedMs);

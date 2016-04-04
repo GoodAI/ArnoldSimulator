@@ -44,7 +44,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         // The experts are indexed from 0 (not centered within the region).
         // Therefore we need to translate them to the region's corner of origin.
-        public override Matrix4 TranslationMatrix
+        protected override Matrix4 TranslationMatrix
         {
             get
             {
@@ -59,7 +59,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         // Experts are rendered as billboards - they turn towards the camera.
         // Their world space rotation is equal to the camera's inverse rotation.
-        public override Matrix4 RotationMatrix
+        protected override Matrix4 RotationMatrix
             => Camera.CurrentFrameViewMatrix.ClearScale().ClearTranslation().Inverted();
 
         protected override void UpdateModel(float elapsedMs)
@@ -117,7 +117,7 @@ namespace GoodAI.Arnold.Graphics.Models
         {
             var r = SpriteSize/2;
 
-            Vector3 m = pickRay.Position - CurrentFrameMatrix.ExtractTranslation();
+            Vector3 m = pickRay.Position - CurrentWorldMatrix.ExtractTranslation();
             float b = Vector3.Dot(m, pickRay.Direction);
             float r2 = r*r;
             float c = Vector3.Dot(m, m) - r2;

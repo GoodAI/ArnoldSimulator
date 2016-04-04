@@ -397,7 +397,7 @@ namespace GoodAI.Arnold.Forms
         private void SortModels(List<ModelBase> models)
         {
             foreach (ModelBase model in models)
-                m_translucentDistanceCache[model] = model.CurrentFrameMatrix.ExtractTranslation().DistanceFrom(m_camera.Position);
+                m_translucentDistanceCache[model] = model.CurrentWorldMatrix.ExtractTranslation().DistanceFrom(m_camera.Position);
 
             models.Sort(
                 (model1, model2) => m_translucentDistanceCache[model1] < m_translucentDistanceCache[model2]
@@ -410,7 +410,7 @@ namespace GoodAI.Arnold.Forms
             if (!model.Visible)
                 return;
 
-            model.UpdateCurrentFrameMatrix();
+            model.UpdateCurrentWorldMatrix();
 
             var compositeModel = model as CompositeModelBase;
             if (compositeModel != null)
