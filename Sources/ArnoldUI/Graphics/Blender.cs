@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.Graphics
             GL.Disable(EnableCap.Blend);
         }
 
-        public static Blender TextureBlender()
+        public static Blender AveragingBlender()
         {
             return new Blender(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
         }

@@ -35,7 +35,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         protected override void RenderModel(float elapsedMs)
         {
-            using (Blender.TextureBlender())
+            using (Blender.AveragingBlender())
             {
                 GL.LineWidth(1f);
 

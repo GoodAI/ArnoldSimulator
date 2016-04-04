@@ -92,7 +92,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
             GL.Enable(EnableCap.Texture2D);
 
-            using (Blender.TextureBlender())
+            using (Blender.AveragingBlender())
             {
                 GL.Color4(color);
 
