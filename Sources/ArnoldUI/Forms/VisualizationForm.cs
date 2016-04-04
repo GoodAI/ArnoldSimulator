@@ -95,10 +95,7 @@ namespace GoodAI.Arnold.Forms
         {
             InitializeComponent();
 
-            m_camera = new Camera
-            {
-                MoveSpeed = 1
-            };
+            m_camera = new Camera();
 
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
 
@@ -289,7 +286,7 @@ namespace GoodAI.Arnold.Forms
                 m_lastMousePosition += delta;
 
                 if (delta != Vector2.Zero)
-                    m_camera.AddRotation(delta.X, delta.Y);
+                    m_camera.AddRotation(delta.X, delta.Y, elapsedMs);
 
                 HideCursor();
             }
@@ -336,8 +333,8 @@ namespace GoodAI.Arnold.Forms
             foreach (ModelBase model in m_models)
                 model.Update(elapsedMs);
 
-            // TODO: Adjust for elapsed.
-            m_camera.Move(m_keyRight - m_keyLeft, m_keyUp - m_keyDown, m_keyForward - m_keyBack, Keyboard.GetState().IsKeyDown(Key.ControlLeft));
+            bool isSlow = Keyboard.GetState().IsKeyDown(Key.ControlLeft);
+            m_camera.Move(m_keyRight - m_keyLeft, m_keyUp - m_keyDown, m_keyForward - m_keyBack, elapsedMs, isSlow);
         }
 
         private void RenderFrame(float elapsedMs)

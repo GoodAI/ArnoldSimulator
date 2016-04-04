@@ -10,10 +10,11 @@ namespace GoodAI.Arnold.Graphics
     public class Camera
     {
         public Vector3 Position = Vector3.Zero;
-        public Vector3 Orientation = new Vector3(0f, 0f, 0f);
-        public float MoveSpeed = 1f;
-        public const float MoveSpeedSlowFactor = 4;
-        public float MouseSensitivity = 0.01f;
+        public Vector3 Orientation = Vector3.Zero;
+
+        public float MoveSpeedPerMs = 1f/10;
+        public float MoveSpeedSlowFactor = 4;
+        public float MouseSpeedPerMs = 1f/5000;
 
         public Matrix4 CurrentFrameViewMatrix { get; private set; }
         
@@ -59,14 +60,11 @@ namespace GoodAI.Arnold.Graphics
         /// <param name="x">Distance to move along the right direction of the camera</param>
         /// <param name="y">Distance to move along the forward direction of the camera</param>
         /// <param name="z">Distance to move along the up direction of the camera</param>
+        /// <param name="elapsedMs">Milliseconds elapsed since last frame</param>
         /// <param name="slow">If true, move slower</param>
-        public void Move(float x, float y, float z, bool slow=false)
+        public void Move(float x, float y, float z, float elapsedMs, bool slow=false)
         {
-            /** When the camera moves, we don't want it to move relative to the world coordinates 
-             * (like the XYZ space its position is in), but instead relative to the camera's view. 
-             * Like the view angle, this requires a bit of trigonometry. */
-
-            Vector3 offset = new Vector3();
+            var offset = new Vector3();
 
             Vector3 forward = LookAtVector;
             Vector3 right = RightVector;
@@ -75,14 +73,13 @@ namespace GoodAI.Arnold.Graphics
             offset += x * right;
             offset += z * forward;
             offset += y * up;
-            //offset.Y += y;
 
             if (offset == Vector3.Zero)
                 return;
 
             offset.Normalize();
 
-            float speed = MoveSpeed;
+            float speed = MoveSpeedPerMs*elapsedMs;
             if (slow)
                 speed /= MoveSpeedSlowFactor;
 
@@ -97,11 +94,12 @@ namespace GoodAI.Arnold.Graphics
         /// </summary>
         /// <param name="x">The x distance the mouse moved</param>
         /// <param name="y">The y distance the mouse moved</param>
-        public void AddRotation(float x, float y)
+        public void AddRotation(float x, float y, float elapsedMs)
         { 
             /** In this case, our rotation is due to mouse input, so it's based on the distances the mouse moved along each axis.*/
-            x = x * MouseSensitivity;
-            y = y * MouseSensitivity;
+            float speed = MouseSpeedPerMs*elapsedMs;
+            x = x*speed;
+            y = y*speed;
 
             Orientation.X = (Orientation.X + x) % ((float)Math.PI * 2.0f);
             Orientation.Y = Math.Max(Math.Min(Orientation.Y + y, (float)Math.PI / 2.0f - 0.001f), (float)-Math.PI / 2.0f + 0.001f);
