@@ -33,7 +33,7 @@ namespace GoodAI.Arnold.Graphics.Models
         {
         }
 
-        protected override void RenderModel(Camera camera, float elapsedMs)
+        protected override void RenderModel(float elapsedMs)
         {
             using (Blender.TextureBlender())
             {

@@ -82,7 +82,7 @@ namespace GoodAI.Arnold.Graphics.Models
                 synapse.Spike();
         }
 
-        protected override void RenderModel(Camera camera, float elapsedMs)
+        protected override void RenderModel(float elapsedMs)
         {
             GL.BindTexture(TextureTarget.Texture2D, NeuronTexture);
 

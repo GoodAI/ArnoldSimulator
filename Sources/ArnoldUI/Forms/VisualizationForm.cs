@@ -368,10 +368,10 @@ namespace GoodAI.Arnold.Forms
 
             // Render here.
             foreach (ModelBase model in opaqueModels)
-                model.Render(m_camera, elapsedMs);
+                model.Render(elapsedMs);
 
             foreach (ModelBase model in translucentModels)
-                model.Render(m_camera, elapsedMs);
+                model.Render(elapsedMs);
 
         }
 

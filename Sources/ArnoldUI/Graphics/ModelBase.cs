@@ -55,19 +55,19 @@ namespace GoodAI.Arnold.Graphics
 
         protected abstract void UpdateModel(float elapsedMs);
 
-        internal virtual void Render(Camera camera, float elapsedMs)
+        internal virtual void Render(float elapsedMs)
         {
             GL.PushMatrix();
 
             var modelViewMatrix = CurrentFrameMatrix;
             GL.MultMatrix(ref modelViewMatrix);
 
-            RenderModel(camera, elapsedMs);
+            RenderModel(elapsedMs);
 
             GL.PopMatrix();
         }
 
-        protected abstract void RenderModel(Camera camera, float elapsedMs);
+        protected abstract void RenderModel(float elapsedMs);
     }
 
     public abstract class CompositeModelBase : ModelBase

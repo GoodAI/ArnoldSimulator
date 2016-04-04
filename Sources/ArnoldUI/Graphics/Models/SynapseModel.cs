@@ -69,7 +69,7 @@ namespace GoodAI.Arnold.Graphics.Models
             Visible = m_alpha > 0;
         }
 
-        protected override void RenderModel(Camera camera, float elapsedMs)
+        protected override void RenderModel(float elapsedMs)
         {
             using (Blender.MultiplicativeBlender())
             {
