@@ -100,8 +100,6 @@ namespace GoodAI.Arnold.Forms
                 MoveSpeed = 1
             };
 
-            m_camera.AddRotation(-250, 0);
-
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
 
             m_models.Add(m_gridModel);

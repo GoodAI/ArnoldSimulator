@@ -10,7 +10,7 @@ namespace GoodAI.Arnold.Graphics
     public class Camera
     {
         public Vector3 Position = Vector3.Zero;
-        public Vector3 Orientation = new Vector3((float)Math.PI, 0f, 0f);
+        public Vector3 Orientation = new Vector3(0f, 0f, 0f);
         public float MoveSpeed = 1f;
         public const float MoveSpeedSlowFactor = 4;
         public float MouseSensitivity = 0.01f;
@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.Graphics
              * the position to create a view matrix we can use to change where our scene is viewed from. 
              * The Vector3.UnitY is being assigned to the "up" parameter,
              * which will keep our camera angle so that the right side is up.*/
-            Vector3 lookAt = GetLookAtVector();
+            Vector3 lookAt = LookAtVector;
             CurrentFrameViewMatrix = Matrix4.LookAt(Position, Position + lookAt, Vector3.UnitY);
         }
 
@@ -39,23 +39,27 @@ namespace GoodAI.Arnold.Graphics
         //    return Matrix4.LookAt(position, position + lookAt, Vector3.UnitY);
         //}
 
-        public Vector3 GetLookAtVector()
+        private Vector3 LookAtVector => new Vector3
         {
-            Vector3 lookAt = new Vector3();
+            X = (float) (Math.Cos(Orientation.Y)*Math.Sin(Orientation.X)),
+            Y = (float) Math.Sin(Orientation.Y),
+            Z = (float) (Math.Cos(Orientation.Y)*Math.Cos(Orientation.X))
+        };
 
-            lookAt.X = (float)(Math.Sin(Orientation.X) * Math.Cos(Orientation.Y));
-            lookAt.Y = (float)Math.Sin(Orientation.Y);
-            lookAt.Z = (float)(Math.Cos(Orientation.X) * Math.Cos(Orientation.Y));
-
-            return lookAt;
-        }
+        private Vector3 RightVector => new Vector3
+        {
+            X = (float) Math.Sin(Orientation.X - Math.PI/2.0f),
+            Y = 0,
+            Z = (float) Math.Cos(Orientation.X - Math.PI/2.0f)
+        };
 
         /// <summary>
         /// Moves the camera in local space
         /// </summary>
-        /// <param name="x">Distance to move along the screen's x axis</param>
-        /// <param name="y">Distance to move along the axis of the camera</param>
-        /// <param name="z">Distance to move along the screen's y axis</param>
+        /// <param name="x">Distance to move along the right direction of the camera</param>
+        /// <param name="y">Distance to move along the forward direction of the camera</param>
+        /// <param name="z">Distance to move along the up direction of the camera</param>
+        /// <param name="slow">If true, move slower</param>
         public void Move(float x, float y, float z, bool slow=false)
         {
             /** When the camera moves, we don't want it to move relative to the world coordinates 
@@ -64,23 +68,19 @@ namespace GoodAI.Arnold.Graphics
 
             Vector3 offset = new Vector3();
 
-            float sinX = (float) Math.Sin(Orientation.X);
-            float cosX = (float) Math.Cos(Orientation.X);
-            float sinY = (float) Math.Sin(Orientation.Y);
-            float cosY = (float) Math.Cos(Orientation.Y);
-
-            Vector3 forward = new Vector3(sinX, sinY, cosX);
-            // TODO: This doesn't work correctly if you look forward.
-            Vector3 up = new Vector3(sinX, cosY, cosX);
-            Vector3 right = new Vector3(-cosX, 0, sinX);
+            Vector3 forward = LookAtVector;
+            Vector3 right = RightVector;
+            Vector3 up = Vector3.Cross(right, forward);
 
             offset += x * right;
             offset += z * forward;
             offset += y * up;
             //offset.Y += y;
 
-            if (offset != Vector3.Zero)
-                offset.Normalize();
+            if (offset == Vector3.Zero)
+                return;
+
+            offset.Normalize();
 
             float speed = MoveSpeed;
             if (slow)
@@ -104,7 +104,7 @@ namespace GoodAI.Arnold.Graphics
             y = y * MouseSensitivity;
 
             Orientation.X = (Orientation.X + x) % ((float)Math.PI * 2.0f);
-            Orientation.Y = Math.Max(Math.Min(Orientation.Y + y, (float)Math.PI / 2.0f - 0.1f), (float)-Math.PI / 2.0f + 0.1f);
+            Orientation.Y = Math.Max(Math.Min(Orientation.Y + y, (float)Math.PI / 2.0f - 0.001f), (float)-Math.PI / 2.0f + 0.001f);
         }
     }
 }
