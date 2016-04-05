@@ -45,15 +45,15 @@ namespace GoodAI.Arnold.Simulation
 
                 Regions.Add(newSimulationRegion);
 
-                //newSimulationRegion = new RegionModel(new Vector3((region.Location.X+300)/ResizeFactor, 0, (region.Location.Y+600)/ResizeFactor));
-                //GenerateExperts(newSimulationRegion);
+                newSimulationRegion = new RegionModel(new Vector3((region.Location.X + 300) / ResizeFactor, 0, (region.Location.Y + 600) / ResizeFactor));
+                GenerateExperts(newSimulationRegion);
 
-                //Regions.Add(newSimulationRegion);
+                Regions.Add(newSimulationRegion);
 
-                //newSimulationRegion = new RegionModel(new Vector3((region.Location.X+500)/ResizeFactor, 0, (region.Location.Y-600)/ResizeFactor));
-                //GenerateExperts(newSimulationRegion);
+                newSimulationRegion = new RegionModel(new Vector3((region.Location.X + 500) / ResizeFactor, 0, (region.Location.Y - 600) / ResizeFactor));
+                GenerateExperts(newSimulationRegion);
 
-                //Regions.Add(newSimulationRegion);
+                Regions.Add(newSimulationRegion);
             }
         }
 

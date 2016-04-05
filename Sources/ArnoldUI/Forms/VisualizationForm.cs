@@ -96,8 +96,8 @@ namespace GoodAI.Arnold.Forms
 
             m_camera = new Camera
             {
-                Position = new Vector3(0, 50, 50),
-                Orientation = new Vector3((float) (Math.PI/2), 0, 0)
+                Position = new Vector3(5, 100, 100),
+                Orientation = new Vector3((float) Math.PI, (float) (-Math.PI/4), 0)
             };
 
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
