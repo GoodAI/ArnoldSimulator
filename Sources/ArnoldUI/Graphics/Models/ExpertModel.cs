@@ -62,6 +62,8 @@ namespace GoodAI.Arnold.Graphics.Models
         protected override Matrix4 RotationMatrix
             => Camera.CurrentFrameViewMatrix.ClearScale().ClearTranslation().Inverted();
 
+        public bool Picked { get; set; }
+
         protected override void UpdateModel(float elapsedMs)
         {
             if (m_alpha > MinAlpha)

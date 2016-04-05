@@ -43,7 +43,7 @@ namespace GoodAI.Arnold.Forms
 
         private readonly Color m_backgroundColor = Color.FromArgb(255, 30, 30, 30);
 
-        readonly Stopwatch m_stopwatch = new Stopwatch();
+        private readonly Stopwatch m_stopwatch = new Stopwatch();
 
         private float m_keyRight;
         private float m_keyLeft;
@@ -70,6 +70,8 @@ namespace GoodAI.Arnold.Forms
         private readonly Dictionary<ModelBase, float> m_translucentDistanceCache = new Dictionary<ModelBase, float>();
         private QFont m_font;
         private int m_modelsDisplayed;
+
+        private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
 
         public BrainSimulation BrainSimulation
         {
@@ -182,19 +184,24 @@ namespace GoodAI.Arnold.Forms
 
         private void PickObject(int x, int y)
         {
-            Console.WriteLine($"Mouse: {x}, {y} of {ClientSize.Width}, {ClientSize.Height}");
+            //Console.WriteLine($"Mouse: {x}, {y} of {ClientSize.Width}, {ClientSize.Height}");
             PickRay pickRay = GetPickRay(x, y);
-            Console.WriteLine($"Ray: {pickRay.Direction.X}, {pickRay.Direction.Y}, {pickRay.Direction.Z}");
+            //Console.WriteLine($"Ray: {pickRay.Direction.X}, {pickRay.Direction.Y}, {pickRay.Direction.Z}");
 
             m_pickRay = pickRay;
 
             ExpertModel expert = FindFirstExpert(pickRay, BrainSimulation.Regions);
             if (expert != null)
-                SelectExpert(expert);
+                PickExpert(expert);
         }
 
-        private void SelectExpert(ExpertModel expert)
+        private void PickExpert(ExpertModel expert)
         {
+            expert.Picked = !expert.Picked;
+            if (expert.Picked)
+                m_pickedExperts.Add(expert);
+            else
+                m_pickedExperts.Remove(expert);
         }
 
         private PickRay GetPickRay(int x, int y)
@@ -208,7 +215,7 @@ namespace GoodAI.Arnold.Forms
             eyeRay = new Vector4(eyeRay.X, eyeRay.Y, -1, 0);
 
             
-            Vector3 worldRay = (Vector4.Transform(eyeRay, m_camera.CurrentFrameViewMatrix.Inverted())).Xyz.Normalized;
+            Vector3 worldRay = Vector4.Transform(eyeRay, m_camera.CurrentFrameViewMatrix.Inverted()).Xyz.Normalized;
 
             return new PickRay
             {
@@ -218,13 +225,39 @@ namespace GoodAI.Arnold.Forms
             };
         }
 
+        private Vector3 ModelToScreenCoordinates(ModelBase model)
+        {
+            var projected = Project(model);
+            return new Vector3(projected.X, ClientSize.Height - projected.Y, 0);
+        }
+
+        /// <summary>
+        /// Project the center of the given model onto screen coordinates.
+        /// </summary>
+        private Vector2 Project(ModelBase model)
+        {
+            // TODO(HonzaS): Allow different points than centers?
+            var center4 = new Vector4(Vector3.Zero, 1);
+
+            // Transform the to clip space.
+            Vector4 world = Vector4.Transform(center4, model.CurrentWorldMatrix);
+            Vector4 view = Vector4.Transform(world, m_camera.CurrentFrameViewMatrix);
+            Vector4 clip = Vector4.Transform(view, ProjectionMatrix);
+
+            // Transform to screen space.
+            Vector3 ndc = clip.Xyz/clip.W;
+            Vector2 screen = ((ndc.Xy + Vector2.One)/2f) * new Vector2(ClientSize.Width, ClientSize.Height);
+
+            return screen;
+        }
+
         private ExpertModel FindFirstExpert(PickRay pickRay, List<RegionModel> regions)
         {
             float closestDistance = float.MaxValue;
             ExpertModel closestExpert = null;
             foreach (RegionModel region in regions)
             {
-                foreach (ExpertModel expert in region.Models.OfType<ExpertModel>())
+                foreach (ExpertModel expert in region.Experts)
                 {
                     float distance = expert.DistanceToRayOrigin(pickRay);
                     if (distance < closestDistance)
@@ -367,7 +400,6 @@ namespace GoodAI.Arnold.Forms
 
             foreach (ModelBase model in translucentModels)
                 model.Render(elapsedMs);
-
         }
 
         private void RenderOverlay()
@@ -375,6 +407,65 @@ namespace GoodAI.Arnold.Forms
             if (m_font == null)
                 return;
 
+            // The fonts setup the same projection, but we also need to draw rectangles etc.
+            // So we'll set up our own on the bottom of theirs.
+            SetupOverlayProjection();
+
+            RenderPickedInfo();
+
+            RenderDiagnostics();
+
+            // Tear down our projection in case there is some more drawing happening.
+            TeardownOverlayProjection();
+        }
+
+        private void RenderPickedInfo()
+        {
+            foreach (ExpertModel expert in m_pickedExperts)
+            {
+                GL.PushMatrix();
+                Vector3 screenPosition = ModelToScreenCoordinates(expert);
+
+                GL.Translate(screenPosition);
+
+                GL.Color4(Color4.Blue);
+                GL.Begin(PrimitiveType.Quads);
+
+                GL.Vertex3(10, 10, 0);
+                GL.Vertex3(20, 10, 0);
+                GL.Vertex3(20, 20, 0);
+                GL.Vertex3(10, 20, 0);
+
+                GL.End();
+                GL.PopMatrix();
+            }
+        }
+
+        private void SetupOverlayProjection()
+        {
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix(); //push projection matrix
+            GL.LoadIdentity();
+            GL.Ortho(0, ClientSize.Width, ClientSize.Height, 0, -1.0, 1.0);
+
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();  //push modelview matrix
+            GL.LoadIdentity();
+        }
+
+        private void TeardownOverlayProjection()
+        {
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PopMatrix(); //pop modelview
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PopMatrix(); //pop projection
+
+            GL.MatrixMode(MatrixMode.Modelview);
+        }
+
+        private void RenderDiagnostics()
+        {
             QFont.Begin();
             GL.PushMatrix();
 
@@ -383,7 +474,6 @@ namespace GoodAI.Arnold.Forms
 
             GL.Translate(0, m_font.LineSpacing, 0);
             m_font.Print($"# of models: {m_modelsDisplayed}", QFontAlignment.Left);
-
 
             GL.PopMatrix();
             QFont.End();
@@ -445,8 +535,8 @@ namespace GoodAI.Arnold.Forms
             GL.Viewport(0, 0, ClientSize.Width, ClientSize.Height); // Use all of the glControl painting area
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            float aspectRatio = ClientSize.Width/(float) ClientSize.Height;
-            ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView((float) (Math.PI/4), aspectRatio, NearZ, FarZ);
+            float aspectRatio = ClientSize.Width / (float)ClientSize.Height;
+            ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView((float)(Math.PI / 4), aspectRatio, NearZ, FarZ);
             Matrix4 perspective = ProjectionMatrix;
             GL.LoadMatrix(ref perspective);
         }

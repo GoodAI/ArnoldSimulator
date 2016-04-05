@@ -1257,6 +1257,9 @@ namespace QuickFont
         public static void End()
         {
             ProjectionStack.End();
+
+            // This resets the texture from font to none.
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         /// <summary>
