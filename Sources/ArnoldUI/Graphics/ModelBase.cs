@@ -12,8 +12,14 @@ namespace GoodAI.Arnold.Graphics
 {
     public abstract class ModelBase
     {
+        /// <summary>
+        /// The owner of this model. If it's null, the world is the owner.
+        /// </summary>
         public ModelBase Owner { get; set; }
 
+        /// <summary>
+        /// Use these to orient the model inside it's owner's space.
+        /// </summary>
         public Vector3 Position { get; set; } = Vector3.Zero;
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Vector3 Scale { get; set; } = Vector3.One;
@@ -23,6 +29,10 @@ namespace GoodAI.Arnold.Graphics
         /// </summary>
         public bool Translucent { get; set; }
 
+        /// <summary>
+        /// If a model's not visible, it's not rendered at all. This serves as an important optimization.
+        /// A good idea is to set this to false if the model is translucent and it's visibility is (close to) zero.
+        /// </summary>
         public bool Visible { get; set; } = true;
 
         // The matrices' calculations are virtual because some objects might want to 
@@ -37,6 +47,9 @@ namespace GoodAI.Arnold.Graphics
 
         protected virtual Matrix4 TranslationMatrix => Matrix4.CreateTranslation(Position);
 
+        /// <summary>
+        /// Provides the world matrix of the owner for hierarchical models.
+        /// </summary>
         protected virtual Matrix4 OwnerWorldMatrix => Owner?.CurrentWorldMatrix ?? Matrix4.Identity;
 
         /// <summary>
@@ -51,8 +64,16 @@ namespace GoodAI.Arnold.Graphics
         /// Use this inside your Render methods if needed.
         /// </summary>
         internal Matrix4 CurrentWorldMatrix { get; private set; }
+
+        /// <summary>
+        /// Saves the current world matrix into the cache.
+        /// </summary>
         internal void UpdateCurrentWorldMatrix() => CurrentWorldMatrix = WorldMatrix;
 
+        /// <summary>
+        /// Updates the model. An example of an override is in CompositeModelBase.
+        /// </summary>
+        /// <param name="elapsedMs"></param>
         internal virtual void Update(float elapsedMs)
         {
             UpdateModel(elapsedMs);
@@ -60,6 +81,13 @@ namespace GoodAI.Arnold.Graphics
 
         protected abstract void UpdateModel(float elapsedMs);
 
+        /// <summary>
+        /// This is used for basic rendering logic. It applies the modelView matrix so that RenderModel can
+        /// operate in model space.
+        /// 
+        /// Override this if you need to do some additional operations with the modelView transformation.
+        /// </summary>
+        /// <param name="elapsedMs"></param>
         internal virtual void Render(float elapsedMs)
         {
             GL.PushMatrix();
@@ -79,11 +107,19 @@ namespace GoodAI.Arnold.Graphics
         protected abstract void RenderModel(float elapsedMs);
     }
 
+    /// <summary>
+    /// All composite models must implement this, or they will not be collected for rendering.
+    /// </summary>
     public interface ICompositeModel
     {
         IEnumerable<ModelBase> Models { get; }
     }
 
+    /// <summary>
+    /// A base for a typical composite model. Subclass this in composite models that have
+    /// their own update or render logic.
+    /// </summary>
+    /// <typeparam name="T">Type of the contained models.</typeparam>
     public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : ModelBase
     {
         public IEnumerable<ModelBase> Models => m_children;
@@ -120,6 +156,10 @@ namespace GoodAI.Arnold.Graphics
         }
     }
 
+    /// <summary>
+    /// A composite model without any update or render logic. Use this for hierarchical composition.
+    /// </summary>
+    /// <typeparam name="T">Type of the contained models.</typeparam>
     public class CompositeModel<T> : CompositeModelBase<T> where T : ModelBase
     {
         protected override void UpdateModel(float elapsedMs)
