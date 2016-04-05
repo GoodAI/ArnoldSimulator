@@ -41,8 +41,6 @@ namespace GoodAI.Arnold.Forms
         public const int GridDepth = 100;
         public const int GridCellSize = 10;
 
-        private Random m_random = new Random();
-
         private readonly Color m_backgroundColor = Color.FromArgb(255, 30, 30, 30);
 
         readonly Stopwatch m_stopwatch = new Stopwatch();
@@ -65,7 +63,7 @@ namespace GoodAI.Arnold.Forms
 
         private readonly Camera m_camera;
         private readonly GridModel m_gridModel;
-        private readonly CompositeModelBase m_brainModel;
+        private readonly CompositeModelBase<ModelBase> m_brainModel;
 
         private readonly IList<ModelBase> m_models = new List<ModelBase>();
         private PickRay m_pickRay;
@@ -79,12 +77,12 @@ namespace GoodAI.Arnold.Forms
             set
             {
                 // TODO: Cleanup the old simulation?
-                m_brainModel.Children.Clear();
+                m_brainModel.Clear();
                 m_brainSimulation = value;
                 // TODO: Nasty! Change!
                 foreach (var region in m_brainSimulation.Regions)
                 {
-                    foreach (ExpertModel expert in region.Children.OfType<ExpertModel>())
+                    foreach (ExpertModel expert in region.Experts)
                         expert.Camera = m_camera;
 
                     m_brainModel.AddChild(region);
@@ -96,7 +94,11 @@ namespace GoodAI.Arnold.Forms
         {
             InitializeComponent();
 
-            m_camera = new Camera();
+            m_camera = new Camera
+            {
+                Position = new Vector3(0, 50, 50),
+                Orientation = new Vector3((float) (Math.PI/2), 0, 0)
+            };
 
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
 
@@ -222,7 +224,7 @@ namespace GoodAI.Arnold.Forms
             ExpertModel closestExpert = null;
             foreach (RegionModel region in regions)
             {
-                foreach (ExpertModel expert in region.Children.OfType<ExpertModel>())
+                foreach (ExpertModel expert in region.Models.OfType<ExpertModel>())
                 {
                     float distance = expert.DistanceToRayOrigin(pickRay);
                     if (distance < closestDistance)
@@ -405,9 +407,9 @@ namespace GoodAI.Arnold.Forms
 
             model.UpdateCurrentWorldMatrix();
 
-            var compositeModel = model as CompositeModelBase;
+            var compositeModel = model as ICompositeModel;
             if (compositeModel != null)
-                foreach (ModelBase child in compositeModel.Children)
+                foreach (ModelBase child in compositeModel.Models)
                     CollectModels(child, ref opaqueModels, ref translucentModels);
 
             if (model.Translucent)

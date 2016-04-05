@@ -6,14 +6,7 @@ using System.Threading.Tasks;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class BrainModel : CompositeModelBase
+    public class BrainModel : CompositeModel<ModelBase>
     {
-        protected override void UpdateModel(float elapsedMs)
-        {
-        }
-
-        protected override void RenderModel(float elapsedMs)
-        {
-        }
     }
 }

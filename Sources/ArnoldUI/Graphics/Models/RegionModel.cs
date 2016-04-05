@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class RegionModel : CompositeModelBase
+    public class RegionModel : CompositeModelBase<ModelBase>
     {
         private Vector3 m_size;
         public const float RegionMargin = 2f;
@@ -23,6 +23,9 @@ namespace GoodAI.Arnold.Graphics.Models
                 HalfSize = Size/2;
             }
         }
+
+        public CompositeModel<ExpertModel> Experts { get; } = new CompositeModel<ExpertModel>();
+        public CompositeModel<SynapseModel> Synapses { get; } = new CompositeModel<SynapseModel>();
 
         public Vector3 HalfSize { get; private set; }
 
@@ -39,23 +42,13 @@ namespace GoodAI.Arnold.Graphics.Models
 
             Translucent = true;
 
-            //Children.Add(new RegionFaceModel(this, new Vector3(1, 0, 0)));
-            //Children.Add(new RegionFaceModel(this, new Vector3(-1, 0, 0)));
-            //Children.Add(new RegionFaceModel(this, new Vector3(0, 1, 0)));
-            //Children.Add(new RegionFaceModel(this, new Vector3(0, -1, 0)));
-            //Children.Add(new RegionFaceModel(this, new Vector3(0, 0, 1)));
-            //Children.Add(new RegionFaceModel(this, new Vector3(0, 0, -1)));
+            AddChild(Experts);
+            AddChild(Synapses);
         }
 
-        public void AddExpert(ExpertModel expert)
-        {
-            AddChild(expert);
-        }
+        public void AddExpert(ExpertModel expert) => Experts.AddChild(expert);
 
-        public void AddSynapse(SynapseModel synapse)
-        {
-            AddChild(synapse);
-        }
+        public void AddSynapse(SynapseModel synapse) => Synapses.AddChild(synapse);
 
         public void AdjustSize()
         {
@@ -69,13 +62,8 @@ namespace GoodAI.Arnold.Graphics.Models
             float minZ = 0;
             float maxZ = 0;
 
-            foreach (var model in Children)
+            foreach (ExpertModel expert in Experts)
             {
-                var expert = model as ExpertModel;
-
-                if (expert == null)
-                    continue;
-
                 maxX = Math.Max(expert.Position.X, maxX);
                 maxY = Math.Max(expert.Position.Y, maxY);
                 maxZ = Math.Max(expert.Position.Z, maxZ);

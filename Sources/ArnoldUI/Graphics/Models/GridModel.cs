@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
@@ -10,6 +11,10 @@ namespace GoodAI.Arnold.Graphics.Models
 {
     public class GridModel : ModelBase
     {
+        public const float AxisLength = 35f;
+
+        public bool DrawAxes { get; set; } = true;
+
         private readonly int m_width;
         private readonly int m_depth;
         private readonly int m_cellSize;
@@ -38,9 +43,7 @@ namespace GoodAI.Arnold.Graphics.Models
             using (Blender.AveragingBlender())
             {
                 GL.LineWidth(1f);
-
                 GL.Begin(PrimitiveType.Lines);
-
 
                 for (int i = 0; i < m_width; i++)
                 {
@@ -64,7 +67,36 @@ namespace GoodAI.Arnold.Graphics.Models
                     }
                 }
                 GL.End();
+
+                if (!DrawAxes)
+                    return;
+
+                DrawAxis(new Vector3(1, 0, 0), Color4.Red);
+                DrawAxis(new Vector3(0, 1, 0), Color4.Blue);
+                DrawAxis(new Vector3(0, 0, 1), Color4.Green);
             }
+        }
+
+        private void DrawAxis(Vector3 direction, Color4 color)
+        {
+            GL.Color4(color);
+
+            GL.LineWidth(2f);
+            GL.Begin(PrimitiveType.Lines);
+
+            GL.Vertex3(-direction * AxisLength);
+            GL.Vertex3(direction * AxisLength);
+
+            GL.End();
+
+            // Arrow
+
+            GL.PointSize(5f);
+            GL.Begin(PrimitiveType.Points);
+
+            GL.Vertex3(direction * AxisLength);
+
+            GL.End();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
@@ -10,7 +12,7 @@ namespace GoodAI.Arnold.Graphics
 {
     public abstract class ModelBase
     {
-        public CompositeModelBase Owner { get; set; }
+        public ModelBase Owner { get; set; }
 
         public Vector3 Position { get; set; } = Vector3.Zero;
         public Vector3 Rotation { get; set; } = Vector3.Zero;
@@ -70,30 +72,62 @@ namespace GoodAI.Arnold.Graphics
             GL.PopMatrix();
         }
 
+        /// <summary>
+        /// Renders the model relative to model space.
+        /// </summary>
+        /// <param name="elapsedMs">Milliseconds elapsed since the last frame. Useful for animations.</param>
         protected abstract void RenderModel(float elapsedMs);
     }
 
-    public abstract class CompositeModelBase : ModelBase
+    public interface ICompositeModel
     {
-        public IList<ModelBase> Children { get; }
+        IEnumerable<ModelBase> Models { get; }
+    }
 
-        public CompositeModelBase()
-        {
-            Children = new List<ModelBase>();
-        }
+    public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : ModelBase
+    {
+        public IEnumerable<ModelBase> Models => m_children;
 
-        public void AddChild(ModelBase child)
+        private readonly IList<T> m_children = new List<T>();
+
+        public void AddChild(T child)
         {
             child.Owner = this;
-            Children.Add(child);
+            m_children.Add(child);
+        }
+
+        public void Clear()
+        {
+            m_children.Clear();
         }
 
         internal override void Update(float elapsedMs)
         {
             base.Update(elapsedMs);
 
-            foreach (var child in Children)
+            foreach (var child in m_children)
                 child.Update(elapsedMs);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return m_children.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+
+    public class CompositeModel<T> : CompositeModelBase<T> where T : ModelBase
+    {
+        protected override void UpdateModel(float elapsedMs)
+        {
+        }
+
+        protected override void RenderModel(float elapsedMs)
+        {
         }
     }
 }
