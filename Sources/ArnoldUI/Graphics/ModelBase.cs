@@ -74,10 +74,7 @@ namespace GoodAI.Arnold.Graphics
         /// Updates the model. An example of an override is in CompositeModelBase.
         /// </summary>
         /// <param name="elapsedMs"></param>
-        internal virtual void Update(float elapsedMs)
-        {
-            UpdateModel(elapsedMs);
-        }
+        internal virtual void Update(float elapsedMs) => UpdateModel(elapsedMs);
 
         protected abstract void UpdateModel(float elapsedMs);
 
@@ -132,10 +129,7 @@ namespace GoodAI.Arnold.Graphics
             m_children.Add(child);
         }
 
-        public void Clear()
-        {
-            m_children.Clear();
-        }
+        public void Clear() => m_children.Clear();
 
         internal override void Update(float elapsedMs)
         {
@@ -145,15 +139,9 @@ namespace GoodAI.Arnold.Graphics
                 child.Update(elapsedMs);
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            return m_children.GetEnumerator();
-        }
+        public IEnumerator<T> GetEnumerator() => m_children.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     /// <summary>

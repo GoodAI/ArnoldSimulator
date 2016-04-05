@@ -173,7 +173,15 @@ namespace GoodAI.Arnold.Forms
         private void glControl_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
+            {
                 m_mouseCaptured = !m_mouseCaptured;
+                
+                if (m_mouseCaptured)
+                    HideCursor();
+                else
+                    ShowCursor();
+            }
+
 
             if (m_mouseCaptured)
                 ResetLastMousePosition();
@@ -327,11 +335,8 @@ namespace GoodAI.Arnold.Forms
                 if (delta != Vector2.Zero)
                     m_camera.AddRotation(delta.X, delta.Y, elapsedMs);
 
-                HideCursor();
-            }
-            else
-            {
-                ShowCursor();
+                Mouse.SetPosition(Left + ClientSize.Width / 2, Top + ClientSize.Height / 2);
+                m_lastMousePosition = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
             }
 
             HandleKeyboard();
@@ -352,8 +357,6 @@ namespace GoodAI.Arnold.Forms
         private void HideCursor()
         {
             Cursor = new Cursor(Resources.EmptyCursor.Handle);
-            Mouse.SetPosition(Left + ClientSize.Width / 2, Top + ClientSize.Height / 2);
-            m_lastMousePosition = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
         }
 
         private void ShowCursor()
@@ -447,7 +450,7 @@ namespace GoodAI.Arnold.Forms
                 GL.PushMatrix();
                 GL.Translate(screenPosition);
 
-                GL.Color4(new Color4(0, 200, 200, 220));
+                GL.Color4(new Color4(100, 100, 100, 220));
                 GL.Begin(PrimitiveType.Quads);
 
                 GL.Vertex3(0, 0, 0);
