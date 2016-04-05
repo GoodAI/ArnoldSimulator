@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.Simulation
 
         private const float SynapseProbability = 0.1f;
 
-        private const int ResizeFactor = 10;
+        private const float ResizeFactor = 1f;
 
         private AgentBlueprint AgentBlueprint { get; }
 
@@ -31,26 +31,26 @@ namespace GoodAI.Arnold.Simulation
             Regions = new List<RegionModel>();
             AgentBlueprint = agentBlueprint;
 
-            GenerateExperts();
+            GenerateRegions();
         }
 
-        private void GenerateExperts()
+        private void GenerateRegions()
         {
+            // First pass to get the maximum boundaries
+            var size = new Vector2();
             foreach (Region region in AgentBlueprint.Brain.Regions)
             {
-                RegionModel newSimulationRegion;
+                size.X = Math.Max(region.Location.X, size.X);
+                size.Y = Math.Max(region.Location.Y, size.Y);
+            }
 
-                newSimulationRegion = new RegionModel(new Vector3((region.Location.X + 100) / ResizeFactor, 0, (region.Location.Y - 100) / ResizeFactor));
-                GenerateExperts(newSimulationRegion);
+            Vector2 halfSize = size/2;
 
-                Regions.Add(newSimulationRegion);
-
-                newSimulationRegion = new RegionModel(new Vector3((region.Location.X + 300) / ResizeFactor, 0, (region.Location.Y + 600) / ResizeFactor));
-                GenerateExperts(newSimulationRegion);
-
-                Regions.Add(newSimulationRegion);
-
-                newSimulationRegion = new RegionModel(new Vector3((region.Location.X + 500) / ResizeFactor, 0, (region.Location.Y - 600) / ResizeFactor));
+            foreach (Region region in AgentBlueprint.Brain.Regions)
+            {
+                var newSimulationRegion =
+                    new RegionModel(new Vector3((region.Location.X - halfSize.X)*ResizeFactor, 0,
+                        (region.Location.Y - halfSize.Y)*ResizeFactor));
                 GenerateExperts(newSimulationRegion);
 
                 Regions.Add(newSimulationRegion);

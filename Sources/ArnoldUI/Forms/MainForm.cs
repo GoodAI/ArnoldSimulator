@@ -41,12 +41,17 @@ namespace GoodAI.Arnold
 
             GraphForm = new GraphForm();
             GraphForm.Show(dockPanel, DockState.Document);
-
             GraphForm.AgentBlueprint = AgentBlueprint;
 
             SimulationHandler = new SimulationHandler();
 
             StartSimulation();
+        }
+
+        private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
+        {
+            VisualizationForm.FormClosed -= VisualizationFormOnClosed;
+            SimulationHandler.Reset();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -69,6 +74,7 @@ namespace GoodAI.Arnold
             VisualizationForm.BrainSimulation = SimulationHandler.BrainSimulation;
 
             VisualizationForm.Show();
+            VisualizationForm.FormClosed += VisualizationFormOnClosed;
         }
     }
 }
