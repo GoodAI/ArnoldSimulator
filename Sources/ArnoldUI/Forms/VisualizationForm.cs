@@ -225,16 +225,16 @@ namespace GoodAI.Arnold.Forms
             };
         }
 
-        private Vector3 ModelToScreenCoordinates(ModelBase model)
+        private Vector3 ModelToScreenCoordinates(ModelBase model, out bool isBehindCamera)
         {
-            var projected = Project(model);
+            Vector2 projected = Project(model, out isBehindCamera);
             return new Vector3(projected.X, ClientSize.Height - projected.Y, 0);
         }
 
         /// <summary>
         /// Project the center of the given model onto screen coordinates.
         /// </summary>
-        private Vector2 Project(ModelBase model)
+        private Vector2 Project(ModelBase model, out bool isBehindCamera)
         {
             // TODO(HonzaS): Allow different points than centers?
             var center4 = new Vector4(Vector3.Zero, 1);
@@ -244,8 +244,12 @@ namespace GoodAI.Arnold.Forms
             Vector4 view = Vector4.Transform(world, m_camera.CurrentFrameViewMatrix);
             Vector4 clip = Vector4.Transform(view, ProjectionMatrix);
 
+            // TODO: Change this to something less hacky.
+            isBehindCamera = clip.Z < 0;
+
             // Transform to screen space.
             Vector3 ndc = clip.Xyz/clip.W;
+
             Vector2 screen = ((ndc.Xy + Vector2.One)/2f) * new Vector2(ClientSize.Width, ClientSize.Height);
 
             return screen;
@@ -423,8 +427,13 @@ namespace GoodAI.Arnold.Forms
         {
             foreach (ExpertModel expert in m_pickedExperts)
             {
+                bool isBehindCamera;
+                Vector3 screenPosition = ModelToScreenCoordinates(expert, out isBehindCamera);
+
+                if (isBehindCamera)
+                    continue;
+
                 GL.PushMatrix();
-                Vector3 screenPosition = ModelToScreenCoordinates(expert);
 
                 GL.Translate(screenPosition);
 
