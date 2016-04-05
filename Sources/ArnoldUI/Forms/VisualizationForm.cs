@@ -433,20 +433,38 @@ namespace GoodAI.Arnold.Forms
                 if (isBehindCamera)
                     continue;
 
-                GL.PushMatrix();
+                RenderExpertInfo(expert, screenPosition);
+            }
+        }
 
+        private void RenderExpertInfo(ExpertModel expert, Vector3 screenPosition)
+        {
+            screenPosition.X += 10;
+            screenPosition.Y += 10;
+
+            using (Blender.AveragingBlender())
+            {
+                GL.PushMatrix();
                 GL.Translate(screenPosition);
 
-                GL.Color4(Color4.Blue);
+                GL.Color4(new Color4(0, 200, 200, 220));
                 GL.Begin(PrimitiveType.Quads);
 
-                GL.Vertex3(10, 10, 0);
-                GL.Vertex3(20, 10, 0);
-                GL.Vertex3(20, 20, 0);
-                GL.Vertex3(10, 20, 0);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(150, 0, 0);
+                GL.Vertex3(150, 30, 0);
+                GL.Vertex3(0, 30, 0);
 
                 GL.End();
                 GL.PopMatrix();
+
+                QFont.Begin();
+                GL.Translate(10, 0, 0);
+                GL.Translate(screenPosition);
+
+                m_font.Print($"{expert.Position}", QFontAlignment.Left);
+
+                QFont.End();
             }
         }
 

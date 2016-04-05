@@ -74,6 +74,16 @@ namespace GoodAI.Arnold.Graphics.Models
 
             if (m_random.NextDouble() < SpikesPerMs*elapsedMs/1000f)
                 Spike();
+
+            if (Picked)
+            {
+                m_alpha = 1;
+                Scale = new Vector3(2, 2, 2);
+            }
+            else
+            {
+                Scale = Vector3.One;
+            }
         }
 
         private void Spike()
