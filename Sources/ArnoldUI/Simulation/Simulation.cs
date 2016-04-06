@@ -22,6 +22,18 @@ namespace GoodAI.Arnold.Simulation
 
         private const float ResizeFactor = 1f;
 
+        // Register to events like this in the visualization so that we can do stuff like inject camera.
+        public class ExpertAddedEventArgs : EventArgs
+        {
+            public ExpertModel Expert { get; }
+
+            public ExpertAddedEventArgs(ExpertModel expert)
+            {
+                Expert = expert;
+            }
+        }
+        public event EventHandler<ExpertAddedEventArgs> ExpertAdded;
+
         private AgentBlueprint AgentBlueprint { get; }
 
         public List<RegionModel> Regions { get; }

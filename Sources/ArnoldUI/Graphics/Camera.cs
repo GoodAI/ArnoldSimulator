@@ -94,6 +94,7 @@ namespace GoodAI.Arnold.Graphics
         /// </summary>
         /// <param name="x">The x distance the mouse moved</param>
         /// <param name="y">The y distance the mouse moved</param>
+        /// <param name="elapsedMs">Milliseconds elapsed since last frame</param>
         public void AddRotation(float x, float y, float elapsedMs)
         { 
             /** In this case, our rotation is due to mouse input, so it's based on the distances the mouse moved along each axis.*/

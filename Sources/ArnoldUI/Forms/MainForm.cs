@@ -67,9 +67,7 @@ namespace GoodAI.Arnold
             SimulationHandler.LoadBlueprint(AgentBlueprint);
 
             if (VisualizationForm == null || VisualizationForm.IsDisposed)
-                VisualizationForm = new VisualizationForm();
-
-            VisualizationForm.BrainSimulation = SimulationHandler.BrainSimulation;
+                VisualizationForm = new VisualizationForm(SimulationHandler);
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;
