@@ -73,7 +73,7 @@ namespace GoodAI.Arnold.Graphics
             eyeRay = new Vector4(eyeRay.X, eyeRay.Y, -1, 0);
 
             
-            Vector3 worldRay = Vector4.Transform(eyeRay, camera.CurrentFrameViewMatrix.Inverted()).Xyz.Normalized;
+            Vector3 worldRay = Vector4.Transform(eyeRay, camera.CurrentFrameViewMatrix.Inverted()).Xyz.Normalized();
 
             return new PickRay
             {
