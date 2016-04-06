@@ -187,14 +187,12 @@ namespace GoodAI.Arnold.Forms
                 ResetLastMousePosition();
 
             if (!m_mouseCaptured && e.Button == MouseButtons.Left)
-                PickObject(e.X, ClientSize.Height - e.Y);  // Invert Y (windows 0,0 is top left, GL is bottom left).
+                PickObject(e.X, glControl.Size.Height - e.Y);  // Invert Y (windows 0,0 is top left, GL is bottom left).
         }
 
         private void PickObject(int x, int y)
         {
-            //Console.WriteLine($"Mouse: {x}, {y} of {ClientSize.Width}, {ClientSize.Height}");
             PickRay pickRay = GetPickRay(x, y);
-            //Console.WriteLine($"Ray: {pickRay.Direction.X}, {pickRay.Direction.Y}, {pickRay.Direction.Z}");
 
             m_pickRay = pickRay;
 
@@ -214,8 +212,8 @@ namespace GoodAI.Arnold.Forms
 
         private PickRay GetPickRay(int x, int y)
         {
-            float normX = (2f * x) / ClientSize.Width - 1f;
-            float normY = (2f * y) / ClientSize.Height - 1f;
+            float normX = (2f * x) / glControl.Size.Width - 1f;
+            float normY = (2f * y) / glControl.Size.Height - 1f;
 
             Vector4 clipRay = new Vector4(normX, normY, -1, 0);
 
@@ -236,7 +234,7 @@ namespace GoodAI.Arnold.Forms
         private Vector3 ModelToScreenCoordinates(ModelBase model, out bool isBehindCamera)
         {
             Vector2 projected = Project(model, out isBehindCamera);
-            return new Vector3(projected.X, ClientSize.Height - projected.Y, 0);
+            return new Vector3(projected.X, glControl.Size.Height - projected.Y, 0);
         }
 
         /// <summary>
@@ -258,7 +256,7 @@ namespace GoodAI.Arnold.Forms
             // Transform to screen space.
             Vector3 ndc = clip.Xyz/clip.W;
 
-            Vector2 screen = ((ndc.Xy + Vector2.One)/2f) * new Vector2(ClientSize.Width, ClientSize.Height);
+            Vector2 screen = ((ndc.Xy + Vector2.One)/2f) * new Vector2(glControl.Size.Width, glControl.Size.Height);
 
             return screen;
         }
@@ -335,7 +333,7 @@ namespace GoodAI.Arnold.Forms
                 if (delta != Vector2.Zero)
                     m_camera.AddRotation(delta.X, delta.Y, elapsedMs);
 
-                Mouse.SetPosition(Left + ClientSize.Width / 2, Top + ClientSize.Height / 2);
+                Mouse.SetPosition(Left + glControl.Size.Width / 2, Top + glControl.Size.Height / 2);
                 m_lastMousePosition = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
             }
 
@@ -350,8 +348,8 @@ namespace GoodAI.Arnold.Forms
         {
             GLControl c = sender as GLControl;
 
-            if (c.ClientSize.Height == 0)
-                c.ClientSize = new Size(c.ClientSize.Width, 1);
+            if (c.Size.Height == 0)
+                c.Size = new Size(c.Size.Width, 1);
         }
 
         private void HideCursor()
@@ -476,7 +474,7 @@ namespace GoodAI.Arnold.Forms
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix(); //push projection matrix
             GL.LoadIdentity();
-            GL.Ortho(0, ClientSize.Width, ClientSize.Height, 0, -1.0, 1.0);
+            GL.Ortho(0, glControl.Size.Width, glControl.Size.Height, 0, -1.0, 1.0);
 
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();  //push modelview matrix
@@ -562,10 +560,10 @@ namespace GoodAI.Arnold.Forms
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
 
-            GL.Viewport(0, 0, ClientSize.Width, ClientSize.Height); // Use all of the glControl painting area
+            GL.Viewport(0, 0, glControl.Size.Width, glControl.Size.Height); // Use all of the glControl painting area
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            float aspectRatio = ClientSize.Width / (float)ClientSize.Height;
+            float aspectRatio = glControl.Size.Width / (float)glControl.Size.Height;
             ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView((float)(Math.PI / 4), aspectRatio, NearZ, FarZ);
             Matrix4 perspective = ProjectionMatrix;
             GL.LoadMatrix(ref perspective);
