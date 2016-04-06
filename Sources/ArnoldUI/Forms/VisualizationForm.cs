@@ -1,30 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArnoldUI.Properties;
 using GoodAI.Arnold.Graphics;
-using GoodAI.Arnold.Graphics.Models;
-using GoodAI.Arnold.Properties;
 using GoodAI.Arnold.Simulation;
-using GoodAI.Arnold.OpenTKExtensions;
 using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Graphics;
 using OpenTK.Input;
-using QuickFont;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
-using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 
 namespace GoodAI.Arnold.Forms
 {
@@ -106,9 +89,7 @@ namespace GoodAI.Arnold.Forms
 
             KeyboardState keyboardState = Keyboard.GetState();
 
-            // TODO: Implement, duh.
-            //if (keyboardState.IsKeyDown(Key.Escape))
-            //    StopSimulation()
+            m_inputInfo.ShouldStop = keyboardState.IsKeyDown(Key.Escape);
 
             m_inputInfo.KeyLeft = keyboardState.IsKeyDown(Key.A);
             m_inputInfo.KeyRight = keyboardState.IsKeyDown(Key.D);
@@ -121,12 +102,14 @@ namespace GoodAI.Arnold.Forms
             m_inputInfo.KeySlow = Keyboard.GetState().IsKeyDown(Key.ControlLeft);
         }
 
-        void Application_Idle(object sender, EventArgs e)
+        private void Stop()
         {
-            if (glControl.IsDisposed)
-                return;
+            Close();
+        }
 
-            while (glControl.IsIdle)
+        private void Application_Idle(object sender, EventArgs e)
+        {
+            while (!glControl.IsDisposed && glControl.IsIdle)
                 Step();
         }
 
@@ -136,6 +119,8 @@ namespace GoodAI.Arnold.Forms
             float elapsedMs = m_stopwatch.ElapsedMilliseconds;
             m_stopwatch.Reset();
             m_stopwatch.Start();
+
+            ResetInput();
 
             if (m_mouseCaptured)
             {
@@ -152,7 +137,18 @@ namespace GoodAI.Arnold.Forms
 
             HandleKeyboard();
 
+            if (m_inputInfo.ShouldStop)
+            {
+                Stop();
+                return;
+            }
+
             m_visualization.Step(m_inputInfo, elapsedMs);
+        }
+
+        private void ResetInput()
+        {
+            m_inputInfo = new InputInfo();
         }
 
         private void glControl_Resize(object sender, EventArgs e)

@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 using ArnoldUI.Properties;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.OpenTKExtensions;
@@ -13,7 +9,6 @@ using GoodAI.Arnold.Simulation;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
 using QuickFont;
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 
@@ -134,43 +129,11 @@ namespace GoodAI.Arnold.Graphics
 
         public void PickObject(int x, int y)
         {
-            PickRay pickRay = GetPickRay(x, y);
+            m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
-            m_pickRay = pickRay;
-
-            ExpertModel expert = FindFirstExpert(pickRay, m_simulation.Regions);
+            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulation.Regions);
             if (expert != null)
-                PickExpert(expert);
-        }
-
-        private void PickExpert(ExpertModel expert)
-        {
-            expert.Picked = !expert.Picked;
-            if (expert.Picked)
-                m_pickedExperts.Add(expert);
-            else
-                m_pickedExperts.Remove(expert);
-        }
-
-        private PickRay GetPickRay(int x, int y)
-        {
-            float normX = (2f * x) / m_control.Size.Width - 1f;
-            float normY = (2f * y) / m_control.Size.Height - 1f;
-
-            Vector4 clipRay = new Vector4(normX, normY, -1, 0);
-
-            Vector4 eyeRay = Vector4.Transform(clipRay, ProjectionMatrix.Inverted());
-            eyeRay = new Vector4(eyeRay.X, eyeRay.Y, -1, 0);
-
-            
-            Vector3 worldRay = Vector4.Transform(eyeRay, m_camera.CurrentFrameViewMatrix.Inverted()).Xyz.Normalized;
-
-            return new PickRay
-            {
-                Position = m_camera.Position,
-                Direction = worldRay,
-                Length = 100f
-            };
+                ToggleExpert(expert);
         }
 
         private ExpertModel FindFirstExpert(PickRay pickRay, List<RegionModel> regions)
@@ -191,6 +154,17 @@ namespace GoodAI.Arnold.Graphics
             }
 
             return closestExpert;
+        }
+
+        private void ToggleExpert(ExpertModel expert)
+        {
+            expert.Picked = !expert.Picked;
+
+            // The expert is recorded in a hashset for future drawing of it's properties.
+            if (expert.Picked)
+                m_pickedExperts.Add(expert);
+            else
+                m_pickedExperts.Remove(expert);
         }
 
         private Vector3 ModelToScreenCoordinates(ModelBase model, out bool isBehindCamera)
@@ -469,5 +443,7 @@ namespace GoodAI.Arnold.Graphics
         public bool CameraRotated { get; set; }
         public float CameraDeltaX { get; set; }
         public float CameraDeltaY { get; set; }
+
+        public bool ShouldStop { get; set; }
     }
 }

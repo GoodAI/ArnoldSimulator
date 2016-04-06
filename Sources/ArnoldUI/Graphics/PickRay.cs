@@ -61,5 +61,26 @@ namespace GoodAI.Arnold.Graphics
 
             GL.PopMatrix();
         }
+
+        public static PickRay Pick(float x, float y, Camera camera, Size viewSize, Matrix4 projectionMatrix)
+        {
+            float normX = (2f * x) / viewSize.Width - 1f;
+            float normY = (2f * y) / viewSize.Height - 1f;
+
+            Vector4 clipRay = new Vector4(normX, normY, -1, 0);
+
+            Vector4 eyeRay = Vector4.Transform(clipRay, projectionMatrix.Inverted());
+            eyeRay = new Vector4(eyeRay.X, eyeRay.Y, -1, 0);
+
+            
+            Vector3 worldRay = Vector4.Transform(eyeRay, camera.CurrentFrameViewMatrix.Inverted()).Xyz.Normalized;
+
+            return new PickRay
+            {
+                Position = camera.Position,
+                Direction = worldRay,
+                Length = 100f
+            };
+        }
     }
 }
