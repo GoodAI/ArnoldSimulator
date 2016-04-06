@@ -44,8 +44,6 @@ namespace GoodAI.Arnold
             GraphForm.AgentBlueprint = AgentBlueprint;
 
             SimulationHandler = new SimulationHandler();
-
-            StartSimulation();
         }
 
         private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
