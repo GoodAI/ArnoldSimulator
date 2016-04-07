@@ -10,29 +10,69 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics
 {
-    public abstract class ModelBase
+    public interface IModel
     {
         /// <summary>
         /// The owner of this model. If it's null, the world is the owner.
         /// </summary>
-        public ModelBase Owner { get; set; }
+        ModelBase Owner { get; set; }
 
         /// <summary>
         /// Use these to orient the model inside it's owner's space.
         /// </summary>
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Vector3 Scale { get; set; } = Vector3.One;
+        Vector3 Position { get; set; }
+
+        Vector3 Rotation { get; set; }
+        Vector3 Scale { get; set; }
 
         /// <summary>
         /// Translucent models get rendered in the second pass, when all opaque models have already been done.
         /// </summary>
-        public bool Translucent { get; set; }
+        bool Translucent { get; set; }
 
         /// <summary>
         /// If a model's not visible, it's not rendered at all. This serves as an important optimization.
         /// A good idea is to set this to false if the model is translucent and it's visibility is (close to) zero.
         /// </summary>
+        bool Visible { get; set; }
+
+        /// <summary>
+        /// After all models are Updated, this will hold the world matrix for the current frame.
+        /// Use this inside your Render methods if needed.
+        /// </summary>
+        Matrix4 CurrentWorldMatrix { get; }
+
+        /// <summary>
+        /// Saves the current world matrix into the cache.
+        /// </summary>
+        void UpdateCurrentWorldMatrix();
+
+        /// <summary>
+        /// Updates the model. An example of an override is in CompositeModelBase.
+        /// </summary>
+        /// <param name="elapsedMs"></param>
+        void Update(float elapsedMs);
+
+        /// <summary>
+        /// This is used for basic rendering logic. It applies the modelView matrix so that RenderModel can
+        /// operate in model space.
+        /// 
+        /// Override this if you need to do some additional operations with the modelView transformation.
+        /// </summary>
+        /// <param name="elapsedMs"></param>
+        void Render(float elapsedMs);
+    }
+
+    public abstract class ModelBase : IModel
+    {
+        public ModelBase Owner { get; set; }
+
+        public Vector3 Position { get; set; } = Vector3.Zero;
+        public Vector3 Rotation { get; set; } = Vector3.Zero;
+        public Vector3 Scale { get; set; } = Vector3.One;
+
+        public bool Translucent { get; set; }
+
         public bool Visible { get; set; } = true;
 
         // The matrices' calculations are virtual because some objects might want to 
@@ -59,33 +99,14 @@ namespace GoodAI.Arnold.Graphics
         /// </summary>
         protected virtual Matrix4 WorldMatrix => ScaleMatrix*RotationMatrix*TranslationMatrix*OwnerWorldMatrix;
 
-        /// <summary>
-        /// After all models are Updated, this will hold the world matrix for the current frame.
-        /// Use this inside your Render methods if needed.
-        /// </summary>
-        internal Matrix4 CurrentWorldMatrix { get; private set; }
+        public Matrix4 CurrentWorldMatrix { get; private set; }
+        public void UpdateCurrentWorldMatrix() => CurrentWorldMatrix = WorldMatrix;
 
-        /// <summary>
-        /// Saves the current world matrix into the cache.
-        /// </summary>
-        internal void UpdateCurrentWorldMatrix() => CurrentWorldMatrix = WorldMatrix;
-
-        /// <summary>
-        /// Updates the model. An example of an override is in CompositeModelBase.
-        /// </summary>
-        /// <param name="elapsedMs"></param>
-        internal virtual void Update(float elapsedMs) => UpdateModel(elapsedMs);
+        public virtual void Update(float elapsedMs) => UpdateModel(elapsedMs);
 
         protected abstract void UpdateModel(float elapsedMs);
 
-        /// <summary>
-        /// This is used for basic rendering logic. It applies the modelView matrix so that RenderModel can
-        /// operate in model space.
-        /// 
-        /// Override this if you need to do some additional operations with the modelView transformation.
-        /// </summary>
-        /// <param name="elapsedMs"></param>
-        internal virtual void Render(float elapsedMs)
+        public virtual void Render(float elapsedMs)
         {
             GL.PushMatrix();
 
@@ -107,9 +128,9 @@ namespace GoodAI.Arnold.Graphics
     /// <summary>
     /// All composite models must implement this, or they will not be collected for rendering.
     /// </summary>
-    public interface ICompositeModel
+    public interface ICompositeModel : IModel
     {
-        IEnumerable<ModelBase> Models { get; }
+        IEnumerable<IModel> Models { get; }
     }
 
     /// <summary>
@@ -119,7 +140,7 @@ namespace GoodAI.Arnold.Graphics
     /// <typeparam name="T">Type of the contained models.</typeparam>
     public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : ModelBase
     {
-        public IEnumerable<ModelBase> Models => m_children;
+        public IEnumerable<IModel> Models => m_children;
 
         private readonly IList<T> m_children = new List<T>();
 
@@ -131,7 +152,7 @@ namespace GoodAI.Arnold.Graphics
 
         public void Clear() => m_children.Clear();
 
-        internal override void Update(float elapsedMs)
+        public override void Update(float elapsedMs)
         {
             base.Update(elapsedMs);
 
