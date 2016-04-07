@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GoodAI.Arnold.Graphics;
 using OpenTK;
-using OpenTK.Graphics.ES11;
 using Rhino.Mocks;
 using Xunit;
 

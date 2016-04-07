@@ -1,6 +1,5 @@
 ﻿using OpenTK;
 using System;
-using OpenTK.Input;
 
 namespace GoodAI.Arnold.Graphics
 {
@@ -29,8 +28,7 @@ namespace GoodAI.Arnold.Graphics
              * the position to create a view matrix we can use to change where our scene is viewed from. 
              * The Vector3.UnitY is being assigned to the "up" parameter,
              * which will keep our camera angle so that the right side is up.*/
-            Vector3 lookAt = LookAtVector;
-            CurrentFrameViewMatrix = Matrix4.LookAt(Position, Position + lookAt, Vector3.UnitY);
+            CurrentFrameViewMatrix = Matrix4.LookAt(Position, Position + LookAtVector, Vector3.UnitY);
         }
 
         //public Matrix4 GetLookAtMatrix(Vector3 position)
