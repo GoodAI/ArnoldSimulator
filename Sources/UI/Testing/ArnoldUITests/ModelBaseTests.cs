@@ -141,5 +141,38 @@ namespace GoodAI.Arnold.UI.Tests
 
             AssertCurrentMatrixEqual(model, expected);
         }
+
+        [Fact]
+        public void UpdateRefreshesWorldMatrix()
+        {
+            var model = new TestModel
+            {
+                Position = new Vector3(2, 3, 4)
+            };
+            model.Update(1);
+
+            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            {
+                {1, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 0, 1, 0},
+                {2, 3, 4, 1},
+            });
+
+            AssertCurrentMatrixEqual(model, expected);
+        }
+
+        [Fact]
+        public void CompositeModelUpdatesChildren()
+        {
+            var model = MockRepository.GenerateMock<IModel>();
+
+            var compositeModel = new CompositeModel<IModel>();
+            compositeModel.AddChild(model);
+
+            compositeModel.Update(0);
+
+            model.AssertWasCalled(m => m.Update(0));
+        }
     }
 }
