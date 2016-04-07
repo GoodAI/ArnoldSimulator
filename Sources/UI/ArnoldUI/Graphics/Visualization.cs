@@ -36,10 +36,10 @@ namespace GoodAI.Arnold.Graphics
         private readonly GridModel m_gridModel;
         private readonly BrainModel m_brainModel;
 
-        private readonly IList<ModelBase> m_models = new List<ModelBase>();
+        private readonly IList<IModel> m_models = new List<IModel>();
 
         private PickRay m_pickRay;
-        private readonly Dictionary<ModelBase, float> m_translucentDistanceCache = new Dictionary<ModelBase, float>();
+        private readonly Dictionary<IModel, float> m_translucentDistanceCache = new Dictionary<IModel, float>();
         private QFont m_font;
 
         private int m_modelsDisplayed;
@@ -167,7 +167,7 @@ namespace GoodAI.Arnold.Graphics
                 m_pickedExperts.Remove(expert);
         }
 
-        private Vector3 ModelToScreenCoordinates(ModelBase model, out bool isBehindCamera)
+        private Vector3 ModelToScreenCoordinates(IModel model, out bool isBehindCamera)
         {
             Vector2 projected = Project(model, out isBehindCamera);
             return new Vector3(projected.X, m_control.Size.Height - projected.Y, 0);
@@ -176,7 +176,7 @@ namespace GoodAI.Arnold.Graphics
         /// <summary>
         /// Project the center of the given model onto screen coordinates.
         /// </summary>
-        private Vector2 Project(ModelBase model, out bool isBehindCamera)
+        private Vector2 Project(IModel model, out bool isBehindCamera)
         {
             // TODO(HonzaS): Allow different points than centers?
             var center4 = new Vector4(Vector3.Zero, 1);
@@ -219,7 +219,7 @@ namespace GoodAI.Arnold.Graphics
 
         private void UpdateFrame(float elapsedMs)
         {
-            foreach (ModelBase model in m_models)
+            foreach (IModel model in m_models)
                 model.Update(elapsedMs);
         }
 
@@ -236,11 +236,11 @@ namespace GoodAI.Arnold.Graphics
 
         private void RenderScene(float elapsedMs)
         {
-            List<ModelBase> opaqueModels = new List<ModelBase>();
-            List<ModelBase> translucentModels = new List<ModelBase>();
+            var opaqueModels = new List<IModel>();
+            var translucentModels = new List<IModel>();
 
             // TODO: Do this only when necessary.
-            foreach (ModelBase model in m_models)
+            foreach (IModel model in m_models)
                 CollectModels(model, ref opaqueModels, ref translucentModels);
 
             // TODO: Only if the camera is moved.
@@ -252,10 +252,10 @@ namespace GoodAI.Arnold.Graphics
             m_pickRay?.Render(m_camera, elapsedMs);
 
             // Render here.
-            foreach (ModelBase model in opaqueModels)
+            foreach (IModel model in opaqueModels)
                 model.Render(elapsedMs);
 
-            foreach (ModelBase model in translucentModels)
+            foreach (IModel model in translucentModels)
                 model.Render(elapsedMs);
         }
 
@@ -359,9 +359,9 @@ namespace GoodAI.Arnold.Graphics
             QFont.End();
         }
 
-        private void SortModels(List<ModelBase> models)
+        private void SortModels(List<IModel> models)
         {
-            foreach (ModelBase model in models)
+            foreach (IModel model in models)
                 m_translucentDistanceCache[model] = model.CurrentWorldMatrix.ExtractTranslation().DistanceFrom(m_camera.Position);
 
             models.Sort(
@@ -370,16 +370,14 @@ namespace GoodAI.Arnold.Graphics
                     : m_translucentDistanceCache[model1] > m_translucentDistanceCache[model2] ? -1 : 0);
         }
 
-        private static void CollectModels(ModelBase model, ref List<ModelBase> opaqueModels, ref List<ModelBase> translucentModels)
+        private static void CollectModels(IModel model, ref List<IModel> opaqueModels, ref List<IModel> translucentModels)
         {
             if (!model.Visible)
                 return;
 
-            model.UpdateCurrentWorldMatrix();
-
             var compositeModel = model as ICompositeModel;
             if (compositeModel != null)
-                foreach (ModelBase child in compositeModel.Models)
+                foreach (IModel child in compositeModel.Models)
                     CollectModels(child, ref opaqueModels, ref translucentModels);
 
             if (model.Translucent)

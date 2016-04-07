@@ -15,7 +15,7 @@ namespace GoodAI.Arnold.Graphics
         /// <summary>
         /// The owner of this model. If it's null, the world is the owner.
         /// </summary>
-        ModelBase Owner { get; set; }
+        IModel Owner { get; set; }
 
         /// <summary>
         /// Use these to orient the model inside it's owner's space.
@@ -65,7 +65,7 @@ namespace GoodAI.Arnold.Graphics
 
     public abstract class ModelBase : IModel
     {
-        public ModelBase Owner { get; set; }
+        public IModel Owner { get; set; }
 
         public Vector3 Position { get; set; } = Vector3.Zero;
         public Vector3 Rotation { get; set; } = Vector3.Zero;
@@ -102,7 +102,11 @@ namespace GoodAI.Arnold.Graphics
         public Matrix4 CurrentWorldMatrix { get; private set; }
         public void UpdateCurrentWorldMatrix() => CurrentWorldMatrix = WorldMatrix;
 
-        public virtual void Update(float elapsedMs) => UpdateModel(elapsedMs);
+        public virtual void Update(float elapsedMs)
+        {
+            UpdateCurrentWorldMatrix();
+            UpdateModel(elapsedMs);
+        }
 
         protected abstract void UpdateModel(float elapsedMs);
 
@@ -138,9 +142,9 @@ namespace GoodAI.Arnold.Graphics
     /// their own update or render logic.
     /// </summary>
     /// <typeparam name="T">Type of the contained models.</typeparam>
-    public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : ModelBase
+    public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : IModel
     {
-        public IEnumerable<IModel> Models => m_children;
+        public IEnumerable<IModel> Models => m_children as IEnumerable<IModel>;
 
         private readonly IList<T> m_children = new List<T>();
 
@@ -169,7 +173,7 @@ namespace GoodAI.Arnold.Graphics
     /// A composite model without any update or render logic. Use this for hierarchical composition.
     /// </summary>
     /// <typeparam name="T">Type of the contained models.</typeparam>
-    public class CompositeModel<T> : CompositeModelBase<T> where T : ModelBase
+    public class CompositeModel<T> : CompositeModelBase<T> where T : IModel
     {
         protected override void UpdateModel(float elapsedMs)
         {

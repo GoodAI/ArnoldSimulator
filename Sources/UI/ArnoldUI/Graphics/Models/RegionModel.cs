@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class RegionModel : CompositeModelBase<ModelBase>
+    public class RegionModel : CompositeModelBase<IModel>
     {
         private Vector3 m_size;
         public const float RegionMargin = 2f;

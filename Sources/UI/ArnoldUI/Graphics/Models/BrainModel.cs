@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class BrainModel : CompositeModel<ModelBase>
+    public class BrainModel : CompositeModel<IModel>
     {
     }
 }
