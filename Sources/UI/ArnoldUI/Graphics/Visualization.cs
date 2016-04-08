@@ -32,7 +32,7 @@ namespace GoodAI.Arnold.Graphics
 
         public Matrix4 ProjectionMatrix { get; set; }
 
-        private readonly Camera m_camera;
+        private readonly ICamera m_camera;
         private readonly GridModel m_gridModel;
         private readonly BrainModel m_brainModel;
 
@@ -249,7 +249,7 @@ namespace GoodAI.Arnold.Graphics
             m_modelsDisplayed = opaqueModels.Count + translucentModels.Count;
 
             // Debug only.
-            m_pickRay?.Render(m_camera, elapsedMs);
+            m_pickRay?.Render();
 
             // Render here.
             foreach (IModel model in opaqueModels)

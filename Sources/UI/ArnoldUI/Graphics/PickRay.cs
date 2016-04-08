@@ -38,7 +38,7 @@ namespace GoodAI.Arnold.Graphics
         public Vector3 Direction { get; set; }
         public float Length { get; set; } = 1f;
 
-        internal void Render(Camera camera, float elapsedMs)
+        internal void Render()
         {
             if (!RenderRay)
                 return;
@@ -62,7 +62,7 @@ namespace GoodAI.Arnold.Graphics
             GL.PopMatrix();
         }
 
-        public static PickRay Pick(float x, float y, Camera camera, Size viewSize, Matrix4 projectionMatrix)
+        public static PickRay Pick(float x, float y, ICamera camera, Size viewSize, Matrix4 projectionMatrix)
         {
             float normX = (2f * x) / viewSize.Width - 1f;
             float normY = (2f * y) / viewSize.Height - 1f;

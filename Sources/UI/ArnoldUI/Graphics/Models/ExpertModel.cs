@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         private float m_alpha = MinAlpha;
 
-        public Camera Camera { get; set; }
+        public ICamera Camera { get; set; }
 
         public RegionModel RegionModel { get; }
 

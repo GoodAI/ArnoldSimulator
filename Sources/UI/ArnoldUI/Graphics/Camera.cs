@@ -3,13 +3,25 @@ using System;
 
 namespace GoodAI.Arnold.Graphics
 {
+    public interface ICamera
+    {
+        Vector3 Position { get; }
+        Vector3 Orientation { get; }
+
+        Matrix4 CurrentFrameViewMatrix { get; }
+
+        void Move(float x, float y, float z, float elapsedMs, bool slow = false);
+        void Rotate(float x, float y, float elapsedMs);
+        void UpdateCurrentFrameMatrix();
+    }
+
     /// <summary>
     /// A basic camera using Euler angles
     /// </summary>
-    public class Camera
+    public class Camera : ICamera
     {
-        public Vector3 Position = Vector3.Zero;
-        public Vector3 Orientation = Vector3.Zero;
+        public Vector3 Position { get; set; } = Vector3.Zero;
+        public Vector3 Orientation { get; set; } = Vector3.Zero;
 
         public float MoveSpeedPerMs = 1f/10;
         public float MoveSpeedSlowFactor = 4;
@@ -100,8 +112,10 @@ namespace GoodAI.Arnold.Graphics
             x = x*speed;
             y = y*speed;
 
-            Orientation.X = (Orientation.X + x) % ((float)Math.PI * 2.0f);
-            Orientation.Y = Math.Max(Math.Min(Orientation.Y + y, (float)Math.PI / 2.0f - 0.001f), (float)-Math.PI / 2.0f + 0.001f);
+            float alpha = (Orientation.X + x)%((float) Math.PI*2.0f);
+            float beta = Math.Max(Math.Min(Orientation.Y + y, (float) Math.PI/2.0f - 0.001f), (float) -Math.PI/2.0f + 0.001f);
+            
+            Orientation = new Vector3(alpha, beta, 0);
         }
     }
 }

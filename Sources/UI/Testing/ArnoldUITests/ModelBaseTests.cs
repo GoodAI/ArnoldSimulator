@@ -21,7 +21,7 @@ namespace GoodAI.Arnold.UI.Tests
 
         private static void AssertCurrentMatrixEqual(TestModel model, Matrix4 expected)
         {
-            CompareResult result = MatrixTestHelpers.MatrixCompare(expected, model.CurrentWorldMatrix);
+            CompareResult result = MathTestHelpers.MatrixCompare(expected, model.CurrentWorldMatrix);
 
             Assert.True(result.AreEqual, result.DifferenceString);
         }
@@ -35,7 +35,7 @@ namespace GoodAI.Arnold.UI.Tests
             };
             model.UpdateCurrentWorldMatrix();
 
-            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
             {
                 {-1, 0, 0, 0},
                 {0, 1, 0, 0},
@@ -55,7 +55,7 @@ namespace GoodAI.Arnold.UI.Tests
             };
             model.UpdateCurrentWorldMatrix();
 
-            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
             {
                 {1, 0, 0, 0},
                 {0, 1, 0, 0},
@@ -75,7 +75,7 @@ namespace GoodAI.Arnold.UI.Tests
             };
             model.UpdateCurrentWorldMatrix();
 
-            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
             {
                 {2, 0, 0, 0},
                 {0, 3, 0, 0},
@@ -97,7 +97,7 @@ namespace GoodAI.Arnold.UI.Tests
             };
             model.UpdateCurrentWorldMatrix();
 
-            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
             {
                 {-2, 0, 0, 0},
                 {0, 3, 0, 0},
@@ -126,7 +126,7 @@ namespace GoodAI.Arnold.UI.Tests
             ownerModel.UpdateCurrentWorldMatrix();
             model.UpdateCurrentWorldMatrix();
 
-            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
             {
                 {4, 0, 0, 0},
                 {0, 3, 0, 0},
@@ -146,7 +146,7 @@ namespace GoodAI.Arnold.UI.Tests
             };
             model.Update(1);
 
-            Matrix4 expected = MatrixTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
             {
                 {1, 0, 0, 0},
                 {0, 1, 0, 0},

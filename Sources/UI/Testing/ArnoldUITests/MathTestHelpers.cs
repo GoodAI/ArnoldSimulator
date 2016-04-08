@@ -4,8 +4,10 @@ using OpenTK;
 
 namespace GoodAI.Arnold.UI.Tests
 {
-    public static class MatrixTestHelpers
+    public static class MathTestHelpers
     {
+        private const float DefaultEpsilon = 1e-6f;
+
         public static Matrix4 BuildMatrix(float[,] values)
         {
             return new Matrix4(
@@ -16,7 +18,7 @@ namespace GoodAI.Arnold.UI.Tests
                 );
         }
 
-        public static CompareResult MatrixCompare(Matrix4 m1, Matrix4 m2, float epsilon = 1e-6f)
+        public static CompareResult MatrixCompare(Matrix4 m1, Matrix4 m2, float epsilon = DefaultEpsilon)
         {
             var result = new CompareResult();
 
@@ -41,6 +43,36 @@ namespace GoodAI.Arnold.UI.Tests
             }
 
             errorPositions.AppendLine("Errors, left to right, top to bottom:");
+
+            result.AreEqual = errorValues.Length == 0;
+            if (!result.AreEqual)
+                result.DifferenceString = errorPositions.ToString() + errorValues.ToString();
+
+            return result;
+        }
+
+        public static CompareResult VectorCompare(Vector3 v1, Vector3 v2, float epsilon = DefaultEpsilon)
+        {
+            var result = new CompareResult();
+
+            var errorPositions = new StringBuilder();
+            var errorValues = new StringBuilder();
+
+            for (int x = 0; x < 3; x++)
+            {
+                if (Math.Abs(v1[x] - v2[x]) > epsilon)
+                {
+                    errorPositions.Append("X");
+                    errorValues.AppendLine($"{v1[x]} vs {v2[x]}");
+                }
+                else
+                {
+                    errorPositions.Append(".");
+                }
+            }
+
+            errorPositions.AppendLine("");
+            errorPositions.AppendLine("Errors, left to right");
 
             result.AreEqual = errorValues.Length == 0;
             if (!result.AreEqual)
