@@ -202,7 +202,7 @@ namespace GoodAI.Arnold.Graphics
             m_fps = 1000/elapsedMs;
 
             if (inputInfo.CameraRotated)
-                m_camera.AddRotation(inputInfo.CameraDeltaX, inputInfo.CameraDeltaY, elapsedMs);
+                m_camera.Rotate(inputInfo.CameraDeltaX, inputInfo.CameraDeltaY, elapsedMs);
 
             int keyRight = inputInfo.KeyRight ? 1 : 0;
             int keyLeft = inputInfo.KeyLeft ? 1 : 0;
