@@ -70,8 +70,7 @@ namespace GoodAI.Net.ConverseSharp
         {
             IsConnected = true;
 
-            if (ImplantMessage != null)
-                ImplantMessage(m_stream);
+            ImplantMessage?.Invoke(m_stream);
 
             return m_stream;
         }
