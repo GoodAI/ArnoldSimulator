@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Google.Protobuf.3.0.0-beta2\lib\dotnet\Google.Protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\AdamsLair.OpenTK.1.1.6.0\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -68,6 +72,7 @@
   <ItemGroup>
     <Compile Include="CameraTests.cs" />
     <Compile Include="MathTestHelpers.cs" />
+    <Compile Include="MessageTests.cs" />
     <Compile Include="ModelBaseTests.cs" />
     <Compile Include="PickRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -23,15 +23,16 @@ namespace GoodAI.Arnold.Net {
     static RequestsReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5SZXF1ZXN0cy5wcm90bxIRR29vZEFJLkFybm9sZC5OZXQicQoHQ29tbWFu",
-            "ZBI3CgdDb21tYW5kGAEgASgOMiYuR29vZEFJLkFybm9sZC5OZXQuQ29tbWFu",
-            "ZC5Db21tYW5kVHlwZSItCgtDb21tYW5kVHlwZRIJCgVTdGFydBAAEgkKBVBh",
-            "dXNlEAESCAoEU3RvcBACIgoKCEdldFN0YXRlYgZwcm90bzM="));
+            "Cg5SZXF1ZXN0cy5wcm90bxIRR29vZEFJLkFybm9sZC5OZXQifwoOQ29tbWFu",
+            "ZFJlcXVlc3QSPgoHQ29tbWFuZBgBIAEoDjItLkdvb2RBSS5Bcm5vbGQuTmV0",
+            "LkNvbW1hbmRSZXF1ZXN0LkNvbW1hbmRUeXBlIi0KC0NvbW1hbmRUeXBlEgkK",
+            "BVN0YXJ0EAASCQoFUGF1c2UQARIICgRTdG9wEAIiEQoPR2V0U3RhdGVSZXF1",
+            "ZXN0YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.Command), global::GoodAI.Arnold.Net.Command.Parser, new[]{ "Command_" }, null, new[]{ typeof(global::GoodAI.Arnold.Net.Command.Types.CommandType) }, null),
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.GetState), global::GoodAI.Arnold.Net.GetState.Parser, null, null, null, null)
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.CommandRequest), global::GoodAI.Arnold.Net.CommandRequest.Parser, new[]{ "Command" }, null, new[]{ typeof(global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType) }, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.GetStateRequest), global::GoodAI.Arnold.Net.GetStateRequest.Parser, null, null, null, null)
           }));
     }
     #endregion
@@ -39,9 +40,9 @@ namespace GoodAI.Arnold.Net {
   }
   #region Messages
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-  public sealed partial class Command : pb::IMessage<Command> {
-    private static readonly pb::MessageParser<Command> _parser = new pb::MessageParser<Command>(() => new Command());
-    public static pb::MessageParser<Command> Parser { get { return _parser; } }
+  public sealed partial class CommandRequest : pb::IMessage<CommandRequest> {
+    private static readonly pb::MessageParser<CommandRequest> _parser = new pb::MessageParser<CommandRequest>(() => new CommandRequest());
+    public static pb::MessageParser<CommandRequest> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
       get { return global::GoodAI.Arnold.Net.RequestsReflection.Descriptor.MessageTypes[0]; }
@@ -51,24 +52,24 @@ namespace GoodAI.Arnold.Net {
       get { return Descriptor; }
     }
 
-    public Command() {
+    public CommandRequest() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
-    public Command(Command other) : this() {
+    public CommandRequest(CommandRequest other) : this() {
       command_ = other.command_;
     }
 
-    public Command Clone() {
-      return new Command(this);
+    public CommandRequest Clone() {
+      return new CommandRequest(this);
     }
 
     /// <summary>Field number for the "Command" field.</summary>
-    public const int Command_FieldNumber = 1;
-    private global::GoodAI.Arnold.Net.Command.Types.CommandType command_ = global::GoodAI.Arnold.Net.Command.Types.CommandType.Start;
-    public global::GoodAI.Arnold.Net.Command.Types.CommandType Command_ {
+    public const int CommandFieldNumber = 1;
+    private global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType command_ = global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start;
+    public global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType Command {
       get { return command_; }
       set {
         command_ = value;
@@ -76,23 +77,23 @@ namespace GoodAI.Arnold.Net {
     }
 
     public override bool Equals(object other) {
-      return Equals(other as Command);
+      return Equals(other as CommandRequest);
     }
 
-    public bool Equals(Command other) {
+    public bool Equals(CommandRequest other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (Command_ != other.Command_) return false;
+      if (Command != other.Command) return false;
       return true;
     }
 
     public override int GetHashCode() {
       int hash = 1;
-      if (Command_ != global::GoodAI.Arnold.Net.Command.Types.CommandType.Start) hash ^= Command_.GetHashCode();
+      if (Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) hash ^= Command.GetHashCode();
       return hash;
     }
 
@@ -101,26 +102,26 @@ namespace GoodAI.Arnold.Net {
     }
 
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Command_ != global::GoodAI.Arnold.Net.Command.Types.CommandType.Start) {
+      if (Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) {
         output.WriteRawTag(8);
-        output.WriteEnum((int) Command_);
+        output.WriteEnum((int) Command);
       }
     }
 
     public int CalculateSize() {
       int size = 0;
-      if (Command_ != global::GoodAI.Arnold.Net.Command.Types.CommandType.Start) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Command_);
+      if (Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Command);
       }
       return size;
     }
 
-    public void MergeFrom(Command other) {
+    public void MergeFrom(CommandRequest other) {
       if (other == null) {
         return;
       }
-      if (other.Command_ != global::GoodAI.Arnold.Net.Command.Types.CommandType.Start) {
-        Command_ = other.Command_;
+      if (other.Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) {
+        Command = other.Command;
       }
     }
 
@@ -132,7 +133,7 @@ namespace GoodAI.Arnold.Net {
             input.SkipLastField();
             break;
           case 8: {
-            command_ = (global::GoodAI.Arnold.Net.Command.Types.CommandType) input.ReadEnum();
+            command_ = (global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType) input.ReadEnum();
             break;
           }
         }
@@ -140,7 +141,7 @@ namespace GoodAI.Arnold.Net {
     }
 
     #region Nested types
-    /// <summary>Container for nested types declared in the Command message type.</summary>
+    /// <summary>Container for nested types declared in the CommandRequest message type.</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     public static partial class Types {
       public enum CommandType {
@@ -155,9 +156,9 @@ namespace GoodAI.Arnold.Net {
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-  public sealed partial class GetState : pb::IMessage<GetState> {
-    private static readonly pb::MessageParser<GetState> _parser = new pb::MessageParser<GetState>(() => new GetState());
-    public static pb::MessageParser<GetState> Parser { get { return _parser; } }
+  public sealed partial class GetStateRequest : pb::IMessage<GetStateRequest> {
+    private static readonly pb::MessageParser<GetStateRequest> _parser = new pb::MessageParser<GetStateRequest>(() => new GetStateRequest());
+    public static pb::MessageParser<GetStateRequest> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
       get { return global::GoodAI.Arnold.Net.RequestsReflection.Descriptor.MessageTypes[1]; }
@@ -167,24 +168,24 @@ namespace GoodAI.Arnold.Net {
       get { return Descriptor; }
     }
 
-    public GetState() {
+    public GetStateRequest() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
-    public GetState(GetState other) : this() {
+    public GetStateRequest(GetStateRequest other) : this() {
     }
 
-    public GetState Clone() {
-      return new GetState(this);
+    public GetStateRequest Clone() {
+      return new GetStateRequest(this);
     }
 
     public override bool Equals(object other) {
-      return Equals(other as GetState);
+      return Equals(other as GetStateRequest);
     }
 
-    public bool Equals(GetState other) {
+    public bool Equals(GetStateRequest other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -211,7 +212,7 @@ namespace GoodAI.Arnold.Net {
       return size;
     }
 
-    public void MergeFrom(GetState other) {
+    public void MergeFrom(GetStateRequest other) {
       if (other == null) {
         return;
       }
