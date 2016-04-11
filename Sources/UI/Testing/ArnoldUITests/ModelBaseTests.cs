@@ -1,7 +1,7 @@
 ﻿using System;
 using GoodAI.Arnold.Graphics;
+using Moq;
 using OpenTK;
-using Rhino.Mocks;
 using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
@@ -160,14 +160,15 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void CompositeModelUpdatesChildren()
         {
-            var model = MockRepository.GenerateMock<IModel>();
+            var modelMock = new Mock<IModel>();
+            IModel model = modelMock.Object;
 
             var compositeModel = new CompositeModel<IModel>();
             compositeModel.AddChild(model);
 
             compositeModel.Update(0);
 
-            model.AssertWasCalled(m => m.Update(0));
+            modelMock.Verify(m => m.Update(0));
         }
     }
 }

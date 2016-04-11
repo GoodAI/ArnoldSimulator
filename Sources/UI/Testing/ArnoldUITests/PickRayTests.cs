@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Graphics;
+using Moq;
 using OpenTK;
-using Rhino.Mocks;
 using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
@@ -16,22 +16,24 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void CalculatesPickRay()
         {
-            var x = 100;
-            var y = 200;
+            const int x = 100;
+            const int y = 200;
 
-            var camera = MockRepository.GenerateMock<ICamera>();
-            camera.Stub(c => c.CurrentFrameViewMatrix).Return(MathTestHelpers.BuildMatrix(new float[,]
+            var cameraMock = new Mock<ICamera>();
+            cameraMock.Setup(c => c.CurrentFrameViewMatrix).Returns(MathTestHelpers.BuildMatrix(new float[,]
             {
                 { 1, 2, 3, 0},
                 { 1, 2, 3, 0},
                 { 1, 2, 3, 0},
                 { 1, 2, 3, 1}
             }));
-            camera.Stub(c => c.Position).Return(new Vector3(10, 20, 30));
+            cameraMock.Setup(c => c.Position).Returns(new Vector3(10, 20, 30));
+
+            ICamera camera = cameraMock.Object;
 
             var viewSize = new Size(1000, 600);
 
-            var projectionMatrix = MathTestHelpers.BuildMatrix(new float[,]
+            Matrix4 projectionMatrix = MathTestHelpers.BuildMatrix(new float[,]
             {
                 { 4, 3, 2, 0},
                 { 4, 3, 2, 0},
