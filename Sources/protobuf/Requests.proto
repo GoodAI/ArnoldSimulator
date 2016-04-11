@@ -1,0 +1,14 @@
+syntax = "proto3";
+package GoodAI.Arnold.Net;
+
+message Command {
+	enum CommandType {
+		Start = 0;
+		Pause = 1;
+		Stop = 2;
+	}
+	
+	CommandType Command = 1;
+}
+
+message GetState {}

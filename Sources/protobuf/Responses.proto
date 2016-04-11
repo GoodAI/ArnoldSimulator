@@ -1,0 +1,24 @@
+syntax = "proto3";
+package GoodAI.Arnold.Net;
+
+message Error {
+	string ErrorMessage = 1;
+}
+
+message StateData {
+	enum StateType {
+		Stopped = 0;
+		Running = 1;
+		Paused = 2;
+		Invalid = 3;
+	}
+	
+	StateType State = 1;
+}
+
+message StateResponse {
+	oneof response_oneof {
+		Error Error = 1;
+		StateData Data = 2;
+	}
+}

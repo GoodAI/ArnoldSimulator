@@ -4,20 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ProtoBuf;
+using Google.Protobuf;
 using Xunit;
 
 namespace GoodAI.Net.ConverseSharp
 {
-    [ProtoContract]
-    internal struct Command
-    {
-        [ProtoMember(1)]
-        public int Code;
-        [ProtoMember(2)]
-        public string Method;
-    }
-
     public class ConverseProtoBufClientTests
     {
         private readonly Command m_command;
@@ -37,8 +28,8 @@ namespace GoodAI.Net.ConverseSharp
             m_protoBufClient.SendMessage("command", m_command);
 
             m_stream.Position = ConverseClient.MessageHeaderLength;
-            var receivedCommand = Serializer.DeserializeWithLengthPrefix<Command>(m_stream,
-                ConverseProtoBufClient.ProtoBufPrefixStyle);
+            var parser = new MessageParser<Command>(() => new Command());
+            var receivedCommand = parser.ParseFrom(m_stream);
 
             Assert.Equal(m_command, receivedCommand);
         }

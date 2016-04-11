@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ProtoBuf;
+using Google.Protobuf;
 
 namespace GoodAI.Net.ConverseSharp
 {
@@ -13,8 +13,6 @@ namespace GoodAI.Net.ConverseSharp
     /// </summary>
     public class ConverseProtoBufClient : ConverseClient
     {
-        internal const ProtoBuf.PrefixStyle ProtoBufPrefixStyle = PrefixStyle.Fixed32;
-
         private const int InitialBufferSize = 32 * 1024;
 
         private readonly MemoryStream m_sendingMemStream = new MemoryStream(InitialBufferSize);  // Resizable memory stream.
@@ -27,6 +25,7 @@ namespace GoodAI.Net.ConverseSharp
         /// Serialize messageBody using ProtoBuf and send it via the ConversationClient. NOTE: Not thread safe!
         /// </summary>
         public void SendMessage<TRequest>(string handlerName, TRequest messageBody)
+            where TRequest : IMessage
         {
             SerializeMessage(messageBody);
 
@@ -34,6 +33,8 @@ namespace GoodAI.Net.ConverseSharp
         }
 
         public TResponse SendQuery<TRequest, TResponse>(string handlerName, TRequest messageBody)
+            where TResponse : IMessage<TResponse>, new()
+            where TRequest : IMessage
         {
             SerializeMessage(messageBody);
 
@@ -42,14 +43,15 @@ namespace GoodAI.Net.ConverseSharp
 
             m_replyMemStream.Position = 0;  // Read the stream from the beginning.
 
-            return Serializer.Deserialize<TResponse>(m_replyMemStream);
+            var parser = new MessageParser<TResponse>(() => new TResponse());
+            return parser.ParseFrom(m_replyMemStream);
         }
 
-        private void SerializeMessage<TRequest>(TRequest messageBody)
+        private void SerializeMessage<TRequest>(TRequest messageBody) where TRequest : IMessage
         {
             ResetSendingBuffer();
 
-            Serializer.SerializeWithLengthPrefix(m_sendingMemStream, messageBody, ProtoBufPrefixStyle);
+            messageBody.WriteTo(m_sendingMemStream);
         }
 
         private void ResetSendingBuffer()

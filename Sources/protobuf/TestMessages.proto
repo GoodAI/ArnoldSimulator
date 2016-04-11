@@ -1,0 +1,7 @@
+syntax = "proto3";
+package GoodAI.Net.ConverseSharp;
+
+message Command {
+	int32 Code = 1;
+	string Method = 2;
+}
