@@ -133,7 +133,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
-    <Compile Include="Simulation\Simulation.cs" />
+    <Compile Include="Simulation\Model.cs" />
     <Compile Include="Simulation\SimulationHandler.cs" />
     <Compile Include="Graphics\Visualization.cs" />
     <EmbeddedResource Include="Forms\GraphForm.resx">

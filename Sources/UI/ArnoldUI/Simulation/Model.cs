@@ -9,7 +9,7 @@ using OpenTK.Platform.Windows;
 
 namespace GoodAI.Arnold.Simulation
 {
-    public class BrainSimulation : IDisposable
+    public class Model
     {
         private const int LayerCount = 6;
 
@@ -38,7 +38,7 @@ namespace GoodAI.Arnold.Simulation
 
         public List<RegionModel> Regions { get; }
 
-        public BrainSimulation(AgentBlueprint agentBlueprint)
+        public Model(AgentBlueprint agentBlueprint)
         {
             Regions = new List<RegionModel>();
             AgentBlueprint = agentBlueprint;
@@ -116,14 +116,6 @@ namespace GoodAI.Arnold.Simulation
             }
 
             simulationRegionModel.AdjustSize();
-        }
-
-        public void Step()
-        {
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

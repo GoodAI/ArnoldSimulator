@@ -10,7 +10,7 @@ using GoodAI.Arnold.Project;
 
 namespace GoodAI.Arnold.Simulation
 {
-    public interface ISimulationHandler
+    public interface ISimulation
     {
         /// <summary>
         /// Loads an agent into the handler, creates a new simulation.
@@ -62,18 +62,18 @@ namespace GoodAI.Arnold.Simulation
         { }
     }
 
-    public class SimulationHandler : ISimulationHandler
+    public class RemoteSimulation : ISimulation
     {
         private const int SimulationStopTimeoutMs = 30000;
 
-        public BrainSimulation BrainSimulation { get; private set; }
+        public Model Model { get; private set; }
         private CancellationTokenSource m_cancellationTokenSource;
 
         public SimulationState State { get; private set; }
 
         private readonly ManualResetEvent m_simulationPaused = new ManualResetEvent(true);
 
-        public SimulationHandler()
+        public RemoteSimulation()
         {
             State = SimulationState.Stopped;
         }
@@ -83,7 +83,7 @@ namespace GoodAI.Arnold.Simulation
             if (State != SimulationState.Stopped)
                 throw new WrongHandlerStateException("LoadAgent", State);
 
-            BrainSimulation = new BrainSimulation(agentBlueprint);
+            Model = new Model(agentBlueprint);
 
             State = SimulationState.Paused;
         }
@@ -93,8 +93,7 @@ namespace GoodAI.Arnold.Simulation
             if (State != SimulationState.Paused)
                 throw new WrongHandlerStateException("Reset", State);
 
-            BrainSimulation?.Dispose();
-            BrainSimulation = null;
+            Model = null;
 
             State = SimulationState.Stopped;
         }
@@ -148,7 +147,7 @@ namespace GoodAI.Arnold.Simulation
                 if (token.IsCancellationRequested)
                     break;
 
-                BrainSimulation.Step();
+                //Model.Step();
 
                 i++;
             }

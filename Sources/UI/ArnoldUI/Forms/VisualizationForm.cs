@@ -22,18 +22,18 @@ namespace GoodAI.Arnold.Forms
         private bool m_mouseCaptured;
         private Vector2 m_lastMousePosition;
 
-        private readonly SimulationHandler m_simulationHandler;
-        private readonly BrainSimulation m_simulation;
+        private readonly RemoteSimulation m_simulation;
+        private readonly Model m_model;
         private readonly Visualization m_visualization;
 
-        public VisualizationForm(SimulationHandler handler)
+        public VisualizationForm(RemoteSimulation simulation)
         {
             InitializeComponent();
 
-            m_simulationHandler = handler;
-            m_simulation = handler.BrainSimulation;
+            m_simulation = simulation;
+            m_model = simulation.Model;
 
-            m_visualization = new Visualization(glControl, m_simulation);
+            m_visualization = new Visualization(glControl, m_model);
         }
 
         // Resize the glControl

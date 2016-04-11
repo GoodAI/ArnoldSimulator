@@ -46,13 +46,13 @@ namespace GoodAI.Arnold.Graphics
         private float m_fps;
 
         private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
-        private readonly BrainSimulation m_simulation;
+        private readonly Model m_model;
 
         // TODO: Move stuff from the VisualizationForm here.
-        public Visualization(GLControl glControl, BrainSimulation simulation)
+        public Visualization(GLControl glControl, Model model)
         {
             m_control = glControl;
-            m_simulation = simulation;
+            m_model = model;
 
             m_camera = new Camera
             {
@@ -75,7 +75,7 @@ namespace GoodAI.Arnold.Graphics
         {
             // TODO: Nasty! Change!
             // If (when) experts are drawn via shaders, they might not actually need the camera position? (no sprites)
-            foreach (var region in m_simulation.Regions)
+            foreach (var region in m_model.Regions)
             {
                 foreach (ExpertModel expert in region.Experts)
                     expert.Camera = m_camera;
@@ -131,7 +131,7 @@ namespace GoodAI.Arnold.Graphics
         {
             m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
-            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulation.Regions);
+            ExpertModel expert = FindFirstExpert(m_pickRay, m_model.Regions);
             if (expert != null)
                 ToggleExpert(expert);
         }

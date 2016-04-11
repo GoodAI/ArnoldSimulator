@@ -24,7 +24,7 @@ namespace GoodAI.Arnold
 
         public AgentBlueprint AgentBlueprint { get; }
 
-        public SimulationHandler SimulationHandler { get; set; }
+        public RemoteSimulation Simulation { get; set; }
 
         public MainForm()
         {
@@ -43,13 +43,13 @@ namespace GoodAI.Arnold
             GraphForm.Show(dockPanel, DockState.Document);
             GraphForm.AgentBlueprint = AgentBlueprint;
 
-            SimulationHandler = new SimulationHandler();
+            Simulation = new RemoteSimulation();
         }
 
         private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
         {
             VisualizationForm.FormClosed -= VisualizationFormOnClosed;
-            SimulationHandler.Reset();
+            Simulation.Reset();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -64,10 +64,10 @@ namespace GoodAI.Arnold
 
         private void StartSimulation()
         {
-            SimulationHandler.LoadBlueprint(AgentBlueprint);
+            Simulation.LoadBlueprint(AgentBlueprint);
 
             if (VisualizationForm == null || VisualizationForm.IsDisposed)
-                VisualizationForm = new VisualizationForm(SimulationHandler);
+                VisualizationForm = new VisualizationForm(Simulation);
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;
