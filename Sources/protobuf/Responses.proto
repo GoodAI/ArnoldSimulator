@@ -7,7 +7,7 @@ message Error {
 
 message StateData {
 	enum StateType {
-		Stopped = 0;
+		Empty = 0;
 		Running = 1;
 		Paused = 2;
 		Invalid = 3;

@@ -31,7 +31,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             var message = new CommandRequest
             {
-                Command = CommandRequest.Types.CommandType.Start
+                Command = CommandRequest.Types.CommandType.Run
             };
             AssertWriteReadEquality(message);
         }

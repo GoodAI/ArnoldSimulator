@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ArnoldUI.Network;
+using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 
 namespace GoodAI.Arnold.Simulation
@@ -20,7 +22,7 @@ namespace GoodAI.Arnold.Simulation
 
         /// <summary>
         /// Runs the given number of steps.
-        /// This moves the simulation from Stopped to Running. When the requested number
+        /// This moves the simulation from Paused to Running. When the requested number
         /// of steps are performed, moves to state Paused.
         /// </summary>
         /// <param name="stepsToRun">The number of steps to run. 0 is infinity.</param>
@@ -33,22 +35,22 @@ namespace GoodAI.Arnold.Simulation
         void Step();
 
         /// <summary>
-        /// Stops the running simulation. If the simulation is not running, this does nothing.
+        /// Pauses the running simulation. If the simulation is not running, this does nothing.
         /// This moves the simulation from Running state to Paused.
         /// </summary>
         void Pause();
 
         /// <summary>
-        /// This moves the simulation from Paused state to Clear.
+        /// This moves the simulation from Paused state to Empty.
         /// </summary>
-        void Reset();
+        void Clear();
 
         SimulationState State { get; }
     }
 
     public enum SimulationState
     {
-        Stopped,
+        Empty,
         Paused,
         Running
     }
@@ -62,45 +64,94 @@ namespace GoodAI.Arnold.Simulation
         { }
     }
 
+    public class StateChangedEventArgs : EventArgs
+    {
+        public SimulationState PreviousState { get; set; }
+        public SimulationState CurrentState { get; set; }
+
+        public StateChangedEventArgs(SimulationState previousState, SimulationState currentState)
+        {
+            PreviousState = previousState;
+            CurrentState = currentState;
+        }
+    }
+
+    public class StateChangeFailedEventArgs : EventArgs
+    {
+        public StateChangeFailedEventArgs(Error error)
+        {
+            Error = error;
+        }
+
+        public Error Error { get; set; }
+    }
+
     public class RemoteSimulation : ISimulation
     {
-        private const int SimulationStopTimeoutMs = 30000;
-
         public Model Model { get; private set; }
-        private CancellationTokenSource m_cancellationTokenSource;
 
-        public SimulationState State { get; private set; }
+        public event EventHandler<StateChangedEventArgs> StateChanged;
+        public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
 
-        private readonly ManualResetEvent m_simulationPaused = new ManualResetEvent(true);
-
-        public RemoteSimulation()
+        public SimulationState State
         {
-            State = SimulationState.Stopped;
+            get { return m_state; }
+            private set
+            {
+                SimulationState oldState = m_state;
+                m_state = value;
+                StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
+            }
+        }
+
+        private ICoreLink m_coreLink;
+        private SimulationState m_state;
+
+        public RemoteSimulation(ICoreLink coreLink)
+        {
+            m_coreLink = coreLink;
+            State = SimulationState.Empty;
+
+            Model = new Model();
         }
 
         public void LoadBlueprint(AgentBlueprint agentBlueprint)
         {
-            if (State != SimulationState.Stopped)
+            if (State != SimulationState.Empty)
                 throw new WrongHandlerStateException("LoadAgent", State);
 
-            Model = new Model(agentBlueprint);
+            // TODO(HonzaS): Add the blueprint data.
+            var conversation = new CommandConversation
+            {
+                Request =
+                {
+                    Command = CommandRequest.Types.CommandType.Load,
+                    Blueprint = new BlueprintData()
+                }
+            };
 
-            State = SimulationState.Paused;
+            RequestAndHandleState(conversation);
         }
 
-        public void Reset()
+        public void Clear()
         {
-            if (State != SimulationState.Paused)
+            if (State != SimulationState.Empty && State != SimulationState.Paused)
                 throw new WrongHandlerStateException("Reset", State);
 
-            Model = null;
+            var conversation = new CommandConversation
+            {
+                Request =
+                {
+                    Command = CommandRequest.Types.CommandType.Clear
+                }
+            };
 
-            State = SimulationState.Stopped;
+            RequestAndHandleState(conversation);
         }
 
         public void Run(int stepsToRun = 0)
         {
-            if (State != SimulationState.Paused)
+            if (State != SimulationState.Paused && State != SimulationState.Running)
                 throw new WrongHandlerStateException("Run", State);
 
             RunSimulation(stepsToRun);
@@ -108,8 +159,14 @@ namespace GoodAI.Arnold.Simulation
 
         public void Step()
         {
-            if (State != SimulationState.Paused)
+            if (State != SimulationState.Paused && State != SimulationState.Running)
                 throw new WrongHandlerStateException("Step", State);
+
+            if (State == SimulationState.Running)
+            {
+                Pause();
+                return;
+            }
 
             RunSimulation(1);
         }
@@ -119,40 +176,81 @@ namespace GoodAI.Arnold.Simulation
             if (State != SimulationState.Paused && State != SimulationState.Running)
                 throw new WrongHandlerStateException("Pause", State);
 
-            m_cancellationTokenSource.Cancel();
-            bool signalled = m_simulationPaused.WaitOne(SimulationStopTimeoutMs);
+            if (State == SimulationState.Paused)
+                return;
+
+            var conversation = new CommandConversation
+            {
+                Request =
+                {
+                    Command = CommandRequest.Types.CommandType.Pause
+                }
+            };
+
+            RequestAndHandleState(conversation);
+
+            // TODO(HonzaS): Signal the Core.
             // TODO(HonzaS): Logging!
             //if (!signalled)
             //    deal with it
         }
 
-
-
         private void RunSimulation(int stepsToRun)
         {
-            m_cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken token = m_cancellationTokenSource.Token;
-            m_simulationPaused.Reset();
-            Task.Factory.StartNew(() => RunSimulationSteps(stepsToRun, token), TaskCreationOptions.LongRunning)
-                .ContinueWith(task => m_simulationPaused.Set(), token);
+            if (State == SimulationState.Running)
+                return;
+
+            var conversation = new CommandConversation
+            {
+                Request =
+                {
+                    Command = CommandRequest.Types.CommandType.Run,
+                    StepsToRun = stepsToRun
+                }
+            };
+
+            RequestAndHandleState(conversation);
         }
 
-        private void RunSimulationSteps(int stepsToRun, CancellationToken token)
+        private void RequestAndHandleState(CommandConversation conversation)
         {
-            State = SimulationState.Running;
+            Task<StateResponse> response = m_coreLink.Request(conversation);
 
-            int i = 0;
-            while(stepsToRun == 0 || i < stepsToRun)
+            response.ContinueWith(HandleStateResponse);
+        }
+
+        private void HandleStateResponse(Task<StateResponse> task)
+        {
+            StateResponse result = task.Result;
+            if (result.ResponseOneofCase == StateResponse.ResponseOneofOneofCase.Error)
             {
-                if (token.IsCancellationRequested)
-                    break;
-
-                //Model.Step();
-
-                i++;
+                ProcessError(result.Error);
             }
+            else
+            {
+                switch (result.Data.State)
+                {
+                    case StateData.Types.StateType.Empty:
+                        State = SimulationState.Empty;
+                        break;
+                    case StateData.Types.StateType.Paused:
+                        State = SimulationState.Paused;
+                        break;
+                    case StateData.Types.StateType.Running:
+                        State = SimulationState.Running;
+                        break;
+                    case StateData.Types.StateType.Invalid:
+                        ProcessError(new Error {Message = "Invalid simulation state"});
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
-            State = SimulationState.Paused;
+        private void ProcessError(Error error)
+        {
+            StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(error));
         }
     }
 }

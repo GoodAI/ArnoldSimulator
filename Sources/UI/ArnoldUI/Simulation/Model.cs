@@ -38,9 +38,13 @@ namespace GoodAI.Arnold.Simulation
 
         public List<RegionModel> Regions { get; }
 
-        public Model(AgentBlueprint agentBlueprint)
+        public Model()
         {
             Regions = new List<RegionModel>();
+        }
+
+        public Model(AgentBlueprint agentBlueprint) : this()
+        {
             AgentBlueprint = agentBlueprint;
 
             GenerateRegions();

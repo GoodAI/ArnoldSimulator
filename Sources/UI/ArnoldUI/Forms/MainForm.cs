@@ -9,8 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GoodAI.Arnold.Forms;
+using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
+using GoodAI.Net.ConverseSharp;
 using WeifenLuo.WinFormsUI.Docking;
 using Region = GoodAI.Arnold.Project.Region;
 
@@ -43,13 +45,13 @@ namespace GoodAI.Arnold
             GraphForm.Show(dockPanel, DockState.Document);
             GraphForm.AgentBlueprint = AgentBlueprint;
 
-            Simulation = new RemoteSimulation();
+            //Simulation = new RemoteSimulation(new CoreLink(new ConverseProtoBufClient(new DummyConnector())));
         }
 
         private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
         {
             VisualizationForm.FormClosed -= VisualizationFormOnClosed;
-            Simulation.Reset();
+            Simulation.Clear();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)

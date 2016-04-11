@@ -11,8 +11,8 @@ namespace GoodAI.Arnold.Network
     public interface ICoreLink
     {
         Task<TResponse> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation)
-            where TRequest : IMessage
-            where TResponse : IMessage<TResponse>, new();
+            where TRequest : class, IMessage
+            where TResponse : class, IMessage<TResponse>, new();
     }
 
     public interface IConversation<out TRequest, TResponse>
@@ -31,10 +31,12 @@ namespace GoodAI.Arnold.Network
         }
 
         public Task<TResponse> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation)
-            where TResponse : IMessage<TResponse>, new()
-            where TRequest : IMessage
+            where TResponse : class, IMessage<TResponse>, new()
+            where TRequest : class, IMessage
         {
-            return Task<TResponse>.Factory.StartNew(() => m_converseClient.SendQuery<TRequest, TResponse>(conversation.Handler, conversation.Request));
+            return
+                Task<TResponse>.Factory.StartNew(
+                    () => m_converseClient.SendQuery<TRequest, TResponse>(conversation.Handler, conversation.Request));
         }
     }
 }

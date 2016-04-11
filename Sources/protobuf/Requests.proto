@@ -1,14 +1,21 @@
 syntax = "proto3";
 package GoodAI.Arnold.Network;
 
+message BlueprintData {}
+
 message CommandRequest {
 	enum CommandType {
-		Start = 0;
-		Pause = 1;
-		Stop = 2;
+		Load = 0;
+		Run = 1;
+		Pause = 2;
+		Clear = 3;
 	}
 	
 	CommandType Command = 1;
+	
+	int32 StepsToRun = 2;
+	
+	BlueprintData Blueprint = 3;
 }
 
 message GetStateRequest {}

@@ -23,15 +23,18 @@ namespace GoodAI.Arnold.Network {
     static RequestsReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5SZXF1ZXN0cy5wcm90bxIVR29vZEFJLkFybm9sZC5OZXR3b3JrIoMBCg5D",
-            "b21tYW5kUmVxdWVzdBJCCgdDb21tYW5kGAEgASgOMjEuR29vZEFJLkFybm9s",
-            "ZC5OZXR3b3JrLkNvbW1hbmRSZXF1ZXN0LkNvbW1hbmRUeXBlIi0KC0NvbW1h",
-            "bmRUeXBlEgkKBVN0YXJ0EAASCQoFUGF1c2UQARIICgRTdG9wEAIiEQoPR2V0",
-            "U3RhdGVSZXF1ZXN0YgZwcm90bzM="));
+            "Cg5SZXF1ZXN0cy5wcm90bxIVR29vZEFJLkFybm9sZC5OZXR3b3JrIg8KDUJs",
+            "dWVwcmludERhdGEi2QEKDkNvbW1hbmRSZXF1ZXN0EkIKB0NvbW1hbmQYASAB",
+            "KA4yMS5Hb29kQUkuQXJub2xkLk5ldHdvcmsuQ29tbWFuZFJlcXVlc3QuQ29t",
+            "bWFuZFR5cGUSEgoKU3RlcHNUb1J1bhgCIAEoBRI3CglCbHVlcHJpbnQYAyAB",
+            "KAsyJC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuQmx1ZXByaW50RGF0YSI2CgtD",
+            "b21tYW5kVHlwZRIICgRMb2FkEAASBwoDUnVuEAESCQoFUGF1c2UQAhIJCgVD",
+            "bGVhchADIhEKD0dldFN0YXRlUmVxdWVzdGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.CommandRequest), global::GoodAI.Arnold.Network.CommandRequest.Parser, new[]{ "Command" }, null, new[]{ typeof(global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType) }, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.BlueprintData), global::GoodAI.Arnold.Network.BlueprintData.Parser, null, null, null, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.CommandRequest), global::GoodAI.Arnold.Network.CommandRequest.Parser, new[]{ "Command", "StepsToRun", "Blueprint" }, null, new[]{ typeof(global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType) }, null),
             new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.GetStateRequest), global::GoodAI.Arnold.Network.GetStateRequest.Parser, null, null, null, null)
           }));
     }
@@ -40,12 +43,88 @@ namespace GoodAI.Arnold.Network {
   }
   #region Messages
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+  public sealed partial class BlueprintData : pb::IMessage<BlueprintData> {
+    private static readonly pb::MessageParser<BlueprintData> _parser = new pb::MessageParser<BlueprintData>(() => new BlueprintData());
+    public static pb::MessageParser<BlueprintData> Parser { get { return _parser; } }
+
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[0]; }
+    }
+
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    public BlueprintData() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    public BlueprintData(BlueprintData other) : this() {
+    }
+
+    public BlueprintData Clone() {
+      return new BlueprintData(this);
+    }
+
+    public override bool Equals(object other) {
+      return Equals(other as BlueprintData);
+    }
+
+    public bool Equals(BlueprintData other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      return true;
+    }
+
+    public override int GetHashCode() {
+      int hash = 1;
+      return hash;
+    }
+
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    public void WriteTo(pb::CodedOutputStream output) {
+    }
+
+    public int CalculateSize() {
+      int size = 0;
+      return size;
+    }
+
+    public void MergeFrom(BlueprintData other) {
+      if (other == null) {
+        return;
+      }
+    }
+
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+        }
+      }
+    }
+
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   public sealed partial class CommandRequest : pb::IMessage<CommandRequest> {
     private static readonly pb::MessageParser<CommandRequest> _parser = new pb::MessageParser<CommandRequest>(() => new CommandRequest());
     public static pb::MessageParser<CommandRequest> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[0]; }
+      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[1]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {
@@ -60,6 +139,8 @@ namespace GoodAI.Arnold.Network {
 
     public CommandRequest(CommandRequest other) : this() {
       command_ = other.command_;
+      stepsToRun_ = other.stepsToRun_;
+      Blueprint = other.blueprint_ != null ? other.Blueprint.Clone() : null;
     }
 
     public CommandRequest Clone() {
@@ -68,11 +149,31 @@ namespace GoodAI.Arnold.Network {
 
     /// <summary>Field number for the "Command" field.</summary>
     public const int CommandFieldNumber = 1;
-    private global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType command_ = global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start;
+    private global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType command_ = global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Load;
     public global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType Command {
       get { return command_; }
       set {
         command_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "StepsToRun" field.</summary>
+    public const int StepsToRunFieldNumber = 2;
+    private int stepsToRun_;
+    public int StepsToRun {
+      get { return stepsToRun_; }
+      set {
+        stepsToRun_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "Blueprint" field.</summary>
+    public const int BlueprintFieldNumber = 3;
+    private global::GoodAI.Arnold.Network.BlueprintData blueprint_;
+    public global::GoodAI.Arnold.Network.BlueprintData Blueprint {
+      get { return blueprint_; }
+      set {
+        blueprint_ = value;
       }
     }
 
@@ -88,12 +189,16 @@ namespace GoodAI.Arnold.Network {
         return true;
       }
       if (Command != other.Command) return false;
+      if (StepsToRun != other.StepsToRun) return false;
+      if (!object.Equals(Blueprint, other.Blueprint)) return false;
       return true;
     }
 
     public override int GetHashCode() {
       int hash = 1;
-      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) hash ^= Command.GetHashCode();
+      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Load) hash ^= Command.GetHashCode();
+      if (StepsToRun != 0) hash ^= StepsToRun.GetHashCode();
+      if (blueprint_ != null) hash ^= Blueprint.GetHashCode();
       return hash;
     }
 
@@ -102,16 +207,30 @@ namespace GoodAI.Arnold.Network {
     }
 
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) {
+      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Load) {
         output.WriteRawTag(8);
         output.WriteEnum((int) Command);
+      }
+      if (StepsToRun != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(StepsToRun);
+      }
+      if (blueprint_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Blueprint);
       }
     }
 
     public int CalculateSize() {
       int size = 0;
-      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) {
+      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Load) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Command);
+      }
+      if (StepsToRun != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(StepsToRun);
+      }
+      if (blueprint_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Blueprint);
       }
       return size;
     }
@@ -120,8 +239,17 @@ namespace GoodAI.Arnold.Network {
       if (other == null) {
         return;
       }
-      if (other.Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) {
+      if (other.Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Load) {
         Command = other.Command;
+      }
+      if (other.StepsToRun != 0) {
+        StepsToRun = other.StepsToRun;
+      }
+      if (other.blueprint_ != null) {
+        if (blueprint_ == null) {
+          blueprint_ = new global::GoodAI.Arnold.Network.BlueprintData();
+        }
+        Blueprint.MergeFrom(other.Blueprint);
       }
     }
 
@@ -136,6 +264,17 @@ namespace GoodAI.Arnold.Network {
             command_ = (global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType) input.ReadEnum();
             break;
           }
+          case 16: {
+            StepsToRun = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            if (blueprint_ == null) {
+              blueprint_ = new global::GoodAI.Arnold.Network.BlueprintData();
+            }
+            input.ReadMessage(blueprint_);
+            break;
+          }
         }
       }
     }
@@ -145,9 +284,10 @@ namespace GoodAI.Arnold.Network {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     public static partial class Types {
       public enum CommandType {
-        Start = 0,
-        Pause = 1,
-        Stop = 2,
+        Load = 0,
+        Run = 1,
+        Pause = 2,
+        Clear = 3,
       }
 
     }
@@ -161,7 +301,7 @@ namespace GoodAI.Arnold.Network {
     public static pb::MessageParser<GetStateRequest> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[1]; }
+      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[2]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {

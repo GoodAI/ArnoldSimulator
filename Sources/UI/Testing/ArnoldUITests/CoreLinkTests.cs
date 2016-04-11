@@ -34,7 +34,7 @@ namespace GoodAI.Arnold.UI.Tests
             {
                 Request =
                 {
-                    Command = CommandRequest.Types.CommandType.Start
+                    Command = CommandRequest.Types.CommandType.Run
                 }
             };
 
@@ -73,7 +73,7 @@ namespace GoodAI.Arnold.UI.Tests
             {
                 Request =
                 {
-                    Command = CommandRequest.Types.CommandType.Start
+                    Command = CommandRequest.Types.CommandType.Run
                 }
             };
 
@@ -102,7 +102,7 @@ namespace GoodAI.Arnold.UI.Tests
             {
                 Request =
                 {
-                    Command = CommandRequest.Types.CommandType.Start
+                    Command = CommandRequest.Types.CommandType.Run
                 }
             };
 

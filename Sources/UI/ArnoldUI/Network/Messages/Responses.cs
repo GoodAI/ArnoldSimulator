@@ -24,13 +24,13 @@ namespace GoodAI.Arnold.Network {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg9SZXNwb25zZXMucHJvdG8SFUdvb2RBSS5Bcm5vbGQuTmV0d29yayIYCgVF",
-            "cnJvchIPCgdNZXNzYWdlGAEgASgJIoYBCglTdGF0ZURhdGESOQoFU3RhdGUY",
+            "cnJvchIPCgdNZXNzYWdlGAEgASgJIoQBCglTdGF0ZURhdGESOQoFU3RhdGUY",
             "ASABKA4yKi5Hb29kQUkuQXJub2xkLk5ldHdvcmsuU3RhdGVEYXRhLlN0YXRl",
-            "VHlwZSI+CglTdGF0ZVR5cGUSCwoHU3RvcHBlZBAAEgsKB1J1bm5pbmcQARIK",
-            "CgZQYXVzZWQQAhILCgdJbnZhbGlkEAMiggEKDVN0YXRlUmVzcG9uc2USLQoF",
-            "RXJyb3IYASABKAsyHC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuRXJyb3JIABIw",
-            "CgREYXRhGAIgASgLMiAuR29vZEFJLkFybm9sZC5OZXR3b3JrLlN0YXRlRGF0",
-            "YUgAQhAKDnJlc3BvbnNlX29uZW9mYgZwcm90bzM="));
+            "VHlwZSI8CglTdGF0ZVR5cGUSCQoFRW1wdHkQABILCgdSdW5uaW5nEAESCgoG",
+            "UGF1c2VkEAISCwoHSW52YWxpZBADIoIBCg1TdGF0ZVJlc3BvbnNlEi0KBUVy",
+            "cm9yGAEgASgLMhwuR29vZEFJLkFybm9sZC5OZXR3b3JrLkVycm9ySAASMAoE",
+            "RGF0YRgCIAEoCzIgLkdvb2RBSS5Bcm5vbGQuTmV0d29yay5TdGF0ZURhdGFI",
+            "AEIQCg5yZXNwb25zZV9vbmVvZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
@@ -175,7 +175,7 @@ namespace GoodAI.Arnold.Network {
 
     /// <summary>Field number for the "State" field.</summary>
     public const int StateFieldNumber = 1;
-    private global::GoodAI.Arnold.Network.StateData.Types.StateType state_ = global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped;
+    private global::GoodAI.Arnold.Network.StateData.Types.StateType state_ = global::GoodAI.Arnold.Network.StateData.Types.StateType.Empty;
     public global::GoodAI.Arnold.Network.StateData.Types.StateType State {
       get { return state_; }
       set {
@@ -200,7 +200,7 @@ namespace GoodAI.Arnold.Network {
 
     public override int GetHashCode() {
       int hash = 1;
-      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) hash ^= State.GetHashCode();
+      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Empty) hash ^= State.GetHashCode();
       return hash;
     }
 
@@ -209,7 +209,7 @@ namespace GoodAI.Arnold.Network {
     }
 
     public void WriteTo(pb::CodedOutputStream output) {
-      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) {
+      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Empty) {
         output.WriteRawTag(8);
         output.WriteEnum((int) State);
       }
@@ -217,7 +217,7 @@ namespace GoodAI.Arnold.Network {
 
     public int CalculateSize() {
       int size = 0;
-      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) {
+      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Empty) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) State);
       }
       return size;
@@ -227,7 +227,7 @@ namespace GoodAI.Arnold.Network {
       if (other == null) {
         return;
       }
-      if (other.State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) {
+      if (other.State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Empty) {
         State = other.State;
       }
     }
@@ -252,7 +252,7 @@ namespace GoodAI.Arnold.Network {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     public static partial class Types {
       public enum StateType {
-        Stopped = 0,
+        Empty = 0,
         Running = 1,
         Paused = 2,
         Invalid = 3,
