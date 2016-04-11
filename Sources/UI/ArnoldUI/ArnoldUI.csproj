@@ -96,8 +96,9 @@
     <Compile Include="Graphics\ModelBase.cs" />
     <Compile Include="Graphics\PickRay.cs" />
     <Compile Include="Graphics\Models\SynapseModel.cs" />
-    <Compile Include="Network\Requests.cs" />
-    <Compile Include="Network\Responses.cs" />
+    <Compile Include="Network\CoreLink.cs" />
+    <Compile Include="Network\Messages\Requests.cs" />
+    <Compile Include="Network\Messages\Responses.cs" />
     <Compile Include="OpenTKExtensions\Vector3Extensions.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">
@@ -178,6 +179,10 @@
     <ProjectReference Include="..\Libs\3rd\WinFormsUI\WinFormsUI.csproj">
       <Project>{c75532c4-765b-418e-b09b-46d36b2abdb1}</Project>
       <Name>WinFormsUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libs\ConverseSharp\ConverseSharp.csproj">
+      <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>
+      <Name>ConverseSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

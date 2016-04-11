@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CameraTests.cs" />
+    <Compile Include="CoreLinkTests.cs" />
     <Compile Include="MathTestHelpers.cs" />
     <Compile Include="MessageTests.cs" />
     <Compile Include="ModelBaseTests.cs" />
@@ -84,6 +85,10 @@
     <ProjectReference Include="..\..\ArnoldUI\ArnoldUI.csproj">
       <Project>{201ECC90-6E2B-43AE-A779-EBBCB35CE3A7}</Project>
       <Name>ArnoldUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\ConverseSharp\ConverseSharp.csproj">
+      <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>
+      <Name>ConverseSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
