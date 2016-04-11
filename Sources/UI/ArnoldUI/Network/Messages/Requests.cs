@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace GoodAI.Arnold.Net {
+namespace GoodAI.Arnold.Network {
 
   /// <summary>Holder for reflection information generated from Requests.proto</summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -23,16 +23,16 @@ namespace GoodAI.Arnold.Net {
     static RequestsReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5SZXF1ZXN0cy5wcm90bxIRR29vZEFJLkFybm9sZC5OZXQifwoOQ29tbWFu",
-            "ZFJlcXVlc3QSPgoHQ29tbWFuZBgBIAEoDjItLkdvb2RBSS5Bcm5vbGQuTmV0",
-            "LkNvbW1hbmRSZXF1ZXN0LkNvbW1hbmRUeXBlIi0KC0NvbW1hbmRUeXBlEgkK",
-            "BVN0YXJ0EAASCQoFUGF1c2UQARIICgRTdG9wEAIiEQoPR2V0U3RhdGVSZXF1",
-            "ZXN0YgZwcm90bzM="));
+            "Cg5SZXF1ZXN0cy5wcm90bxIVR29vZEFJLkFybm9sZC5OZXR3b3JrIoMBCg5D",
+            "b21tYW5kUmVxdWVzdBJCCgdDb21tYW5kGAEgASgOMjEuR29vZEFJLkFybm9s",
+            "ZC5OZXR3b3JrLkNvbW1hbmRSZXF1ZXN0LkNvbW1hbmRUeXBlIi0KC0NvbW1h",
+            "bmRUeXBlEgkKBVN0YXJ0EAASCQoFUGF1c2UQARIICgRTdG9wEAIiEQoPR2V0",
+            "U3RhdGVSZXF1ZXN0YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.CommandRequest), global::GoodAI.Arnold.Net.CommandRequest.Parser, new[]{ "Command" }, null, new[]{ typeof(global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType) }, null),
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.GetStateRequest), global::GoodAI.Arnold.Net.GetStateRequest.Parser, null, null, null, null)
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.CommandRequest), global::GoodAI.Arnold.Network.CommandRequest.Parser, new[]{ "Command" }, null, new[]{ typeof(global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType) }, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.GetStateRequest), global::GoodAI.Arnold.Network.GetStateRequest.Parser, null, null, null, null)
           }));
     }
     #endregion
@@ -45,7 +45,7 @@ namespace GoodAI.Arnold.Net {
     public static pb::MessageParser<CommandRequest> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Net.RequestsReflection.Descriptor.MessageTypes[0]; }
+      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[0]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {
@@ -68,8 +68,8 @@ namespace GoodAI.Arnold.Net {
 
     /// <summary>Field number for the "Command" field.</summary>
     public const int CommandFieldNumber = 1;
-    private global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType command_ = global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start;
-    public global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType Command {
+    private global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType command_ = global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start;
+    public global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType Command {
       get { return command_; }
       set {
         command_ = value;
@@ -93,7 +93,7 @@ namespace GoodAI.Arnold.Net {
 
     public override int GetHashCode() {
       int hash = 1;
-      if (Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) hash ^= Command.GetHashCode();
+      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) hash ^= Command.GetHashCode();
       return hash;
     }
 
@@ -102,7 +102,7 @@ namespace GoodAI.Arnold.Net {
     }
 
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) {
+      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) {
         output.WriteRawTag(8);
         output.WriteEnum((int) Command);
       }
@@ -110,7 +110,7 @@ namespace GoodAI.Arnold.Net {
 
     public int CalculateSize() {
       int size = 0;
-      if (Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) {
+      if (Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Command);
       }
       return size;
@@ -120,7 +120,7 @@ namespace GoodAI.Arnold.Net {
       if (other == null) {
         return;
       }
-      if (other.Command != global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType.Start) {
+      if (other.Command != global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType.Start) {
         Command = other.Command;
       }
     }
@@ -133,7 +133,7 @@ namespace GoodAI.Arnold.Net {
             input.SkipLastField();
             break;
           case 8: {
-            command_ = (global::GoodAI.Arnold.Net.CommandRequest.Types.CommandType) input.ReadEnum();
+            command_ = (global::GoodAI.Arnold.Network.CommandRequest.Types.CommandType) input.ReadEnum();
             break;
           }
         }
@@ -161,7 +161,7 @@ namespace GoodAI.Arnold.Net {
     public static pb::MessageParser<GetStateRequest> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Net.RequestsReflection.Descriptor.MessageTypes[1]; }
+      get { return global::GoodAI.Arnold.Network.RequestsReflection.Descriptor.MessageTypes[1]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {

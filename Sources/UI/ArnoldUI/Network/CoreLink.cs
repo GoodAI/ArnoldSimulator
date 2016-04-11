@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using GoodAI.Net.ConverseSharp;
 using Google.Protobuf;
 
-namespace ArnoldUI.Network
+namespace GoodAI.Arnold.Network
 {
     public interface ICoreLink
     {

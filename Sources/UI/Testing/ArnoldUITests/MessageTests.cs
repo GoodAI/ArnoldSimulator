@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Net;
+using GoodAI.Arnold.Network;
 using Google.Protobuf;
 using Xunit;
 

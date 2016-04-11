@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace GoodAI.Arnold.Net {
+namespace GoodAI.Arnold.Network {
 
   /// <summary>Holder for reflection information generated from Responses.proto</summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -23,20 +23,20 @@ namespace GoodAI.Arnold.Net {
     static ResponsesReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg9SZXNwb25zZXMucHJvdG8SEUdvb2RBSS5Bcm5vbGQuTmV0Ih0KBUVycm9y",
-            "EhQKDEVycm9yTWVzc2FnZRgBIAEoCSKCAQoJU3RhdGVEYXRhEjUKBVN0YXRl",
-            "GAEgASgOMiYuR29vZEFJLkFybm9sZC5OZXQuU3RhdGVEYXRhLlN0YXRlVHlw",
-            "ZSI+CglTdGF0ZVR5cGUSCwoHU3RvcHBlZBAAEgsKB1J1bm5pbmcQARIKCgZQ",
-            "YXVzZWQQAhILCgdJbnZhbGlkEAMiegoNU3RhdGVSZXNwb25zZRIpCgVFcnJv",
-            "chgBIAEoCzIYLkdvb2RBSS5Bcm5vbGQuTmV0LkVycm9ySAASLAoERGF0YRgC",
-            "IAEoCzIcLkdvb2RBSS5Bcm5vbGQuTmV0LlN0YXRlRGF0YUgAQhAKDnJlc3Bv",
-            "bnNlX29uZW9mYgZwcm90bzM="));
+            "Cg9SZXNwb25zZXMucHJvdG8SFUdvb2RBSS5Bcm5vbGQuTmV0d29yayIdCgVF",
+            "cnJvchIUCgxFcnJvck1lc3NhZ2UYASABKAkihgEKCVN0YXRlRGF0YRI5CgVT",
+            "dGF0ZRgBIAEoDjIqLkdvb2RBSS5Bcm5vbGQuTmV0d29yay5TdGF0ZURhdGEu",
+            "U3RhdGVUeXBlIj4KCVN0YXRlVHlwZRILCgdTdG9wcGVkEAASCwoHUnVubmlu",
+            "ZxABEgoKBlBhdXNlZBACEgsKB0ludmFsaWQQAyKCAQoNU3RhdGVSZXNwb25z",
+            "ZRItCgVFcnJvchgBIAEoCzIcLkdvb2RBSS5Bcm5vbGQuTmV0d29yay5FcnJv",
+            "ckgAEjAKBERhdGEYAiABKAsyIC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuU3Rh",
+            "dGVEYXRhSABCEAoOcmVzcG9uc2Vfb25lb2ZiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.Error), global::GoodAI.Arnold.Net.Error.Parser, new[]{ "ErrorMessage" }, null, null, null),
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.StateData), global::GoodAI.Arnold.Net.StateData.Parser, new[]{ "State" }, null, new[]{ typeof(global::GoodAI.Arnold.Net.StateData.Types.StateType) }, null),
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Net.StateResponse), global::GoodAI.Arnold.Net.StateResponse.Parser, new[]{ "Error", "Data" }, new[]{ "ResponseOneof" }, null, null)
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.Error), global::GoodAI.Arnold.Network.Error.Parser, new[]{ "ErrorMessage" }, null, null, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.StateData), global::GoodAI.Arnold.Network.StateData.Parser, new[]{ "State" }, null, new[]{ typeof(global::GoodAI.Arnold.Network.StateData.Types.StateType) }, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.StateResponse), global::GoodAI.Arnold.Network.StateResponse.Parser, new[]{ "Error", "Data" }, new[]{ "ResponseOneof" }, null, null)
           }));
     }
     #endregion
@@ -49,7 +49,7 @@ namespace GoodAI.Arnold.Net {
     public static pb::MessageParser<Error> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Net.ResponsesReflection.Descriptor.MessageTypes[0]; }
+      get { return global::GoodAI.Arnold.Network.ResponsesReflection.Descriptor.MessageTypes[0]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {
@@ -152,7 +152,7 @@ namespace GoodAI.Arnold.Net {
     public static pb::MessageParser<StateData> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Net.ResponsesReflection.Descriptor.MessageTypes[1]; }
+      get { return global::GoodAI.Arnold.Network.ResponsesReflection.Descriptor.MessageTypes[1]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {
@@ -175,8 +175,8 @@ namespace GoodAI.Arnold.Net {
 
     /// <summary>Field number for the "State" field.</summary>
     public const int StateFieldNumber = 1;
-    private global::GoodAI.Arnold.Net.StateData.Types.StateType state_ = global::GoodAI.Arnold.Net.StateData.Types.StateType.Stopped;
-    public global::GoodAI.Arnold.Net.StateData.Types.StateType State {
+    private global::GoodAI.Arnold.Network.StateData.Types.StateType state_ = global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped;
+    public global::GoodAI.Arnold.Network.StateData.Types.StateType State {
       get { return state_; }
       set {
         state_ = value;
@@ -200,7 +200,7 @@ namespace GoodAI.Arnold.Net {
 
     public override int GetHashCode() {
       int hash = 1;
-      if (State != global::GoodAI.Arnold.Net.StateData.Types.StateType.Stopped) hash ^= State.GetHashCode();
+      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) hash ^= State.GetHashCode();
       return hash;
     }
 
@@ -209,7 +209,7 @@ namespace GoodAI.Arnold.Net {
     }
 
     public void WriteTo(pb::CodedOutputStream output) {
-      if (State != global::GoodAI.Arnold.Net.StateData.Types.StateType.Stopped) {
+      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) {
         output.WriteRawTag(8);
         output.WriteEnum((int) State);
       }
@@ -217,7 +217,7 @@ namespace GoodAI.Arnold.Net {
 
     public int CalculateSize() {
       int size = 0;
-      if (State != global::GoodAI.Arnold.Net.StateData.Types.StateType.Stopped) {
+      if (State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) State);
       }
       return size;
@@ -227,7 +227,7 @@ namespace GoodAI.Arnold.Net {
       if (other == null) {
         return;
       }
-      if (other.State != global::GoodAI.Arnold.Net.StateData.Types.StateType.Stopped) {
+      if (other.State != global::GoodAI.Arnold.Network.StateData.Types.StateType.Stopped) {
         State = other.State;
       }
     }
@@ -240,7 +240,7 @@ namespace GoodAI.Arnold.Net {
             input.SkipLastField();
             break;
           case 8: {
-            state_ = (global::GoodAI.Arnold.Net.StateData.Types.StateType) input.ReadEnum();
+            state_ = (global::GoodAI.Arnold.Network.StateData.Types.StateType) input.ReadEnum();
             break;
           }
         }
@@ -269,7 +269,7 @@ namespace GoodAI.Arnold.Net {
     public static pb::MessageParser<StateResponse> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Arnold.Net.ResponsesReflection.Descriptor.MessageTypes[2]; }
+      get { return global::GoodAI.Arnold.Network.ResponsesReflection.Descriptor.MessageTypes[2]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {
@@ -300,8 +300,8 @@ namespace GoodAI.Arnold.Net {
 
     /// <summary>Field number for the "Error" field.</summary>
     public const int ErrorFieldNumber = 1;
-    public global::GoodAI.Arnold.Net.Error Error {
-      get { return responseOneofCase_ == ResponseOneofOneofCase.Error ? (global::GoodAI.Arnold.Net.Error) responseOneof_ : null; }
+    public global::GoodAI.Arnold.Network.Error Error {
+      get { return responseOneofCase_ == ResponseOneofOneofCase.Error ? (global::GoodAI.Arnold.Network.Error) responseOneof_ : null; }
       set {
         responseOneof_ = value;
         responseOneofCase_ = value == null ? ResponseOneofOneofCase.None : ResponseOneofOneofCase.Error;
@@ -310,8 +310,8 @@ namespace GoodAI.Arnold.Net {
 
     /// <summary>Field number for the "Data" field.</summary>
     public const int DataFieldNumber = 2;
-    public global::GoodAI.Arnold.Net.StateData Data {
-      get { return responseOneofCase_ == ResponseOneofOneofCase.Data ? (global::GoodAI.Arnold.Net.StateData) responseOneof_ : null; }
+    public global::GoodAI.Arnold.Network.StateData Data {
+      get { return responseOneofCase_ == ResponseOneofOneofCase.Data ? (global::GoodAI.Arnold.Network.StateData) responseOneof_ : null; }
       set {
         responseOneof_ = value;
         responseOneofCase_ = value == null ? ResponseOneofOneofCase.None : ResponseOneofOneofCase.Data;
@@ -409,7 +409,7 @@ namespace GoodAI.Arnold.Net {
             input.SkipLastField();
             break;
           case 10: {
-            global::GoodAI.Arnold.Net.Error subBuilder = new global::GoodAI.Arnold.Net.Error();
+            global::GoodAI.Arnold.Network.Error subBuilder = new global::GoodAI.Arnold.Network.Error();
             if (responseOneofCase_ == ResponseOneofOneofCase.Error) {
               subBuilder.MergeFrom(Error);
             }
@@ -418,7 +418,7 @@ namespace GoodAI.Arnold.Net {
             break;
           }
           case 18: {
-            global::GoodAI.Arnold.Net.StateData subBuilder = new global::GoodAI.Arnold.Net.StateData();
+            global::GoodAI.Arnold.Network.StateData subBuilder = new global::GoodAI.Arnold.Network.StateData();
             if (responseOneofCase_ == ResponseOneofOneofCase.Data) {
               subBuilder.MergeFrom(Data);
             }

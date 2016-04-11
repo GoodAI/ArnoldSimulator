@@ -1,5 +1,5 @@
 syntax = "proto3";
-package GoodAI.Arnold.Net;
+package GoodAI.Arnold.Network;
 
 message Error {
 	string ErrorMessage = 1;

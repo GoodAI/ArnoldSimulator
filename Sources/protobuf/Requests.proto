@@ -1,5 +1,5 @@
 syntax = "proto3";
-package GoodAI.Arnold.Net;
+package GoodAI.Arnold.Network;
 
 message CommandRequest {
 	enum CommandType {
