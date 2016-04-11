@@ -62,6 +62,15 @@ namespace GoodAI.Arnold.UI.Tests
                         } as TResponse;
                     }
 
+                    var getStateRequest = request as GetStateRequest;
+                    if (getStateRequest != null)
+                    {
+                        return new StateResponse
+                        {
+                            Data = new StateData {State = StateType.Empty}
+                        } as TResponse;
+                    }
+
                     // Unexpected test case.
                     throw new InvalidOperationException("Unexpected test case");
                 });
@@ -117,6 +126,25 @@ namespace GoodAI.Arnold.UI.Tests
             simulation.LoadBlueprint(new AgentBlueprint());
             // The event should be fired via StateChangeFailed.
             Assert.True(waitEvent.WaitOne(timeoutMs), "Timed out");
+        }
+
+        [Fact]
+        public void RefreshesState()
+        {
+            const int timeoutMs = 100;
+
+            ICoreLink coreLink = new DummyCoreLink();
+
+            var waitEvent = new AutoResetEvent(false);
+
+            var simulation = new RemoteSimulation(coreLink);
+            Assert.Equal(SimulationState.Empty, simulation.State);
+
+            simulation.StateChanged += (sender, args) => waitEvent.Set();
+
+            simulation.RefreshState();
+            waitEvent.WaitOne(timeoutMs);
+            Assert.Equal(SimulationState.Empty, simulation.State);
         }
     }
 }

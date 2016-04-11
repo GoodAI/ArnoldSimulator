@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ArnoldUI.Network;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
+using Google.Protobuf;
 
 namespace GoodAI.Arnold.Simulation
 {
@@ -44,6 +45,11 @@ namespace GoodAI.Arnold.Simulation
         /// This moves the simulation from Paused state to Empty.
         /// </summary>
         void Clear();
+
+        /// <summary>
+        /// Requests a state refresh.
+        /// </summary>
+        void RefreshState();
 
         SimulationState State { get; }
     }
@@ -212,7 +218,8 @@ namespace GoodAI.Arnold.Simulation
             RequestAndHandleState(conversation);
         }
 
-        private void RequestAndHandleState(CommandConversation conversation)
+        private void RequestAndHandleState<TRequest>(IConversation<TRequest, StateResponse> conversation)
+            where TRequest : class, IMessage
         {
             Task<StateResponse> response = m_coreLink.Request(conversation);
 
@@ -251,6 +258,13 @@ namespace GoodAI.Arnold.Simulation
         private void ProcessError(Error error)
         {
             StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(error));
+        }
+
+        public void RefreshState()
+        {
+            var conversation = new GetStateConversation();
+
+            RequestAndHandleState(conversation);
         }
     }
 }
