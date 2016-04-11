@@ -96,7 +96,9 @@
     <Compile Include="Graphics\ModelBase.cs" />
     <Compile Include="Graphics\PickRay.cs" />
     <Compile Include="Graphics\Models\SynapseModel.cs" />
+    <Compile Include="Network\CommandConversation.cs" />
     <Compile Include="Network\CoreLink.cs" />
+    <Compile Include="Network\GetStateConversation.cs" />
     <Compile Include="Network\Messages\Requests.cs" />
     <Compile Include="Network\Messages\Responses.cs" />
     <Compile Include="OpenTKExtensions\Vector3Extensions.cs" />
