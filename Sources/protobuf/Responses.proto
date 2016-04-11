@@ -2,7 +2,7 @@ syntax = "proto3";
 package GoodAI.Arnold.Network;
 
 message Error {
-	string ErrorMessage = 1;
+	string Message = 1;
 }
 
 message StateData {

@@ -48,7 +48,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             var message = new StateResponse
             {
-                Error = new Error {ErrorMessage = "Foo bar"}
+                Error = new Error {Message = "Foo bar"}
             };
             Assert.Equal(StateResponse.ResponseOneofOneofCase.Error, message.ResponseOneofCase);
             AssertWriteReadEquality(message);

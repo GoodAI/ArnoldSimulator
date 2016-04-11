@@ -23,18 +23,18 @@ namespace GoodAI.Arnold.Network {
     static ResponsesReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg9SZXNwb25zZXMucHJvdG8SFUdvb2RBSS5Bcm5vbGQuTmV0d29yayIdCgVF",
-            "cnJvchIUCgxFcnJvck1lc3NhZ2UYASABKAkihgEKCVN0YXRlRGF0YRI5CgVT",
-            "dGF0ZRgBIAEoDjIqLkdvb2RBSS5Bcm5vbGQuTmV0d29yay5TdGF0ZURhdGEu",
-            "U3RhdGVUeXBlIj4KCVN0YXRlVHlwZRILCgdTdG9wcGVkEAASCwoHUnVubmlu",
-            "ZxABEgoKBlBhdXNlZBACEgsKB0ludmFsaWQQAyKCAQoNU3RhdGVSZXNwb25z",
-            "ZRItCgVFcnJvchgBIAEoCzIcLkdvb2RBSS5Bcm5vbGQuTmV0d29yay5FcnJv",
-            "ckgAEjAKBERhdGEYAiABKAsyIC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuU3Rh",
-            "dGVEYXRhSABCEAoOcmVzcG9uc2Vfb25lb2ZiBnByb3RvMw=="));
+            "Cg9SZXNwb25zZXMucHJvdG8SFUdvb2RBSS5Bcm5vbGQuTmV0d29yayIYCgVF",
+            "cnJvchIPCgdNZXNzYWdlGAEgASgJIoYBCglTdGF0ZURhdGESOQoFU3RhdGUY",
+            "ASABKA4yKi5Hb29kQUkuQXJub2xkLk5ldHdvcmsuU3RhdGVEYXRhLlN0YXRl",
+            "VHlwZSI+CglTdGF0ZVR5cGUSCwoHU3RvcHBlZBAAEgsKB1J1bm5pbmcQARIK",
+            "CgZQYXVzZWQQAhILCgdJbnZhbGlkEAMiggEKDVN0YXRlUmVzcG9uc2USLQoF",
+            "RXJyb3IYASABKAsyHC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuRXJyb3JIABIw",
+            "CgREYXRhGAIgASgLMiAuR29vZEFJLkFybm9sZC5OZXR3b3JrLlN0YXRlRGF0",
+            "YUgAQhAKDnJlc3BvbnNlX29uZW9mYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.Error), global::GoodAI.Arnold.Network.Error.Parser, new[]{ "ErrorMessage" }, null, null, null),
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.Error), global::GoodAI.Arnold.Network.Error.Parser, new[]{ "Message" }, null, null, null),
             new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.StateData), global::GoodAI.Arnold.Network.StateData.Parser, new[]{ "State" }, null, new[]{ typeof(global::GoodAI.Arnold.Network.StateData.Types.StateType) }, null),
             new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Arnold.Network.StateResponse), global::GoodAI.Arnold.Network.StateResponse.Parser, new[]{ "Error", "Data" }, new[]{ "ResponseOneof" }, null, null)
           }));
@@ -63,20 +63,20 @@ namespace GoodAI.Arnold.Network {
     partial void OnConstruction();
 
     public Error(Error other) : this() {
-      errorMessage_ = other.errorMessage_;
+      message_ = other.message_;
     }
 
     public Error Clone() {
       return new Error(this);
     }
 
-    /// <summary>Field number for the "ErrorMessage" field.</summary>
-    public const int ErrorMessageFieldNumber = 1;
-    private string errorMessage_ = "";
-    public string ErrorMessage {
-      get { return errorMessage_; }
+    /// <summary>Field number for the "Message" field.</summary>
+    public const int MessageFieldNumber = 1;
+    private string message_ = "";
+    public string Message {
+      get { return message_; }
       set {
-        errorMessage_ = pb::Preconditions.CheckNotNull(value, "value");
+        message_ = pb::Preconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -91,13 +91,13 @@ namespace GoodAI.Arnold.Network {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (ErrorMessage != other.ErrorMessage) return false;
+      if (Message != other.Message) return false;
       return true;
     }
 
     public override int GetHashCode() {
       int hash = 1;
-      if (ErrorMessage.Length != 0) hash ^= ErrorMessage.GetHashCode();
+      if (Message.Length != 0) hash ^= Message.GetHashCode();
       return hash;
     }
 
@@ -106,16 +106,16 @@ namespace GoodAI.Arnold.Network {
     }
 
     public void WriteTo(pb::CodedOutputStream output) {
-      if (ErrorMessage.Length != 0) {
+      if (Message.Length != 0) {
         output.WriteRawTag(10);
-        output.WriteString(ErrorMessage);
+        output.WriteString(Message);
       }
     }
 
     public int CalculateSize() {
       int size = 0;
-      if (ErrorMessage.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMessage);
+      if (Message.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Message);
       }
       return size;
     }
@@ -124,8 +124,8 @@ namespace GoodAI.Arnold.Network {
       if (other == null) {
         return;
       }
-      if (other.ErrorMessage.Length != 0) {
-        ErrorMessage = other.ErrorMessage;
+      if (other.Message.Length != 0) {
+        Message = other.Message;
       }
     }
 
@@ -137,7 +137,7 @@ namespace GoodAI.Arnold.Network {
             input.SkipLastField();
             break;
           case 10: {
-            ErrorMessage = input.ReadString();
+            Message = input.ReadString();
             break;
           }
         }
