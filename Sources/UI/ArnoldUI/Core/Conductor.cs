@@ -16,8 +16,8 @@ namespace ArnoldUI.Core
 
         private ICoreProxy m_proxy;
         private EndPoint m_endPoint;
-        private ICoreLink m_coreLink;
-        private ISimulation m_simulation;
+        public ICoreLink CoreLink { get; private set; }
+        public ISimulation Simulation { get; private set; }
 
         public void Setup()
         {
@@ -27,11 +27,11 @@ namespace ArnoldUI.Core
             StartProxy();
 
             // TODO(HonzaS): How to better handle resolution here?
-            m_coreLink = new CoreLink(
+            CoreLink = new CoreLink(
                 new ConverseProtoBufClient(new TcpConnector(m_endPoint.Hostname, m_endPoint.Port, TcpTimeoutMs)));
 
             // TODO(HonzaS): Simulation should only be present after there has been a blueprint upload.
-            m_simulation = new SimulationProxy(m_coreLink);
+            Simulation = new SimulationProxy(CoreLink);
         }
 
         private void StartProxy()
