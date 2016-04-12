@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ArnoldUI.Network;
 using ArnoldUI.Simulation;
 using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Net.ConverseSharp;
 
@@ -19,11 +20,16 @@ namespace ArnoldUI.Core
 
         event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
         event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
+        event EventHandler TornDown;
 
-        void KillSimulation();
         void Setup(EndPoint endPoint = null);
         void Teardown();
+        void LoadBlueprint(AgentBlueprint blueprint);
         void StartSimulation(int stepsToRun = 0);
+        void PauseSimulation();
+        void KillSimulation();
+
+        SimulationState SimulationState { get; }
     }
 
     public class SimulationInstanceEventArgs : EventArgs
@@ -40,6 +46,7 @@ namespace ArnoldUI.Core
     {
         public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
+        public event EventHandler TornDown;
 
         private bool m_shouldKill;
 
@@ -78,7 +85,7 @@ namespace ArnoldUI.Core
 
             endPoint = m_proxy.Start();
 
-            CoreLink = m_coreLinkFactory.Create(endPoint.Hostname, endPoint.Port);
+            CoreLink = m_coreLinkFactory.Create(endPoint);
 
             // TODO(HonzaS): Simulation should only be present after there has been a blueprint upload.
             Simulation = m_simulationFactory.Create(CoreLink);
@@ -92,13 +99,28 @@ namespace ArnoldUI.Core
 
         public void Teardown()
         {
+            if (m_proxy == null)
+                throw new InvalidOperationException("Not set up, cannot tear down.");
+
+            if (CoreLink == null)
+            {
+                Reset();
+                return;
+            }
+
             var conversation = new CommandConversation
             {
                 Request = { Command = CommandRequest.Types.CommandType.Shutdown }
             };
 
-            var task = CoreLink.Request(conversation);
+            Task<StateResponse> task = CoreLink.Request(conversation);
             task.ContinueWith(AfterTeardown);
+        }
+
+        public void LoadBlueprint(AgentBlueprint blueprint)
+        {
+            // TODO(HonzaS): Add this when blueprints come into play.
+            Simulation.LoadBlueprint(blueprint);
         }
 
         private void AfterTeardown(Task<StateResponse> finishedTask)
@@ -109,9 +131,18 @@ namespace ArnoldUI.Core
                 // TODO(HonzaS): Logging.
             }
 
+            Reset();
+        }
+
+        private void Reset()
+        {
+            CoreLink = null;
+
             // This will kill the local process.
             m_proxy.Dispose();
             m_proxy = null;
+
+            TornDown?.Invoke(this, EventArgs.Empty);
         }
 
         private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
@@ -142,8 +173,12 @@ namespace ArnoldUI.Core
                 throw new InvalidOperationException("Simulation does not exist, cannot start.");
 
             m_shouldKill = false;
-
             Simulation.Run(stepsToRun);
+        }
+
+        public void PauseSimulation()
+        {
+            Simulation.Pause();
         }
 
         public void KillSimulation()
@@ -156,6 +191,17 @@ namespace ArnoldUI.Core
             else
             {
                 CleanupSimulation();
+            }
+        }
+
+        public SimulationState SimulationState
+        {
+            get
+            {
+                if (Simulation != null)
+                    return Simulation.State;
+
+                return SimulationState.Null;
             }
         }
 

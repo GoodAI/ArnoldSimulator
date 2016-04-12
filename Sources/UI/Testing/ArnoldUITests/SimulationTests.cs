@@ -106,6 +106,15 @@ namespace GoodAI.Arnold.UI.Tests
             simulation.Clear();
             waitEvent.WaitOne(timeoutMs);
             Assert.Equal(SimulationState.Empty, simulation.State);
+
+            // Test direct Clear from a Running state.
+            simulation.LoadBlueprint(new AgentBlueprint());
+            waitEvent.WaitOne(timeoutMs);
+            simulation.Run();
+            waitEvent.WaitOne(timeoutMs);
+            simulation.Clear();
+            waitEvent.WaitOne(timeoutMs);
+            Assert.Equal(SimulationState.Empty, simulation.State);
         }
 
         [Fact]

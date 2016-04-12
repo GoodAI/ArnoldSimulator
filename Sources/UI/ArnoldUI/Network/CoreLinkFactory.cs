@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArnoldUI.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Net.ConverseSharp;
 
@@ -10,7 +11,7 @@ namespace ArnoldUI.Network
 {
     public interface ICoreLinkFactory
     {
-        ICoreLink Create(string hostname, int port);
+        ICoreLink Create(EndPoint endPoint);
     }
 
     // TODO(HonzaS): This class still does some composition.
@@ -18,9 +19,9 @@ namespace ArnoldUI.Network
     {
         private const int TcpTimeoutMs = 5000;
 
-        public ICoreLink Create(string hostname, int port)
+        public ICoreLink Create(EndPoint endPoint)
         {
-            var connector = new TcpConnector(hostname, port, TcpTimeoutMs);
+            var connector = new TcpConnector(endPoint.Hostname, endPoint.Port, TcpTimeoutMs);
             return Create(connector);
         }
 
