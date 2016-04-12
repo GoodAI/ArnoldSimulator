@@ -9,18 +9,30 @@ using System.Threading.Tasks;
 
 namespace ArnoldUI.Core
 {
-    public interface ICore : IDisposable
+    public class EndPoint
     {
-        IPEndPoint Start();
+        public string Hostname { get; set; }
+        public int Port { get; set; }
+
+        public EndPoint(string hostname, int port)
+        {
+            Hostname = hostname;
+            Port = port;
+        }
+    }
+
+    public interface ICoreProxy : IDisposable
+    {
+        EndPoint Start();
     }
     
-    public class LocalCore : ICore
+    public class LocalCoreProxy : ICoreProxy
     {
         private const string CoreProcessDirectory = "../Core/ArnoldCore.exe";
 
         private Process m_process;
 
-        public IPEndPoint Start()
+        public EndPoint Start()
         {
             var processStartInfo = new ProcessStartInfo
             {
@@ -30,18 +42,18 @@ namespace ArnoldUI.Core
             m_process = new Process {StartInfo = processStartInfo};
             m_process.Start();
 
-            IPAddress address;
+            string hostname;
             int port;
-            ReadEndpoint(m_process.StandardOutput, out address, out port);
+            ReadEndpoint(m_process.StandardOutput, out hostname, out port);
 
-            return new IPEndPoint(address, port);
+            return new EndPoint(hostname, port);
         }
 
-        private void ReadEndpoint(StreamReader standardOutput, out IPAddress address, out int port)
+        private void ReadEndpoint(StreamReader standardOutput, out string hostname, out int port)
         {
             // TODO(HonzaS): Parse the address and port from standardOutput.
             // Throw exception when the parsing fails or detects core not being able to start.
-            address = new IPAddress(new byte[] {127, 0, 0, 1});
+            hostname = "localhost";
             port = 1337;
         }
 
@@ -51,11 +63,11 @@ namespace ArnoldUI.Core
         }
     }
 
-    public class RemoteCore : ICore
+    public class RemoteCoreProxy : ICoreProxy
     {
-        private readonly IPEndPoint m_endPoint;
+        private readonly EndPoint m_endPoint;
 
-        public RemoteCore(IPEndPoint endPoint)
+        public RemoteCoreProxy(EndPoint endPoint)
         {
             m_endPoint = endPoint;
         }
@@ -64,7 +76,7 @@ namespace ArnoldUI.Core
         {
         }
 
-        public IPEndPoint Start()
+        public EndPoint Start()
         {
             return m_endPoint;
         }

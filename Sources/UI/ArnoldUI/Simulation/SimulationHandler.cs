@@ -92,10 +92,11 @@ namespace GoodAI.Arnold.Simulation
         public Error Error { get; set; }
     }
 
-    public class RemoteSimulation : ISimulation
+    public class SimulationProxy : ISimulation
     {
         public Model Model { get; private set; }
 
+        public event EventHandler<StateChangedEventArgs> StateUpdated;
         public event EventHandler<StateChangedEventArgs> StateChanged;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
 
@@ -106,14 +107,16 @@ namespace GoodAI.Arnold.Simulation
             {
                 SimulationState oldState = m_state;
                 m_state = value;
-                StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
+                StateUpdated?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
+                if (oldState != m_state)
+                    StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
             }
         }
 
-        private ICoreLink m_coreLink;
+        private readonly ICoreLink m_coreLink;
         private SimulationState m_state;
 
-        public RemoteSimulation(ICoreLink coreLink)
+        public SimulationProxy(ICoreLink coreLink)
         {
             m_coreLink = coreLink;
             State = SimulationState.Empty;

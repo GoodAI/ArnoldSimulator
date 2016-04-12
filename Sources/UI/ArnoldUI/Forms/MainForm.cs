@@ -26,7 +26,7 @@ namespace GoodAI.Arnold
 
         public AgentBlueprint AgentBlueprint { get; }
 
-        public RemoteSimulation Simulation { get; set; }
+        public SimulationProxy Simulation { get; set; }
 
         public MainForm()
         {

@@ -83,7 +83,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Core.cs" />
+    <Compile Include="Core\Conductor.cs" />
+    <Compile Include="Core\CoreProxy.cs" />
     <Compile Include="Forms\VisualizationForm.cs">
       <SubType>Form</SubType>
     </Compile>

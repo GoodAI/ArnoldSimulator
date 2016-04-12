@@ -86,10 +86,10 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new RemoteSimulation(coreLink);
+            var simulation = new SimulationProxy(coreLink);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
-            simulation.StateChanged += (sender, args) => waitEvent.Set();
+            simulation.StateUpdated += (sender, args) => waitEvent.Set();
 
             simulation.LoadBlueprint(new AgentBlueprint());
             waitEvent.WaitOne(timeoutMs);
@@ -118,7 +118,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new RemoteSimulation(coreLink);
+            var simulation = new SimulationProxy(coreLink);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
             simulation.StateChangeFailed += (sender, args) => waitEvent.Set();
@@ -137,10 +137,10 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new RemoteSimulation(coreLink);
+            var simulation = new SimulationProxy(coreLink);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
-            simulation.StateChanged += (sender, args) => waitEvent.Set();
+            simulation.StateUpdated += (sender, args) => waitEvent.Set();
 
             simulation.RefreshState();
             waitEvent.WaitOne(timeoutMs);

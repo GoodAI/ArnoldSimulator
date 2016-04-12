@@ -22,11 +22,11 @@ namespace GoodAI.Arnold.Forms
         private bool m_mouseCaptured;
         private Vector2 m_lastMousePosition;
 
-        private readonly RemoteSimulation m_simulation;
+        private readonly SimulationProxy m_simulation;
         private readonly Model m_model;
         private readonly Visualization m_visualization;
 
-        public VisualizationForm(RemoteSimulation simulation)
+        public VisualizationForm(SimulationProxy simulation)
         {
             InitializeComponent();
 
