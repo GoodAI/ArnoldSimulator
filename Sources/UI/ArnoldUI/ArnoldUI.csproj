@@ -137,8 +137,9 @@
     <Compile Include="Graphics\Models\RegionModel.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
     <Compile Include="Simulation\Model.cs" />
-    <Compile Include="Simulation\SimulationHandler.cs" />
+    <Compile Include="Simulation\Simulation.cs" />
     <Compile Include="Graphics\Visualization.cs" />
+    <Compile Include="UIMain.cs" />
     <EmbeddedResource Include="Forms\GraphForm.resx">
       <DependentUpon>GraphForm.cs</DependentUpon>
     </EmbeddedResource>

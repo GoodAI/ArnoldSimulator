@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ArnoldUI;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
@@ -20,30 +21,25 @@ namespace GoodAI.Arnold
 {
     public partial class MainForm : Form
     {
+        private readonly UIMain m_uiMain;
         public LogForm LogForm { get; }
         public GraphForm GraphForm { get; }
         public VisualizationForm VisualizationForm { get; set; }
-
-        public AgentBlueprint AgentBlueprint { get; }
-
-        public SimulationProxy Simulation { get; set; }
 
         public MainForm()
         {
             InitializeComponent();
 
-            AgentBlueprint = new AgentBlueprint();
-            AgentBlueprint.Brain.Regions.Add(new Project.Region
-            {
-                Location = new PointF(100, 100)
-            });
+            m_uiMain = new UIMain();
 
             LogForm = new LogForm();
             LogForm.Show(dockPanel, DockState.DockBottom);
 
             GraphForm = new GraphForm();
             GraphForm.Show(dockPanel, DockState.Document);
-            GraphForm.AgentBlueprint = AgentBlueprint;
+
+            // TODO(HonzaS): The blueprint should be in the Designer later.
+            GraphForm.AgentBlueprint = m_uiMain.AgentBlueprint;
 
             //Simulation = new RemoteSimulation(new CoreLink(new ConverseProtoBufClient(new DummyConnector())));
         }
@@ -51,7 +47,7 @@ namespace GoodAI.Arnold
         private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
         {
             VisualizationForm.FormClosed -= VisualizationFormOnClosed;
-            Simulation.Clear();
+            m_uiMain.VisualizationClosed();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -66,10 +62,10 @@ namespace GoodAI.Arnold
 
         private void StartSimulation()
         {
-            Simulation.LoadBlueprint(AgentBlueprint);
+            m_uiMain.StartSimulation();
 
             if (VisualizationForm == null || VisualizationForm.IsDisposed)
-                VisualizationForm = new VisualizationForm(Simulation);
+                VisualizationForm = new VisualizationForm(m_uiMain.Simulation);
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;
