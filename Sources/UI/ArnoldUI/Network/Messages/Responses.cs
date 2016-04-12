@@ -24,13 +24,13 @@ namespace GoodAI.Arnold.Network {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg9SZXNwb25zZXMucHJvdG8SFUdvb2RBSS5Bcm5vbGQuTmV0d29yayIYCgVF",
-            "cnJvchIPCgdNZXNzYWdlGAEgASgJIoQBCglTdGF0ZURhdGESOQoFU3RhdGUY",
+            "cnJvchIPCgdNZXNzYWdlGAEgASgJIpYBCglTdGF0ZURhdGESOQoFU3RhdGUY",
             "ASABKA4yKi5Hb29kQUkuQXJub2xkLk5ldHdvcmsuU3RhdGVEYXRhLlN0YXRl",
-            "VHlwZSI8CglTdGF0ZVR5cGUSCQoFRW1wdHkQABILCgdSdW5uaW5nEAESCgoG",
-            "UGF1c2VkEAISCwoHSW52YWxpZBADIoIBCg1TdGF0ZVJlc3BvbnNlEi0KBUVy",
-            "cm9yGAEgASgLMhwuR29vZEFJLkFybm9sZC5OZXR3b3JrLkVycm9ySAASMAoE",
-            "RGF0YRgCIAEoCzIgLkdvb2RBSS5Bcm5vbGQuTmV0d29yay5TdGF0ZURhdGFI",
-            "AEIQCg5yZXNwb25zZV9vbmVvZmIGcHJvdG8z"));
+            "VHlwZSJOCglTdGF0ZVR5cGUSCQoFRW1wdHkQABILCgdSdW5uaW5nEAESCgoG",
+            "UGF1c2VkEAISEAoMU2h1dHRpbmdEb3duEAMSCwoHSW52YWxpZBAEIoIBCg1T",
+            "dGF0ZVJlc3BvbnNlEi0KBUVycm9yGAEgASgLMhwuR29vZEFJLkFybm9sZC5O",
+            "ZXR3b3JrLkVycm9ySAASMAoERGF0YRgCIAEoCzIgLkdvb2RBSS5Bcm5vbGQu",
+            "TmV0d29yay5TdGF0ZURhdGFIAEIQCg5yZXNwb25zZV9vbmVvZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
@@ -255,7 +255,8 @@ namespace GoodAI.Arnold.Network {
         Empty = 0,
         Running = 1,
         Paused = 2,
-        Invalid = 3,
+        ShuttingDown = 3,
+        Invalid = 4,
       }
 
     }

@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using ArnoldUI.Network;
+using ArnoldUI.Simulation;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using Google.Protobuf;
@@ -15,6 +10,9 @@ namespace GoodAI.Arnold.Simulation
 {
     public interface ISimulation
     {
+        event EventHandler<StateUpdatedEventArgs> StateUpdated;
+        event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
+
         /// <summary>
         /// Loads an agent into the handler, creates a new simulation.
         /// This moves the simulation from Empty state to Paused.
@@ -30,19 +28,13 @@ namespace GoodAI.Arnold.Simulation
         void Run(int stepsToRun = 0);
 
         /// <summary>
-        /// Runs one step. Alternative to Run(1).
-        /// This briefly moves the simulation from Paused to Running and then back to Paused.
-        /// </summary>
-        void Step();
-
-        /// <summary>
         /// Pauses the running simulation. If the simulation is not running, this does nothing.
         /// This moves the simulation from Running state to Paused.
         /// </summary>
         void Pause();
 
         /// <summary>
-        /// This moves the simulation from Paused state to Empty.
+        /// This moves the simulation from Running or Paused state to Empty.
         /// </summary>
         void Clear();
 
@@ -52,13 +44,16 @@ namespace GoodAI.Arnold.Simulation
         void RefreshState();
 
         SimulationState State { get; }
+
+        ISimulationModel Model { get; }
     }
 
     public enum SimulationState
     {
-        Empty,
-        Paused,
-        Running
+        Null,  // The simulation doesn't exist. Don't set this as Simulation.State!
+        Empty,  // The core is ready, but no blueprint has been loaded.
+        Paused,  // The simulation is ready but not running.
+        Running  // The simulation is running.
     }
 
     public class WrongHandlerStateException : Exception
@@ -70,34 +65,11 @@ namespace GoodAI.Arnold.Simulation
         { }
     }
 
-    public class StateChangedEventArgs : EventArgs
-    {
-        public SimulationState PreviousState { get; set; }
-        public SimulationState CurrentState { get; set; }
-
-        public StateChangedEventArgs(SimulationState previousState, SimulationState currentState)
-        {
-            PreviousState = previousState;
-            CurrentState = currentState;
-        }
-    }
-
-    public class StateChangeFailedEventArgs : EventArgs
-    {
-        public StateChangeFailedEventArgs(Error error)
-        {
-            Error = error;
-        }
-
-        public Error Error { get; set; }
-    }
-
     public class SimulationProxy : ISimulation
     {
-        public Model Model { get; private set; }
+        public ISimulationModel Model { get; private set; }
 
-        public event EventHandler<StateChangedEventArgs> StateUpdated;
-        public event EventHandler<StateChangedEventArgs> StateChanged;
+        public event EventHandler<StateUpdatedEventArgs> StateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
 
         public SimulationState State
@@ -105,11 +77,12 @@ namespace GoodAI.Arnold.Simulation
             get { return m_state; }
             private set
             {
+                if (value == SimulationState.Null)
+                    throw new InvalidOperationException("The simulation state cannot be Null.");
+
                 SimulationState oldState = m_state;
                 m_state = value;
-                StateUpdated?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
-                if (oldState != m_state)
-                    StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
+                StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, m_state));
             }
         }
 
@@ -121,7 +94,7 @@ namespace GoodAI.Arnold.Simulation
             m_coreLink = coreLink;
             State = SimulationState.Empty;
 
-            Model = new Model();
+            Model = new SimulationModel();
         }
 
         public void LoadBlueprint(AgentBlueprint agentBlueprint)
@@ -144,9 +117,6 @@ namespace GoodAI.Arnold.Simulation
 
         public void Clear()
         {
-            if (State != SimulationState.Empty && State != SimulationState.Paused)
-                throw new WrongHandlerStateException("Reset", State);
-
             var conversation = new CommandConversation
             {
                 Request =
@@ -164,20 +134,6 @@ namespace GoodAI.Arnold.Simulation
                 throw new WrongHandlerStateException("Run", State);
 
             RunSimulation(stepsToRun);
-        }
-
-        public void Step()
-        {
-            if (State != SimulationState.Paused && State != SimulationState.Running)
-                throw new WrongHandlerStateException("Step", State);
-
-            if (State == SimulationState.Running)
-            {
-                Pause();
-                return;
-            }
-
-            RunSimulation(1);
         }
 
         public void Pause()

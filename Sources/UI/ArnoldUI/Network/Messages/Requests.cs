@@ -24,12 +24,13 @@ namespace GoodAI.Arnold.Network {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg5SZXF1ZXN0cy5wcm90bxIVR29vZEFJLkFybm9sZC5OZXR3b3JrIg8KDUJs",
-            "dWVwcmludERhdGEi2QEKDkNvbW1hbmRSZXF1ZXN0EkIKB0NvbW1hbmQYASAB",
+            "dWVwcmludERhdGEi5wEKDkNvbW1hbmRSZXF1ZXN0EkIKB0NvbW1hbmQYASAB",
             "KA4yMS5Hb29kQUkuQXJub2xkLk5ldHdvcmsuQ29tbWFuZFJlcXVlc3QuQ29t",
             "bWFuZFR5cGUSEgoKU3RlcHNUb1J1bhgCIAEoBRI3CglCbHVlcHJpbnQYAyAB",
-            "KAsyJC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuQmx1ZXByaW50RGF0YSI2CgtD",
+            "KAsyJC5Hb29kQUkuQXJub2xkLk5ldHdvcmsuQmx1ZXByaW50RGF0YSJECgtD",
             "b21tYW5kVHlwZRIICgRMb2FkEAASBwoDUnVuEAESCQoFUGF1c2UQAhIJCgVD",
-            "bGVhchADIhEKD0dldFN0YXRlUmVxdWVzdGIGcHJvdG8z"));
+            "bGVhchADEgwKCFNodXRkb3duEAQiEQoPR2V0U3RhdGVSZXF1ZXN0YgZwcm90",
+            "bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
@@ -288,6 +289,7 @@ namespace GoodAI.Arnold.Network {
         Run = 1,
         Pause = 2,
         Clear = 3,
+        Shutdown = 4,
       }
 
     }

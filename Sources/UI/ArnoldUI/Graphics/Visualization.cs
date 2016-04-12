@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using ArnoldUI.Core;
 using ArnoldUI.Properties;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.OpenTKExtensions;
@@ -46,13 +47,17 @@ namespace GoodAI.Arnold.Graphics
         private float m_fps;
 
         private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
-        private readonly Model m_model;
+        private ISimulation m_simulation;
+        private readonly ISimulationModel m_simulationModel;
+        private IConductor m_conductor;
 
         // TODO: Move stuff from the VisualizationForm here.
-        public Visualization(GLControl glControl, Model model)
+        public Visualization(GLControl glControl, IConductor conductor)
         {
             m_control = glControl;
-            m_model = model;
+            m_conductor = conductor;
+            m_simulation = m_conductor.Simulation;
+            m_simulationModel = m_simulation.Model;
 
             m_camera = new Camera
             {
@@ -75,7 +80,7 @@ namespace GoodAI.Arnold.Graphics
         {
             // TODO: Nasty! Change!
             // If (when) experts are drawn via shaders, they might not actually need the camera position? (no sprites)
-            foreach (var region in m_model.Regions)
+            foreach (var region in m_simulationModel.Regions)
             {
                 foreach (ExpertModel expert in region.Experts)
                     expert.Camera = m_camera;
@@ -131,12 +136,12 @@ namespace GoodAI.Arnold.Graphics
         {
             m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
-            ExpertModel expert = FindFirstExpert(m_pickRay, m_model.Regions);
+            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Regions);
             if (expert != null)
                 ToggleExpert(expert);
         }
 
-        private ExpertModel FindFirstExpert(PickRay pickRay, List<RegionModel> regions)
+        private ExpertModel FindFirstExpert(PickRay pickRay, IList<RegionModel> regions)
         {
             float closestDistance = float.MaxValue;
             ExpertModel closestExpert = null;

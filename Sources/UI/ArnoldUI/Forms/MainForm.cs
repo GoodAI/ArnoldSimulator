@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArnoldUI;
+using ArnoldUI.Simulation;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
@@ -41,7 +42,18 @@ namespace GoodAI.Arnold
             // TODO(HonzaS): The blueprint should be in the Designer later.
             GraphForm.AgentBlueprint = m_uiMain.AgentBlueprint;
 
+            m_uiMain.SimulationStateUpdated += SimulationOnStateUpdated;
+            m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
+
             //Simulation = new RemoteSimulation(new CoreLink(new ConverseProtoBufClient(new DummyConnector())));
+        }
+
+        private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
+        {
+        }
+
+        private void SimulationOnStateChangeFailed(object sender, StateChangeFailedEventArgs e)
+        {
         }
 
         private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
@@ -65,7 +77,7 @@ namespace GoodAI.Arnold
             m_uiMain.StartSimulation();
 
             if (VisualizationForm == null || VisualizationForm.IsDisposed)
-                VisualizationForm = new VisualizationForm(m_uiMain.Simulation);
+                VisualizationForm = new VisualizationForm(m_uiMain.Conductor);
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;

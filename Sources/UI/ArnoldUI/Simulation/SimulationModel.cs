@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using GoodAI.Arnold.Graphics;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.Project;
@@ -9,7 +10,23 @@ using OpenTK.Platform.Windows;
 
 namespace GoodAI.Arnold.Simulation
 {
-    public class Model
+    public class ExpertAddedEventArgs : EventArgs
+    {
+        public ExpertModel Expert { get; }
+
+        public ExpertAddedEventArgs(ExpertModel expert)
+        {
+            Expert = expert;
+        }
+    }
+
+    public interface ISimulationModel
+    {
+        event EventHandler<ExpertAddedEventArgs> ExpertAdded;
+        IList<RegionModel> Regions { get; }
+    }
+
+    public class SimulationModel : ISimulationModel
     {
         private const int LayerCount = 6;
 
@@ -23,27 +40,18 @@ namespace GoodAI.Arnold.Simulation
         private const float ResizeFactor = 1f;
 
         // Register to events like this in the visualization so that we can do stuff like inject camera.
-        public class ExpertAddedEventArgs : EventArgs
-        {
-            public ExpertModel Expert { get; }
-
-            public ExpertAddedEventArgs(ExpertModel expert)
-            {
-                Expert = expert;
-            }
-        }
         public event EventHandler<ExpertAddedEventArgs> ExpertAdded;
 
         private AgentBlueprint AgentBlueprint { get; }
 
-        public List<RegionModel> Regions { get; }
+        public IList<RegionModel> Regions { get; }
 
-        public Model()
+        public SimulationModel()
         {
             Regions = new List<RegionModel>();
         }
 
-        public Model(AgentBlueprint agentBlueprint) : this()
+        public SimulationModel(AgentBlueprint agentBlueprint) : this()
         {
             AgentBlueprint = agentBlueprint;
 

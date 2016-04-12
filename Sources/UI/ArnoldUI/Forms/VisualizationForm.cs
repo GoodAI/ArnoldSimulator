@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using ArnoldUI.Core;
 using ArnoldUI.Properties;
 using GoodAI.Arnold.Graphics;
 using GoodAI.Arnold.Simulation;
@@ -22,18 +23,13 @@ namespace GoodAI.Arnold.Forms
         private bool m_mouseCaptured;
         private Vector2 m_lastMousePosition;
 
-        private readonly SimulationProxy m_simulation;
-        private readonly Model m_model;
         private readonly Visualization m_visualization;
 
-        public VisualizationForm(SimulationProxy simulation)
+        public VisualizationForm(IConductor conductor)
         {
             InitializeComponent();
 
-            m_simulation = simulation;
-            m_model = simulation.Model;
-
-            m_visualization = new Visualization(glControl, m_model);
+            m_visualization = new Visualization(glControl, conductor);
         }
 
         // Resize the glControl

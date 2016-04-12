@@ -136,7 +136,8 @@
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
-    <Compile Include="Simulation\Model.cs" />
+    <Compile Include="Simulation\SimulationEvents.cs" />
+    <Compile Include="Simulation\SimulationModel.cs" />
     <Compile Include="Simulation\Simulation.cs" />
     <Compile Include="Graphics\Visualization.cs" />
     <Compile Include="UIMain.cs" />

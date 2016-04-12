@@ -10,7 +10,8 @@ message StateData {
 		Empty = 0;
 		Running = 1;
 		Paused = 2;
-		Invalid = 3;
+		ShuttingDown = 3;
+		Invalid = 4;
 	}
 	
 	StateType State = 1;

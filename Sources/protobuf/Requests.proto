@@ -9,6 +9,7 @@ message CommandRequest {
 		Run = 1;
 		Pause = 2;
 		Clear = 3;
+		Shutdown = 4;
 	}
 	
 	CommandType Command = 1;
