@@ -21,7 +21,7 @@ namespace ArnoldUI.Core
         event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
 
         void KillSimulation();
-        void Setup();
+        void Setup(EndPoint endPoint = null);
         void Teardown();
         void StartSimulation(int stepsToRun = 0);
     }
@@ -38,35 +38,50 @@ namespace ArnoldUI.Core
 
     public class Conductor : IConductor
     {
-        private const int TcpTimeoutMs = 5000;
-
         public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
 
-        private ICoreProxy m_proxy;
-        private EndPoint m_endPoint;
         private bool m_shouldKill;
+
+        private readonly ICoreProxyFactory m_coreProxyFactory;
+        private ICoreProxy m_proxy;
+
+        private readonly ICoreLinkFactory m_coreLinkFactory;
         public ICoreLink CoreLink { get; private set; }
+
+        private readonly ISimulationFactory m_simulationFactory;
         public ISimulation Simulation { get; private set; }
 
-        public void Setup()
+        public Conductor(ICoreProxyFactory coreProxyFactory, ICoreLinkFactory coreLinkFactory,
+            ISimulationFactory simulationFactory)
+        {
+            m_coreProxyFactory = coreProxyFactory;
+            m_coreLinkFactory = coreLinkFactory;
+            m_simulationFactory = simulationFactory;
+        }
+
+        public void Setup(EndPoint endPoint = null)
         {
             if (Simulation != null)
-                throw new InvalidOperationException("There is still a Simulation present. It must be cleaned up before Setup().");
+            {
+                throw new InvalidOperationException(
+                    "There is still a Simulation present. It must be cleaned up before Setup().");
+            }
 
             if (m_proxy != null)
-                throw new InvalidOperationException("There is still a Core present. It must be cleaned up before Setup().");
+            {
+                throw new InvalidOperationException(
+                    "There is still a Core present. It must be cleaned up before Setup().");
+            }
 
-            m_proxy = new LocalCoreProxy();
+            m_proxy = m_coreProxyFactory.Create(endPoint);
 
-            m_endPoint = m_proxy.Start();
+            endPoint = m_proxy.Start();
 
-            // TODO(HonzaS): How to better handle resolution here?
-            CoreLink = new CoreLink(
-                new ConverseProtoBufClient(new TcpConnector(m_endPoint.Hostname, m_endPoint.Port, TcpTimeoutMs)));
+            CoreLink = m_coreLinkFactory.Create(endPoint.Hostname, endPoint.Port);
 
             // TODO(HonzaS): Simulation should only be present after there has been a blueprint upload.
-            Simulation = new SimulationProxy(CoreLink);
+            Simulation = m_simulationFactory.Create(CoreLink);
 
             Simulation.StateUpdated += SimulationOnStateUpdated;
             Simulation.StateChangeFailed += SimulationOnStateChangeFailed;

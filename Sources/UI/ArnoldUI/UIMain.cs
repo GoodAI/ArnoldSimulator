@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ArnoldUI.Core;
+using ArnoldUI.Network;
 using ArnoldUI.Simulation;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
@@ -41,7 +42,8 @@ namespace ArnoldUI
                 Location = new PointF(100, 100)
             });
 
-            Conductor = new Conductor();
+            // TODO(HonzaS): Resolve from container.
+            Conductor = new Conductor(new CoreProxyFactory(), new CoreLinkFactory(), new SimulationFactory());
         }
 
         public void VisualizationClosed()
