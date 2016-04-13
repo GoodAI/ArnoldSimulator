@@ -19,36 +19,36 @@ namespace GoodAI.Arnold
     {
         public static void RegisterHandlers()
         {
-            if (!Debugger.IsAttached)
-            {
-                Application.ThreadException += new ThreadExceptionEventHandler(ProcessThreadException);
+            if (Debugger.IsAttached)
+                return;
 
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += ProcessThreadException;
 
-                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ProcessUnhandledException);
-            }
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+            AppDomain.CurrentDomain.UnhandledException += ProcessUnhandledException;
         }
 
-        static void ProcessThreadException(object sender, ThreadExceptionEventArgs e)
+        private static void ProcessThreadException(object sender, ThreadExceptionEventArgs e)
         {
             ShowExceptionAndExit("Unhandled Thread Exception", e.Exception);
         }
 
-        static void ProcessUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void ProcessUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             ShowExceptionAndExit("Unhandled UI Exception", e.ExceptionObject as Exception);
         }
 
-        static void ShowExceptionAndExit(string title, Exception ex)
+        private static void ShowExceptionAndExit(string title, Exception ex)
         {
-            MessageBox.Show("Unhandled exception encountered, sorry :-("
-                + "\n\n" + PrintException(ex),
+            MessageBox.Show("Unhandled exception encountered, sorry :-(\n\n"
+                + PrintException(ex),
                 title, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             Environment.Exit(1);
         }
 
-        static string PrintException(Exception ex, bool isInner = false)
+        private static string PrintException(Exception ex, bool isInner = false)
         {
             return (ex == null)
                 ? "(null)"
@@ -60,7 +60,7 @@ namespace GoodAI.Arnold
                         : "");
         }
 
-        static string PrintStackTrace(string trace, bool brief = false)
+        private static string PrintStackTrace(string trace, bool brief = false)
         {
             if (string.IsNullOrEmpty(trace))
                 return "";
