@@ -43,12 +43,7 @@ namespace ArnoldUI
             });
 
             // TODO(HonzaS): Resolve from container.
-            Conductor = new Conductor(new CoreProxyFactory(), new CoreLinkFactory(), new SimulationFactory());
-            Conductor.TornDown += ConductorOnTornDown;
-        }
-
-        private void ConductorOnTornDown(object sender, EventArgs eventArgs)
-        {
+            Conductor = new Conductor(new CoreProxyFactory(), new CoreLinkFactory(), new CoreControllerFactory(), new SimulationFactory());
         }
 
         public void VisualizationClosed()

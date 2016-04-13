@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ArnoldUI.Network;
 using ArnoldUI.Simulation;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using Google.Protobuf;
@@ -52,8 +53,10 @@ namespace GoodAI.Arnold.Simulation
     {
         Null,  // The simulation doesn't exist. Don't set this as Simulation.State!
         Empty,  // The core is ready, but no blueprint has been loaded.
-        Paused,  // The simulation is ready but not running.
-        Running  // The simulation is running.
+        Paused,
+        Running,
+        ShuttingDown,
+        Invalid  // Invalid state - something really wrong happened in the core.
     }
 
     public class WrongHandlerStateException : Exception
@@ -87,11 +90,13 @@ namespace GoodAI.Arnold.Simulation
         }
 
         private readonly ICoreLink m_coreLink;
+        private readonly ICoreController m_controller;
         private SimulationState m_state;
 
-        public SimulationProxy(ICoreLink coreLink)
+        public SimulationProxy(ICoreLink coreLink, ICoreController controller)
         {
             m_coreLink = coreLink;
+            m_controller = controller;
             State = SimulationState.Empty;
 
             Model = new SimulationModel();
@@ -112,7 +117,7 @@ namespace GoodAI.Arnold.Simulation
                 }
             };
 
-            RequestAndHandleState(conversation);
+            SendCommand(conversation);
         }
 
         public void Clear()
@@ -125,7 +130,7 @@ namespace GoodAI.Arnold.Simulation
                 }
             };
 
-            RequestAndHandleState(conversation);
+            SendCommand(conversation);
         }
 
         public void Run(int stepsToRun = 0)
@@ -152,7 +157,7 @@ namespace GoodAI.Arnold.Simulation
                 }
             };
 
-            RequestAndHandleState(conversation);
+            SendCommand(conversation);
 
             // TODO(HonzaS): Signal the Core.
             // TODO(HonzaS): Logging!
@@ -174,47 +179,51 @@ namespace GoodAI.Arnold.Simulation
                 }
             };
 
-            RequestAndHandleState(conversation);
+            SendCommand(conversation);
         }
 
-        private void RequestAndHandleState<TRequest>(IConversation<TRequest, StateResponse> conversation)
-            where TRequest : class, IMessage
+        private void SendCommand(CommandConversation conversation)
         {
-            Task<StateResponse> response = m_coreLink.Request(conversation);
-
-            response.ContinueWith(HandleStateResponse);
+            m_controller.Command(conversation, HandleStateResponse, HandleTimeoutCancellation);
         }
 
-        private void HandleStateResponse(Task<StateResponse> task)
+        private TimeoutAction HandleTimeoutCancellation()
         {
-            StateResponse result = task.Result;
-            if (result.ResponseOneofCase == StateResponse.ResponseOneofOneofCase.Error)
+            throw new NotImplementedException();
+        }
+
+        private void HandleStateResponse(StateResponse state)
+        {
+            if (state.ResponseOneofCase == StateResponse.ResponseOneofOneofCase.Error)
             {
-                ProcessError(result.Error);
+                HandleError(state.Error);
             }
             else
             {
-                switch (result.Data.State)
-                {
-                    case StateData.Types.StateType.Empty:
-                        State = SimulationState.Empty;
-                        break;
-                    case StateData.Types.StateType.Paused:
-                        State = SimulationState.Paused;
-                        break;
-                    case StateData.Types.StateType.Running:
-                        State = SimulationState.Running;
-                        break;
-                    case StateData.Types.StateType.Invalid:
-                        ProcessError(new Error {Message = "Invalid simulation state"});
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                State = ReadState(state.Data);
             }
         }
 
-        private void ProcessError(Error error)
+        public static SimulationState ReadState(StateData stateData)
+        {
+            switch (stateData.State)
+            {
+                case StateData.Types.StateType.Empty:
+                    return SimulationState.Empty;
+                case StateData.Types.StateType.Paused:
+                    return SimulationState.Paused;
+                case StateData.Types.StateType.Running:
+                    return SimulationState.Running;
+                case StateData.Types.StateType.Invalid:
+                    return SimulationState.Invalid;
+                case StateData.Types.StateType.ShuttingDown:
+                    return SimulationState.ShuttingDown;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void HandleError(Error error)
         {
             StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(error));
         }
@@ -223,7 +232,14 @@ namespace GoodAI.Arnold.Simulation
         {
             var conversation = new GetStateConversation();
 
-            RequestAndHandleState(conversation);
+            m_coreLink.Request(conversation).ContinueWith(task =>
+            {
+                TimeoutResult<StateResponse> timeoutResult = task.Result;
+                if (!timeoutResult.TimedOut && timeoutResult.Result.ResponseOneofCase != StateResponse.ResponseOneofOneofCase.Error)
+                {
+                    State = ReadState(timeoutResult.Result.Data);
+                }
+            });
         }
     }
 }

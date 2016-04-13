@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ArnoldUI.Core;
 using ArnoldUI.Network;
 using ArnoldUI.Simulation;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
@@ -23,8 +24,11 @@ namespace GoodAI.Arnold.UI.Tests
         private Mock<ISimulation> m_simulationMock;
         private Mock<ICoreProxyFactory> m_coreProxyFactoryMock;
         private Mock<ICoreLinkFactory> m_coreLinkFactoryMock;
+        private Mock<ICoreControllerFactory> m_coreControllerFactoryMock;
         private Mock<ISimulationFactory> m_simulationFactoryMock;
-        private Conductor m_conductor;
+        private readonly Conductor m_conductor;
+        private ICoreController m_coreController;
+        private const int TimeoutMs = 100;
 
         public ConductorTests()
         {
@@ -40,22 +44,27 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkFactoryMock.Setup(factory => factory.Create(null))
                 .Returns(m_coreLinkMock.Object);
 
+            m_coreController = new CoreController(m_coreLinkMock.Object);
+            m_coreControllerFactoryMock = new Mock<ICoreControllerFactory>();
+            m_coreControllerFactoryMock.Setup(factory => factory.Create(m_coreLinkMock.Object)).Returns(m_coreController);
+
             var stateResponse = new StateResponse
             {
                 Data = new StateData {State = StateData.Types.StateType.ShuttingDown}
             };
-            m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>()))
-                .Returns(() =>
-                {
-                    return Task<StateResponse>.Factory.StartNew(() => stateResponse);
-                });
+            m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>())).Returns(() =>
+            {
+                return Task<TimeoutResult<StateResponse>>.Factory.StartNew(
+                    () => new TimeoutResult<StateResponse> {Result = stateResponse});
+            });
 
 
             m_simulationFactoryMock = new Mock<ISimulationFactory>();
-            m_simulationFactoryMock.Setup(factory => factory.Create(m_coreLinkMock.Object))
+            m_simulationFactoryMock.Setup(factory => factory.Create(m_coreLinkMock.Object, m_coreController))
                 .Returns(m_simulationMock.Object);
 
             m_conductor = new Conductor(m_coreProxyFactoryMock.Object, m_coreLinkFactoryMock.Object,
+                m_coreControllerFactoryMock.Object,
                 m_simulationFactoryMock.Object);
         }
 
@@ -71,7 +80,7 @@ namespace GoodAI.Arnold.UI.Tests
             m_simulationMock.Verify(simulation => simulation.RefreshState());
 
             var waitEvent = new AutoResetEvent(false);
-            m_conductor.TornDown += (sender, args) => waitEvent.Set();
+            m_conductor.SimulationStateUpdated += (sender, args) => waitEvent.Set();
             m_conductor.Teardown();
 
             waitEvent.WaitOne();
@@ -91,7 +100,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             m_conductor.Setup();
             var waitEvent = new AutoResetEvent(false);
-            m_conductor.TornDown += (sender, args) => waitEvent.Set();
+            m_conductor.SimulationStateUpdated += (sender, args) => waitEvent.Set();
             m_conductor.Teardown();
 
             waitEvent.WaitOne();

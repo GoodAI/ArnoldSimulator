@@ -7,7 +7,7 @@
     <ProjectGuid>{201ECC90-6E2B-43AE-A779-EBBCB35CE3A7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ArnoldUI</RootNamespace>
+    <RootNamespace>GoodAI.Arnold</RootNamespace>
     <AssemblyName>ArnoldUI</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -86,6 +86,7 @@
     <Compile Include="Core\Conductor.cs" />
     <Compile Include="Core\CoreProxy.cs" />
     <Compile Include="Core\CoreProxyFactory.cs" />
+    <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Forms\VisualizationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -100,12 +101,13 @@
     <Compile Include="Graphics\PickRay.cs" />
     <Compile Include="Graphics\Models\SynapseModel.cs" />
     <Compile Include="Network\CommandConversation.cs" />
+    <Compile Include="Network\CoreControllerFactory.cs" />
     <Compile Include="Network\CoreLink.cs" />
     <Compile Include="Network\CoreLinkFactory.cs" />
     <Compile Include="Network\GetStateConversation.cs" />
     <Compile Include="Network\Messages\Requests.cs" />
     <Compile Include="Network\Messages\Responses.cs" />
-    <Compile Include="OpenTKExtensions\Vector3Extensions.cs" />
+    <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">
       <SubType>Form</SubType>
@@ -138,6 +140,7 @@
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
+    <Compile Include="Network\CoreController.cs" />
     <Compile Include="Simulation\SimulationEvents.cs" />
     <Compile Include="Simulation\SimulationFactory.cs" />
     <Compile Include="Simulation\SimulationModel.cs" />

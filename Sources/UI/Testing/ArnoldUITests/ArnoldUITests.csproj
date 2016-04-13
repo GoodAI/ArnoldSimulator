@@ -79,6 +79,7 @@
     <Compile Include="PickRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimulationTests.cs" />
+    <Compile Include="TaskExtensionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

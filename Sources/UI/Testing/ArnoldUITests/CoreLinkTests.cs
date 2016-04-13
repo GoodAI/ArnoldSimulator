@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Net.ConverseSharp;
 using Moq;
@@ -14,7 +15,7 @@ namespace GoodAI.Arnold.UI.Tests
 {
     public class CoreLinkTests
     {
-        const int WaitMs = 20;
+        const int WaitMs = 50;
 
         class TestConversation : IConversation<CommandRequest, StateResponse>
         {
@@ -49,17 +50,18 @@ namespace GoodAI.Arnold.UI.Tests
             ICoreLink coreLink = GenerateCoreLink(conv, response);
 
 
-            Task<StateResponse> futureResponse = coreLink.Request(conv);
+            Task<TimeoutResult<StateResponse>> futureResponse = coreLink.Request(conv);
 
             StateResponse receivedResponse = ReadResponse(futureResponse);
             Assert.Equal(StateResponse.ResponseOneofOneofCase.Data, receivedResponse.ResponseOneofCase);
             Assert.Equal(StateData.Types.StateType.Running, receivedResponse.Data.State);
         }
 
-        private static StateResponse ReadResponse(Task<StateResponse> futureResponse)
+        private static StateResponse ReadResponse(Task<TimeoutResult<StateResponse>> futureResponse)
         {
-            Assert.True(futureResponse.Wait(WaitMs));
-            StateResponse receivedResponse = futureResponse.Result;
+            TimeoutResult<StateResponse> timeoutResult = futureResponse.Result;
+            Assert.False(timeoutResult.TimedOut);
+            StateResponse receivedResponse = timeoutResult.Result;
             Assert.NotNull(receivedResponse);
             return receivedResponse;
         }
@@ -88,7 +90,7 @@ namespace GoodAI.Arnold.UI.Tests
             ICoreLink coreLink = GenerateCoreLink(conv, response);
 
 
-            Task<StateResponse> futureResponse = coreLink.Request(conv);
+            Task<TimeoutResult<StateResponse>> futureResponse = coreLink.Request(conv);
 
             StateResponse receivedResponse = ReadResponse(futureResponse);
             Assert.Equal(StateResponse.ResponseOneofOneofCase.Error, receivedResponse.ResponseOneofCase);
@@ -110,15 +112,15 @@ namespace GoodAI.Arnold.UI.Tests
 
             var converseClientMock = new Mock<IConverseProtoBufClient>();
             converseClientMock.Setup(client => client.SendQuery<CommandRequest, StateResponse>(conv.Handler, conv.Request))
-                .Callback(() => Thread.Sleep(WaitMs+1))
+                .Callback(() => Thread.Sleep(WaitMs*2))
                 .Returns(response);
             IConverseProtoBufClient converseClient = converseClientMock.Object;
 
             var coreLink = new CoreLink(converseClient);
 
-            Task<StateResponse> futureResponse = coreLink.Request(conv);
+            Task<TimeoutResult<StateResponse>> futureResponse = coreLink.Request(conv, WaitMs);
 
-            Assert.False(futureResponse.Wait(WaitMs));
+            Assert.True(futureResponse.Result.TimedOut);
         }
 
         private static CoreLink GenerateCoreLink(TestConversation conv, StateResponse response)

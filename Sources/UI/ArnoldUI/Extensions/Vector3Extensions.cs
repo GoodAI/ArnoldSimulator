@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 
-namespace GoodAI.Arnold.OpenTKExtensions
+namespace GoodAI.Arnold.Extensions
 {
     public static class Vector3Extensions
     {

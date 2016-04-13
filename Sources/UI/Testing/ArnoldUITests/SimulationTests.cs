@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ArnoldUI.Network;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
@@ -23,97 +25,112 @@ namespace GoodAI.Arnold.UI.Tests
 
             private static readonly Error m_error = new Error {Message = "Foo bar"};
 
-            public Task<TResponse> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation)
+            public Task<TimeoutResult<TResponse>> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs = 0)
                 where TRequest : class, IMessage
                 where TResponse : class, IMessage<TResponse>, new()
             {
-                return Task<TResponse>.Factory.StartNew(() =>
+                return Task<TimeoutResult<TResponse>>.Factory.StartNew(() =>
                 {
                     TRequest request = conversation.Request;
+
+                    var result = new TimeoutResult<TResponse>();
 
                     var commandRequest = request as CommandRequest;
                     if (commandRequest != null)
                     {
                         if (Fail)
-                            return new StateResponse {Error = m_error} as TResponse;
-
-                        StateType resultState;
-                        switch (commandRequest.Command)
                         {
-                            case CommandRequest.Types.CommandType.Load:
-                                resultState = StateType.Paused;
-                                break;
-                            case CommandRequest.Types.CommandType.Run:
-                                resultState = StateType.Running;
-                                break;
-                            case CommandRequest.Types.CommandType.Pause:
-                                resultState = StateType.Paused;
-                                break;
-                            case CommandRequest.Types.CommandType.Clear:
-                                resultState = StateType.Empty;
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
+                            result.Result = new StateResponse {Error = m_error} as TResponse;
                         }
-
-                        return new StateResponse
+                        else
                         {
-                            Data = new StateData {State = resultState}
-                        } as TResponse;
+                            StateType resultState;
+                            switch (commandRequest.Command)
+                            {
+                                case CommandRequest.Types.CommandType.Load:
+                                    resultState = StateType.Paused;
+                                    break;
+                                case CommandRequest.Types.CommandType.Run:
+                                    resultState = StateType.Running;
+                                    break;
+                                case CommandRequest.Types.CommandType.Pause:
+                                    resultState = StateType.Paused;
+                                    break;
+                                case CommandRequest.Types.CommandType.Clear:
+                                    resultState = StateType.Empty;
+                                    break;
+                                case CommandRequest.Types.CommandType.Shutdown:
+                                    resultState = StateType.ShuttingDown;
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+
+                            result.Result = new StateResponse
+                            {
+                                Data = new StateData {State = resultState}
+                            } as TResponse;
+                        }
                     }
 
                     var getStateRequest = request as GetStateRequest;
                     if (getStateRequest != null)
                     {
-                        return new StateResponse
+                        result.Result = new StateResponse
                         {
                             Data = new StateData {State = StateType.Empty}
                         } as TResponse;
                     }
 
-                    // Unexpected test case.
-                    throw new InvalidOperationException("Unexpected test case");
+                    return result;
                 });
             }
         }
 
-        [Fact]
-        public void StateMachineTransitionsCorrectly()
+        private async Task WaitFor(AutoResetEvent waitEvent)
         {
-            const int timeoutMs = 100;
+            await Task.Factory.StartNew(waitEvent.WaitOne).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async void StateMachineTransitionsCorrectly()
+        {
+            const int timeoutMs = 1000;
 
             ICoreLink coreLink = new DummyCoreLink();
 
+            var coreController = new CoreController(coreLink);
+
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new SimulationProxy(coreLink);
+            var simulation = new SimulationProxy(coreLink, coreController);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
             simulation.StateUpdated += (sender, args) => waitEvent.Set();
 
             simulation.LoadBlueprint(new AgentBlueprint());
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             Assert.Equal(SimulationState.Paused, simulation.State);
 
             simulation.Run();
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             Assert.Equal(SimulationState.Running, simulation.State);
 
             simulation.Pause();
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             Assert.Equal(SimulationState.Paused, simulation.State);
 
             simulation.Clear();
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
             // Test direct Clear from a Running state.
             simulation.LoadBlueprint(new AgentBlueprint());
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             simulation.Run();
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             simulation.Clear();
-            waitEvent.WaitOne(timeoutMs);
+            await WaitFor(waitEvent);
             Assert.Equal(SimulationState.Empty, simulation.State);
         }
 
@@ -122,12 +139,13 @@ namespace GoodAI.Arnold.UI.Tests
         {
             const int timeoutMs = 100;
 
-            var coreLink = new DummyCoreLink();
-            coreLink.Fail = true;
+            var coreLink = new DummyCoreLink {Fail = true};
+
+            var coreController = new CoreController(coreLink);
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new SimulationProxy(coreLink);
+            var simulation = new SimulationProxy(coreLink, coreController);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
             simulation.StateChangeFailed += (sender, args) => waitEvent.Set();
@@ -146,7 +164,10 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new SimulationProxy(coreLink);
+            var coreControllerMock = new Mock<ICoreController>();
+            var coreController = coreControllerMock.Object;
+
+            var simulation = new SimulationProxy(coreLink, coreController);
             Assert.Equal(SimulationState.Empty, simulation.State);
 
             simulation.StateUpdated += (sender, args) => waitEvent.Set();

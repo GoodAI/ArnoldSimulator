@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ArnoldUI.Network;
 using ArnoldUI.Simulation;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
@@ -20,7 +21,6 @@ namespace ArnoldUI.Core
 
         event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
         event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
-        event EventHandler TornDown;
 
         void Setup(EndPoint endPoint = null);
         void Teardown();
@@ -46,7 +46,6 @@ namespace ArnoldUI.Core
     {
         public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
-        public event EventHandler TornDown;
 
         private bool m_shouldKill;
 
@@ -59,11 +58,15 @@ namespace ArnoldUI.Core
         private readonly ISimulationFactory m_simulationFactory;
         public ISimulation Simulation { get; private set; }
 
+        private ICoreControllerFactory m_coreControllerFactory;
+        public ICoreController CoreController { get; private set; }
+
         public Conductor(ICoreProxyFactory coreProxyFactory, ICoreLinkFactory coreLinkFactory,
-            ISimulationFactory simulationFactory)
+            ICoreControllerFactory coreControllerFactory, ISimulationFactory simulationFactory)
         {
             m_coreProxyFactory = coreProxyFactory;
             m_coreLinkFactory = coreLinkFactory;
+            m_coreControllerFactory = coreControllerFactory;
             m_simulationFactory = simulationFactory;
         }
 
@@ -87,8 +90,10 @@ namespace ArnoldUI.Core
 
             CoreLink = m_coreLinkFactory.Create(endPoint);
 
+            CoreController = m_coreControllerFactory.Create(CoreLink);
+
             // TODO(HonzaS): Simulation should only be present after there has been a blueprint upload.
-            Simulation = m_simulationFactory.Create(CoreLink);
+            Simulation = m_simulationFactory.Create(CoreLink, CoreController);
 
             Simulation.StateUpdated += SimulationOnStateUpdated;
             Simulation.StateChangeFailed += SimulationOnStateChangeFailed;
@@ -113,8 +118,13 @@ namespace ArnoldUI.Core
                 Request = { Command = CommandRequest.Types.CommandType.Shutdown }
             };
 
-            Task<StateResponse> task = CoreLink.Request(conversation);
-            task.ContinueWith(AfterTeardown);
+            CoreController.Command(conversation, AfterTeardown, TeardownTimeout);
+        }
+
+        private TimeoutAction TeardownTimeout()
+        {
+            // TODO(HonzaS): Ask the user what to do.
+            return TimeoutAction.Wait;
         }
 
         public void LoadBlueprint(AgentBlueprint blueprint)
@@ -123,14 +133,14 @@ namespace ArnoldUI.Core
             Simulation.LoadBlueprint(blueprint);
         }
 
-        private void AfterTeardown(Task<StateResponse> finishedTask)
+        private void AfterTeardown(StateResponse result)
         {
-            StateResponse result = finishedTask.Result;
             if (result.ResponseOneofCase == StateResponse.ResponseOneofOneofCase.Error)
             {
                 // TODO(HonzaS): Logging.
             }
 
+            // TODO(HonzaS): This will force-reset, should we give the user a say in that?
             Reset();
         }
 
@@ -142,7 +152,8 @@ namespace ArnoldUI.Core
             m_proxy.Dispose();
             m_proxy = null;
 
-            TornDown?.Invoke(this, EventArgs.Empty);
+            // TODO(HonzaS): Is the previousState correct?
+            SimulationStateUpdated?.Invoke(this, new StateUpdatedEventArgs(SimulationState.Empty, SimulationState.Null));
         }
 
         private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
