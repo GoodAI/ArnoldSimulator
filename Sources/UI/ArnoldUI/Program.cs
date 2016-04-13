@@ -14,6 +14,8 @@ namespace GoodAI.Arnold
         [STAThread]
         static void Main()
         {
+            UnhandledExceptionCatcher.RegisterHandlers();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
