@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ArnoldUI.Core
+namespace GoodAI.Arnold.Core
 {
     public interface ICoreProxyFactory
     {

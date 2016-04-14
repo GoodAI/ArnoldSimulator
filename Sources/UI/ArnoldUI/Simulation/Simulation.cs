@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ArnoldUI.Network;
-using ArnoldUI.Simulation;
+using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using ArnoldUI.Core;
+using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Graphics;
 using GoodAI.Arnold.Properties;
 using GoodAI.Arnold.Simulation;

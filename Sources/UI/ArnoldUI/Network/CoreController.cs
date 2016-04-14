@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArnoldUI.Core;
-using ArnoldUI.Network;
-using ArnoldUI.Simulation;
+using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 
-namespace ArnoldUI.Network
+namespace GoodAI.Arnold.Network
 {
     public interface ICoreController
     {

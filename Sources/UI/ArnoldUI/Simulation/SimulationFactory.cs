@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArnoldUI.Network;
+using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 
-namespace ArnoldUI.Simulation
+namespace GoodAI.Arnold.Simulation
 {
     public interface ISimulationFactory
     {

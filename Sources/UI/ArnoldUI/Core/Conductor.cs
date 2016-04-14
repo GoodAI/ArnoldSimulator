@@ -4,15 +4,15 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using ArnoldUI.Network;
-using ArnoldUI.Simulation;
+using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Net.ConverseSharp;
 
-namespace ArnoldUI.Core
+namespace GoodAI.Arnold.Core
 {
     public interface IConductor
     {

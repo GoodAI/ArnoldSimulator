@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
 
-namespace ArnoldUI.Network
+namespace GoodAI.Arnold.Network
 {
     public class GetStateConversation : IConversation<GetStateRequest, StateResponse>
     {

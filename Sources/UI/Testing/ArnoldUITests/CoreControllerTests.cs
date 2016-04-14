@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ArnoldUI.Network;
+using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
 using Moq;

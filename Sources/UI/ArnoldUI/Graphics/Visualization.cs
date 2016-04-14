@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using ArnoldUI.Core;
+using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.Properties;

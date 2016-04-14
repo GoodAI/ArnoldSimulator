@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArnoldUI;
-using ArnoldUI.Simulation;
+using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;

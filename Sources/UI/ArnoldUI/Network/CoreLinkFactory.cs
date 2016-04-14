@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArnoldUI.Core;
+using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Net.ConverseSharp;
 
-namespace ArnoldUI.Network
+namespace GoodAI.Arnold.Network
 {
     public interface ICoreLinkFactory
     {

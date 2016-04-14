@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArnoldUI.Core;
-using GoodAI.Arnold.Network;
 
-namespace ArnoldUI.Network
+namespace GoodAI.Arnold.Network
 {
     public interface ICoreControllerFactory
     {

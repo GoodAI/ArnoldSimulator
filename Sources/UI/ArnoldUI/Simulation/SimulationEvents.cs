@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 
-namespace ArnoldUI.Simulation
+namespace GoodAI.Arnold.Simulation
 {
     public class StateUpdatedEventArgs : EventArgs
     {
