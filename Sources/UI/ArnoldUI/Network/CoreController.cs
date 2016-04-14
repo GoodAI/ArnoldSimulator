@@ -14,7 +14,8 @@ namespace ArnoldUI.Network
 {
     public interface ICoreController
     {
-        void Command(CommandConversation conversation, Action<StateResponse> successAction, Func<TimeoutAction> timeoutAction);
+        Task Command(CommandConversation conversation, Action<StateResponse> successAction,
+            Func<TimeoutAction> timeoutAction, int timeoutMs = 0);
     }
 
     public enum TimeoutAction
@@ -35,12 +36,12 @@ namespace ArnoldUI.Network
             m_coreLink = coreLink;
         }
 
-        public async void Command(CommandConversation conversation, Action<StateResponse> successAction,
-            Func<TimeoutAction> timeoutCallback)
+        public async Task Command(CommandConversation conversation, Action<StateResponse> successAction,
+            Func<TimeoutAction> timeoutCallback, int timeoutMs = CommandTimeoutMs)
         {
             if (m_runningCommand != null)
             {
-                // TODO(HonzaS): Log this (info).
+                // TODO(HonzaS): Log this (warning).
                 return;
             }
 
@@ -52,7 +53,7 @@ namespace ArnoldUI.Network
 
                 if (retry)
                 {
-                    m_runningCommand = m_coreLink.Request(conversation, CommandTimeoutMs);
+                    m_runningCommand = m_coreLink.Request(conversation, timeoutMs);
                     result = await m_runningCommand.ConfigureAwait(false);
 
                     retry = false;

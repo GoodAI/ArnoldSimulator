@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="CameraTests.cs" />
     <Compile Include="ConductorTests.cs" />
+    <Compile Include="CoreControllerTests.cs" />
     <Compile Include="CoreLinkTests.cs" />
     <Compile Include="MathTestHelpers.cs" />
     <Compile Include="MessageTests.cs" />
