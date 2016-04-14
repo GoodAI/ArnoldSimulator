@@ -11,12 +11,7 @@ using System.Windows.Forms;
 using ArnoldUI;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Forms;
-using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Project;
-using GoodAI.Arnold.Simulation;
-using GoodAI.Net.ConverseSharp;
 using WeifenLuo.WinFormsUI.Docking;
-using Region = GoodAI.Arnold.Project.Region;
 
 namespace GoodAI.Arnold
 {

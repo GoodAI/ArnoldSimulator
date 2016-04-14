@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 
 namespace GoodAI.Arnold.Simulation
 {

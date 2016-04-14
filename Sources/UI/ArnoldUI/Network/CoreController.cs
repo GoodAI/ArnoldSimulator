@@ -7,8 +7,6 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
-using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 
 namespace GoodAI.Arnold.Network
 {

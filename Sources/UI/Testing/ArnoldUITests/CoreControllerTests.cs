@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Extensions;
-using GoodAI.Arnold.Network;
 using Moq;
 using Xunit;
 

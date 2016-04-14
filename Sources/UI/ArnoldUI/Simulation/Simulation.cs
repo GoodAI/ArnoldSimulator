@@ -3,9 +3,7 @@ using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
-using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
-using Google.Protobuf;
 
 namespace GoodAI.Arnold.Simulation
 {

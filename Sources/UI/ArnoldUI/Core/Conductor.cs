@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
-using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Project;
-using GoodAI.Arnold.Simulation;
 using GoodAI.Net.ConverseSharp;
 
 namespace GoodAI.Arnold.Core
