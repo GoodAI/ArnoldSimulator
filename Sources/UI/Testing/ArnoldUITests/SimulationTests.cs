@@ -94,8 +94,6 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void StateMachineTransitionsCorrectly()
         {
-            const int timeoutMs = 1000;
-
             ICoreLink coreLink = new DummyCoreLink();
 
             var coreController = new CoreController(coreLink);

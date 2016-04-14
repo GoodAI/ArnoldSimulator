@@ -48,7 +48,11 @@ namespace GoodAI.Arnold
 
         private void UpdateButtons()
         {
-            // TODO(HonzaS): Check proxy + sim state and update buttons.
+            connectButton.Enabled = !m_uiMain.Conductor.IsConnected;
+            disconnectButton.Enabled = !connectButton.Enabled;
+
+            runButton.Enabled = m_uiMain.Conductor.SimulationState == SimulationState.Paused || m_uiMain.Conductor.SimulationState == SimulationState.Empty;
+            pauseButton.Enabled = m_uiMain.Conductor.SimulationState == SimulationState.Running;
         }
 
         private void PopulateCoreTypes()
@@ -90,6 +94,26 @@ namespace GoodAI.Arnold
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;
+        }
+
+        private void connectButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void disconnectButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void runButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pauseButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

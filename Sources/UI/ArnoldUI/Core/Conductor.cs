@@ -27,6 +27,8 @@ namespace GoodAI.Arnold.Core
         void PauseSimulation();
         void KillSimulation();
 
+        bool IsConnected { get; }
+
         SimulationState SimulationState { get; }
     }
 
@@ -44,7 +46,6 @@ namespace GoodAI.Arnold.Core
     {
         public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
-
         private bool m_shouldKill;
 
         private readonly ICoreProxyFactory m_coreProxyFactory;
@@ -56,7 +57,7 @@ namespace GoodAI.Arnold.Core
         private readonly ISimulationFactory m_simulationFactory;
         public ISimulation Simulation { get; private set; }
 
-        private ICoreControllerFactory m_coreControllerFactory;
+        private readonly ICoreControllerFactory m_coreControllerFactory;
         public ICoreController CoreController { get; private set; }
 
         public Conductor(ICoreProxyFactory coreProxyFactory, ICoreLinkFactory coreLinkFactory,
@@ -202,6 +203,8 @@ namespace GoodAI.Arnold.Core
                 CleanupSimulation();
             }
         }
+
+        public bool IsConnected => m_proxy != null && CoreController != null;
 
         public SimulationState SimulationState
         {
