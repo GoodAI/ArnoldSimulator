@@ -63,6 +63,16 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap action_Cancel_16xMD {
+            get {
+                object obj = ResourceManager.GetObject("action_Cancel_16xMD", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap BasicNeuron {
             get {
                 object obj = ResourceManager.GetObject("BasicNeuron", resourceCulture);
@@ -77,6 +87,36 @@ namespace GoodAI.Arnold.Properties {
             get {
                 object obj = ResourceManager.GetObject("EmptyCursor", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap hardware_16xLG {
+            get {
+                object obj = ResourceManager.GetObject("hardware_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Pause_16xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Pause_16xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Play_16xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Play_16xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

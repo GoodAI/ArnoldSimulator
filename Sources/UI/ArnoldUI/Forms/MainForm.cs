@@ -40,8 +40,27 @@ namespace GoodAI.Arnold
             m_uiMain.SimulationStateUpdated += SimulationOnStateUpdated;
             m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
 
+            PopulateCoreTypes();
+
+            UpdateButtons();
             //Simulation = new RemoteSimulation(new CoreLink(new ConverseProtoBufClient(new DummyConnector())));
         }
+
+        private void UpdateButtons()
+        {
+            // TODO(HonzaS): Check proxy + sim state and update buttons.
+        }
+
+        private void PopulateCoreTypes()
+        {
+            coreTypeComboBox.Items.Add("Local");
+            coreTypeComboBox.SelectedIndex = 0;
+            // TODO(HonzaS): Add saved remotes.
+
+            // TODO(HonzaS): Dialog for adding new remotes.
+            //coreTypeComboBox.Items.Add("Add remote...");
+        }
+
 
         private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
         {

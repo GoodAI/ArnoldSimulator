@@ -199,6 +199,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\StatusAnnotations_Play_16xLG_color.png" />
+    <None Include="Resources\StatusAnnotations_Pause_16xLG_color.png" />
+    <None Include="Resources\hardware_16xLG.png" />
+    <None Include="Resources\action_Cancel_16xMD.png" />
     <Content Include="Resources\BasicNeuron.png" />
     <Content Include="Resources\EmptyCursor.ico" />
   </ItemGroup>
