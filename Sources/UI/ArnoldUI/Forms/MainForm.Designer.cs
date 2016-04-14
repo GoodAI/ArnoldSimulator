@@ -48,12 +48,6 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.simulationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.killToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadBlueprintToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.coreTypeLabel = new System.Windows.Forms.ToolStripLabel();
             this.coreTypeComboBox = new System.Windows.Forms.ToolStripComboBox();
@@ -127,9 +121,7 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileMenuItem,
-            this.simulationMenuItem,
-            this.helpMenuItem});
+            this.fileMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(963, 24);
@@ -150,49 +142,6 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // simulationMenuItem
-            // 
-            this.simulationMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.runToolStripMenuItem,
-            this.pauseToolStripMenuItem,
-            this.killToolStripMenuItem,
-            this.loadBlueprintToolStripMenuItem});
-            this.simulationMenuItem.Name = "simulationMenuItem";
-            this.simulationMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.simulationMenuItem.Size = new System.Drawing.Size(76, 20);
-            this.simulationMenuItem.Text = "Simulation";
-            this.simulationMenuItem.Click += new System.EventHandler(this.runToolStripMenuItem_Click);
-            // 
-            // runToolStripMenuItem
-            // 
-            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-            this.runToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
-            this.runToolStripMenuItem.Text = "Run";
-            // 
-            // pauseToolStripMenuItem
-            // 
-            this.pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
-            this.pauseToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
-            this.pauseToolStripMenuItem.Text = "Pause";
-            // 
-            // killToolStripMenuItem
-            // 
-            this.killToolStripMenuItem.Name = "killToolStripMenuItem";
-            this.killToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
-            this.killToolStripMenuItem.Text = "Kill";
-            // 
-            // loadBlueprintToolStripMenuItem
-            // 
-            this.loadBlueprintToolStripMenuItem.Name = "loadBlueprintToolStripMenuItem";
-            this.loadBlueprintToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
-            this.loadBlueprintToolStripMenuItem.Text = "Load blueprint";
-            // 
-            // helpMenuItem
-            // 
-            this.helpMenuItem.Name = "helpMenuItem";
-            this.helpMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpMenuItem.Text = "Help";
             // 
             // toolStrip1
             // 
@@ -296,19 +245,13 @@
         private WeifenLuo.WinFormsUI.Docking.VS2012LightTheme vS2012LightTheme1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem helpMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem simulationMenuItem;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton runButton;
         private System.Windows.Forms.ToolStripButton pauseButton;
         private System.Windows.Forms.ToolStripButton disconnectButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem runToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem pauseToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem killToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadBlueprintToolStripMenuItem;
         private System.Windows.Forms.ToolStripComboBox coreTypeComboBox;
         private System.Windows.Forms.ToolStripLabel coreTypeLabel;
         private System.Windows.Forms.ToolStripButton connectButton;

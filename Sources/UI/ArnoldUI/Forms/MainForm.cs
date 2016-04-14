@@ -81,11 +81,6 @@ namespace GoodAI.Arnold
             Close();
         }
 
-        private void runToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            StartSimulation();
-        }
-
         private void StartSimulation()
         {
             m_uiMain.StartSimulation();
