@@ -41,6 +41,33 @@ namespace GoodAI.LoggerRobe
                 .WriteTo.ColoredConsole(outputTemplate: DefaultOutputTemplate);
         }
 
-        private ILogger m_logger;
+        private readonly ILogger m_logger;
+
+        #region ILog Implementation
+
+        public void Add(Sev severity, string template, params object[] objects)
+        {
+            m_logger.Write(ConvertSeverity(severity), template, objects);
+        }
+
+        public void Add(Sev severity, Exception ex, string template, params object[] objects)
+        {
+            m_logger.Write(ConvertSeverity(severity), ex, template, objects);
+        }
+
+        #endregion
+
+        private static LogEventLevel ConvertSeverity(Sev severity)
+        {
+            switch (severity)
+            {
+                case Sev.Error:   return LogEventLevel.Error;
+                case Sev.Warn:    return LogEventLevel.Warning;
+                case Sev.Info:    return LogEventLevel.Information;
+                case Sev.Debug:   return LogEventLevel.Debug;
+                case Sev.Verbose: return LogEventLevel.Verbose;
+                default: return LogEventLevel.Error;
+            }
+        }
     }
 }
