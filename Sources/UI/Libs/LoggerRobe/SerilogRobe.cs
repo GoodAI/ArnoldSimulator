@@ -32,6 +32,16 @@ namespace GoodAI.LoggerRobe
             m_logger = DefaultConfig().CreateLogger();
         }
 
+        private SerilogRobe(ILogger serilogLogger)
+        {
+            m_logger = serilogLogger;
+        }
+
+        public static ILog CreateLogger(Func<LoggerConfiguration, LoggerConfiguration> configAction)
+        {
+            return new SerilogRobe(configAction(DefaultConfig()).CreateLogger());
+        }
+
         private static LoggerConfiguration DefaultConfig()
         {
             return new LoggerConfiguration()
