@@ -1,0 +1,28 @@
+module brain
+{
+    extern module core;
+
+    chare BrainBase
+    {
+        entry BrainBase(std::string type, std::string params);
+
+        entry [threaded] void EnqueueClientRequest(RequestId token, std::vector<unsigned char> request);
+
+        entry [sync] void AddRegion(RegionId regId, std::string type, std::string params);
+        entry [sync] void RemoveRegion(RegionId regId);
+        entry [sync] void AddConnector(RegionId regId, Direction direction, ConnectorName name, size_t size);
+        entry [sync] void RemoveConnector(RegionId regId, Direction direction, ConnectorName name);
+        entry [sync] void AddConnection(Direction direction,
+            RegionId srcRegId, ConnectorName srcConnectorName,
+            RegionId destRegId, ConnectorName destConnectorName);
+        entry [sync] void RemoveConnection(Direction direction,
+            RegionId srcRegId, ConnectorName srcConnectorName,
+            RegionId destRegId, ConnectorName destConnectorName);
+
+        entry [threaded] void ReceiveTerminalData(RegionId from, ConnectorName to, std::vector<unsigned char> data);
+
+        entry [threaded] void TriggerRegion(RegionId regId);
+        entry [threaded] void RegionSimulated(RegionId regId, size_t regionsTriggeredCnt);
+        entry [threaded] void InteractionConfirmed();
+    };   	
+};

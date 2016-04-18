@@ -1,0 +1,24 @@
+module region
+{
+    extern module brain;
+
+    array [1D] RegionBase
+    {
+        entry RegionBase(CProxy_BrainBase brain, std::string type, std::string params);
+
+        entry [sync] void CreateInput(ConnectorName name, size_t size);
+        entry [sync] void DeleteInput(ConnectorName name);
+        entry [sync] void ConnectInput(ConnectorName name, RemoteConnector destination);
+        entry [sync] void DisconnectInput(ConnectorName name, RemoteConnector destination);
+
+        entry [sync] void CreateOutput(ConnectorName name, size_t size);
+        entry [sync] void DeleteOutput(ConnectorName name);
+        entry [sync] void ConnectOutput(ConnectorName name, RemoteConnector destination);
+        entry [sync] void DisconnectOutput(ConnectorName name, RemoteConnector destination);
+
+        entry [threaded] void ReceiveSensoMotoricData(Direction direction, ConnectorName from, std::vector<unsigned char> data);
+        entry [threaded] void ReceiveSpikes(Direction direction, RegionId from, std::vector<Spike::Package> spikes);
+        
+        entry [threaded] void Simulate(size_t brainStep);
+    };   	
+};

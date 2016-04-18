@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="body.cpp" />
+    <ClCompile Include="brain.cpp" />
+    <ClCompile Include="core.cpp" />
+    <ClCompile Include="neuron.cpp" />
+    <ClCompile Include="random.cpp" />
+    <ClCompile Include="region.cpp" />
+    <ClCompile Include="spike.cpp" />
+    <ClCompile Include="synapse.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="brain.ci" />
+    <None Include="core.ci" />
+    <None Include="Makefile" />
+    <None Include="region.ci" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="body.h" />
+    <ClInclude Include="brain.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="core.h" />
+    <ClInclude Include="neuron.h" />
+    <ClInclude Include="random.h" />
+    <ClInclude Include="region.h" />
+    <ClInclude Include="spike.h" />
+    <ClInclude Include="synapse.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4639FCAB-E0E1-4F5E-9BAE-B320A03FEB10}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeBuildCommandLine>call "$(VCInstallDir)vcvarsall" amd64
+bash -c "make debug-build"</NMakeBuildCommandLine>
+    <NMakeOutput>debug\core.exe</NMakeOutput>
+    <NMakeCleanCommandLine>bash -c "make debug-clean"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>bash -c "make debug-clean"
+call "$(VCInstallDir)vcvarsall" amd64
+bash -c "make debug-build"</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\libs\charm\net-debug\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src;.\debug</NMakeIncludeSearchPath>
+    <OutDir>$(SolutionDir)debug</OutDir>
+    <IntDir>debug</IntDir>
+    <SourcePath>$(VC_SourcePath);..\libs\charm\net-debug\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeBuildCommandLine>call "$(VCInstallDir)vcvarsall" amd64
+bash -c "make release-build"</NMakeBuildCommandLine>
+    <NMakeOutput>release\core.exe</NMakeOutput>
+    <NMakeCleanCommandLine>bash -c "make release-clean"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>bash -c "make release-clean"
+call "$(VCInstallDir)vcvarsall" amd64
+bash -c "make release-build"</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\libs\charm\net-release\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src;.\release</NMakeIncludeSearchPath>
+    <OutDir>$(SolutionDir)release</OutDir>
+    <IntDir>release</IntDir>
+    <SourcePath>$(VC_SourcePath);..\libs\charm\net-release\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src</SourcePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <BuildLog>
+      <Path>$(IntDir)$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

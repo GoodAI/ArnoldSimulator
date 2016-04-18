@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="Makefile" />
+    <None Include="core.ci">
+      <Filter>Core</Filter>
+    </None>
+    <None Include="brain.ci">
+      <Filter>Core</Filter>
+    </None>
+    <None Include="region.ci">
+      <Filter>Core</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{10c6245b-c1d3-4fa3-add2-2c1d44d7dfe3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="brain.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="body.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="region.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="neuron.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="synapse.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="spike.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="random.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="brain.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="body.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="core.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="region.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="neuron.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="synapse.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="spike.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="random.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
