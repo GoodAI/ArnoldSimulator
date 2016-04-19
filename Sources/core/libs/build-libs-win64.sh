@@ -21,8 +21,13 @@ build_charm()
 
     echo "...fixing scripts"
 
-    cat src/arch/win64/unix2nt_cc | sed 's/\/I`cygpath -d \\"$SDK_DIR\/Include\\"`/\/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/shared\\"` \/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/um\\"`/g' > src/arch/win64/unix2nt_cc
-    cat src/arch/win64/unix2nt_cc | sed 's/$SDK_DIR\/Lib\/x64/$SDK_DIR\/Lib\/$WindowsSDKLibVersion\/um\/x64/g' > src/arch/win64/unix2nt_cc
+    cat src/arch/win64/unix2nt_cc | sed 's/\/I`cygpath -d \\"$SDK_DIR\/Include\\"`/\/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/shared\\"` \/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/um\\"`/g' > src/arch/win64/unix2nt_cc_tmp
+	cat src/arch/win64/unix2nt_cc_tmp > src/arch/win64/unix2nt_cc
+	rm src/arch/win64/unix2nt_cc_tmp
+	
+    cat src/arch/win64/unix2nt_cc | sed 's/$SDK_DIR\/Lib\/x64/$SDK_DIR\/Lib\/$WindowsSDKLibVersion\/um\/x64/g' > src/arch/win64/unix2nt_cc_tmp
+	cat src/arch/win64/unix2nt_cc_tmp > src/arch/win64/unix2nt_cc
+	rm src/arch/win64/unix2nt_cc_tmp
 
     ./build charm++ net-win64 --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ net-win64 --destination=net-release --with-production -j8 | tee net-release.log
