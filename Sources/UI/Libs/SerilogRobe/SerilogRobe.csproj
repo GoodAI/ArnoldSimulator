@@ -7,8 +7,8 @@
     <ProjectGuid>{7BB6441B-3E76-4B6D-A602-70BC268D4826}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GoodAI.LoggerRobe</RootNamespace>
-    <AssemblyName>LoggerRobe</AssemblyName>
+    <RootNamespace>GoodAI.Logging</RootNamespace>
+    <AssemblyName>GoodAI.SerilogRobe</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

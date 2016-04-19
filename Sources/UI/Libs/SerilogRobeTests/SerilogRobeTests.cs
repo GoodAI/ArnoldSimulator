@@ -13,7 +13,7 @@ using Serilog.Events;
 using Serilog.Exceptions;
 using Xunit.Sdk;
 
-namespace LoggerRobeTests
+namespace GoodAI.Logging.Tests
 {
     public class SerilogRobeTests
     {

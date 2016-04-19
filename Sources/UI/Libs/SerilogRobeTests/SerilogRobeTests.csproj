@@ -72,9 +72,9 @@
       <Project>{49a532a2-2080-4dbe-afc8-0b34d9b0b210}</Project>
       <Name>LoggerIface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LoggerRobe\LoggerRobe.csproj">
+    <ProjectReference Include="..\SerilogRobe\SerilogRobe.csproj">
       <Project>{7bb6441b-3e76-4b6d-a602-70bc268d4826}</Project>
-      <Name>LoggerRobe</Name>
+      <Name>SerilogRobe</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

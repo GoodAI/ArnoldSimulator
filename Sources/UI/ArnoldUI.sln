@@ -29,11 +29,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{23AED292
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArnoldUITests", "Testing\ArnoldUITests\ArnoldUITests.csproj", "{F5F607D8-D108-4553-B10E-498B014A7FDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerRobe", "Libs\LoggerRobe\LoggerRobe.csproj", "{7BB6441B-3E76-4B6D-A602-70BC268D4826}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogRobe", "Libs\SerilogRobe\SerilogRobe.csproj", "{7BB6441B-3E76-4B6D-A602-70BC268D4826}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerIface", "Libs\LoggerIface\LoggerIface.csproj", "{49A532A2-2080-4DBE-AFC8-0B34D9B0B210}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerRobeTests", "Libs\LoggerRobeTests\LoggerRobeTests.csproj", "{34F6181D-FCA7-4D19-9B67-04DB8E67B503}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogRobeTests", "Libs\SerilogRobeTests\SerilogRobeTests.csproj", "{34F6181D-FCA7-4D19-9B67-04DB8E67B503}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
