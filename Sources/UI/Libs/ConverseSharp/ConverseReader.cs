@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Google.Protobuf;
 
 namespace GoodAI.Net.ConverseSharp
 {
@@ -17,12 +16,12 @@ namespace GoodAI.Net.ConverseSharp
         /// Reads the header and leaves the rest of the stream for reading in other ways (such as ProtoBufs).
         /// NOTE: Not thread-safe.
         /// </summary>
-        /// <param name="stream">A connected stream.</param>
-        public uint ReadInteger(Stream stream)
+        /// <param name="inputStream">A connected stream.</param>
+        public uint ReadInteger(Stream inputStream)
         {
             var buffer = new byte[4];
 
-            ReadBytesToFixedBuffer(stream, ref buffer);
+            ReadBytesToFixedBuffer(inputStream, buffer);
 
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(buffer);
@@ -46,7 +45,7 @@ namespace GoodAI.Net.ConverseSharp
             if (replyBuffer.Length < messageLength)
                 replyBuffer = new byte[messageLength];
 
-            ReadBytesToFixedBuffer(inputStream, ref replyBuffer, Convert.ToInt32(messageLength));
+            ReadBytesToFixedBuffer(inputStream, replyBuffer, Convert.ToInt32(messageLength));
 
             return messageLength;
         }
@@ -66,7 +65,7 @@ namespace GoodAI.Net.ConverseSharp
                 replyMemoryStream.Capacity = Convert.ToInt32(messageLength);
 
             byte[] buffer = replyMemoryStream.GetBuffer();
-            ReadBytesToFixedBuffer(inputStream, ref buffer, Convert.ToInt32(messageLength));
+            ReadBytesToFixedBuffer(inputStream, buffer, Convert.ToInt32(messageLength));
 
             return messageLength;
         }
@@ -84,17 +83,17 @@ namespace GoodAI.Net.ConverseSharp
             details.HandlerName = ReadHandlerName(inputStream);
 
             byte[] buffer = requestMemoryStream.GetBuffer();
-            ReadBytesToFixedBuffer(inputStream, ref buffer, Convert.ToInt32(details.MessageLength));
+            ReadBytesToFixedBuffer(inputStream, buffer, Convert.ToInt32(details.MessageLength));
 
             return details;
         }
 
         internal static string ReadHandlerName(Stream inputStream)
         {
-            const int handlerNameLength = 32;
+            const int handlerNameLength = ConverseWriter.HandlerNameMaxLength;
 
             var buffer = new byte[handlerNameLength];
-            inputStream.Read(buffer, 0, handlerNameLength);
+            ReadBytesToFixedBuffer(inputStream, buffer, handlerNameLength);
 
             string fullName = Encoding.ASCII.GetString(buffer);
             string trimmedName = fullName.Substring(0, fullName.IndexOf('\0'));
@@ -102,7 +101,7 @@ namespace GoodAI.Net.ConverseSharp
             return trimmedName;
         }
 
-        private static void ReadBytesToFixedBuffer(Stream stream, ref byte[] buffer, int lengthLimit = 0)
+        private static void ReadBytesToFixedBuffer(Stream stream, byte[] buffer, int lengthLimit = 0)
         {
             if (lengthLimit > buffer.Length)
                 throw new ArgumentException($"{nameof(lengthLimit)} must be greater than buffer.Length", nameof(lengthLimit));

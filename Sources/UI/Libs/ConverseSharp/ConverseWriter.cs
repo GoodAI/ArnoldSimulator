@@ -43,7 +43,7 @@ namespace GoodAI.Net.ConverseSharp
 {
     public class ConverseWriter
     {
-        private const int HandlerNameMaxLength = 32;
+        public const int HandlerNameMaxLength = 32;
 
         public const int HeaderLength = 4 + 4 + HandlerNameMaxLength;
 
