@@ -41,7 +41,7 @@ CCS Reply ----------------------------------
 
 namespace GoodAI.Net.ConverseSharp
 {
-    internal class ConverseWriter
+    public class ConverseWriter
     {
         private const int HandlerNameMaxLength = 32;
 

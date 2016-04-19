@@ -109,13 +109,13 @@ namespace GoodAI.Net.ConverseSharp
 
             int read = 0;
             int chunkRead;
-            int lenghtToRead = (lengthLimit > 0) ? lengthLimit : buffer.Length;
+            int lengthToRead = (lengthLimit > 0) ? lengthLimit : buffer.Length;
 
-            while ((chunkRead = stream.Read(buffer, read, lenghtToRead - read)) > 0)
+            while ((chunkRead = stream.Read(buffer, read, lengthToRead - read)) > 0)
             {
                 read += chunkRead;
 
-                if (read == lenghtToRead)
+                if (read == lengthToRead)
                     break;
             }
         }
