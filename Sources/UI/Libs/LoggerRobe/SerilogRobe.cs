@@ -55,27 +55,27 @@ namespace GoodAI.LoggerRobe
 
         #region ILog Implementation
 
-        public void Add(Sev severity, string template, params object[] objects)
+        public void Add(Severity severity, string template, params object[] objects)
         {
             m_logger.Write(ConvertSeverity(severity), template, objects);
         }
 
-        public void Add(Sev severity, Exception ex, string template, params object[] objects)
+        public void Add(Severity severity, Exception ex, string template, params object[] objects)
         {
             m_logger.Write(ConvertSeverity(severity), ex, template, objects);
         }
 
         #endregion
 
-        private static LogEventLevel ConvertSeverity(Sev severity)
+        private static LogEventLevel ConvertSeverity(Severity severity)
         {
             switch (severity)
             {
-                case Sev.Error:   return LogEventLevel.Error;
-                case Sev.Warn:    return LogEventLevel.Warning;
-                case Sev.Info:    return LogEventLevel.Information;
-                case Sev.Debug:   return LogEventLevel.Debug;
-                case Sev.Verbose: return LogEventLevel.Verbose;
+                case Severity.Error:   return LogEventLevel.Error;
+                case Severity.Warn:    return LogEventLevel.Warning;
+                case Severity.Info:    return LogEventLevel.Information;
+                case Severity.Debug:   return LogEventLevel.Debug;
+                case Severity.Verbose: return LogEventLevel.Verbose;
                 default: return LogEventLevel.Error;
             }
         }
