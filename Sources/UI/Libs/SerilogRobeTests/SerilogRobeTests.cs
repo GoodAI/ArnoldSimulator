@@ -32,7 +32,7 @@ namespace GoodAI.Logging.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "disable until logging is done")]
         public void ManualTest()
         {
             var infoSink = new TestSink();
