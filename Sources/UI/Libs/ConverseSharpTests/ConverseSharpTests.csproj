@@ -35,10 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Google.Protobuf.3.0.0-beta2\lib\dotnet\Google.Protobuf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -115,16 +111,18 @@
     <Compile Include="Asserts\StringAsserts.cs" />
     <Compile Include="Asserts\TypeAsserts.cs" />
     <Compile Include="ConverseClientTests.cs" />
-    <Compile Include="ConverseProtoBufClientTests.cs" />
     <Compile Include="ConverseReaderTests.cs" />
     <Compile Include="ConverseWriterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProtoMessages\TestMessages.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConverseSharpProtobuf\ConverseSharpProtobuf.csproj">
+      <Project>{29FE8AB5-EA2A-4C55-BF38-AFC951DDEFAD}</Project>
+      <Name>ConverseSharpProtobuf</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ConverseSharp\ConverseSharp.csproj">
       <Project>{6d704040-e839-41dd-9aa2-36eeadefb0c9}</Project>
       <Name>ConverseSharp</Name>

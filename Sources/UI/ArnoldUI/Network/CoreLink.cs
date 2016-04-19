@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Extensions;
-using GoodAI.Net.ConverseSharp;
+using GoodAI.Net.ConverseSharpProtoBuf;
 using Google.Protobuf;
 
 namespace GoodAI.Arnold.Network

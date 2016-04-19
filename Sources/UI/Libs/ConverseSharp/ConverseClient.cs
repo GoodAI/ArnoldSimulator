@@ -5,7 +5,7 @@ namespace GoodAI.Net.ConverseSharp
 {
     public class ConverseClient
     {
-        internal const int MessageHeaderLength = ConverseWriter.HeaderLength;
+        public const int MessageHeaderLength = ConverseWriter.HeaderLength;
 
         private readonly ITcpConnector m_connector;
         private readonly ConverseWriter m_converseWriter = new ConverseWriter();

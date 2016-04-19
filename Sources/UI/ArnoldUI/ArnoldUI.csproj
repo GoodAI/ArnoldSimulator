@@ -193,6 +193,10 @@
       <Project>{c75532c4-765b-418e-b09b-46d36b2abdb1}</Project>
       <Name>WinFormsUI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Libs\ConverseSharpProtobuf\ConverseSharpProtobuf.csproj">
+      <Project>{29FE8AB5-EA2A-4C55-BF38-AFC951DDEFAD}</Project>
+      <Name>ConverseSharpProtobuf</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Libs\ConverseSharp\ConverseSharp.csproj">
       <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>
       <Name>ConverseSharp</Name>

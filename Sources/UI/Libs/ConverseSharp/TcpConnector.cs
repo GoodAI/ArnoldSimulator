@@ -53,7 +53,7 @@ namespace GoodAI.Net.ConverseSharp
         }
     }
 
-    internal class DummyConnector : ITcpConnector
+    public class DummyConnector : ITcpConnector
     {
         private readonly Stream m_stream;
 

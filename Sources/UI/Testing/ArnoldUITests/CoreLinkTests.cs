@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network;
-using GoodAI.Net.ConverseSharp;
+using GoodAI.Net.ConverseSharpProtoBuf;
 using Moq;
 using Xunit;
 using Xunit.Sdk;

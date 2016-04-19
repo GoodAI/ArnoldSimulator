@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GoodAI.Net.ConverseSharp;
 using Google.Protobuf;
 using Xunit;
 
-namespace GoodAI.Net.ConverseSharp
+namespace GoodAI.Net.ConverseSharpProtoBuf
 {
     public class ConverseProtoBufClientTests
     {

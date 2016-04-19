@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Net.ConverseSharp;
+using GoodAI.Net.ConverseSharpProtoBuf;
 
 namespace GoodAI.Arnold.Network
 {

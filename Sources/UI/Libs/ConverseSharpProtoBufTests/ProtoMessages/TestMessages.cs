@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace GoodAI.Net.ConverseSharp {
+namespace GoodAI.Net.ConverseSharpProtoBuf {
 
   /// <summary>Holder for reflection information generated from TestMessages.proto</summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -29,7 +29,7 @@ namespace GoodAI.Net.ConverseSharp {
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedCodeInfo(null, new pbr::GeneratedCodeInfo[] {
-            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Net.ConverseSharp.Command), global::GoodAI.Net.ConverseSharp.Command.Parser, new[]{ "Code", "Method" }, null, null, null)
+            new pbr::GeneratedCodeInfo(typeof(global::GoodAI.Net.ConverseSharpProtoBuf.Command), global::GoodAI.Net.ConverseSharpProtoBuf.Command.Parser, new[]{ "Code", "Method" }, null, null, null)
           }));
     }
     #endregion
@@ -42,7 +42,7 @@ namespace GoodAI.Net.ConverseSharp {
     public static pb::MessageParser<Command> Parser { get { return _parser; } }
 
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::GoodAI.Net.ConverseSharp.TestMessagesReflection.Descriptor.MessageTypes[0]; }
+      get { return global::GoodAI.Net.ConverseSharpProtoBuf.TestMessagesReflection.Descriptor.MessageTypes[0]; }
     }
 
     pbr::MessageDescriptor pb::IMessage.Descriptor {
