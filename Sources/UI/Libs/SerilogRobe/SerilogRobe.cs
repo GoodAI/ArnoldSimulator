@@ -3,52 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
 
-namespace GoodAI.LoggerRobe
+namespace GoodAI.Logging
 {
     public class SerilogRobe : ILog
     {
-
-#if DEBUG
-        public const string DefaultOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} <{SourceContext:l}> [{Level}] ({ThreadId}): {Message}{NewLine}{Exception}";
-        public const LogEventLevel DefaultDebugLevel = LogEventLevel.Debug;
-#else
-        public const string DefaultOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}]: {Message}{NewLine}{Exception}";
-        public const LogEventLevel DefaultDebugLevel = LogEventLevel.Information;
-#endif
-
         static SerilogRobe()
         {
             // Serilog diagnostic output. Serilog won't write its errors into the user-space sinks.
             Serilog.Debugging.SelfLog.Out = Console.Out;
         }
 
-        public SerilogRobe()
-        {
-            m_logger = DefaultConfig().CreateLogger();
-        }
-
-        private SerilogRobe(ILogger serilogLogger)
+        protected SerilogRobe(ILogger serilogLogger)
         {
             m_logger = serilogLogger;
         }
 
         public static ILog CreateLogger(Func<LoggerConfiguration, LoggerConfiguration> configAction)
         {
-            return new SerilogRobe(configAction(DefaultConfig()).CreateLogger());
-        }
-
-        private static LoggerConfiguration DefaultConfig()
-        {
-            return new LoggerConfiguration()
-                .MinimumLevel.Is(DefaultDebugLevel)
-                .Enrich.WithThreadId()
-                .Enrich.With(new ExceptionEnricher(new ExceptionDestructurer(), new AggregateExceptionDestructurer()))
-                .WriteTo.ColoredConsole(outputTemplate: DefaultOutputTemplate);
+            return new SerilogRobe(configAction(SerilogRobeConfig.DefaultConfig).CreateLogger());
         }
 
         private readonly ILogger m_logger;
@@ -79,5 +55,12 @@ namespace GoodAI.LoggerRobe
                 default: return LogEventLevel.Error;
             }
         }
+    }
+
+    public class SerilogRobe<TContext> : SerilogRobe
+    {
+        public SerilogRobe(LoggerConfiguration serilogConfig)
+            : base(serilogConfig.CreateLogger().ForContext("SourceContext", typeof(TContext).Name))
+        { }
     }
 }

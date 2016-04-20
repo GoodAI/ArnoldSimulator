@@ -7,7 +7,7 @@
     <ProjectGuid>{34F6181D-FCA7-4D19-9B67-04DB8E67B503}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LoggerRobeTests</RootNamespace>
+    <RootNamespace>GoodAI.Logging.Tests</RootNamespace>
     <AssemblyName>LoggerRobeTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -38,6 +38,10 @@
       <HintPath>..\..\packages\Serilog.1.5.14\lib\net45\Serilog.FullNetFx.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SimpleInjector, Version=3.1.3.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SimpleInjector.3.1.3\lib\net45\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LoggerInjectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerilogRobeTests.cs" />
   </ItemGroup>
@@ -75,6 +80,10 @@
     <ProjectReference Include="..\SerilogRobe\SerilogRobe.csproj">
       <Project>{7bb6441b-3e76-4b6d-a602-70bc268d4826}</Project>
       <Name>SerilogRobe</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeMap\TypeMap.csproj">
+      <Project>{86955c47-2a02-41a4-ab32-c9e592eb2971}</Project>
+      <Name>TypeMap</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

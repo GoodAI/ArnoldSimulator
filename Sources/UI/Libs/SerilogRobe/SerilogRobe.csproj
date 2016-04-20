@@ -52,6 +52,7 @@
     <Compile Include="ExceptionEnricher.cs" />
     <Compile Include="SerilogRobe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerilogRobeConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

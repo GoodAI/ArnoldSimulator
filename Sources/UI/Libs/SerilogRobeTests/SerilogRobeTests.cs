@@ -4,36 +4,35 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.LoggerRobe;
 using GoodAI.Logging;
-using Xunit;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Xunit;
 using Xunit.Sdk;
 
 namespace GoodAI.Logging.Tests
 {
-    public class SerilogRobeTests
+    internal class TestSink : ILogEventSink
     {
-        private class TestSink : ILogEventSink
+        public List<LogEvent> Events { get; private set; }
+
+        public TestSink()
         {
-            public List<LogEvent> Events { get; private set; }
-
-            public TestSink()
-            {
-                Events = new List<LogEvent>();
-            }
-
-            public void Emit(LogEvent logEvent)
-            {
-                Events.Add(logEvent);
-            }
+            Events = new List<LogEvent>();
         }
 
-        [Fact(Skip = "disable until logging is done")]
-        public void ManualTest()
+        public void Emit(LogEvent logEvent)
+        {
+            Events.Add(logEvent);
+        }
+    }
+
+    public class SerilogRobeTests
+    {
+        [Fact]
+        public void BasicLogLevelTest()
         {
             var infoSink = new TestSink();
             var debugSink = new TestSink();
@@ -57,8 +56,8 @@ namespace GoodAI.Logging.Tests
             //logger.Debug("debug 3");
             //logger.Information("info 3");
 
-            Assert.Equal(6, debugSink.Events.Count);
-            Assert.Equal(3, infoSink.Events.Count);
+            Assert.Equal(4, debugSink.Events.Count);
+            Assert.Equal(2, infoSink.Events.Count);
 
             Assert.Contains("debug 2: \"foo\"", debugSink.Events.Select(e => e.RenderMessage()));
             Assert.Contains("info 2: bar", debugSink.Events.Select(e => e.RenderMessage()));
