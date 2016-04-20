@@ -71,6 +71,7 @@
     <Compile Include="LoggerInjectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerilogRobeTests.cs" />
+    <Compile Include="TestLogEventSink.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LoggerIface\LoggerIface.csproj">

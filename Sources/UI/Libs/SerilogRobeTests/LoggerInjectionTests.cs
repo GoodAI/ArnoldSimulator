@@ -44,7 +44,7 @@ namespace GoodAI.Logging.Tests
 
     public class LoggerInjectionTests
     {
-        private static readonly TestSink TestSink = new TestSink();
+        private static readonly TestLogEventSink TestSink = new TestLogEventSink();
 
         static LoggerInjectionTests()
         {
@@ -53,6 +53,11 @@ namespace GoodAI.Logging.Tests
 
             TypeMap.InitializeConfiguration<TestContainerConfig>();
             TypeMap.SimpleInjectorContainer.Verify();
+        }
+
+        public LoggerInjectionTests()
+        {
+            TestSink.Clear();
         }
 
         [Fact]

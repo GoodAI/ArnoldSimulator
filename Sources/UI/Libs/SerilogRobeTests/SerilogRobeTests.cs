@@ -14,28 +14,13 @@ using Xunit.Sdk;
 
 namespace GoodAI.Logging.Tests
 {
-    internal class TestSink : ILogEventSink
-    {
-        public List<LogEvent> Events { get; private set; }
-
-        public TestSink()
-        {
-            Events = new List<LogEvent>();
-        }
-
-        public void Emit(LogEvent logEvent)
-        {
-            Events.Add(logEvent);
-        }
-    }
-
     public class SerilogRobeTests
     {
         [Fact]
         public void BasicLogLevelTest()
         {
-            var infoSink = new TestSink();
-            var debugSink = new TestSink();
+            var infoSink = new TestLogEventSink();
+            var debugSink = new TestLogEventSink();
 
             ILog log = SerilogRobe.CreateLogger(configuration =>
             {
