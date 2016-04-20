@@ -1,0 +1,8 @@
+namespace GoodAI.Net.ConverseSharpFlatBuffers;
+
+table Command {
+	code:int;
+	method:string;
+}
+
+root_type Command;

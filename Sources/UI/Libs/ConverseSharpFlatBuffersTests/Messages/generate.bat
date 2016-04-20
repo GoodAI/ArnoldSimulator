@@ -1,0 +1,1 @@
+"../../../../network/flatbuffers/bin/flatc.exe" --csharp --gen-onefile TestMessages.fbs

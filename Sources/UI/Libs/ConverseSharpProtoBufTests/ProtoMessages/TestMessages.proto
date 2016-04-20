@@ -1,5 +1,5 @@
 syntax = "proto3";
-package GoodAI.Net.ConverseSharp;
+package GoodAI.Net.ConverseSharpProtoBuf;
 
 message Command {
 	int32 Code = 1;
