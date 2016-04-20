@@ -1,0 +1,42 @@
+// Definitions for the Request messages
+
+namespace GoodAI.Arnold.Network;
+
+
+// Error response.
+
+table ErrorResponse {
+	message:string;
+}
+
+// End of error response.
+
+
+// State response.
+
+enum StateType:byte {
+	Empty,
+	Running,
+	Paused,
+	ShuttingDown,
+	Invalid
+}
+
+table StateResponse {
+	state:StateType;
+}
+
+// End of state response.
+
+
+// All the responses must be here, including error.
+union Response {
+	ErrorResponse,
+	StateResponse
+}
+
+table ResponseMessage {
+	response:Response;
+}
+
+root_type ResponseMessage;

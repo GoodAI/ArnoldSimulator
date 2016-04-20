@@ -1,0 +1,29 @@
+// Definitions for the Request messages
+
+namespace GoodAI.Arnold.Network;
+
+enum CommandType:byte {
+	Load,
+	Run,
+	Pause,
+	Clear,
+	Shutdown
+}
+
+table CommandRequest {
+	command:CommandType;
+	stepsToRun:uint;
+}
+
+table GetStateRequest {}
+
+union Request {
+	CommandRequest,
+	GetStateRequest
+}
+
+table RequestMessage {
+	request:Request;
+}
+
+root_type RequestMessage;
