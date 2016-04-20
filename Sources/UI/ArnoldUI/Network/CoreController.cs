@@ -12,7 +12,7 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreController
     {
-        Task Command(CommandConversation conversation, Action<StateResponse> successAction,
+        Task Command(CommandConversation conversation, Action<Response<StateResponse>> successAction,
             Func<TimeoutAction> timeoutAction, int timeoutMs = 0);
     }
 
@@ -26,7 +26,7 @@ namespace GoodAI.Arnold.Network
     public class CoreController : ICoreController
     {
         private readonly ICoreLink m_coreLink;
-        private Task<TimeoutResult<StateResponse>> m_runningCommand;
+        private Task<TimeoutResult<Response<StateResponse>>> m_runningCommand;
         private const int CommandTimeoutMs = 15 * 1000;
 
         public CoreController(ICoreLink coreLink)
@@ -34,7 +34,7 @@ namespace GoodAI.Arnold.Network
             m_coreLink = coreLink;
         }
 
-        public async Task Command(CommandConversation conversation, Action<StateResponse> successAction,
+        public async Task Command(CommandConversation conversation, Action<Response<StateResponse>> successAction,
             Func<TimeoutAction> timeoutCallback, int timeoutMs = CommandTimeoutMs)
         {
             if (m_runningCommand != null)
@@ -47,7 +47,7 @@ namespace GoodAI.Arnold.Network
 
             while (true)
             {
-                TimeoutResult<StateResponse> result;
+                TimeoutResult<Response<StateResponse>> result;
 
                 if (retry)
                 {

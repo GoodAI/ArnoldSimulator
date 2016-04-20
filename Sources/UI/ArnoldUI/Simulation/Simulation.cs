@@ -24,7 +24,7 @@ namespace GoodAI.Arnold.Simulation
         /// of steps are performed, moves to state Paused.
         /// </summary>
         /// <param name="stepsToRun">The number of steps to run. 0 is infinity.</param>
-        void Run(int stepsToRun = 0);
+        void Run(uint stepsToRun = 0);
 
         /// <summary>
         /// Pauses the running simulation. If the simulation is not running, this does nothing.
@@ -106,32 +106,19 @@ namespace GoodAI.Arnold.Simulation
                 throw new WrongHandlerStateException("LoadAgent", State);
 
             // TODO(HonzaS): Add the blueprint data.
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Load,
-                    Blueprint = new BlueprintData()
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Load);
 
             SendCommand(conversation);
         }
 
         public void Clear()
         {
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Clear
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Clear);
 
             SendCommand(conversation);
         }
 
-        public void Run(int stepsToRun = 0)
+        public void Run(uint stepsToRun = 0)
         {
             if (State != SimulationState.Paused && State != SimulationState.Running)
                 throw new WrongHandlerStateException("Run", State);
@@ -147,13 +134,7 @@ namespace GoodAI.Arnold.Simulation
             if (State == SimulationState.Paused)
                 return;
 
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Pause
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Pause);
 
             SendCommand(conversation);
 
@@ -163,19 +144,12 @@ namespace GoodAI.Arnold.Simulation
             //    deal with it
         }
 
-        private void RunSimulation(int stepsToRun)
+        private void RunSimulation(uint stepsToRun)
         {
             if (State == SimulationState.Running)
                 return;
 
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Run,
-                    StepsToRun = stepsToRun
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Run, stepsToRun);
 
             SendCommand(conversation);
         }
@@ -190,38 +164,38 @@ namespace GoodAI.Arnold.Simulation
             throw new NotImplementedException();
         }
 
-        private void HandleStateResponse(StateResponse state)
+        private void HandleStateResponse(Response<StateResponse> response)
         {
-            if (state.ResponseOneofCase == StateResponse.ResponseOneofOneofCase.Error)
+            if (response.Error != null)
             {
-                HandleError(state.Error);
+                HandleError(response.Error);
             }
             else
             {
-                State = ReadState(state.Data);
+                State = ReadState(response.Data);
             }
         }
 
-        public static SimulationState ReadState(StateData stateData)
+        public static SimulationState ReadState(StateResponse stateData)
         {
             switch (stateData.State)
             {
-                case StateData.Types.StateType.Empty:
+                case StateType.Empty:
                     return SimulationState.Empty;
-                case StateData.Types.StateType.Paused:
-                    return SimulationState.Paused;
-                case StateData.Types.StateType.Running:
+                case StateType.Running:
                     return SimulationState.Running;
-                case StateData.Types.StateType.Invalid:
-                    return SimulationState.Invalid;
-                case StateData.Types.StateType.ShuttingDown:
+                case StateType.Paused:
+                    return SimulationState.Paused;
+                case StateType.ShuttingDown:
                     return SimulationState.ShuttingDown;
+                case StateType.Invalid:
+                    return SimulationState.Invalid;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private void HandleError(Error error)
+        private void HandleError(ErrorResponse error)
         {
             StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(error));
         }
@@ -232,11 +206,9 @@ namespace GoodAI.Arnold.Simulation
 
             m_coreLink.Request(conversation).ContinueWith(task =>
             {
-                TimeoutResult<StateResponse> timeoutResult = task.Result;
-                if (!timeoutResult.TimedOut && timeoutResult.Result.ResponseOneofCase != StateResponse.ResponseOneofOneofCase.Error)
-                {
+                TimeoutResult<Response<StateResponse>> timeoutResult = task.Result;
+                if (!timeoutResult.TimedOut && timeoutResult.Result.Error != null)
                     State = ReadState(timeoutResult.Result.Data);
-                }
             });
         }
     }

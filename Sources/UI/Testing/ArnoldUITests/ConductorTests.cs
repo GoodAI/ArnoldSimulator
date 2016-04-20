@@ -9,6 +9,7 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Network.Messages;
 using GoodAI.Arnold.Project;
 using Moq;
 using Xunit;
@@ -39,21 +40,20 @@ namespace GoodAI.Arnold.UI.Tests
                 .Returns(m_coreProxyMock.Object);
 
             m_coreLinkFactoryMock = new Mock<ICoreLinkFactory>();
-            m_coreLinkFactoryMock.Setup(factory => factory.Create(null))
+            m_coreLinkFactoryMock.Setup(factory => factory.Create(null, null))
                 .Returns(m_coreLinkMock.Object);
 
             m_coreController = new CoreController(m_coreLinkMock.Object);
             m_coreControllerFactoryMock = new Mock<ICoreControllerFactory>();
             m_coreControllerFactoryMock.Setup(factory => factory.Create(m_coreLinkMock.Object)).Returns(m_coreController);
 
-            var stateResponse = new StateResponse
-            {
-                Data = new StateData {State = StateData.Types.StateType.ShuttingDown}
-            };
+            var response = StateResponseBuilder.Build(StateType.ShuttingDown);
+            var stateResponse = response.GetResponse(new StateResponse());
+
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>())).Returns(() =>
             {
-                return Task<TimeoutResult<StateResponse>>.Factory.StartNew(
-                    () => new TimeoutResult<StateResponse> {Result = stateResponse});
+                return Task<TimeoutResult<Response<StateResponse>>>.Factory.StartNew(
+                    () => new TimeoutResult<Response<StateResponse>> {Result = new Response<StateResponse>(stateResponse)});
             });
 
 
@@ -114,7 +114,7 @@ namespace GoodAI.Arnold.UI.Tests
             m_simulationMock.Verify(simulation => simulation.LoadBlueprint(It.IsAny<AgentBlueprint>()));
 
             m_conductor.StartSimulation();
-            m_simulationMock.Verify(simulation => simulation.Run(It.IsAny<int>()));
+            m_simulationMock.Verify(simulation => simulation.Run(It.IsAny<uint>()));
 
             m_conductor.PauseSimulation();
             m_simulationMock.Verify(simulation => simulation.Pause());

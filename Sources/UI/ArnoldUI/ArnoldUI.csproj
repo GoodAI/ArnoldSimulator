@@ -53,10 +53,6 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Protobuf.3.0.0-beta2\lib\dotnet\Google.Protobuf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="OpenTK, Version=1.1.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AdamsLair.OpenTK.1.1.6.0\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -101,11 +97,15 @@
     <Compile Include="Graphics\PickRay.cs" />
     <Compile Include="Graphics\Models\SynapseModel.cs" />
     <Compile Include="Network\CommandConversation.cs" />
+    <Compile Include="Network\Conversation.cs" />
     <Compile Include="Network\CoreControllerFactory.cs" />
     <Compile Include="Network\CoreLink.cs" />
     <Compile Include="Network\CoreLinkFactory.cs" />
+    <Compile Include="Network\CoreResponseParser.cs" />
     <Compile Include="Network\GetStateConversation.cs" />
+    <Compile Include="Network\Messages\RequestBuilders.cs" />
     <Compile Include="Network\Messages\Requests.cs" />
+    <Compile Include="Network\Messages\ResponseBuilders.cs" />
     <Compile Include="Network\Messages\Responses.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="Project\Brain.cs" />
@@ -181,6 +181,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Libs\3rd\FlatBuffers\FlatBuffers.csproj">
+      <Project>{28c00774-1e73-4a75-ad8f-844cd21a064d}</Project>
+      <Name>FlatBuffers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Libs\3rd\Graph\Graph.csproj">
       <Project>{E4CC63D8-127D-4BC9-80E0-CCB3E9DA06DC}</Project>
       <Name>Graph</Name>
@@ -193,9 +197,9 @@
       <Project>{c75532c4-765b-418e-b09b-46d36b2abdb1}</Project>
       <Name>WinFormsUI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Libs\ConverseSharpProtobuf\ConverseSharpProtobuf.csproj">
-      <Project>{29FE8AB5-EA2A-4C55-BF38-AFC951DDEFAD}</Project>
-      <Name>ConverseSharpProtobuf</Name>
+    <ProjectReference Include="..\Libs\ConverseSharpFlatBuffers\ConverseSharpFlatBuffers.csproj">
+      <Project>{A5965DC3-2404-4E32-A06D-294659052233}</Project>
+      <Name>ConverseSharpFlatBuffers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Libs\ConverseSharp\ConverseSharp.csproj">
       <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>

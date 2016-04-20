@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Net.ConverseSharp;
-using GoodAI.Net.ConverseSharpProtoBuf;
+using GoodAI.Net.ConverseSharpFlatBuffers;
 
 namespace GoodAI.Arnold.Network
 {
     public interface ICoreLinkFactory
     {
-        ICoreLink Create(EndPoint endPoint);
+        ICoreLink Create(EndPoint endPoint, IResponseParser responseParser);
     }
 
     // TODO(HonzaS): This class still does some composition.
@@ -20,15 +20,15 @@ namespace GoodAI.Arnold.Network
     {
         private const int TcpTimeoutMs = 5000;
 
-        public ICoreLink Create(EndPoint endPoint)
+        public ICoreLink Create(EndPoint endPoint, IResponseParser responseParser)
         {
             var connector = new TcpConnector(endPoint.Hostname, endPoint.Port, TcpTimeoutMs);
-            return Create(connector);
+            return Create(connector, responseParser);
         }
 
-        private ICoreLink Create(ITcpConnector connector)
+        private ICoreLink Create(ITcpConnector connector, IResponseParser responseParser)
         {
-            return new CoreLink(new ConverseProtoBufClient(connector));
+            return new CoreLink(new ConverseFlatBuffersClient(connector, responseParser));
         }
     }
 }

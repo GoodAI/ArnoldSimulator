@@ -22,11 +22,11 @@ namespace GoodAI.Arnold.Simulation
 
     public class StateChangeFailedEventArgs : EventArgs
     {
-        public StateChangeFailedEventArgs(Error error)
+        public StateChangeFailedEventArgs(ErrorResponse error)
         {
             Error = error;
         }
 
-        public Error Error { get; set; }
+        public ErrorResponse Error { get; set; }
     }
 }

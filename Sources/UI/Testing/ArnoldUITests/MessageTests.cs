@@ -4,65 +4,40 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FlatBuffers;
 using GoodAI.Arnold.Network;
-using Google.Protobuf;
+using GoodAI.Arnold.Network.Messages;
 using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
 {
     public class MessageTests
     {
-        private static void AssertWriteReadEquality<T>(T message)
-            where T : IMessage<T>, new()
-        {
-            var stream = new MemoryStream();
-
-            message.WriteTo(stream);
-            stream.Position = 0;
-
-            var parser = new MessageParser<T>(() => new T());
-            T receivedCommand = parser.ParseFrom(stream);
-
-            Assert.Equal(message, receivedCommand);
-        }
-
         [Fact]
         public void WritesReadsCommand()
         {
-            var message = new CommandRequest
-            {
-                Command = CommandRequest.Types.CommandType.Run
-            };
-            AssertWriteReadEquality(message);
+            var message = CommandRequestBuilder.Build(CommandType.Run);
+            var receivedMessage = RequestMessage.GetRootAsRequestMessage(message.ByteBuffer);
+
+            Assert.Equal(message, receivedMessage);
         }
 
         [Fact]
         public void WritesReadsGetState()
         {
-            var message = new GetStateRequest();
-            AssertWriteReadEquality(message);
+            var message = GetStateRequestBuilder.Build();
+            var receivedMessage = RequestMessage.GetRootAsRequestMessage(message.ByteBuffer);
+
+            Assert.Equal(message, receivedMessage);
         }
 
         [Fact]
         public void WritesReadsStateResponseError()
         {
-            var message = new StateResponse
-            {
-                Error = new Error {Message = "Foo bar"}
-            };
-            Assert.Equal(StateResponse.ResponseOneofOneofCase.Error, message.ResponseOneofCase);
-            AssertWriteReadEquality(message);
-        }
+            var message = ErrorResponseBuilder.Build("foo");
+            var receivedMessage = ResponseMessage.GetRootAsResponseMessage(message.ByteBuffer);
 
-        [Fact]
-        public void WritesReadsStateResponseData()
-        {
-            var message = new StateResponse
-            {
-                Data = new StateData {State = StateData.Types.StateType.Running}
-            };
-            Assert.Equal(StateResponse.ResponseOneofOneofCase.Data, message.ResponseOneofCase);
-            AssertWriteReadEquality(message);
+            Assert.Equal(message, receivedMessage);
         }
     }
 }

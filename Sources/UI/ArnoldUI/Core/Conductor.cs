@@ -23,7 +23,7 @@ namespace GoodAI.Arnold.Core
         void Setup(EndPoint endPoint = null);
         void Teardown();
         void LoadBlueprint(AgentBlueprint blueprint);
-        void StartSimulation(int stepsToRun = 0);
+        void StartSimulation(uint stepsToRun = 0);
         void PauseSimulation();
         void KillSimulation();
 
@@ -87,7 +87,7 @@ namespace GoodAI.Arnold.Core
 
             endPoint = m_proxy.Start();
 
-            CoreLink = m_coreLinkFactory.Create(endPoint);
+            CoreLink = m_coreLinkFactory.Create(endPoint, new CoreResponseParser());
 
             CoreController = m_coreControllerFactory.Create(CoreLink);
 
@@ -112,10 +112,7 @@ namespace GoodAI.Arnold.Core
                 return;
             }
 
-            var conversation = new CommandConversation
-            {
-                Request = { Command = CommandRequest.Types.CommandType.Shutdown }
-            };
+            var conversation = new CommandConversation(CommandType.Shutdown);
 
             CoreController.Command(conversation, AfterTeardown, TeardownTimeout);
         }
@@ -132,9 +129,9 @@ namespace GoodAI.Arnold.Core
             Simulation.LoadBlueprint(blueprint);
         }
 
-        private void AfterTeardown(StateResponse result)
+        private void AfterTeardown(Response<StateResponse> result)
         {
-            if (result.ResponseOneofCase == StateResponse.ResponseOneofOneofCase.Error)
+            if (result.Error != null)
             {
                 // TODO(HonzaS): Logging.
             }
@@ -177,7 +174,7 @@ namespace GoodAI.Arnold.Core
             SimulationStateChangeFailed?.Invoke(this, stateChangeFailedEventArgs);
         }
 
-        public void StartSimulation(int stepsToRun = 0)
+        public void StartSimulation(uint stepsToRun = 0)
         {
             if (Simulation == null)
                 throw new InvalidOperationException("Simulation does not exist, cannot start.");

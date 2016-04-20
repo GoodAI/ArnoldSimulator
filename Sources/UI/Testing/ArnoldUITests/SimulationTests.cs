@@ -4,15 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FlatBuffers;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Network.Messages;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Simulation;
-using Google.Protobuf;
 using Moq;
 using Xunit;
-
-using static GoodAI.Arnold.Network.StateData.Types;
 
 namespace GoodAI.Arnold.UI.Tests
 {
@@ -22,65 +21,63 @@ namespace GoodAI.Arnold.UI.Tests
         {
             public bool Fail { get; set; }
 
-            private static readonly Error m_error = new Error {Message = "Foo bar"};
+            private static readonly string m_errorMessage = "Foo bar";
 
-            public Task<TimeoutResult<TResponse>> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs = 0)
-                where TRequest : class, IMessage
-                where TResponse : class, IMessage<TResponse>, new()
+            Task<TimeoutResult<Response<TResponse>>> ICoreLink.Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs)
             {
-                return Task<TimeoutResult<TResponse>>.Factory.StartNew(() =>
+                return Task<TimeoutResult<Response<TResponse>>>.Factory.StartNew(() =>
                 {
-                    TRequest request = conversation.Request;
+                    TRequest request = conversation.RequestData;
 
-                    var result = new TimeoutResult<TResponse>();
+                    var result = new TimeoutResult<Response<TResponse>>();
 
-                    var commandRequest = request as CommandRequest;
-                    if (commandRequest != null)
+                    var builder = new FlatBufferBuilder(1);
+
+                    if (Fail)
                     {
-                        if (Fail)
+                        ResponseMessage responseMessage = ErrorResponseBuilder.Build(m_errorMessage);
+
+                        result.Result = new Response<TResponse>(responseMessage.GetResponse(new ErrorResponse()));
+                    }
+                    else
+                    {
+
+                        StateType resultState = StateType.Empty;
+
+                        var commandRequest = request as CommandRequest;
+                        if (commandRequest != null)
                         {
-                            result.Result = new StateResponse {Error = m_error} as TResponse;
-                        }
-                        else
-                        {
-                            StateType resultState;
                             switch (commandRequest.Command)
                             {
-                                case CommandRequest.Types.CommandType.Load:
+                                case CommandType.Load:
                                     resultState = StateType.Paused;
                                     break;
-                                case CommandRequest.Types.CommandType.Run:
+                                case CommandType.Run:
                                     resultState = StateType.Running;
                                     break;
-                                case CommandRequest.Types.CommandType.Pause:
+                                case CommandType.Pause:
                                     resultState = StateType.Paused;
                                     break;
-                                case CommandRequest.Types.CommandType.Clear:
+                                case CommandType.Clear:
                                     resultState = StateType.Empty;
                                     break;
-                                case CommandRequest.Types.CommandType.Shutdown:
+                                case CommandType.Shutdown:
                                     resultState = StateType.ShuttingDown;
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException();
                             }
-
-                            result.Result = new StateResponse
-                            {
-                                Data = new StateData {State = resultState}
-                            } as TResponse;
                         }
-                    }
 
-                    var getStateRequest = request as GetStateRequest;
-                    if (getStateRequest != null)
-                    {
-                        result.Result = new StateResponse
-                        {
-                            Data = new StateData {State = StateType.Empty}
-                        } as TResponse;
-                    }
+                        var getStateRequest = request as GetStateRequest;
+                        if (getStateRequest != null)
+                            resultState = StateType.Empty;
 
+                        ResponseMessage responseMessage = StateResponseBuilder.Build(resultState);
+
+                        result.Result = new Response<TResponse>(responseMessage.GetResponse(new ErrorResponse()));
+                    }
+                    
                     return result;
                 });
             }

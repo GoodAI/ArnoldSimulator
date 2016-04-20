@@ -31,22 +31,16 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<StateResponse>>(() =>
+                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
                     {
                         Thread.Sleep(100);
-                        return new TimeoutResult<StateResponse>();
+                        return new TimeoutResult<Response<StateResponse>>();
                     });
                     task.Start();
                     return task;
                 });
 
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Run
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Run);
 
             bool first = false;
             bool second = false;
@@ -67,15 +61,15 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<StateResponse>>(() =>
+                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
                     {
-                        var result = new TimeoutResult<StateResponse>();
+                        var result = new TimeoutResult<Response<StateResponse>>();
                         if (noOfRuns == 0)
                         {
                             result.TimedOut = true;
                         } else
                         {
-                            result.Result = new StateResponse();
+                            result.Result = new Response<StateResponse>(new StateResponse());
                         }
                         noOfRuns++;
                         return result;
@@ -84,13 +78,7 @@ namespace GoodAI.Arnold.UI.Tests
                     return task;
                 });
 
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Run
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Run);
 
             await m_controller.Command(conversation, response => { }, () => TimeoutAction.Retry, 30);
 
@@ -104,12 +92,12 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<StateResponse>>(() =>
+                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
                     {
                         // Set up the "continuation" task.
-                        var result = new TimeoutResult<StateResponse>
+                        var result = new TimeoutResult<Response<StateResponse>>
                         {
-                            OriginalTask = new Task<StateResponse>(() => new StateResponse())
+                            OriginalTask = new Task<Response<StateResponse>>(() => new Response<StateResponse>(new StateResponse()))
                         };
                         result.OriginalTask.Start();
                         
@@ -125,13 +113,7 @@ namespace GoodAI.Arnold.UI.Tests
                     return task;
                 });
 
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Run
-                }
-            };
+            var conversation = new CommandConversation(CommandType.Run);
 
             await m_controller.Command(conversation, response => { }, () => TimeoutAction.Wait, 30);
 
@@ -146,11 +128,11 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<StateResponse>>(() =>
+                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
                     {
-                        var result = new TimeoutResult<StateResponse>
+                        var result = new TimeoutResult<Response<StateResponse>>
                         {
-                            OriginalTask = new Task<StateResponse>(() => new StateResponse())
+                            OriginalTask = new Task<Response<StateResponse>>(() => new Response<StateResponse>(new StateResponse()))
                         };
                         result.OriginalTask.Start();
                         result.TimedOut = true;
@@ -161,14 +143,8 @@ namespace GoodAI.Arnold.UI.Tests
                     return task;
                 });
 
-            var conversation = new CommandConversation
-            {
-                Request =
-                {
-                    Command = CommandRequest.Types.CommandType.Run
-                }
-            };
-
+            var conversation = new CommandConversation(CommandType.Run);
+            
             await m_controller.Command(conversation, response => successCalled = true, () => TimeoutAction.Cancel, 30);
 
             Assert.False(successCalled);

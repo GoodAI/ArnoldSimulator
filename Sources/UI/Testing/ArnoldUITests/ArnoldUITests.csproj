@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Google.Protobuf.3.0.0-beta2\lib\dotnet\Google.Protobuf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Moq, Version=4.2.1510.2205, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
       <Private>True</Private>
@@ -90,9 +86,13 @@
       <Project>{201ECC90-6E2B-43AE-A779-EBBCB35CE3A7}</Project>
       <Name>ArnoldUI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libs\ConverseSharpProtobuf\ConverseSharpProtobuf.csproj">
-      <Project>{29FE8AB5-EA2A-4C55-BF38-AFC951DDEFAD}</Project>
-      <Name>ConverseSharpProtobuf</Name>
+    <ProjectReference Include="..\..\Libs\3rd\FlatBuffers\FlatBuffers.csproj">
+      <Project>{28c00774-1e73-4a75-ad8f-844cd21a064d}</Project>
+      <Name>FlatBuffers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\ConverseSharpFlatBuffers\ConverseSharpFlatBuffers.csproj">
+      <Project>{a5965dc3-2404-4e32-a06d-294659052233}</Project>
+      <Name>ConverseSharpFlatBuffers</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Libs\ConverseSharp\ConverseSharp.csproj">
       <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>

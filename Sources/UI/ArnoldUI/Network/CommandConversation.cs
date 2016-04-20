@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FlatBuffers;
+using GoodAI.Arnold.Network.Messages;
 
 namespace GoodAI.Arnold.Network
 {
-    public class CommandConversation : IConversation<CommandRequest, StateResponse>
+    public sealed class CommandConversation : Conversation<CommandRequest, StateResponse>
     {
-        public string Handler => "CommandHandler";
-        public CommandRequest Request { get; }
-
-        public CommandConversation()
+        public CommandConversation(CommandType commandType, uint stepsToRun = 0)
         {
-            Request = new CommandRequest();
+            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun);
         }
     }
 }
