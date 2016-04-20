@@ -31,8 +31,6 @@ namespace GoodAI.Arnold.UI.Tests
 
                     var result = new TimeoutResult<Response<TResponse>>();
 
-                    var builder = new FlatBufferBuilder(1);
-
                     if (Fail)
                     {
                         ResponseMessage responseMessage = ErrorResponseBuilder.Build(m_errorMessage);
@@ -75,7 +73,7 @@ namespace GoodAI.Arnold.UI.Tests
 
                         ResponseMessage responseMessage = StateResponseBuilder.Build(resultState);
 
-                        result.Result = new Response<TResponse>(responseMessage.GetResponse(new ErrorResponse()));
+                        result.Result = new Response<TResponse>(responseMessage.GetResponse(new TResponse()));
                     }
                     
                     return result;

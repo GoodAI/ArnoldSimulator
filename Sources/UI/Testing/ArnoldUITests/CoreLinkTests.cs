@@ -10,7 +10,6 @@ using GoodAI.Arnold.Network.Messages;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 using Moq;
 using Xunit;
-using Xunit.Sdk;
 
 namespace GoodAI.Arnold.UI.Tests
 {
@@ -26,7 +25,6 @@ namespace GoodAI.Arnold.UI.Tests
             var responseMessage = StateResponseBuilder.Build(StateType.Running);
 
             ICoreLink coreLink = GenerateCoreLink(conversation, responseMessage);
-
 
             var futureResponse = coreLink.Request(conversation);
 
@@ -52,12 +50,11 @@ namespace GoodAI.Arnold.UI.Tests
             var conv = new CommandConversation(CommandType.Run);
 
             var responseMessage = ErrorResponseBuilder.Build(errorMessage);
-            var response = responseMessage.GetResponse(new ErrorResponse());
 
             ICoreLink coreLink = GenerateCoreLink(conv, responseMessage);
 
 
-            Task<TimeoutResult<Response<StateResponse>>> futureResponse = coreLink.Request(conv);
+            var futureResponse = coreLink.Request(conv);
 
             Response<StateResponse> receivedResponse = ReadResponse(futureResponse);
             Assert.Null(receivedResponse.Data);
@@ -72,14 +69,14 @@ namespace GoodAI.Arnold.UI.Tests
             var response = StateResponseBuilder.Build(StateType.Invalid);
 
             var converseClientMock = new Mock<IConverseFlatBuffersClient>();
-            converseClientMock.Setup(client => client.SendQuery<CommandRequest, ResponseMessage>(Conversation.Handler, conv.RequestData))
+            converseClientMock.Setup(client => client.SendQuery<CommandRequest, ResponseMessage>(Conversation.Handler, It.IsAny<CommandRequest>()))
                 .Callback(() => Thread.Sleep(WaitMs*2))
                 .Returns(response);
             IConverseFlatBuffersClient converseClient = converseClientMock.Object;
 
             var coreLink = new CoreLink(converseClient);
 
-            Task<TimeoutResult<Response<StateResponse>>> futureResponse = coreLink.Request(conv, WaitMs);
+            var futureResponse = coreLink.Request(conv, WaitMs);
 
             Assert.True(futureResponse.Result.TimedOut);
         }
@@ -96,7 +93,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             var converseClientMock = new Mock<IConverseFlatBuffersClient>();
             converseClientMock.Setup(
-                    client => client.SendQuery<CommandRequest, ResponseMessage>(Conversation.Handler, conv.RequestData))
+                    client => client.SendQuery<CommandRequest, ResponseMessage>(Conversation.Handler, It.IsAny<CommandRequest>()))
                 .Returns(response);
             IConverseFlatBuffersClient converseClient = converseClientMock.Object;
             return converseClient;

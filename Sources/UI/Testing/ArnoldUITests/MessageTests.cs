@@ -17,27 +17,16 @@ namespace GoodAI.Arnold.UI.Tests
         public void WritesReadsCommand()
         {
             var message = CommandRequestBuilder.Build(CommandType.Run);
-            var receivedMessage = RequestMessage.GetRootAsRequestMessage(message.ByteBuffer);
 
-            Assert.Equal(message, receivedMessage);
-        }
-
-        [Fact]
-        public void WritesReadsGetState()
-        {
-            var message = GetStateRequestBuilder.Build();
-            var receivedMessage = RequestMessage.GetRootAsRequestMessage(message.ByteBuffer);
-
-            Assert.Equal(message, receivedMessage);
+            Assert.Equal(CommandType.Run, message.GetRequest(new CommandRequest()).Command);
         }
 
         [Fact]
         public void WritesReadsStateResponseError()
         {
             var message = ErrorResponseBuilder.Build("foo");
-            var receivedMessage = ResponseMessage.GetRootAsResponseMessage(message.ByteBuffer);
 
-            Assert.Equal(message, receivedMessage);
+            Assert.Equal("foo", message.GetResponse(new ErrorResponse()).Message);
         }
     }
 }

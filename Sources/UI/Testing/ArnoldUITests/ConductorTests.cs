@@ -11,6 +11,7 @@ using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network.Messages;
 using GoodAI.Arnold.Project;
+using GoodAI.Net.ConverseSharpFlatBuffers;
 using Moq;
 using Xunit;
 
@@ -36,16 +37,16 @@ namespace GoodAI.Arnold.UI.Tests
             m_simulationMock = new Mock<ISimulation>();
 
             m_coreProxyFactoryMock = new Mock<ICoreProxyFactory>();
-            m_coreProxyFactoryMock.Setup(factory => factory.Create(null))
+            m_coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<EndPoint>()))
                 .Returns(m_coreProxyMock.Object);
 
             m_coreLinkFactoryMock = new Mock<ICoreLinkFactory>();
-            m_coreLinkFactoryMock.Setup(factory => factory.Create(null, null))
+            m_coreLinkFactoryMock.Setup(factory => factory.Create(It.IsAny<EndPoint>(), It.IsAny<IResponseParser>()))
                 .Returns(m_coreLinkMock.Object);
 
             m_coreController = new CoreController(m_coreLinkMock.Object);
             m_coreControllerFactoryMock = new Mock<ICoreControllerFactory>();
-            m_coreControllerFactoryMock.Setup(factory => factory.Create(m_coreLinkMock.Object)).Returns(m_coreController);
+            m_coreControllerFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>())).Returns(m_coreController);
 
             var response = StateResponseBuilder.Build(StateType.ShuttingDown);
             var stateResponse = response.GetResponse(new StateResponse());
@@ -58,7 +59,7 @@ namespace GoodAI.Arnold.UI.Tests
 
 
             m_simulationFactoryMock = new Mock<ISimulationFactory>();
-            m_simulationFactoryMock.Setup(factory => factory.Create(m_coreLinkMock.Object, m_coreController))
+            m_simulationFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>(), It.IsAny<ICoreController>()))
                 .Returns(m_simulationMock.Object);
 
             m_conductor = new Conductor(m_coreProxyFactoryMock.Object, m_coreLinkFactoryMock.Object,
