@@ -16,6 +16,6 @@ namespace GoodAI.Arnold.Network
     public abstract class Conversation<TRequest, TResponse> : Conversation, IConversation<TRequest, TResponse> where TRequest : Table, new()
     {
         public TRequest RequestData => RequestMessage.GetRequest(new TRequest());
-        public RequestMessage RequestMessage { get; protected set; }
+        protected RequestMessage RequestMessage { private get; set; }
     }
 }

@@ -20,7 +20,6 @@ namespace GoodAI.Arnold.Network
     public interface IConversation<out TRequest, TResponse>
     {
         TRequest RequestData { get; }
-        RequestMessage RequestMessage { get; }
     }
 
     public class Response<TResponse>

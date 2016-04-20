@@ -36,11 +36,7 @@ namespace GoodAI.Net.ConverseSharpFlatBuffers
         public void SendMessage<TRequest>(string handlerName, TRequest messageBody)
             where TRequest : Table
         {
-            ByteBuffer byteBuffer = messageBody.ByteBuffer;
-            int dataLength = byteBuffer.Length - byteBuffer.Position;
-            var buffer = new byte[dataLength];
-
-            Buffer.BlockCopy(byteBuffer.Data, byteBuffer.Position, buffer, 0, dataLength);
+            byte[] buffer = BufferConverter.Convert(messageBody.ByteBuffer);
 
             SendMessage(handlerName, buffer, buffer.Length);
         }
@@ -51,12 +47,28 @@ namespace GoodAI.Net.ConverseSharpFlatBuffers
         {
             var receiveStream = new MemoryStream(InitialBufferSize);
 
-            ByteBuffer buffer = messageBody.ByteBuffer;
-            SendQuery(handlerName, buffer.Data, receiveStream, buffer.Length);
+            ByteBuffer byteBuffer = messageBody.ByteBuffer;
+
+            byte[] buffer = BufferConverter.Convert(byteBuffer);
+
+            SendQuery(handlerName, buffer, receiveStream, buffer.Length);
 
             receiveStream.Position = 0;
 
             return m_responseParser.Parse<TResponse>(receiveStream.GetBuffer());
+        }
+    }
+
+    public static class BufferConverter
+    {
+        public static byte[] Convert(ByteBuffer source)
+        {
+            int dataLength = source.Length - source.Position;
+            var destination = new byte[dataLength];
+            
+            Buffer.BlockCopy(source.Data, source.Position, destination, 0, destination.Length);
+
+            return destination;
         }
     }
 }
