@@ -36,6 +36,17 @@ build_flatc()
     cd ../..
 }
 
+copy_headers()
+{
+	cd network/flatbuffers
+	
+	rm -r -f ../../core/core/flatbuffers
+	mkdir ../../core/core/flatbuffers
+	cp include/flatbuffers/flatbuffers.h ../../core/core/flatbuffers/
+	
+	cd ../..
+}
+
 build_corelibs()
 {
 	echo "Building core libs"
@@ -70,7 +81,11 @@ do
     case $option in
         flatc)
             build_flatc
+			copy_headers
         ;;
+		copy-flat-headers)
+			copy_headers
+		;;
         corelibs)
             build_corelibs
         ;;

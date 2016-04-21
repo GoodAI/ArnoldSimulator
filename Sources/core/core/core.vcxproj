@@ -34,6 +34,8 @@
     <ClInclude Include="neuron.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="region.h" />
+    <ClInclude Include="requests_generated.h" />
+    <ClInclude Include="responses_generated.h" />
     <ClInclude Include="spike.h" />
     <ClInclude Include="synapse.h" />
   </ItemGroup>

@@ -71,5 +71,11 @@
     <ClInclude Include="random.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="requests_generated.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="responses_generated.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
