@@ -7,8 +7,8 @@
     <ProjectGuid>{86955C47-2A02-41A4-AB32-C9E592EB2971}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TypeMap</RootNamespace>
-    <AssemblyName>TypeMap</AssemblyName>
+    <RootNamespace>GoodAI.TypeMapping</RootNamespace>
+    <AssemblyName>GoodAI.TypeMap</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ImplicitPropertySelection.cs" />
     <Compile Include="TypeMap.cs" />
     <Compile Include="IContainerConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
