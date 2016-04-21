@@ -15,14 +15,17 @@ namespace GoodAI.Logging.Tests
     {
         public void Configure(Container container)
         {
+            container.Options.PropertySelectionBehavior = new PropertyInjectionForType<ILog>(container);
+
             container.RegisterSingleton(SerilogRobeConfig.CurrentConfig);
             container.RegisterConditional(
                 typeof(ILog),
-                c => typeof(SerilogRobe<>).MakeGenericType(c.Consumer.ImplementationType),
+                typeFactory => typeof(SerilogRobe<>).MakeGenericType(typeFactory.Consumer.ImplementationType),
                 Lifestyle.Transient,
-                c => true);
+                predicateContext => true);
 
-            container.Register<Fool, Fool>(Lifestyle.Transient);
+            container.Register<Fool, Fool>();
+            container.Register<PropertyJester, PropertyJester>();
         }
     }
 
@@ -39,6 +42,20 @@ namespace GoodAI.Logging.Tests
         public void LogJoke()
         {
             m_log.Info("10 words: binary code");
+        }
+    }
+
+    public class PropertyJester
+    {
+        public ILog Log { get; set; } // = NullLogger.Instance; TODO(Premek)
+
+        public Fool DontInjectToMe { get; set; }
+
+        public SerilogRobe DontInjectToDerivedType { get; set; }
+
+        public void LogJoke()
+        {
+            Log.Warn("I'm not a fool!");
         }
     }
 
@@ -78,6 +95,26 @@ namespace GoodAI.Logging.Tests
             LogEvent logEvent = TestSink.Events.FirstOrDefault();
             Assert.NotNull(logEvent);
             Assert.Equal("\"Fool\"", logEvent.Properties["SourceContext"].ToString());
+        }
+
+        [Fact]
+        public void LoggerIsInjectedToProperty()
+        {
+            var jester = TypeMap.GetInstance<PropertyJester>();
+
+            Assert.NotNull(jester);
+
+            jester.LogJoke();
+            Assert.NotNull(TestSink.Events.FirstOrDefault());
+        }
+
+        [Fact]
+        public void DoesNotInjectOtherProperties()
+        {
+            var jester = TypeMap.GetInstance<PropertyJester>();
+
+            Assert.Null(jester.DontInjectToMe);
+            Assert.Null(jester.DontInjectToDerivedType);
         }
     }
 }

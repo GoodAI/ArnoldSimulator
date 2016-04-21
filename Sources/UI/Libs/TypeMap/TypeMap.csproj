@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ImplicitPropertySelection.cs" />
+    <Compile Include="PropertyInjectionForType.cs" />
     <Compile Include="TypeMap.cs" />
     <Compile Include="IContainerConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
