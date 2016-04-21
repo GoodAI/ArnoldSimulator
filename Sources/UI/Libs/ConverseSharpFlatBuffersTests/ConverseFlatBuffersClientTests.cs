@@ -30,8 +30,7 @@ namespace ConverseSharpFlatBuffersTests
 
             Offset<Command> commandOffset = Command.EndCommand(builder);
             builder.Finish(commandOffset.Value);
-            ByteBuffer buffer = builder.DataBuffer;
-            m_command = Command.GetRootAsCommand(buffer);
+            m_command = Command.GetRootAsCommand(builder.DataBuffer);
 
             m_responseParser = new ResponseParser();
             m_flatBuffersClient = new ConverseFlatBuffersClient(new DummyConnector(m_stream), m_responseParser);

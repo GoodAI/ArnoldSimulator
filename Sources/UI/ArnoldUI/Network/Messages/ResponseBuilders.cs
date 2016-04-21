@@ -9,6 +9,8 @@ namespace GoodAI.Arnold.Network.Messages
 {
     public static class ResponseMessageBuilder
     {
+        public const int BufferInitialSize = 64;
+
         public static ResponseMessage Build<TRequest>(FlatBufferBuilder builder, Response responseType, Offset<TRequest> responseOffset)
             where TRequest : Table
         {
@@ -24,7 +26,7 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public static ResponseMessage Build(string message)
         {
-            var builder = new FlatBufferBuilder(1);
+            var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
 
             StringOffset messageOffset = builder.CreateString(message);
 
@@ -38,7 +40,7 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public static ResponseMessage Build(StateType state)
         {
-            var builder = new FlatBufferBuilder(1);
+            var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
 
             Offset<StateResponse> responseOffset = StateResponse.CreateStateResponse(builder, state);
 

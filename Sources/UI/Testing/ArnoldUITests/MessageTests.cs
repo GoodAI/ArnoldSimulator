@@ -22,6 +22,22 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
+        public void WritesReadsGetState()
+        {
+            var message = GetStateRequestBuilder.Build();
+
+            Assert.NotNull(message.GetRequest(new GetStateRequest()));
+        }
+
+        [Fact]
+        public void WritesReadsStateResponse()
+        {
+            var message = StateResponseBuilder.Build(StateType.ShuttingDown);
+
+            Assert.Equal(StateType.ShuttingDown, message.GetResponse(new StateResponse()).State);
+        }
+
+        [Fact]
         public void WritesReadsStateResponseError()
         {
             var message = ErrorResponseBuilder.Build("foo");

@@ -26,7 +26,7 @@ namespace GoodAI.Net.ConverseSharpFlatBuffers
     public class ConverseFlatBuffersClient : ConverseClient, IConverseFlatBuffersClient
     {
         private readonly IResponseParser m_responseParser;
-        private const int InitialBufferSize = 32 * 1024;
+        private const int InitialBufferSize = 512;
 
         public ConverseFlatBuffersClient(ITcpConnector connector, IResponseParser responseParser) : base(connector)
         {

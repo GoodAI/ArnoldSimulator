@@ -9,6 +9,8 @@ namespace GoodAI.Arnold.Network.Messages
 {
     public static class RequestMessageBuilder
     {
+        public const int BufferInitialSize = 64;
+
         public static RequestMessage Build<TRequest>(FlatBufferBuilder builder, Request requestType, Offset<TRequest> requestOffset)
             where TRequest : Table
         {
@@ -24,7 +26,7 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0)
         {
-            var builder = new FlatBufferBuilder(1);
+            var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
 
             Offset<CommandRequest> requestOffset = CommandRequest.CreateCommandRequest(builder, commandType, stepsToRun);
 
@@ -36,7 +38,7 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public static RequestMessage Build()
         {
-            var builder = new FlatBufferBuilder(1);
+            var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
 
             // Tables without fields don't have the Create...() static method, it needs to be done like this.
             GetStateRequest.StartGetStateRequest(builder);
