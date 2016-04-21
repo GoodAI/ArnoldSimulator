@@ -43,6 +43,9 @@ copy_headers()
     rm -r -f ../../core/core/flatbuffers
     mkdir ../../core/core/flatbuffers
     cp include/flatbuffers/flatbuffers.h ../../core/core/flatbuffers/
+	
+	rm -r -f ../../UI/Libs/3rd/FlatBuffers
+	cp -r net/FlatBuffers ../../UI/Libs/3rd/FlatBuffers
     
     cd ../..
 }
