@@ -47,7 +47,7 @@ namespace GoodAI.Logging.Tests
 
     public class PropertyJester
     {
-        public ILog Log { get; set; } // = NullLogger.Instance; TODO(Premek)
+        public ILog Log { get; set; } = NullLogger.Instance;
 
         public Fool DontInjectToMe { get; set; }
 
