@@ -39,10 +39,6 @@ build_flatc()
 copy_headers()
 {
     cd network/flatbuffers
-    
-    rm -r -f ../../core/core/flatbuffers
-    mkdir ../../core/core/flatbuffers
-    cp include/flatbuffers/flatbuffers.h ../../core/core/flatbuffers/
 	
 	rm -r -f ../../UI/Libs/3rd/FlatBuffers
 	cp -r net/FlatBuffers ../../UI/Libs/3rd/FlatBuffers
@@ -56,7 +52,7 @@ build_corelibs()
     
     cd core/libs
     
-    ./build-libs-win64.sh
+    ./build-libs-win64.sh all
     
     cd ../..
 }
@@ -72,9 +68,6 @@ build_messages()
     
     flatbuffers/bin/flatc.exe --csharp --gen-onefile -o ../UI/ArnoldUI/Network/Messages/ messages/responses.fbs
     mv ../UI/ArnoldUI/Network/Messages/responses.cs ../UI/ArnoldUI/Network/Messages/Responses.cs
-    
-    flatbuffers/bin/flatc.exe --cpp -o ../core/core/ messages/requests.fbs
-    flatbuffers/bin/flatc.exe --cpp -o ../core/core/ messages/responses.fbs
     
     cd ..
 }

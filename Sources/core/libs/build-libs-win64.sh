@@ -21,13 +21,11 @@ build_charm()
 
     echo "...fixing scripts"
 
-    cat src/arch/win64/unix2nt_cc | sed 's/\/I`cygpath -d \\"$SDK_DIR\/Include\\"`/\/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/shared\\"` \/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/um\\"`/g' > src/arch/win64/unix2nt_cc_tmp
-	cat src/arch/win64/unix2nt_cc_tmp > src/arch/win64/unix2nt_cc
-	rm src/arch/win64/unix2nt_cc_tmp
-	
-    cat src/arch/win64/unix2nt_cc | sed 's/$SDK_DIR\/Lib\/x64/$SDK_DIR\/Lib\/$WindowsSDKLibVersion\/um\/x64/g' > src/arch/win64/unix2nt_cc_tmp
-	cat src/arch/win64/unix2nt_cc_tmp > src/arch/win64/unix2nt_cc
-	rm src/arch/win64/unix2nt_cc_tmp
+    cat src/arch/win64/unix2nt_cc | sed 's/\/I`cygpath -d \\"$SDK_DIR\/Include\\"`/\/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/shared\\"` \/I`cygpath -d \\"$SDK_DIR\/Include\/$WindowsSDKLibVersion\/um\\"`/g' > src/arch/win64/unix2nt_cc.tmp
+    mv -f src/arch/win64/unix2nt_cc.tmp src/arch/win64/unix2nt_cc
+
+    cat src/arch/win64/unix2nt_cc | sed 's/$SDK_DIR\/Lib\/x64/$SDK_DIR\/Lib\/$WindowsSDKLibVersion\/um\/x64/g' > src/arch/win64/unix2nt_cc.tmp
+    mv -f src/arch/win64/unix2nt_cc.tmp src/arch/win64/unix2nt_cc
 
     ./build charm++ net-win64 --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ net-win64 --destination=net-release --with-production -j8 | tee net-release.log
@@ -103,6 +101,38 @@ build_json()
     mv json-${JSON_VERSION} json
 }
 
+build_flatbuffers()
+{
+    echo "Building FlatBuffers"
+    FLATBUFFERS_VERSION=1.3.0
+    FLATBUFFERS_LINK=https://github.com/google/flatbuffers/archive/v1.3.0.zip
+    
+    echo "...cleaning"
+    rm -r -f flatbuffers
+    rm -r -f bin
+
+    if [ `ls -1 flatbuffers-$FLATBUFFERS_VERSION.zip 2>/dev/null | wc -l` -le 0 ]
+    then
+        wget --no-check-certificate --output-document=flatbuffers-$FLATBUFFERS_VERSION.zip $FLATBUFFERS_LINK
+    fi
+
+    echo "...unpacking"
+    unzip -q -n flatbuffers-$FLATBUFFERS_VERSION.zip
+    mv flatbuffers-$FLATBUFFERS_VERSION flatbuffers
+    
+    cd flatbuffers
+    
+    echo "...building"
+    
+    devenv.exe /Upgrade build/VS2010/FlatBuffers.sln
+    msbuild.exe build/VS2010/FlatBuffers.sln /property:Configuration=Release /property:Platform=x64
+    
+    mkdir bin
+    mv build/VS2010/x64/Release/* bin
+
+    cd ..
+}
+
 for option
 do
     case $option in
@@ -117,6 +147,16 @@ do
         ;;
         json)
             build_json
+        ;;
+        flatbuffers)
+            build_flatbuffers
+        ;;
+        all)
+            build_charm
+            build_tbb
+            build_sparsehash
+            build_json
+            build_flatbuffers
         ;;
     esac
 done

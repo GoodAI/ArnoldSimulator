@@ -19,7 +19,7 @@
     e.g. C:\cygwin64\cygwin.bat
 - in the Cygwin commnad prompt, execute the following commands:
     cd /cygdrive/c/somedir/arnold/libs
-    ./build-libs-win64.sh charm tbb sparsehash json
+    ./build-libs-win64.sh all
 - note: fatal errors during charm++ compilation are expected (it tries to compile memory allocation and threading implementations opportunistically even for different platforms)
 
 4) Build solution
