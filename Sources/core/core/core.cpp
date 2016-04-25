@@ -15,8 +15,11 @@ void Core::HandleRequestFromClient(char *request)
         std::vector<unsigned char> vecRequest(strRequest.begin(), strRequest.end());
         RequestId requestId = mRequestCounter++;
         mTokens.insert(std::make_pair(requestId, CcsDelayReply()));
-        gCore.ckLocal()->mBrain.EnqueueClientRequest(requestId, vecRequest);
+        //gCore.ckLocal()->mBrain.EnqueueClientRequest(requestId, vecRequest);
+        gCore.ckLocal()->mRequestHandler->EnqueueClientRequest(requestId, vecRequest);
     }
+
+	CmiFree(request);
 }
 
 Core::Core(CkArgMsg *msg)
@@ -32,11 +35,14 @@ Core::Core(CkArgMsg *msg)
     gCore = thisProxy;
 
     mBrain = CProxy_BrainBase::ckNew("ThresholdBrain", "");
+	mRequestHandler = new RequestHandler();
     mStart = CmiWallTimer();
 }
 
 void Core::Exit()
 {
+	mRequestHandler->~RequestHandler();
+
     CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStart);
     CkExit();
 }

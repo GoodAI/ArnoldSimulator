@@ -86,8 +86,6 @@ public:
     void ProgressSimulation();
 
 private:
-    std::vector<std::pair<RequestId, std::vector<unsigned char>>> mClientRequests;
-
     Body *mBody;
     Brain *mBrain;
     CProxy_RegionBase mRegionsAll;

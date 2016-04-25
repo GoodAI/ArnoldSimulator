@@ -17,6 +17,7 @@
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="region.cpp" />
+    <ClCompile Include="requesthandler.cpp" />
     <ClCompile Include="spike.cpp" />
     <ClCompile Include="synapse.cpp" />
   </ItemGroup>
@@ -34,6 +35,7 @@
     <ClInclude Include="neuron.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="region.h" />
+    <ClInclude Include="requesthandler.h" />
     <ClInclude Include="spike.h" />
     <ClInclude Include="synapse.h" />
   </ItemGroup>

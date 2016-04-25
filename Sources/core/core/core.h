@@ -10,6 +10,8 @@
 #include "core.decl.h"
 #include "brain.decl.h"
 
+#include "requesthandler.h"
+
 class Core : public CBase_Core
 {
 public:
@@ -24,6 +26,7 @@ public:
 private:
     double mStart;
     CProxy_BrainBase mBrain;
+	RequestHandler *mRequestHandler;
 
     static std::atomic<RequestId> mRequestCounter;
     static std::unordered_map<RequestId, CcsDelayedReply> mTokens;
