@@ -12,6 +12,8 @@
 
 #include "requesthandler.h"
 
+class RequestHandler;
+
 class Core : public CBase_Core
 {
 public:
@@ -21,7 +23,7 @@ public:
 
     static void HandleRequestFromClient(char *request);
 
-    void SendResponseToClient(RequestId token, std::vector<unsigned char> &response);
+    void SendResponseToClient(RequestId token, std::vector<uint8_t> &response);
 
 private:
     double mStart;

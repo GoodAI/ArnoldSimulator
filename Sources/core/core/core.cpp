@@ -12,10 +12,9 @@ void Core::HandleRequestFromClient(char *request)
 {
     if (CcsIsRemoteRequest()) {
         std::string strRequest(request + CmiMsgHeaderSizeBytes);
-        std::vector<unsigned char> vecRequest(strRequest.begin(), strRequest.end());
+        std::vector<uint8_t> vecRequest(strRequest.begin(), strRequest.end());
         RequestId requestId = mRequestCounter++;
         mTokens.insert(std::make_pair(requestId, CcsDelayReply()));
-        //gCore.ckLocal()->mBrain.EnqueueClientRequest(requestId, vecRequest);
         gCore.ckLocal()->mRequestHandler->EnqueueClientRequest(requestId, vecRequest);
     }
 
@@ -35,7 +34,7 @@ Core::Core(CkArgMsg *msg)
     gCore = thisProxy;
 
     mBrain = CProxy_BrainBase::ckNew("ThresholdBrain", "");
-	mRequestHandler = new RequestHandler();
+	mRequestHandler = new RequestHandler(this);
     mStart = CmiWallTimer();
 }
 
@@ -47,7 +46,7 @@ void Core::Exit()
     CkExit();
 }
 
-void Core::SendResponseToClient(RequestId token, std::vector<unsigned char> &response)
+void Core::SendResponseToClient(RequestId token, std::vector<uint8_t> &response)
 {
     CcsSendDelayedReply(mTokens[token], response.size(), response.data());
 }
