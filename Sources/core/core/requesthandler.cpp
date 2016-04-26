@@ -6,30 +6,39 @@ void RequestHandler::EnqueueClientRequest(RequestId token, std::vector<uint8_t> 
 }
 
 void RequestHandler::ProcessClientRequests() {
-	for (auto requestPair : mClientRequests) {
-		RequestId token = requestPair.first;
-		std::vector<uint8_t> request = requestPair.second;
+	CkPrintf("Processing %d client requests", mClientRequests.size());
+	try
+	{
+		for (auto requestPair : mClientRequests) {
+			RequestId token = requestPair.first;
+			std::vector<uint8_t> request = requestPair.second;
 
-		// FlatBuffers work with an uint8_t* buffer.
-		uint8_t* data = &request[0];
-		const RequestMessage* requestMessage = GetRequestMessage(data);
-		ProcessClientRequest(requestMessage, token);
+			// FlatBuffers work with an uint8_t* buffer.
+			uint8_t* data = &request[0];
+			const RequestMessage *requestMessage = GetRequestMessage(data);
+			ProcessClientRequest(requestMessage, token);
+		}
+	}
+	catch (ShutdownRequestedException &exception)
+	{
+		mCore->Exit();
 	}
 }
 
-void RequestHandler::ProcessClientRequest(const RequestMessage* requestMessage, const RequestId token) {
+void RequestHandler::ProcessClientRequest(const RequestMessage *requestMessage, const RequestId token) const
+{
 	Request requestType = requestMessage->request_type();
 
 	switch (requestType) {
 	case Request_CommandRequest:
 	{
-		const CommandRequest* commandRequest = static_cast<const CommandRequest*>(requestMessage->request());
+		const CommandRequest *commandRequest = static_cast<const CommandRequest*>(requestMessage->request());
 		ProcessCommandRequest(commandRequest, token);
 		break;
 	}
 	case Request_GetStateRequest:
 	{
-		const GetStateRequest* getStateRequest = static_cast<const GetStateRequest*>(requestMessage->request());
+		const GetStateRequest *getStateRequest = static_cast<const GetStateRequest*>(requestMessage->request());
 		ProcessGetStateRequest(getStateRequest, token);
 		break;
 	}
@@ -38,32 +47,40 @@ void RequestHandler::ProcessClientRequest(const RequestMessage* requestMessage, 
 	}
 }
 
-void RequestHandler::ProcessCommandRequest(const CommandRequest* commandRequest, const RequestId token)
+void RequestHandler::ProcessCommandRequest(const CommandRequest *commandRequest, RequestId token) const
 {
 	CommandType commandType = commandRequest->command();
-	CkPrintf("Received command request");
 
-	// TODO(HonzaS): Add actual logic here.
-	std::vector<uint8_t> message = CreateStateMessage(StateType_Running);
-	mCore->SendResponseToClient(token, message);
+	if (commandType == CommandType_Shutdown)
+	{
+		std::vector<uint8_t> message = CreateStateMessage(StateType_ShuttingDown);
+		mCore->SendResponseToClient(token, message);
+
+		throw ShutdownRequestedException("Shutdown requested by the client");
+	}
+	else
+	{
+		// TODO(HonzaS): Add actual logic here.
+		std::vector<uint8_t> message = CreateStateMessage(StateType_Running);
+		mCore->SendResponseToClient(token, message);
+	}
 }
 
-void RequestHandler::ProcessGetStateRequest(const GetStateRequest* getStateRequest, const RequestId token)
+void RequestHandler::ProcessGetStateRequest(const GetStateRequest *getStateRequest, RequestId token) const
 {
-	CkPrintf("Received GetState request");
 	// TODO(HonzaS): Add actual logic here.
 	std::vector<uint8_t> message = CreateStateMessage(StateType_Running);
 	mCore->SendResponseToClient(token, message);
 }
 
-const std::vector<uint8_t> RequestHandler::CreateStateMessage(const StateType state)
+std::vector<uint8_t> RequestHandler::CreateStateMessage(StateType state)
 {
 	flatbuffers::FlatBufferBuilder builder;
 
 	flatbuffers::Offset<StateResponse> stateResponseOffset = CreateStateResponse(builder, state);
 	builder.Finish(stateResponseOffset);
 
-	uint8_t* buffer = builder.GetBufferPointer();
+	uint8_t *buffer = builder.GetBufferPointer();
 	std::vector<uint8_t> vecResponse(buffer, buffer + builder.GetSize());
 
 	return vecResponse;

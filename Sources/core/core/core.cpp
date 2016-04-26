@@ -3,6 +3,10 @@
 
 #include "core.h"
 
+
+#include "flatbuffers/flatbuffers.h"
+#include "requests_generated.h"
+
 CProxy_Core gCore;
 
 std::atomic<RequestId> Core::mRequestCounter = 0;
@@ -21,6 +25,20 @@ void Core::HandleRequestFromClient(char *request)
 	CmiFree(request);
 }
 
+std::vector<uint8_t> CreateTestCommandRequest()
+{
+	flatbuffers::FlatBufferBuilder builder;
+
+	auto command = CreateCommandRequest(builder, CommandType_Run);
+	auto request = CreateRequestMessage(builder, Request_CommandRequest, command.Union());
+
+	builder.Finish(request);
+
+	uint8_t *buffer = builder.GetBufferPointer();
+	std::vector<uint8_t> vecResponse(buffer, buffer + builder.GetSize());
+
+	return vecResponse;
+}
 Core::Core(CkArgMsg *msg)
 {
     //if (msg->argc > 1) someParam1 = atoi(msg->argv[1]);
@@ -36,11 +54,17 @@ Core::Core(CkArgMsg *msg)
     mBrain = CProxy_BrainBase::ckNew("ThresholdBrain", "");
 	mRequestHandler = new RequestHandler(this);
     mStart = CmiWallTimer();
+
+	/*auto request = CreateTestCommandRequest();
+	RequestId requestId = mRequestCounter++;
+	mTokens.insert(std::make_pair(requestId, CcsDelayReply()));
+	mRequestHandler->EnqueueClientRequest(requestId, request);
+	mRequestHandler->ProcessClientRequests();*/
 }
 
 void Core::Exit()
 {
-	mRequestHandler->~RequestHandler();
+	delete mRequestHandler;
 
     CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStart);
     CkExit();
