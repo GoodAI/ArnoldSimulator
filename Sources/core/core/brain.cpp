@@ -17,11 +17,11 @@ Brain *BrainBase::CreateBrain(const std::string &type, BrainBase &base, json &pa
 
 BrainBase::BrainBase(const std::string &type, const std::string &params)
 {
-    json parsedParams;
+    /*json parsedParams;
     std::stringstream streamedParams(params);
     streamedParams >> parsedParams;
 
-    mBrain = BrainBase::CreateBrain(type, *this, parsedParams);
+    mBrain = BrainBase::CreateBrain(type, *this, parsedParams);*/
 }
 
 BrainBase::BrainBase(CkMigrateMessage *msg)
