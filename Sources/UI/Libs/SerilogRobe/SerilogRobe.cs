@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog;
+using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Exceptions;
 
@@ -11,20 +12,15 @@ namespace GoodAI.Logging
 {
     public class SerilogRobe : ILog
     {
-        static SerilogRobe()
-        {
-            // Serilog diagnostic output. Serilog won't write its errors into the user-space sinks.
-            Serilog.Debugging.SelfLog.Out = Console.Out;
-        }
-
         protected SerilogRobe(ILogger serilogLogger)
         {
             m_logger = serilogLogger;
         }
 
-        public static ILog CreateLogger(Func<LoggerConfiguration, LoggerConfiguration> configAction)
+        static SerilogRobe()
         {
-            return new SerilogRobe(configAction(SerilogRobeConfig.DefaultConfig).CreateLogger());
+            // Serilog diagnostic output. Serilog won't write its errors into the user-space sinks.
+            SelfLog.Out = Console.Out;
         }
 
         private readonly ILogger m_logger;
@@ -41,8 +37,6 @@ namespace GoodAI.Logging
             m_logger.Write(ConvertSeverity(severity), ex, template, objects);
         }
 
-        #endregion
-
         private static LogEventLevel ConvertSeverity(Severity severity)
         {
             switch (severity)
@@ -55,6 +49,36 @@ namespace GoodAI.Logging
                 default: return LogEventLevel.Error;
             }
         }
+
+        #endregion
+
+        #region Factories
+
+        /// <summary>
+        /// Creates new logger based on SerilogRobeConfig.CurrentConfig.
+        /// </summary>
+        public static ILog CreateLogger()
+        {
+            return new SerilogRobe(SerilogRobeConfig.CurrentConfig.CreateLogger());
+        }
+
+        /// <summary>
+        /// Creates new logger based on SerilogRobeConfig.CurrentConfig.
+        /// </summary>
+        public static ILog CreateLoggerForContext<TContext>()
+        {
+            return new SerilogRobe<TContext>(SerilogRobeConfig.CurrentConfig);
+        }
+
+        /// <summary>
+        /// Creates new logger based on SerilogRobeConfig.DefaultConfig customized by the configAction.
+        /// </summary>
+        public static ILog CreateLogger(Func<LoggerConfiguration, LoggerConfiguration> configAction)
+        {
+            return new SerilogRobe(configAction(SerilogRobeConfig.DefaultConfig).CreateLogger());
+        }
+
+        #endregion
     }
 
     public class SerilogRobe<TContext> : SerilogRobe

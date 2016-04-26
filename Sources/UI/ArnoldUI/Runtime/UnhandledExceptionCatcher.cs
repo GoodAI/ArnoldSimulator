@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using GoodAI.Logging;
 
 namespace GoodAI.Arnold
 {
@@ -17,6 +18,8 @@ namespace GoodAI.Arnold
     /// </summary>
     internal static class UnhandledExceptionCatcher
     {
+        public static ILog Log { get; set; }
+
         public static void RegisterHandlers()
         {
             if (Debugger.IsAttached)

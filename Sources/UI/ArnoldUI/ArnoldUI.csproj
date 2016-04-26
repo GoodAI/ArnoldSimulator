@@ -61,6 +61,14 @@
       <HintPath>..\packages\AdamsLair.OpenTK.GLControl.1.1.6.0\lib\net20\OpenTK.GLControl.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.1.5.14\lib\net45\Serilog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.FullNetFx, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.1.5.14\lib\net45\Serilog.FullNetFx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Activities" />
     <Reference Include="System.Collections.Immutable, Version=1.1.37.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -204,6 +212,14 @@
     <ProjectReference Include="..\Libs\ConverseSharp\ConverseSharp.csproj">
       <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>
       <Name>ConverseSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libs\LoggerIface\LoggerIface.csproj">
+      <Project>{49A532A2-2080-4DBE-AFC8-0B34D9B0B210}</Project>
+      <Name>LoggerIface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libs\SerilogRobe\SerilogRobe.csproj">
+      <Project>{7BB6441B-3E76-4B6D-A602-70BC268D4826}</Project>
+      <Name>SerilogRobe</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

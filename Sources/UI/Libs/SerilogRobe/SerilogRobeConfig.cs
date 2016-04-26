@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,9 @@ namespace GoodAI.Logging
         public const LogEventLevel DefaultLevel = LogEventLevel.Information;
 #endif
 
+        private const int DefaultSizeLimit = 100*1024*1024;
+        private const int DefaultFileCountLimit = 10;
+
         private static LoggerConfiguration m_config;
 
         public static LoggerConfiguration CurrentConfig => m_config ?? (m_config = DefaultConfig);
@@ -32,6 +36,16 @@ namespace GoodAI.Logging
         public static void Setup(Func<LoggerConfiguration, LoggerConfiguration> configAction)
         {
             m_config = configAction(DefaultConfig);
+        }
+
+        public static void SetupLoggingToFile(string logPath, string logName, int sizeLimit = DefaultSizeLimit)
+        {
+            SerilogRobeConfig.Setup(configuration => configuration.WriteTo.RollingFile(
+                Path.Combine(logPath, logName + "-{Date}.log"),
+                LogEventLevel.Information,
+                outputTemplate: SerilogRobeConfig.DefaultOutputTemplate,
+                fileSizeLimitBytes: sizeLimit / DefaultFileCountLimit,
+                retainedFileCountLimit: DefaultFileCountLimit));
         }
     }
 }
