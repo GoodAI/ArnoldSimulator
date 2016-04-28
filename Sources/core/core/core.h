@@ -3,9 +3,6 @@
 #include <atomic>
 #include <unordered_map>
 
-#include "converse.h"
-#include "conv-ccs.h"
-
 #include "common.h"
 #include "core.decl.h"
 #include "brain.decl.h"
@@ -21,7 +18,7 @@ public:
 
     void Exit();
 
-    static void HandleRequestFromClient(char *request);
+    void HandleRequestFromClient(CkCcsRequestMsg *msg);
 
     void SendResponseToClient(RequestId token, std::vector<uint8_t> &response);
 

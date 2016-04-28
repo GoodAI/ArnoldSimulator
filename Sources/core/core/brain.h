@@ -15,7 +15,6 @@
 #include "spike.h"
 #include "synapse.h"
 #include "body.h"
-#include "core.decl.h"
 #include "brain.decl.h"
 #include "region.decl.h"
 

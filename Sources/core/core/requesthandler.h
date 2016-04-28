@@ -32,7 +32,7 @@ public:
     RequestHandler(const RequestHandler &other) = delete;
     RequestHandler &operator=(const RequestHandler &other) = delete;
 
-    void EnqueueClientRequest(RequestId token, std::vector<uint8_t> &request);
+    void EnqueueClientRequest(RequestId token, const char *data, int length);
 	void ProcessClientRequests();
 private:
     std::vector<std::pair<RequestId, std::vector<uint8_t>>> mClientRequests;

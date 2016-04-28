@@ -1,12 +1,18 @@
 #include "requesthandler.h"
 
-void RequestHandler::EnqueueClientRequest(RequestId token, std::vector<uint8_t> &request)
+void RequestHandler::EnqueueClientRequest(RequestId token, const char *data, int length)
 {
-	mClientRequests.push_back(std::pair<RequestId, std::vector<uint8_t>>(token, request));
+	std::vector<uint8_t> message;
+	message.assign(data, data + length);
+
+	// Store the data in a vector so it's serializable.
+	// The original buffer can still be accessed via &message[0];
+	mClientRequests.push_back(std::pair<RequestId, std::vector<uint8_t>>(token, message));
+	ProcessClientRequests();
 }
 
 void RequestHandler::ProcessClientRequests() {
-	CkPrintf("Processing %d client requests", mClientRequests.size());
+	CkPrintf("Processing %d client requests\n", mClientRequests.size());
 	try
 	{
 		for (auto requestPair : mClientRequests) {
