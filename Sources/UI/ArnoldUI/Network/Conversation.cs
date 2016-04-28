@@ -10,7 +10,7 @@ namespace GoodAI.Arnold.Network
 {
     public abstract class Conversation
     {
-        public const string Handler = "RequestHandler";
+        public const string Handler = "request";
     }
 
     public abstract class Conversation<TRequest, TResponse> : Conversation, IConversation<TRequest, TResponse> where TRequest : Table, new()
