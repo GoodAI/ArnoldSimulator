@@ -123,7 +123,7 @@ void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<unsi
 
 void BrainBase::ProgressSimulation()
 {
-	// TODO(HonzaS): Incorporate the message handling into the simulation code when it's done.
+    // TODO(HonzaS): Incorporate the message handling into the simulation code when it's done.
 
     /*
     bool allSimulated = regionsSimulatedCnt == regionsToBeSimulatedCnt;

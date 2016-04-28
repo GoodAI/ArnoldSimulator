@@ -1,6 +1,6 @@
 mainmodule core
 {
-	include "ckcallback-ccs.h";
+    include "ckcallback-ccs.h";
 
 
     readonly CProxy_Core gCore;

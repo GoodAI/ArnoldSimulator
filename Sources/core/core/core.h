@@ -21,12 +21,12 @@ public:
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
 
     void SendResponseToClient(RequestId token, std::vector<uint8_t> &response);
-	void NoResponseToClient(RequestId token);
+    void NoResponseToClient(RequestId token);
 
 private:
     double mStart;
     CProxy_BrainBase mBrain;
-	RequestHandler *mRequestHandler;
+    RequestHandler *mRequestHandler;
 
     static std::atomic<RequestId> mRequestCounter;
     static std::unordered_map<RequestId, CkCcsRequestMsg*> mTokens;

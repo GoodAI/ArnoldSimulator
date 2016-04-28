@@ -11,14 +11,14 @@ std::unordered_map<RequestId, CkCcsRequestMsg*> Core::mTokens;
 
 void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
 {
-	RequestId requestId = mRequestCounter++;
-	mTokens.insert(std::make_pair(requestId, msg));
+    RequestId requestId = mRequestCounter++;
+    mTokens.insert(std::make_pair(requestId, msg));
 
-	flatbuffers::FlatBufferBuilder builder;
+    flatbuffers::FlatBufferBuilder builder;
 
-	mRequestHandler->HandleRequestFromClient(requestId, msg->data, msg->length);
+    mRequestHandler->HandleRequestFromClient(requestId, msg->data, msg->length);
 
-	// Cannot delete the message here - it holds the reply and will be deleted later.
+    // Cannot delete the message here - it holds the reply and will be deleted later.
 }
 
 Core::Core(CkArgMsg *msg)
@@ -27,7 +27,7 @@ Core::Core(CkArgMsg *msg)
     //if (msg->argc > 2) someParam2 = atoi(msg->argv[2]);
     //if (msg->argc > 3) someParam3 = atoi(msg->argv[3]);
     delete msg;
-	msg = nullptr;
+    msg = nullptr;
     //CcsRegisterHandler("request", (CmiHandler)HandleRequestFromClient);
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 
@@ -35,13 +35,13 @@ Core::Core(CkArgMsg *msg)
     gCore = thisProxy;
 
     //mBrain = CProxy_BrainBase::ckNew("ThresholdBrain", "");
-	mRequestHandler = new RequestHandler(this);
+    mRequestHandler = new RequestHandler(this);
     mStart = CmiWallTimer();
 }
 
 void Core::Exit()
 {
-	delete mRequestHandler;
+    delete mRequestHandler;
 
     CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStart);
     CkExit();
@@ -49,16 +49,16 @@ void Core::Exit()
 
 void Core::SendResponseToClient(RequestId token, std::vector<uint8_t> &response)
 {
-	CkCcsRequestMsg *requestMessage = mTokens[token];
+    CkCcsRequestMsg *requestMessage = mTokens[token];
     CcsSendDelayedReply(requestMessage->reply, response.size(), response.data());
 
-	// This destroys the message.
-	mTokens.erase(token);
+    // This destroys the message.
+    mTokens.erase(token);
 }
 
 void Core::NoResponseToClient(RequestId token)
 {
-	mTokens.erase(token);
+    mTokens.erase(token);
 }
 
 #include "core.def.h"
