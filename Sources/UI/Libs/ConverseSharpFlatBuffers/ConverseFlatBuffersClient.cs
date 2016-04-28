@@ -33,6 +33,9 @@ namespace GoodAI.Net.ConverseSharpFlatBuffers
             m_responseParser = responseParser;
         }
 
+        /// <summary>
+        /// Warning: There's one unnecessary copying of the data. You should fix it before sending large data too often.
+        /// </summary>
         public void SendMessage<TRequest>(string handlerName, TRequest messageBody)
             where TRequest : Table
         {
@@ -41,6 +44,9 @@ namespace GoodAI.Net.ConverseSharpFlatBuffers
             SendMessage(handlerName, buffer, buffer.Length);
         }
 
+        /// <summary>
+        /// Warning: There's one unnecessary copying of the data. You should fix it before sending large data too often.
+        /// </summary>
         public TResponse SendQuery<TRequest, TResponse>(string handlerName, TRequest messageBody)
             where TRequest : Table
             where TResponse : Table
@@ -61,6 +67,7 @@ namespace GoodAI.Net.ConverseSharpFlatBuffers
 
     public static class BufferConverter
     {
+        // TODO(Premek): Eliminate buffer copy. Add support for sending from the middle of a buffer to the lower layers.
         public static byte[] Convert(ByteBuffer source)
         {
             int dataLength = source.Length - source.Position;
