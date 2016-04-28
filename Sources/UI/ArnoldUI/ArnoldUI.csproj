@@ -147,6 +147,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
+    <Compile Include="Runtime\LoggingConfig.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
     <Compile Include="Network\CoreController.cs" />
     <Compile Include="Simulation\SimulationEvents.cs" />
