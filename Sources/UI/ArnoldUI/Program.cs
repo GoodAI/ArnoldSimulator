@@ -31,11 +31,12 @@ namespace GoodAI.Arnold
         {
             try
             {
-                string appName = AppDomain.CurrentDomain.FriendlyName;
+                string appName = typeof(Program).Namespace ?? "(default)";
 
                 if (string.IsNullOrEmpty(logPath))
                 {
-                    logPath = InitLogDirectory(appName);
+                    // Log to 'GoodAI\Arnold\Logs'.
+                    logPath = InitLogDirectory(appName.Replace('.', '\\'), "Logs");
                 }
 
                 SerilogRobeConfig.SetupLoggingToFile(logPath, appName);
@@ -52,9 +53,9 @@ namespace GoodAI.Arnold
             }
         }
 
-        private static string InitLogDirectory(string appName)
+        private static string InitLogDirectory(string subfolderPath, string logFolder)
         {
-            string logPath = Path.Combine(GetDefaultLogPath(), appName);
+            string logPath = Path.Combine(GetDefaultLogPath(), subfolderPath, logFolder);
 
             Directory.CreateDirectory(logPath);
 
@@ -63,7 +64,18 @@ namespace GoodAI.Arnold
 
         private static string GetDefaultLogPath()
         {
-            return Path.GetTempPath();
+            try
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            }
+            catch (Exception)
+            {
+                string path = Path.GetTempPath();
+
+                MessageBox.Show($"Error getting application data path. Logging to alternative path: {path}");
+
+                return path;
+            }
         }
     }
 }
