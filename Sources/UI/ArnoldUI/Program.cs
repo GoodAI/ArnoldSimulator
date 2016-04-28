@@ -18,7 +18,7 @@ namespace GoodAI.Arnold
         [STAThread]
         public static void Main()
         {
-            UnhandledExceptionCatcher.RegisterHandlers();  // TODO(P): prop. inject logger after it is initialized
+            UnhandledExceptionCatcher.RegisterHandlers();
 
             SetupLogging();
 
@@ -47,7 +47,7 @@ namespace GoodAI.Arnold
                 // TODO: Print inner exceptions and stack traces
                 MessageBox.Show(
                     "Logging setup failed. The application will not log.\n\n" +
-                    $"Attempted log path:{logPath}\n\n{ex.Message}",
+                    $"Attempted log path: {logPath}\n\nException message: {ex.Message}",
                     "Logging initialization error.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
@@ -63,14 +63,7 @@ namespace GoodAI.Arnold
 
         private static string GetDefaultLogPath()
         {
-            try
-            {
-                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
-            catch (Exception)
-            {
-                return Path.GetTempPath();
-            }
+            return Path.GetTempPath();
         }
     }
 }

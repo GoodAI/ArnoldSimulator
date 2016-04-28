@@ -34,18 +34,22 @@ namespace GoodAI.Arnold
 
         private static void ProcessThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            ShowExceptionAndExit("Unhandled Thread Exception", e.Exception);
+            ProcessExceptionAndExit("Unhandled Thread Exception", e.Exception);
         }
 
         private static void ProcessUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            ShowExceptionAndExit("Unhandled UI Exception", e.ExceptionObject as Exception);
+            ProcessExceptionAndExit("Unhandled UI Exception", e.ExceptionObject as Exception);
         }
 
-        private static void ShowExceptionAndExit(string title, Exception ex)
+        private static void ProcessExceptionAndExit(string title, Exception ex)
         {
+            Log?.Error(ex, "Unhandled exception occurred.");
+
             MessageBox.Show("Unhandled exception encountered, sorry :-(\n\n"
-                + PrintException(ex),
+                + ((Log != null)
+                    ? "(Details logged.)"
+                    : PrintException(ex)),
                 title, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             Environment.Exit(1);
