@@ -119,10 +119,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ConverseSharpProtobuf\ConverseSharpProtobuf.csproj">
-      <Project>{29FE8AB5-EA2A-4C55-BF38-AFC951DDEFAD}</Project>
-      <Name>ConverseSharpProtobuf</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ConverseSharp\ConverseSharp.csproj">
       <Project>{6d704040-e839-41dd-9aa2-36eeadefb0c9}</Project>
       <Name>ConverseSharp</Name>
