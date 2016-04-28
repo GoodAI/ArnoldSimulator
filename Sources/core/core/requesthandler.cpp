@@ -1,13 +1,16 @@
 #include "requesthandler.h"
 
-void RequestHandler::EnqueueClientRequest(RequestId token, const char *data, int length)
+void RequestHandler::HandleRequestFromClient(RequestId token, const char *data, int length)
 {
+	// Store the data in a vector so it's serializable.
+	// The original buffer can still be accessed via &message[0];
 	std::vector<uint8_t> message;
 	message.assign(data, data + length);
 
-	// Store the data in a vector so it's serializable.
-	// The original buffer can still be accessed via &message[0];
-	mClientRequests.push_back(std::pair<RequestId, std::vector<uint8_t>>(token, message));
+	mClientRequests.push(std::pair<RequestId, std::vector<uint8_t>>(token, message));
+
+	// TODO(HonzaS): Only call this when it's desirable.
+	// TODO(HonzaS): Some request must be delegated to the brain.
 	ProcessClientRequests();
 }
 
@@ -15,7 +18,10 @@ void RequestHandler::ProcessClientRequests() {
 	CkPrintf("Processing %d client requests\n", mClientRequests.size());
 	try
 	{
-		for (auto requestPair : mClientRequests) {
+		while (mClientRequests.size() > 0)
+		{
+			auto requestPair = mClientRequests.front();
+			mClientRequests.pop();
 			RequestId token = requestPair.first;
 			std::vector<uint8_t> request = requestPair.second;
 
@@ -84,7 +90,9 @@ std::vector<uint8_t> RequestHandler::CreateStateMessage(StateType state)
 	flatbuffers::FlatBufferBuilder builder;
 
 	flatbuffers::Offset<StateResponse> stateResponseOffset = CreateStateResponse(builder, state);
-	builder.Finish(stateResponseOffset);
+	auto responseMessage = CreateResponseMessage(builder, Response_StateResponse, stateResponseOffset.Union());
+
+	builder.Finish(responseMessage);
 
 	uint8_t *buffer = builder.GetBufferPointer();
 	std::vector<uint8_t> vecResponse(buffer, buffer + builder.GetSize());

@@ -9,6 +9,7 @@
 #include "responses_generated.h"
 
 #include "core.h"
+#include <queue>
 
 using namespace GoodAI::Arnold::Network;
 
@@ -32,10 +33,10 @@ public:
     RequestHandler(const RequestHandler &other) = delete;
     RequestHandler &operator=(const RequestHandler &other) = delete;
 
-    void EnqueueClientRequest(RequestId token, const char *data, int length);
+    void HandleRequestFromClient(RequestId token, const char *data, int length);
 	void ProcessClientRequests();
 private:
-    std::vector<std::pair<RequestId, std::vector<uint8_t>>> mClientRequests;
+    std::queue<std::pair<RequestId, std::vector<uint8_t>>> mClientRequests;
 
 	void ProcessClientRequest(const RequestMessage *requestMessage, RequestId token) const;
 	void ProcessCommandRequest(const CommandRequest *commandRequest, RequestId token) const;

@@ -7,17 +7,18 @@
 CProxy_Core gCore;
 
 std::atomic<RequestId> Core::mRequestCounter = 0;
-std::unordered_map<RequestId, CcsDelayedReply> Core::mTokens;
+std::unordered_map<RequestId, CkCcsRequestMsg*> Core::mTokens;
 
 void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
 {
 	RequestId requestId = mRequestCounter++;
-	mTokens.insert(std::make_pair(requestId, msg->reply));
+	mTokens.insert(std::make_pair(requestId, msg));
 
 	flatbuffers::FlatBufferBuilder builder;
 
-	mRequestHandler->EnqueueClientRequest(requestId, msg->data, msg->length);
-	delete msg;
+	mRequestHandler->HandleRequestFromClient(requestId, msg->data, msg->length);
+
+	// Cannot delete the message here - it holds the reply and will be deleted later.
 }
 
 Core::Core(CkArgMsg *msg)
@@ -48,7 +49,16 @@ void Core::Exit()
 
 void Core::SendResponseToClient(RequestId token, std::vector<uint8_t> &response)
 {
-    CcsSendDelayedReply(mTokens[token], response.size(), response.data());
+	CkCcsRequestMsg *requestMessage = mTokens[token];
+    CcsSendDelayedReply(requestMessage->reply, response.size(), response.data());
+
+	// This destroys the message.
+	mTokens.erase(token);
+}
+
+void Core::NoResponseToClient(RequestId token)
+{
+	mTokens.erase(token);
 }
 
 #include "core.def.h"

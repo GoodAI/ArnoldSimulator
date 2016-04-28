@@ -21,6 +21,7 @@ public:
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
 
     void SendResponseToClient(RequestId token, std::vector<uint8_t> &response);
+	void NoResponseToClient(RequestId token);
 
 private:
     double mStart;
@@ -28,5 +29,5 @@ private:
 	RequestHandler *mRequestHandler;
 
     static std::atomic<RequestId> mRequestCounter;
-    static std::unordered_map<RequestId, CcsDelayedReply> mTokens;
+    static std::unordered_map<RequestId, CkCcsRequestMsg*> mTokens;
 };

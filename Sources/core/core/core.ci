@@ -13,5 +13,6 @@ mainmodule core
         entry void HandleRequestFromClient(CkCcsRequestMsg *msg);
 
         entry void SendResponseToClient(RequestId token, std::vector<uint8_t> response);
+        entry void NoResponseToClient(RequestId token);
     };
 };
