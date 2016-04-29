@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ArnoldUI;
 using GoodAI.Logging;
 using Serilog;
 using Serilog.Events;
@@ -21,13 +22,16 @@ namespace GoodAI.Arnold
         {
             UnhandledExceptionCatcher.RegisterHandlers();
 
-            Container container = ContainerConfig.Create();
+            Container container = ContainerFactory.Create();
 
             UnhandledExceptionCatcher.Log = container.GetInstance<ILog>();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+
+            var uiMain = container.GetInstance<UIMain>();
+
+            Application.Run(new MainForm(uiMain));
         }
 
 

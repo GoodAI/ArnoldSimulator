@@ -12,6 +12,10 @@ namespace GoodAI.Logging
 {
     public class SerilogRobe : ILog
     {
+        public SerilogRobe(LoggerConfiguration serilogConfig)
+            : this(serilogConfig.CreateLogger())
+        { }
+
         protected SerilogRobe(ILogger serilogLogger)
         {
             m_logger = serilogLogger;

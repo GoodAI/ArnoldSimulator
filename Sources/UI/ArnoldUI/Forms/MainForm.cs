@@ -22,11 +22,11 @@ namespace GoodAI.Arnold
         public GraphForm GraphForm { get; }
         public VisualizationForm VisualizationForm { get; set; }
 
-        public MainForm()
+        public MainForm(UIMain uiMain)
         {
             InitializeComponent();
 
-            m_uiMain = new UIMain();
+            m_uiMain = uiMain;
 
             LogForm = new LogForm();
             LogForm.Show(dockPanel, DockState.DockBottom);

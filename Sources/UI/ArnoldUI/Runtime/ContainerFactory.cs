@@ -15,6 +15,8 @@ namespace GoodAI.Arnold
 
             new ArnoldContainerConfig().Configure(container);
 
+            container.Verify();
+            
             return container;
         }
     }

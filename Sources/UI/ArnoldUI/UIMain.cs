@@ -32,7 +32,7 @@ namespace ArnoldUI
 
         public ISimulation Simulation => Conductor.Simulation;
 
-        public UIMain()
+        public UIMain(IConductor conductor)
         {
             // TODO: This should move into the Designer.
             AgentBlueprint = new AgentBlueprint();
@@ -41,8 +41,7 @@ namespace ArnoldUI
                 Location = new PointF(100, 100)
             });
 
-            // TODO(HonzaS): Resolve from container.
-            Conductor = new Conductor(new CoreProxyFactory(), new CoreLinkFactory(), new CoreControllerFactory(), new SimulationFactory());
+            Conductor = conductor;
         }
 
         public void VisualizationClosed()
