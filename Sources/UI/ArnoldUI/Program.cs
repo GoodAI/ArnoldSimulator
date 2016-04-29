@@ -20,6 +20,7 @@ namespace GoodAI.Arnold
         {
             UnhandledExceptionCatcher.RegisterHandlers();
 
+            // This injects logger to UnhandledExceptionCatcher (maybe do it less statically?)
             LoggingConfig.Setup();
 
             Application.EnableVisualStyles();
