@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConverseSharpFlatBuffers", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConverseSharpFlatBuffersTests", "Libs\ConverseSharpFlatBuffersTests\ConverseSharpFlatBuffersTests.csproj", "{9A4BAD98-1C3A-4DF0-9B43-4E1CFAA36FAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleInjectorTools", "Libs\SimpleInjectorTools\SimpleInjectorTools.csproj", "{953FA519-4D77-4EF1-95A8-9450676E7D92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -171,6 +173,14 @@ Global
 		{9A4BAD98-1C3A-4DF0-9B43-4E1CFAA36FAA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9A4BAD98-1C3A-4DF0-9B43-4E1CFAA36FAA}.Release|x86.ActiveCfg = Release|Any CPU
 		{9A4BAD98-1C3A-4DF0-9B43-4E1CFAA36FAA}.Release|x86.Build.0 = Release|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Debug|x86.Build.0 = Debug|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Release|x86.ActiveCfg = Release|Any CPU
+		{953FA519-4D77-4EF1-95A8-9450676E7D92}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -193,5 +203,6 @@ Global
 		{28C00774-1E73-4A75-AD8F-844CD21A064D} = {977043EE-27F3-404D-97E6-D4A377693B19}
 		{A5965DC3-2404-4E32-A06D-294659052233} = {0B0790F3-12A6-4329-B291-080F401B6C63}
 		{9A4BAD98-1C3A-4DF0-9B43-4E1CFAA36FAA} = {A458F4D8-A484-408E-91AB-32041B97E1A6}
+		{953FA519-4D77-4EF1-95A8-9450676E7D92} = {0B0790F3-12A6-4329-B291-080F401B6C63}
 	EndGlobalSection
 EndGlobal
