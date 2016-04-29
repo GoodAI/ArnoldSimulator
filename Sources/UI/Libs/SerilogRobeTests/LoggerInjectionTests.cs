@@ -65,24 +65,21 @@ namespace GoodAI.Logging.Tests
 
     public class LoggerInjectionTests
     {
-        private readonly TestLogEventSink m_testSink;
+        private readonly Container m_container;
 
-        static LoggerInjectionTests()
-        {
-            TypeMap.InitializeConfiguration<TestContainerConfig>();
-            TypeMap.SimpleInjectorContainer.Verify();
-        }
+        private readonly TestLogEventSink m_testSink;
 
         public LoggerInjectionTests()
         {
-            m_testSink = TypeMap.GetInstance<TestLogEventSink>();
-            m_testSink.Clear();
+            m_container = ContainerFactory.Create<TestContainerConfig>();
+
+            m_testSink = m_container.GetInstance<TestLogEventSink>();
         }
 
         [Fact]
         public void LoggerIsInjected()
         {
-            var fool = TypeMap.GetInstance<Fool>();
+            var fool = m_container.GetInstance<Fool>();
 
             Assert.NotNull(fool);
         }
@@ -90,7 +87,7 @@ namespace GoodAI.Logging.Tests
         [Fact]
         public void LoggerInjectedWithProperContext()
         {
-            var fool = TypeMap.GetInstance<Fool>();
+            var fool = m_container.GetInstance<Fool>();
 
             fool.LogJoke();
 
@@ -102,7 +99,7 @@ namespace GoodAI.Logging.Tests
         [Fact]
         public void LoggerIsInjectedToProperty()
         {
-            var jester = TypeMap.GetInstance<PropertyJester>();
+            var jester = m_container.GetInstance<PropertyJester>();
 
             Assert.NotNull(jester);
 
@@ -113,7 +110,7 @@ namespace GoodAI.Logging.Tests
         [Fact]
         public void DoesNotInjectOtherProperties()
         {
-            var jester = TypeMap.GetInstance<PropertyJester>();
+            var jester = m_container.GetInstance<PropertyJester>();
 
             Assert.Null(jester.DontInjectToMe);
             Assert.Null(jester.DontInjectToDerivedType);

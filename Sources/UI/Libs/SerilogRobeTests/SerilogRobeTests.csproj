@@ -82,9 +82,9 @@
       <Project>{7bb6441b-3e76-4b6d-a602-70bc268d4826}</Project>
       <Name>SerilogRobe</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TypeMap\TypeMap.csproj">
-      <Project>{86955c47-2a02-41a4-ab32-c9e592eb2971}</Project>
-      <Name>TypeMap</Name>
+    <ProjectReference Include="..\SimpleInjectorTools\SimpleInjectorTools.csproj">
+      <Project>{953fa519-4d77-4ef1-95a8-9450676e7d92}</Project>
+      <Name>SimpleInjectorTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
