@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using SimpleInjector;
 
-namespace GoodAI.Arnold
+namespace GoodAI.TypeMapping
 {
-    internal static class ContainerFactory
+    public static class ContainerFactory
     {
-        public static Container Create()
+        public static Container Create<TContainerConfiguration>()
+            where TContainerConfiguration : IContainerConfiguration, new()
         {
             var container = new Container();
 
-            new ArnoldContainerConfig().Configure(container);
+            new TContainerConfiguration().Configure(container);
 
             container.Verify();
             

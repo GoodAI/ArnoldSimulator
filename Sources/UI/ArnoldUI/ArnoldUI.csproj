@@ -152,7 +152,6 @@
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
     <Compile Include="Runtime\ArnoldContainerConfig.cs" />
-    <Compile Include="Runtime\ContainerFactory.cs" />
     <Compile Include="Runtime\LoggingConfig.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
     <Compile Include="Network\CoreController.cs" />
@@ -228,9 +227,9 @@
       <Project>{7BB6441B-3E76-4B6D-A602-70BC268D4826}</Project>
       <Name>SerilogRobe</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Libs\TypeMap\TypeMap.csproj">
-      <Project>{86955C47-2A02-41A4-AB32-C9E592EB2971}</Project>
-      <Name>TypeMap</Name>
+    <ProjectReference Include="..\Libs\SimpleInjectorTools\SimpleInjectorTools.csproj">
+      <Project>{953fa519-4d77-4ef1-95a8-9450676e7d92}</Project>
+      <Name>SimpleInjectorTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArnoldUI;
 using GoodAI.Logging;
-using Serilog;
-using Serilog.Events;
+using GoodAI.TypeMapping;
 using SimpleInjector;
 
 namespace GoodAI.Arnold
@@ -22,7 +21,7 @@ namespace GoodAI.Arnold
         {
             UnhandledExceptionCatcher.RegisterHandlers();
 
-            Container container = ContainerFactory.Create();
+            Container container = ContainerFactory.Create<ArnoldContainerConfig>();
 
             UnhandledExceptionCatcher.Log = container.GetInstance<ILog>();
 
