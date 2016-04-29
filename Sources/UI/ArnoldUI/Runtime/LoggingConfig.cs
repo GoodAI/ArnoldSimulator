@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GoodAI.Logging;
+using Serilog;
 
 namespace GoodAI.Arnold
 {
     internal static class LoggingConfig
     {
-        public static void Setup(string logPath = null)
+        public static LoggerConfiguration Setup(string logPath = null)
         {
             try
             {
@@ -23,9 +24,7 @@ namespace GoodAI.Arnold
                     logPath = InitLogDirectory(appName.Replace('.', '\\'), "Logs");
                 }
 
-                SerilogRobeConfig.SetupLoggingToFile(logPath, appName);
-
-                UnhandledExceptionCatcher.Log = SerilogRobe.CreateLogger();
+                return SerilogRobeConfig.SetupLoggingToFile(logPath, appName);
             }
             catch (Exception ex)
             {
@@ -35,6 +34,8 @@ namespace GoodAI.Arnold
                     $"Attempted log path: {logPath}\n\nException message: {ex.Message}",
                     "Logging initialization error.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
+
+            return null;
         }
 
         private static string InitLogDirectory(string subfolderPath, string logFolder)

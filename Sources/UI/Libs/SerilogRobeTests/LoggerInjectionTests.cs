@@ -17,7 +17,11 @@ namespace GoodAI.Logging.Tests
         {
             container.Options.PropertySelectionBehavior = new PropertyInjectionForType<ILog>(container);
 
-            container.RegisterSingleton(SerilogRobeConfig.CurrentConfig);
+            container.RegisterSingleton(new TestLogEventSink());
+
+            container.RegisterSingleton(() => SerilogRobeConfig.Setup(config =>
+                config.WriteTo.Sink(container.GetInstance<TestLogEventSink>())));
+
             container.RegisterConditional(
                 typeof(ILog),
                 typeFactory => typeof(SerilogRobe<>).MakeGenericType(typeFactory.Consumer.ImplementationType),
@@ -61,20 +65,18 @@ namespace GoodAI.Logging.Tests
 
     public class LoggerInjectionTests
     {
-        private static readonly TestLogEventSink TestSink = new TestLogEventSink();
+        private readonly TestLogEventSink m_testSink;
 
         static LoggerInjectionTests()
         {
-            SerilogRobeConfig.Setup(config =>
-                config.WriteTo.Sink(TestSink));
-
             TypeMap.InitializeConfiguration<TestContainerConfig>();
             TypeMap.SimpleInjectorContainer.Verify();
         }
 
         public LoggerInjectionTests()
         {
-            TestSink.Clear();
+            m_testSink = TypeMap.GetInstance<TestLogEventSink>();
+            m_testSink.Clear();
         }
 
         [Fact]
@@ -92,7 +94,7 @@ namespace GoodAI.Logging.Tests
 
             fool.LogJoke();
 
-            LogEvent logEvent = TestSink.Events.FirstOrDefault();
+            LogEvent logEvent = m_testSink.Events.FirstOrDefault();
             Assert.NotNull(logEvent);
             Assert.Equal("\"Fool\"", logEvent.Properties["SourceContext"].ToString());
         }
@@ -105,7 +107,7 @@ namespace GoodAI.Logging.Tests
             Assert.NotNull(jester);
 
             jester.LogJoke();
-            Assert.NotNull(TestSink.Events.FirstOrDefault());
+            Assert.NotNull(m_testSink.Events.FirstOrDefault());
         }
 
         [Fact]

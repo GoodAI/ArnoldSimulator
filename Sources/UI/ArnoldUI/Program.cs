@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using GoodAI.Logging;
 using Serilog;
 using Serilog.Events;
+using SimpleInjector;
 
 namespace GoodAI.Arnold
 {
@@ -20,8 +21,9 @@ namespace GoodAI.Arnold
         {
             UnhandledExceptionCatcher.RegisterHandlers();
 
-            // This injects logger to UnhandledExceptionCatcher (maybe do it less statically?)
-            LoggingConfig.Setup();
+            Container container = ContainerConfig.Create();
+
+            UnhandledExceptionCatcher.Log = container.GetInstance<ILog>();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

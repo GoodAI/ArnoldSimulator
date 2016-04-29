@@ -23,24 +23,20 @@ namespace GoodAI.Logging
         private const int DefaultSizeLimit = 100*1024*1024;
         private const int DefaultFileCountLimit = 10;
 
-        private static LoggerConfiguration m_config;
-
-        public static LoggerConfiguration CurrentConfig => m_config ?? (m_config = DefaultConfig);
-
         public static LoggerConfiguration DefaultConfig => new LoggerConfiguration()
             .MinimumLevel.Is(DefaultLevel)
             .Enrich.WithThreadId()
             .Enrich.With(new ExceptionEnricher(new ExceptionDestructurer(), new AggregateExceptionDestructurer()))
             .WriteTo.ColoredConsole(outputTemplate: DefaultOutputTemplate);
 
-        public static void Setup(Func<LoggerConfiguration, LoggerConfiguration> configAction)
+        public static LoggerConfiguration Setup(Func<LoggerConfiguration, LoggerConfiguration> configAction)
         {
-            m_config = configAction(DefaultConfig);
+            return configAction(DefaultConfig);
         }
 
-        public static void SetupLoggingToFile(string logPath, string logName, int sizeLimit = DefaultSizeLimit)
+        public static LoggerConfiguration SetupLoggingToFile(string logPath, string logName, int sizeLimit = DefaultSizeLimit)
         {
-            SerilogRobeConfig.Setup(configuration => configuration.WriteTo.RollingFile(
+            return SerilogRobeConfig.Setup(configuration => configuration.WriteTo.RollingFile(
                 Path.Combine(logPath, logName + "-{Date}.log"),
                 LogEventLevel.Information,
                 outputTemplate: SerilogRobeConfig.DefaultOutputTemplate,

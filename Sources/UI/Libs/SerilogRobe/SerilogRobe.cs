@@ -57,17 +57,17 @@ namespace GoodAI.Logging
         /// <summary>
         /// Creates new logger based on SerilogRobeConfig.CurrentConfig.
         /// </summary>
-        public static ILog CreateLogger()
+        public static ILog CreateLogger(LoggerConfiguration config)
         {
-            return new SerilogRobe(SerilogRobeConfig.CurrentConfig.CreateLogger());
+            return new SerilogRobe(config.CreateLogger());
         }
 
         /// <summary>
         /// Creates new logger based on SerilogRobeConfig.CurrentConfig.
         /// </summary>
-        public static ILog CreateLoggerForContext<TContext>()
+        public static ILog CreateLoggerForContext<TContext>(LoggerConfiguration config)
         {
-            return new SerilogRobe<TContext>(SerilogRobeConfig.CurrentConfig);
+            return new SerilogRobe<TContext>(config);
         }
 
         /// <summary>
