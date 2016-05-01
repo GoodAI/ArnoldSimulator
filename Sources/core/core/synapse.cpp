@@ -66,8 +66,7 @@ void Synapse::Data::pup(PUP::er &p)
 
     p | bits16;
 
-    Accessor ac;
-    Editor *ed = Edit(*this, ac, false);
+    Editor *ed = Edit(*this);
 
     if (ed->ExtraBytes() > 0) {
         if (p.isUnpacking()) {
@@ -104,23 +103,6 @@ void Synapse::Editor::Release(Data &data)
     // do nothing
 }
 
-Synapse::Data &Synapse::Accessor::GetData()
-{
-    return *mData;
-}
-
-Synapse::Editor *Synapse::Accessor::GetEditor()
-{
-    return mEditor;
-}
-
-void Synapse::Accessor::Set(Editor *editor, Data &data, bool doLock)
-{
-    mEditor = editor;
-    mData = &data;
-    if (doLock) mLock.acquire(data.lock);
-}
-
 Synapse::Type Synapse::GetType(const Data &data)
 {
     return data.type;
@@ -132,9 +114,7 @@ void Synapse::Initialize(Type type, Data &data)
 
     data.type = type;
 
-    Accessor ac;
-    Editor *ed = Edit(data, ac, false);
-    ed->Initialize(data);
+    Edit(data)->Initialize(data);
 }
 
 void Synapse::Clone(const Data &original, Data &data)
@@ -144,19 +124,15 @@ void Synapse::Clone(const Data &original, Data &data)
 
     data.type = type;
 
-    Accessor ac;
-    Editor *ed = Edit(data, ac);
-    ed->Clone(original, data);
+    Edit(data)->Clone(original, data);
 }
 
-Synapse::Editor *Synapse::Edit(Data &data, Accessor &accessor, bool doLock)
+Synapse::Editor *Synapse::Edit(Data &data)
 {
     Editor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
     if (editor == nullptr) {
         editor = instance.mEditors[static_cast<size_t>(Type::Empty)].get();
     }
-
-    accessor.Set(editor, data, doLock);
 
     return editor;
 }
@@ -165,9 +141,7 @@ void Synapse::Release(Data &data)
 {
     if (data.type == Type::Empty) return;
     
-    Accessor ac;
-    Editor *ed = Edit(data, ac, false);
-    ed->Release(data);
+    Edit(data)->Release(data);
 }
 
 void WeightedSynapse::Initialize(Synapse::Data &data)

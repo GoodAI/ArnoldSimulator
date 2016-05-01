@@ -1,281 +1,30 @@
-#include "random.h"
-#include "region.h"
-
 #include "neuron.h"
 
-Neuron *Neuron::CreateNeuron(const std::string &type, RegionBase &region, NeuronId id, bool isIo)
+#include "brain.h"
+
+#include "core.decl.h"
+#include "brain.decl.h"
+#include "region.decl.h"
+
+extern CkGroupID gMulticastGroupId;
+extern CProxy_CompletionDetector gCompletionDetector;
+
+extern CProxy_Core gCore;
+extern CProxy_BrainBase gBrain;
+extern CProxy_RegionBase gRegions;
+extern CProxy_NeuronBase gNeurons;
+
+Neuron::Neuron(NeuronBase &base, json &params) : mBase(base)
+{
+}
+
+Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json &params)
 {
     if (type == ThresholdNeuron::Type) {
-        return new ThresholdNeuron(region, id, isIo);
+        return new ThresholdNeuron(base, params);
     } else {
         return nullptr;
     }
-}
-
-Neuron::Neuron(RegionBase &region, NeuronId id, bool isIo) : mRegion(region), mId(id), mIsIo(isIo)
-{
-    mParent = RegionBase::DeletedNeuronId;
-    mChildren.set_deleted_key(RegionBase::DeletedNeuronId);
-    mOutputSynapses.set_deleted_key(RegionBase::DeletedNeuronId);
-    mInputSynapses.set_deleted_key(RegionBase::DeletedNeuronId);
-    mBackwardSpikesCurrent = new Spikes();
-    mBackwardSpikesNext = new Spikes();
-    mForwardSpikesCurrent = new Spikes();
-    mForwardSpikesNext = new Spikes();
-}
-
-Neuron::~Neuron()
-{
-    for (auto it = mBackwardSpikesCurrent->begin(); it != mBackwardSpikesCurrent->end(); ++it) {
-        Spike::Release(*it);
-    }
-    for (auto it = mBackwardSpikesNext->begin(); it != mBackwardSpikesNext->end(); ++it) {
-        Spike::Release(*it);
-    }
-    for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
-        Spike::Release(*it);
-    }
-    for (auto it = mForwardSpikesNext->begin(); it != mForwardSpikesNext->end(); ++it) {
-        Spike::Release(*it);
-    }
-    delete mBackwardSpikesCurrent;
-    delete mBackwardSpikesNext;
-    delete mForwardSpikesCurrent;
-    delete mForwardSpikesNext;
-}
-
-void Neuron::pup(PUP::er &p)
-{
-    p | mId;
-    p | mIsIo;
-    p | mParent;
-
-    if (p.isUnpacking()) {
-        size_t childrenCount; p | childrenCount;
-        for (size_t i = 0; i < childrenCount; ++i) {
-            NeuronId child; p | child;
-            mChildren.insert(child);
-        }
-
-        size_t inputSynapsesCount; p | inputSynapsesCount;
-        for (size_t i = 0; i < inputSynapsesCount; ++i) {
-            NeuronId from; p | from;
-            Synapse::Data data; data.pup(p);
-            mInputSynapses.insert(std::make_pair(from, data));
-        }
-
-        size_t outputSynapsesCount; p | outputSynapsesCount;
-        for (size_t i = 0; i < outputSynapsesCount; ++i) {
-            NeuronId to; p | to;
-            mOutputSynapses.insert(to);
-        }    
-
-        size_t backwardSpikesCurrentCount; p | backwardSpikesCurrentCount;
-        for (size_t i = 0; i < backwardSpikesCurrentCount; ++i) {
-            Spike::Data data; data.pup(p);
-            mBackwardSpikesCurrent->push_back(data);
-        }
-
-        size_t backwardSpikesNextCount; p | backwardSpikesNextCount;
-        for (size_t i = 0; i < backwardSpikesNextCount; ++i) {
-            Spike::Data data; data.pup(p);
-            mBackwardSpikesNext->push_back(data);
-        }
-
-        size_t forwardSpikesCurrentCount; p | forwardSpikesCurrentCount;
-        for (size_t i = 0; i < forwardSpikesCurrentCount; ++i) {
-            Spike::Data data; data.pup(p);
-            mForwardSpikesCurrent->push_back(data);
-        }
-
-        size_t forwardSpikesNextCount; p | forwardSpikesNextCount;
-        for (size_t i = 0; i < forwardSpikesNextCount; ++i) {
-            Spike::Data data; data.pup(p);
-            mForwardSpikesNext->push_back(data);
-        }
-    } else {
-        size_t childrenCount = mChildren.size(); p | childrenCount;
-        for (auto it = mChildren.begin(); it != mChildren.end(); ++it) {
-            NeuronId child = *it; p | child;
-        }
-
-        size_t inputSynapsesCount = mInputSynapses.size(); p | inputSynapsesCount;
-        for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
-            NeuronId from = it->first; p | from;
-            Synapse::Data data = it->second; data.pup(p);
-        }
-
-        size_t outputSynapsesCount = mOutputSynapses.size(); p | outputSynapsesCount;
-        for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
-            NeuronId to = *it; p | to;
-        }
-
-        size_t backwardSpikesCurrentCount = mBackwardSpikesCurrent->size(); p | backwardSpikesCurrentCount;
-        for (auto it = mBackwardSpikesCurrent->begin(); it != mBackwardSpikesCurrent->end(); ++it) {
-            Spike::Data data = *it; data.pup(p);
-        }
-
-        size_t backwardSpikesNextCount = mBackwardSpikesNext->size(); p | backwardSpikesNextCount;
-        for (auto it = mBackwardSpikesNext->begin(); it != mBackwardSpikesNext->end(); ++it) {
-            Spike::Data data = *it; data.pup(p);
-        }
-
-        size_t forwardSpikesCurrentCount = mForwardSpikesCurrent->size(); p | forwardSpikesCurrentCount;
-        for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
-            Spike::Data data = *it; data.pup(p);
-        }
-
-        size_t forwardSpikesNextCount = mForwardSpikesNext->size(); p | forwardSpikesNextCount;
-        for (auto it = mForwardSpikesNext->begin(); it != mForwardSpikesNext->end(); ++it) {
-            Spike::Data data = *it; data.pup(p);
-        }
-    }
-}
-
-NeuronId Neuron::GetId() const
-{
-    return mId;
-}
-
-void Neuron::AdoptAsChild(Neuron *neuron, bool cloneSynapses)
-{
-    if (mIsIo) {
-        delete neuron;
-        return;
-    }
-
-    mRegion.AddNeuron(neuron);
-
-    for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
-        Synapse::Data data;
-        {
-            Synapse::Accessor ac;
-            Synapse::Edit(it->second, ac);
-            if (cloneSynapses) {
-                Synapse::Initialize(Synapse::GetType(ac.GetData()), data);
-            } else {
-                Synapse::Clone(ac.GetData(), data);
-            }
-        }
-        mRegion.AddSynapse(Direction::Forward, it->first, mId, data);
-    }
-
-    for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
-        Synapse::Data data;
-        {
-            Synapse::Accessor ac;
-            Synapse::Edit(mRegion.GetNeuron(*it)->mInputSynapses[mId], ac);
-            if (cloneSynapses) {
-                Synapse::Initialize(Synapse::GetType(ac.GetData()), data);
-            } else {
-                Synapse::Clone(ac.GetData(), data);
-            }
-        }
-        mRegion.AddSynapse(Direction::Forward, mId, *it, data);
-    }
-
-    mRegion.AddChildToParent(mId, neuron->GetId());
-}
-
-NeuronId Neuron::GetParent() const
-{
-    return mParent;
-}
-
-void Neuron::SetParent(NeuronId parent)
-{
-    mParent = parent;
-}
-
-void Neuron::UnsetParent()
-{
-    mParent = RegionBase::DeletedNeuronId;
-}
-
-const Neuron::Children &Neuron::GetChildren() const
-{
-    return mChildren;
-}
-
-void Neuron::AddChild(NeuronId child)
-{
-    Lock lock(mConnectionGuard);
-    mChildren.insert(child);
-}
-
-void Neuron::RemoveChild(NeuronId child)
-{
-    Lock lock(mConnectionGuard);
-    mChildren.erase(child);
-}
-
-const Neuron::InputSynapses &Neuron::GetInputSynapses() const
-{
-    return mInputSynapses;
-}
-
-void Neuron::AddInputSynapse(NeuronId from, const Synapse::Data &data)
-{
-    Lock lock(mConnectionGuard);
-    mInputSynapses.insert(std::make_pair(from, data));
-}
-
-void Neuron::RemoveInputSynapse(NeuronId from)
-{
-    Lock lock(mConnectionGuard);
-    mInputSynapses.erase(from);
-}
-
-bool Neuron::AccessInputSynapse(NeuronId from, Synapse::Accessor &accessor, bool doLock)
-{
-    auto it = mInputSynapses.find(from);
-    if (it != mInputSynapses.end()) {
-        Synapse::Edit(it->second, accessor, doLock);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-const Neuron::OutputSynapses &Neuron::GetOutputSynapses() const
-{
-    return mOutputSynapses;
-}
-
-void Neuron::AddOutputSynapse(NeuronId to)
-{
-    Lock lock(mConnectionGuard);
-    mOutputSynapses.insert(to);
-}
-
-void Neuron::RemoveOutputSynapse(NeuronId to)
-{
-    Lock lock(mConnectionGuard);
-    mOutputSynapses.erase(to);
-}
-
-bool Neuron::AccessOutputSynapse(NeuronId to, Synapse::Accessor &accessor, bool doLock)
-{
-    auto it = mOutputSynapses.find(to);
-    if (it != mOutputSynapses.end()) {
-        Synapse::Edit(mRegion.GetNeuron(*it)->mInputSynapses[mId], accessor, doLock);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void Neuron::EnqueueSpike(Direction direction, const Spike::Data &data)
-{
-    if (direction == Direction::Forward) {
-        mForwardSpikesNext->push_back(data);
-    }
-}
-
-void Neuron::FlipSpikeQueues()
-{
-    std::swap(mForwardSpikesCurrent, mForwardSpikesNext);
-    std::swap(mBackwardSpikesCurrent, mBackwardSpikesNext);
 }
 
 bool Neuron::HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data)
@@ -308,75 +57,378 @@ bool Neuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Dat
     return HandleSpikeGeneric(direction, spike, data);
 }
 
-void Neuron::Simulate(size_t brainStep)
+NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 {
+    mTempIdCounter = TEMP_REGION_INDEX;
+
+    json parsedParams;
+    std::stringstream streamedParams(params);
+    streamedParams >> parsedParams;
+
+    mNeuron = CreateNeuron(type, *this, parsedParams);
+    mParent = DELETED_NEURON_ID;
+    mChildren.set_deleted_key(DELETED_NEURON_ID);
+    mInputSynapses.set_deleted_key(DELETED_NEURON_ID);
+    mOutputSynapses.set_deleted_key(DELETED_NEURON_ID);
+    mBackwardSpikesCurrent = new Spikes();
+    mBackwardSpikesNext = new Spikes();
+    mForwardSpikesCurrent = new Spikes();
+    mForwardSpikesNext = new Spikes();
+}
+
+NeuronBase::NeuronBase(CkMigrateMessage *msg)
+{
+}
+
+NeuronBase::~NeuronBase()
+{
+    for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
+        Synapse::Release(it->second);
+    }
+    for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
+        Synapse::Release(it->second);
+    }
+
+    for (auto it = mSynapseAdditions.begin(); it != mSynapseAdditions.end(); ++it) {
+        Synapse::Release(std::get<3>(*it));
+    }
+
+    for (auto it = mBackwardSpikesCurrent->begin(); it != mBackwardSpikesCurrent->end(); ++it) {
+        Spike::Release(*it);
+    }
+    for (auto it = mBackwardSpikesNext->begin(); it != mBackwardSpikesNext->end(); ++it) {
+        Spike::Release(*it);
+    }
     for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
-        bool release = Spike::Edit(*it)->Accept(Direction::Forward, *this, *it);
+        Spike::Release(*it);
+    }
+    for (auto it = mForwardSpikesNext->begin(); it != mForwardSpikesNext->end(); ++it) {
+        Spike::Release(*it);
+    }
+    
+    delete mBackwardSpikesCurrent;
+    delete mBackwardSpikesNext;
+    delete mForwardSpikesCurrent;
+    delete mForwardSpikesNext;
+
+    delete mNeuron;
+}
+
+void NeuronBase::pup(PUP::er &p)
+{
+    p | mTempIdCounter;
+
+    p | mParent;
+
+    p | *mBackwardSpikesCurrent;
+    p | *mBackwardSpikesNext;
+    p | *mForwardSpikesCurrent;
+    p | *mForwardSpikesNext;
+
+    p | mNeuronAdditions;
+    p | mNeuronRemovals;
+    p | mSynapseAdditions;
+    p | mSynapseRemovals;
+    p | mChildAdditions;
+    p | mChildRemovals;
+
+    if (p.isUnpacking()) {
+        size_t childrenCount; p | childrenCount;
+        for (size_t i = 0; i < childrenCount; ++i) {
+            NeuronId child; p | child;
+            mChildren.insert(child);
+        }
+
+        size_t inputSynapsesCount; p | inputSynapsesCount;
+        for (size_t i = 0; i < inputSynapsesCount; ++i) {
+            NeuronId from; p | from;
+            Synapse::Data data; data.pup(p);
+            mInputSynapses.insert(std::make_pair(from, data));
+        }
+
+        size_t outputSynapsesCount; p | outputSynapsesCount;
+        for (size_t i = 0; i < outputSynapsesCount; ++i) {
+            NeuronId to; p | to;
+            Synapse::Data data; data.pup(p);
+            mOutputSynapses.insert(std::make_pair(to, data));
+        }
+
+        json params;
+        std::string neuronType;
+        p | neuronType;
+        mNeuron = CreateNeuron(neuronType, *this, params);
+        mNeuron->pup(p);
+    } else {
+        size_t childrenCount = mChildren.size(); p | childrenCount;
+        for (auto it = mChildren.begin(); it != mChildren.end(); ++it) {
+            NeuronId child = *it; p | child;
+        }
+
+        size_t inputSynapsesCount = mInputSynapses.size(); p | inputSynapsesCount;
+        for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
+            NeuronId from = it->first; p | from;
+            Synapse::Data data = it->second; data.pup(p);
+        }
+
+        size_t outputSynapsesCount = mOutputSynapses.size(); p | outputSynapsesCount;
+        for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
+            NeuronId to = it->first; p | to;
+            Synapse::Data data = it->second; data.pup(p);
+        }
+
+        std::string neuronType(mNeuron->GetType());
+        p | neuronType;
+        mNeuron->pup(p);
+    }
+}
+
+const char *NeuronBase::GetType()
+{
+    return mNeuron->GetType();
+}
+
+NeuronIndex NeuronBase::GetIndex() const
+{
+    return thisIndex.y;
+}
+
+NeuronId NeuronBase::GetId() const
+{
+    return GetNeuronId(thisIndex.x, thisIndex.y);
+}
+
+NeuronId NeuronBase::GetParent() const
+{
+    return mParent;
+}
+
+const NeuronBase::Children &NeuronBase::GetChildren() const
+{
+    return mChildren;
+}
+
+void NeuronBase::AdoptAsChild(NeuronId neuronId, bool cloneSynapses)
+{
+    for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
+        Synapse::Data data;
+        {
+            if (cloneSynapses) {
+                Synapse::Initialize(Synapse::GetType(it->second), data);
+            } else {
+                Synapse::Clone(it->second, data);
+            }
+        }
+        RequestSynapseAddition(Direction::Forward, it->first, GetId(), data);
+    }
+
+    for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
+        Synapse::Data data;
+        {
+            if (cloneSynapses) {
+                Synapse::Initialize(Synapse::GetType(it->second), data);
+            } else {
+                Synapse::Clone(it->second, data);
+            }
+        }
+        RequestSynapseAddition(Direction::Forward, GetId(), it->first, data);
+    }
+
+    RequestChildAddition(GetId(), neuronId);
+}
+
+const NeuronBase::Synapses &NeuronBase::GetInputSynapses() const
+{
+    return mInputSynapses;
+}
+
+Synapse::Data *NeuronBase::AccessInputSynapse(NeuronId from)
+{
+    auto it = mInputSynapses.find(from);
+    if (it != mInputSynapses.end()) {
+        return &it->second;
+    } else {
+        return nullptr;
+    }
+}
+
+void NeuronBase::CommitInputSynapse(NeuronId from)
+{
+    auto it = mInputSynapses.find(from);
+    if (it != mInputSynapses.end()) {
+        // TODO
+        //gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).SynchronizeOutputSynapse(GetId(), it->second);
+    }
+}
+
+const NeuronBase::Synapses &NeuronBase::GetOutputSynapses() const
+{
+    return mOutputSynapses;
+}
+
+Synapse::Data *NeuronBase::AccessOutputSynapse(NeuronId to)
+{
+    auto it = mOutputSynapses.find(to);
+    if (it != mOutputSynapses.end()) {
+        return &it->second;
+    } else {
+        return nullptr;
+    }
+}
+
+void NeuronBase::CommitOutputSynapse(NeuronId to)
+{
+    auto it = mOutputSynapses.find(to);
+    if (it != mOutputSynapses.end()) {
+        // TODO
+        //gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).SynchronizeInputSynapse(GetId(), it->second);
+    }
+}
+
+NeuronId NeuronBase::RequestNeuronAddition(const NeuronType &type, const NeuronParams &params)
+{
+    NeuronId tempId = mTempIdCounter++;
+    mNeuronAdditions.push_back(std::make_tuple(tempId, type, params));
+    return tempId;
+}
+
+void NeuronBase::RequestNeuronRemoval(NeuronId neuronId)
+{
+    mNeuronRemovals.push_back(neuronId);
+}
+
+void NeuronBase::RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data)
+{
+    mSynapseAdditions.push_back(std::make_tuple(direction, from, to, data));
+}
+
+void NeuronBase::RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to)
+{
+    mSynapseRemovals.push_back(std::make_tuple(direction, from, to));
+}
+
+void NeuronBase::RequestChildAddition(NeuronId parent, NeuronId child)
+{
+    mChildAdditions.push_back(std::make_pair(parent, child));
+}
+
+void NeuronBase::RequestChildRemoval(NeuronId parent, NeuronId child)
+{
+    mChildRemovals.push_back(std::make_pair(parent, child));
+}
+
+void NeuronBase::SetParent(NeuronId parent)
+{
+    mParent = parent;
+}
+
+void NeuronBase::UnsetParent()
+{
+    mParent = DELETED_NEURON_ID;
+}
+
+void NeuronBase::AddChild(NeuronId child)
+{
+    mChildren.insert(child);
+}
+
+void NeuronBase::RemoveChild(NeuronId child)
+{
+    mChildren.erase(child);
+}
+
+void NeuronBase::AddInputSynapse(NeuronId from, const Synapse::Data &data)
+{
+    mInputSynapses.insert(std::make_pair(from, data));
+}
+
+void NeuronBase::SynchronizeInputSynapse(NeuronId from, const Synapse::Data &data)
+{
+    auto it = mInputSynapses.find(from);
+    if (it != mInputSynapses.end()) {
+        mInputSynapses[from] = data;
+    }
+}
+
+void NeuronBase::RemoveInputSynapse(NeuronId from)
+{
+    mInputSynapses.erase(from);
+}
+
+void NeuronBase::AddOutputSynapse(NeuronId to, const Synapse::Data &data)
+{
+    mOutputSynapses.insert(std::make_pair(to, data));
+}
+
+void NeuronBase::SynchronizeOutputSynapse(NeuronId to, const Synapse::Data &data)
+{
+    auto it = mOutputSynapses.find(to);
+    if (it != mOutputSynapses.end()) {
+        mOutputSynapses[to] = data;
+    }
+}
+
+void NeuronBase::RemoveOutputSynapse(NeuronId to)
+{
+    mOutputSynapses.erase(to);
+}
+
+void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
+{
+    // TODO
+    //gNeurons(GetRegionIndex(receiver), GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
+}
+
+void NeuronBase::EnqueueSpike(Direction direction, const Spike::Data &data)
+{
+    if (direction == Direction::Forward) {
+        mForwardSpikesNext->push_back(data);
+    } else {
+        mBackwardSpikesNext->push_back(data);
+    }
+}
+
+void NeuronBase::FlipSpikeQueues()
+{
+    std::swap(mForwardSpikesCurrent, mForwardSpikesNext);
+    std::swap(mBackwardSpikesCurrent, mBackwardSpikesNext);
+}
+
+void NeuronBase::Simulate(SimulateMsg *msg)
+{
+    size_t brainStep = msg->brainStep;
+    delete msg;
+
+    for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
+        bool release = Spike::Edit(*it)->Accept(Direction::Forward, *mNeuron, *it);
         if (release) Spike::Release(*it);
     }
 
     for (auto it = mBackwardSpikesCurrent->begin(); it != mBackwardSpikesCurrent->end(); ++it) {
-        bool release = Spike::Edit(*it)->Accept(Direction::Backward, *this, *it);
+        bool release = Spike::Edit(*it)->Accept(Direction::Backward, *mNeuron, *it);
         if (release) Spike::Release(*it);
     }
 
     mForwardSpikesCurrent->clear();
     mBackwardSpikesCurrent->clear();
 
-    Control(brainStep);
+    mNeuron->Control(brainStep);
+    
+    /*
+    int result[3];
+    result[0] = 1; // Copy the desired values into the result.
+    result[1] = 2;
+    result[2] = 3;
+    CkCallback cb(CkReductionTarget(RegionBase, NeuronSimulateDone), gRegions[thisIndex.x]);
+    // Contribute the result to the reductiontarget cb.
+    contribute(3*sizeof(int), result, CkReduction::set, cb);
+    */
 }
 
-BoundaryNeuron::BoundaryNeuron(RegionBase &region, NeuronId id, RegionId destRegId, GateLaneIdx laneIdx) :
-    Neuron(region, id), mDestRegId(destRegId), mLaneIdx(laneIdx)
+ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) :
+    Neuron(base, params)
 {
-}
-
-BoundaryNeuron::~BoundaryNeuron()
-{
-}
-
-void BoundaryNeuron::pup(PUP::er &p)
-{
-    Neuron::pup(p);
-    p | mDestRegId;
-    p | mLaneIdx;
-}
-
-const char *BoundaryNeuron::Type = "BoundaryNeuron";
-
-const char *BoundaryNeuron::GetType()
-{
-    return Type;
-}
-
-void BoundaryNeuron::AdoptAsChild(Neuron *neuron, bool cloneSynapses)
-{
-    delete neuron;
-}
-
-RegionId BoundaryNeuron::GetDestinationRegionId()
-{
-    return mDestRegId;
-}
-
-GateLaneIdx BoundaryNeuron::GetLaneIndex()
-{
-    return mLaneIdx;
-}
-
-bool BoundaryNeuron::HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data)
-{
-    // TODO
-    return true;
-}
-
-void BoundaryNeuron::Control(size_t brainStep)
-{
-}
-
-ThresholdNeuron::ThresholdNeuron(RegionBase &region, NeuronId id, double threshold, bool isIo) :
-    Neuron(region, id, isIo), mThreshold(threshold)
-{
+    // TODO extract mThreshold value from json params (can be empty)
+    mThreshold = 0;
 }
 
 ThresholdNeuron::~ThresholdNeuron()
@@ -385,7 +437,6 @@ ThresholdNeuron::~ThresholdNeuron()
 
 void ThresholdNeuron::pup(PUP::er &p)
 {
-    Neuron::pup(p);
     p | mThreshold;
 }
 
@@ -407,9 +458,9 @@ bool ThresholdNeuron::HandleSpike(Direction direction, ContinuousSpike &spike, S
     } else {
         spike.SetDelay(data, --delay);
         if (direction == Direction::Forward) {
-            mForwardSpikesNext->push_back(data);
+            mBase.EnqueueSpike(Direction::Forward, data);
         } else {
-            mBackwardSpikesNext->push_back(data);
+            mBase.EnqueueSpike(Direction::Backward, data);
         }
         return false;
     }
@@ -481,3 +532,5 @@ void ThresholdNeuron::ChangeThreshold(Direction direction, NeuronId sender, cons
 {
     mThreshold += args.delta;
 }
+
+#include "neuron.def.h"

@@ -1,65 +1,44 @@
 #pragma once
 
-#include <tbb/tbbmalloc_proxy.h>
-#include <tbb/spin_mutex.h>
-#include <tbb/concurrent_vector.h>
+#include <string>
+#include <vector>
 
 #include <sparsehash/sparse_hash_set>
 #include <sparsehash/sparse_hash_map>
 
+#include <json.hpp>
+
 #include <pup.h>
+#include <pup_stl.h>
+#include <completion.h>
 
 #include "common.h"
 #include "spike.h"
 #include "synapse.h"
 
-class RegionBase;
+#include "neuron.decl.h"
+
+using namespace nlohmann;
+
+class SimulateMsg;
+
+class NeuronBase;
 
 class Neuron
 {
 public:
-    typedef google::sparse_hash_map<NeuronId, Synapse::Data> InputSynapses;
-    typedef google::sparse_hash_set<NeuronId> OutputSynapses;
-    typedef google::sparse_hash_set<NeuronId> Children;
-    typedef tbb::concurrent_vector<Spike::Data> Spikes;
-    typedef tbb::spin_mutex::scoped_lock Lock;
-
-    static Neuron *CreateNeuron(const std::string &type, RegionBase &region, NeuronId id, bool isIo = false);
-
-    Neuron(RegionBase &region, NeuronId id, bool isIo = false);
-    virtual ~Neuron();
+    Neuron(NeuronBase &base, json &params);
+    virtual ~Neuron() = default;
 
     Neuron(const Neuron &other) = delete;
     Neuron &operator=(const Neuron &other) = delete;
 
-    virtual void pup(PUP::er &p);
+    virtual void pup(PUP::er &p) = 0;
 
     virtual const char *GetType() = 0;
-    NeuronId GetId() const;
 
-    virtual void AdoptAsChild(Neuron *neuron, bool cloneSynapses = true);
+    virtual void Control(size_t brainStep) = 0;
 
-    NeuronId GetParent() const;
-    void SetParent(NeuronId parent);
-    void UnsetParent();
-
-    const Children &GetChildren() const;
-    void AddChild(NeuronId child);
-    void RemoveChild(NeuronId child);
-
-    const InputSynapses &GetInputSynapses() const;
-    void AddInputSynapse(NeuronId from, const Synapse::Data &data);
-    void RemoveInputSynapse(NeuronId from);
-    bool AccessInputSynapse(NeuronId from, Synapse::Accessor &accessor, bool doLock = true);
-
-    const OutputSynapses &GetOutputSynapses() const;
-    void AddOutputSynapse(NeuronId to);
-    void RemoveOutputSynapse(NeuronId to); 
-    bool AccessOutputSynapse(NeuronId to, Synapse::Accessor &accessor, bool doLock = true);
-    
-    void EnqueueSpike(Direction direction, const Spike::Data &data);
-    void FlipSpikeQueues();
-    
     virtual bool HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data);
     virtual bool HandleSpike(Direction direction, BinarySpike &spike, Spike::Data &data);
     virtual bool HandleSpike(Direction direction, DiscreteSpike &spike, Spike::Data &data);
@@ -67,51 +46,95 @@ public:
     virtual bool HandleSpike(Direction direction, VisualSpike &spike, Spike::Data &data);
     virtual bool HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data);
 
-    void Simulate(size_t brainStep);
-    virtual void Control(size_t brainStep) = 0;
+protected:
+    NeuronBase &mBase;
+};
+
+class NeuronBase : public CBase_NeuronBase
+{
+public:
+    typedef google::sparse_hash_map<NeuronId, Synapse::Data> Synapses;
+    typedef google::sparse_hash_set<NeuronId> Children;
+    typedef std::vector<Spike::Data> Spikes;
+
+    static Neuron *CreateNeuron(const NeuronType &type, NeuronBase &base, json &params);
+
+    NeuronBase(const NeuronType &type, const NeuronParams &params);
+    NeuronBase(CkMigrateMessage *msg);
+    ~NeuronBase();
+
+    NeuronBase(const NeuronBase &other) = delete;
+    NeuronBase &operator=(const NeuronBase &other) = delete;
+
+    void pup(PUP::er &p);
+
+    const char *GetType();
+    NeuronIndex GetIndex() const;
+    NeuronId GetId() const;
+
+    NeuronId GetParent() const;
+    const Children &GetChildren() const;
+    void AdoptAsChild(NeuronId neuronId, bool cloneSynapses = true);
+
+    const Synapses &GetInputSynapses() const;
+    Synapse::Data *AccessInputSynapse(NeuronId from);
+    void CommitInputSynapse(NeuronId from);
+
+    const Synapses &GetOutputSynapses() const;
+    Synapse::Data *AccessOutputSynapse(NeuronId to);
+    void CommitOutputSynapse(NeuronId from);
+
+    NeuronId RequestNeuronAddition(const NeuronType &type, const NeuronParams &params);
+    void RequestNeuronRemoval(NeuronId neuronId);
+    void RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data);
+    void RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to);
+    void RequestChildAddition(NeuronId parent, NeuronId child);
+    void RequestChildRemoval(NeuronId parent, NeuronId child);
+
+    void SetParent(NeuronId parent);
+    void UnsetParent();    
+    
+    void AddChild(NeuronId child);
+    void RemoveChild(NeuronId child);
+
+    void AddInputSynapse(NeuronId from, const Synapse::Data &data);
+    void SynchronizeInputSynapse(NeuronId from, const Synapse::Data &data);
+    void RemoveInputSynapse(NeuronId from);    
+
+    void AddOutputSynapse(NeuronId to, const Synapse::Data &data);
+    void SynchronizeOutputSynapse(NeuronId from, const Synapse::Data &data);
+    void RemoveOutputSynapse(NeuronId to);
+    
+    void SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data);
+    void EnqueueSpike(Direction direction, const Spike::Data &data);
+
+    void FlipSpikeQueues();
+    void Simulate(SimulateMsg *msg);
 
 protected:
-    bool mIsIo;
-    NeuronId mId;
-    RegionBase &mRegion;
-    tbb::spin_mutex mConnectionGuard;
+    NeuronId mTempIdCounter;
 
     NeuronId mParent;
     Children mChildren;
 
-    OutputSynapses mOutputSynapses;
-    Spikes *mBackwardSpikesCurrent;
-    Spikes *mBackwardSpikesNext;
+    Synapses mInputSynapses;
+    Synapses mOutputSynapses;
 
-    InputSynapses mInputSynapses;
+    NeuronAdditions mNeuronAdditions;
+    NeuronRemovals mNeuronRemovals;
+    Synapse::Additions mSynapseAdditions;
+    Synapse::Removals mSynapseRemovals;
+    ChildAdditions mChildAdditions;
+    ChildRemovals mChildRemovals;
+
+    NeuronsTriggered mNeuronsTriggered;
+
+    Spikes *mBackwardSpikesCurrent;
+    Spikes *mBackwardSpikesNext;    
     Spikes *mForwardSpikesCurrent;
     Spikes *mForwardSpikesNext;
-};
 
-class BoundaryNeuron : public Neuron
-{
-public:
-    static const char *Type;
-
-    BoundaryNeuron(RegionBase &region, NeuronId id, RegionId destRegId, GateLaneIdx laneIdx);
-    virtual ~BoundaryNeuron();
-
-    virtual void pup(PUP::er &p) override;
-
-    virtual const char *GetType() override;
-
-    virtual void AdoptAsChild(Neuron *neuron, bool cloneSynapses = true) override;
-
-    RegionId GetDestinationRegionId();
-    GateLaneIdx GetLaneIndex();
-
-    virtual bool HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data) override;
-
-    virtual void Control(size_t brainStep) override;
-
-protected:
-    RegionId mDestRegId;
-    GateLaneIdx mLaneIdx;
+    Neuron *mNeuron;
 };
 
 class ThresholdNeuron : public Neuron
@@ -119,7 +142,7 @@ class ThresholdNeuron : public Neuron
 public:
     static const char *Type;
 
-    ThresholdNeuron(RegionBase &region, NeuronId id, double threshold, bool isIo = false);
+    ThresholdNeuron(NeuronBase &base, json &params);
     virtual ~ThresholdNeuron();
 
     virtual void pup(PUP::er &p) override;
@@ -163,10 +186,10 @@ template<typename Arguments>
 inline void ThresholdNeuron::SendFunctionalSpike(Direction direction, NeuronId receiver, Function function, Arguments &args)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::Functional, mId, data);
+    Spike::Initialize(Spike::Type::Functional, mBase.GetId(), data);
     FunctionalSpike *spike = static_cast<FunctionalSpike *>(Spike::Edit(data));
     spike->SetFunction(data, static_cast<uint8_t>(function));
     spike->SetArguments(data, &args, sizeof(Arguments));
 
-    mRegion.GetNeuron(receiver)->EnqueueSpike(direction, data);
+    mBase.SendSpike(receiver, direction, data);
 }

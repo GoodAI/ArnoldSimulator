@@ -5,7 +5,6 @@
 
 #include "common.h"
 #include "core.decl.h"
-#include "brain.decl.h"
 
 #include "requesthandler.h"
 
@@ -25,7 +24,6 @@ public:
 
 private:
     double mStart;
-    CProxy_BrainBase mBrain;
     RequestHandler *mRequestHandler;
 
     static std::atomic<RequestId> mRequestCounter;

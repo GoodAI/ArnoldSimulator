@@ -1,15 +1,24 @@
-#include "neuron.h"
-
 #include "region.h"
 
-const NeuronId RegionBase::DeletedNeuronId = DELETED_NEURON_ID;
-const RegionId RegionBase::BrainRegionId = BRAIN_REGION_ID;
+#include "brain.h"
+
+#include "core.decl.h"
+#include "brain.decl.h"
+#include "neuron.decl.h"
+
+extern CkGroupID gMulticastGroupId;
+extern CProxy_CompletionDetector gCompletionDetector;
+
+extern CProxy_Core gCore;
+extern CProxy_BrainBase gBrain;
+extern CProxy_RegionBase gRegions;
+extern CProxy_NeuronBase gNeurons;
 
 Region::Region(RegionBase &base, json &params) : mBase(base)
 {
 }
 
-Region *RegionBase::CreateRegion(const std::string &type, RegionBase &base, json &params)
+Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json &params)
 {
     if (type == ThresholdRegion::Type) {
         return new ThresholdRegion(base, params);
@@ -18,7 +27,7 @@ Region *RegionBase::CreateRegion(const std::string &type, RegionBase &base, json
     }
 }
 
-RegionBase::RegionBase(CProxy_BrainBase &brain, const std::string &type, const std::string &params) : mBrain(brain)
+RegionBase::RegionBase(const RegionType &type, const RegionParams &params)
 {
     json parsedParams;
     std::stringstream streamedParams(params);
@@ -39,9 +48,14 @@ void RegionBase::pup(PUP::er &p)
 {
 }
 
-RegionId RegionBase::GetId() const
+const char *RegionBase::GetType()
 {
-    return RegionId();
+    return nullptr;
+}
+
+RegionIndex RegionBase::GetIndex() const
+{
+    return RegionIndex();
 }
 
 NeuronId RegionBase::GetNewNeuronId()
@@ -49,17 +63,83 @@ NeuronId RegionBase::GetNewNeuronId()
     return NeuronId();
 }
 
-std::vector<std::pair<ConnectorName, size_t>> RegionBase::GetInputs() const
+const RegionBase::Connectors &RegionBase::GetInputs() const
 {
-    return std::vector<std::pair<ConnectorName, size_t>>();
+    return mInputConnectors;
 }
 
-std::vector<RemoteConnector> RegionBase::GetInputConnections(const ConnectorName &name) const
+const RegionBase::Connector &RegionBase::GetInput(const ConnectorName &name) const
 {
-    return std::vector<RemoteConnector>();
+    return mInputConnectors.at(name);
 }
 
-void RegionBase::CreateInput(const ConnectorName &name, size_t size)
+const RegionBase::Connectors &RegionBase::GetOutputs() const
+{
+    return mOutputConnectors;
+}
+
+const RegionBase::Connector &RegionBase::GetOutput(const ConnectorName &name) const
+{
+    return mOutputConnectors.at(name);
+}
+
+const NeuronAdditions &RegionBase::GetNeuronAdditions() const
+{
+    return mNeuronAdditions;
+}
+
+const NeuronRemovals &RegionBase::GetNeuronRemovals() const
+{
+    return mNeuronRemovals;
+}
+
+const Synapse::Additions &RegionBase::GetSynapseAdditions() const
+{
+    return mSynapseAdditions;
+}
+
+const Synapse::Removals &RegionBase::GetSynapseRemovals() const
+{
+    return mSynapseRemovals;
+}
+
+const ChildAdditions &RegionBase::GetChildAdditions() const
+{
+    return mChildAdditions;
+}
+
+const ChildRemovals &RegionBase::GetChildRemovals() const
+{
+    return mChildRemovals;
+}
+
+NeuronId RegionBase::RequestNeuronAddition(const NeuronType &type, const NeuronParams &params)
+{
+    return NeuronId();
+}
+
+void RegionBase::RequestNeuronRemoval(NeuronId neuronId)
+{
+}
+
+void RegionBase::RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data)
+{
+}
+
+void RegionBase::RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to)
+{
+}
+
+void RegionBase::RequestChildAddition(NeuronId parent, NeuronId child)
+{
+}
+
+void RegionBase::RequestChildRemoval(NeuronId parent, NeuronId child)
+{
+}
+
+void RegionBase::CreateInput(const ConnectorName &name, Spike::Type spikeType, 
+    const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount)
 {
 }
 
@@ -75,17 +155,8 @@ void RegionBase::DisconnectInput(const ConnectorName &name, const RemoteConnecto
 {
 }
 
-std::vector<std::pair<ConnectorName, size_t>> RegionBase::GetOutputs() const
-{
-    return std::vector<std::pair<ConnectorName, size_t>>();
-}
-
-std::vector<RemoteConnector> RegionBase::GetOutputConnections(const ConnectorName &name) const
-{
-    return std::vector<RemoteConnector>();
-}
-
-void RegionBase::CreateOutput(const ConnectorName &name, size_t size)
+void RegionBase::CreateOutput(const ConnectorName &name, Spike::Type spikeType, 
+    const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount)
 {
 }
 
@@ -101,73 +172,22 @@ void RegionBase::DisconnectOutput(const ConnectorName &name, const RemoteConnect
 {
 }
 
-void RegionBase::ReceiveSensoMotoricData(Direction direction, const ConnectorName &from, std::vector<unsigned char> &data)
+void RegionBase::ReceiveSensoMotoricData(Direction direction, const ConnectorName &connectorName, Spike::BrainSource &data)
 {
 }
 
-void RegionBase::ReceiveSpikes(Direction direction, RegionId from, std::vector<Spike::Package> &spikes)
+void RegionBase::EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data)
 {
 }
 
-const tbb::concurrent_vector<NeuronId>& RegionBase::GetAddedNeurons() const
-{
-    return mNeuronsToAdd;
-}
-
-const tbb::concurrent_vector<NeuronId>& RegionBase::GetRemovedNeurons() const
-{
-    return mNeuronsToRemove;
-}
-
-const tbb::concurrent_vector<Synapse::Addition>& RegionBase::GetAddedSynapses() const
-{
-    return mSynapsesToAdd;
-}
-
-const tbb::concurrent_vector<Synapse::Removal>& RegionBase::GetRemovedSynapses() const
-{
-    return mSynapsesToRemove;
-}
-
-Neuron *RegionBase::GetNeuron(NeuronId neuronId)
-{
-    return nullptr;
-}
-
-void RegionBase::EnqueueSpike(Direction direction, RegionId destRegId, GateLaneIdx laneIdx, const Spike::Data &data)
+void RegionBase::ChangeTopology()
 {
 }
 
-void RegionBase::AddNeuron(Neuron *neuron)
+void RegionBase::Simulate(SimulateMsg *msg)
 {
-}
-
-void RegionBase::RemoveNeuron(NeuronId neuron)
-{
-}
-
-void RegionBase::AddSynapse(Direction direction, NeuronId from, NeuronId to, Synapse::Data &data)
-{
-}
-
-void RegionBase::RemoveSynapse(Direction direction, NeuronId from, NeuronId to)
-{
-}
-
-void RegionBase::AddChildToParent(NeuronId parent, NeuronId child)
-{
-}
-
-void RegionBase::RemoveChildFromParent(NeuronId parent, NeuronId child)
-{
-}
-
-void RegionBase::TriggerNeuron(NeuronId sender, NeuronId receiver)
-{
-}
-
-void RegionBase::Simulate(size_t brainStep)
-{
+    size_t brainStep = msg->brainStep;
+    delete msg;
 
     /*
     expertsTriggeredCurrent->clear();
@@ -255,6 +275,19 @@ void RegionBase::Simulate(size_t brainStep)
     */
 }
 
+void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
+{
+    // Get the initial element in the set.
+    CkReduction::setElement *current = (CkReduction::setElement *)msg->getData();
+    while (current != NULL) // Loop over elements in set.
+    {
+        // Get the pointer to the packed int's.
+        int *result = (int *)&current->data;
+        // Do something with result.
+        current = current->next(); // Iterate.
+    }
+}
+
 const char *ThresholdRegion::Type = "ThresholdRegion";
 
 ThresholdRegion::ThresholdRegion(RegionBase &base, json &params) : Region(base, params)
@@ -299,32 +332,16 @@ ThresholdRegion::~ThresholdRegion()
 {
 }
 
+void ThresholdRegion::pup(PUP::er &p)
+{
+}
+
 const char *ThresholdRegion::GetType()
 {
     return Type;
 }
 
-Spike::Editor *ThresholdRegion::GetInputSpikeEditor(const ConnectorName &name)
-{
-    return nullptr;
-}
-
-Spike::Editor *ThresholdRegion::GetOutputSpikeEditor(const ConnectorName &name)
-{
-    return nullptr;
-}
-
-Neuron *ThresholdRegion::CreateNewInputNeuron(const ConnectorName &name)
-{
-    return nullptr;
-}
-
-Neuron *ThresholdRegion::CreateNewOutputNeuron(const ConnectorName &name)
-{
-    return nullptr;
-}
-
-void ThresholdRegion::Control(size_t brainStep, size_t &interactionsTriggeredCnt)
+void ThresholdRegion::Control(size_t brainStep)
 {
 }
 

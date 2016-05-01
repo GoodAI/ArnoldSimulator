@@ -1,0 +1,32 @@
+module neuron
+{
+    include "common.h";
+    include "spike.h";
+    include "synapse.h";
+
+    extern module region;
+
+    array [2D] NeuronBase
+    {
+        entry NeuronBase(NeuronType type, NeuronParams params);
+
+        entry void SetParent(NeuronId parent);
+        entry void UnsetParent();    
+    
+        entry void AddChild(NeuronId child);
+        entry void RemoveChild(NeuronId child);
+
+        entry void AddInputSynapse(NeuronId from, Synapse::Data data);
+        entry void SynchronizeInputSynapse(NeuronId from, Synapse::Data data);
+        entry void RemoveInputSynapse(NeuronId from);    
+
+        entry void AddOutputSynapse(NeuronId to, Synapse::Data data);
+        entry void SynchronizeOutputSynapse(NeuronId from, Synapse::Data data);
+        entry void RemoveOutputSynapse(NeuronId to);
+    
+        entry void EnqueueSpike(Direction direction, Spike::Data data);
+
+        entry void FlipSpikeQueues();
+        entry void Simulate(SimulateMsg *msg);
+    };   	
+};

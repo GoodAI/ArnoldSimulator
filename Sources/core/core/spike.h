@@ -36,7 +36,9 @@ public:
         uint64_t bits64;
     };
 
-    typedef std::pair<GateLaneIdx, Data> Package;
+    typedef std::pair<NeuronId, Data> DataWithReceiver;
+    typedef std::vector<DataWithReceiver> BrainSink;
+    typedef std::vector<Data> BrainSource;
 
     class Editor
     {
@@ -71,6 +73,10 @@ private:
 
     std::vector<std::unique_ptr<Editor>> mEditors;
 };
+
+inline void operator|(PUP::er &p, Spike::Type &spikeType) {
+    pup_bytes(&p, (void *)&spikeType, sizeof(Spike::Type));
+}
 
 class BinarySpike : public Spike::Editor
 {

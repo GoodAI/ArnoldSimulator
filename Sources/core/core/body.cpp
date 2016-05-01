@@ -31,8 +31,8 @@ const char *RandomBody::GetType()
 }
 
 void RandomBody::Simulate(
-    std::function<void(std::string &, std::vector<unsigned char> &)> pushSensoMotoricData,
-    std::function<void(std::string &, std::vector<unsigned char> &)> pullSensoMotoricData)
+    std::function<void(std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
+    std::function<void(std::string &, std::vector<uint8_t> &)> pullSensoMotoricData)
 {
     /*
     for each actuator in actuators

@@ -4,7 +4,6 @@
 #include <tuple>
 #include <vector>
 
-#include <tbb/spin_mutex.h>
 #include <tbb/scalable_allocator.h>
 
 #include <pup.h>
@@ -14,8 +13,6 @@
 class Synapse
 {
 public:
-    typedef tbb::spin_mutex::scoped_lock Lock;
-
     enum class Type : std::uint8_t
     {
         Empty = 0,
@@ -36,7 +33,7 @@ public:
         void pup(PUP::er &p);
 
         Type type;
-        tbb::spin_mutex lock;
+        uint8_t bits8;
         uint16_t bits16;
         uint64_t bits64;
     };
@@ -44,6 +41,10 @@ public:
     typedef std::tuple<Direction, NeuronId, NeuronId, Data> Addition;
     typedef std::tuple<Direction, NeuronId, NeuronId> Removal;
     typedef std::pair<NeuronId, NeuronId> Transfer;
+
+    typedef std::vector<Addition> Additions;
+    typedef std::vector<Removal> Removals;
+    typedef std::vector<Transfer> Transfers;
 
     class Editor
     {
@@ -58,27 +59,10 @@ public:
         virtual void Release(Data &data);
     };
 
-    class Accessor
-    {
-    public:
-        friend class Synapse;
-
-        Data &GetData();
-        Editor *GetEditor();
-
-    protected:
-        void Set(Editor *editor, Data &data, bool doLock);
-
-    private:
-        Lock mLock;
-        Data *mData;
-        Editor *mEditor;
-    };
-
     static Type GetType(const Data &data);
     static void Initialize(Type type, Data &data);
     static void Clone(const Data &original, Data &data);
-    static Editor *Edit(Data &data, Accessor &accessor, bool doLock = true);
+    static Editor *Edit(Data &data);
     static void Release(Data &data);
 
 private:

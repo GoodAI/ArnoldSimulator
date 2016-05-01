@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <functional>
@@ -22,8 +23,8 @@ public:
     virtual const char *GetType() = 0;
 
     virtual void Simulate(
-        std::function<void(std::string &, std::vector<unsigned char> &)> pushSensoMotoricData,
-        std::function<void(std::string &, std::vector<unsigned char> &)> pullSensoMotoricData
+        std::function<void(std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
+        std::function<void(std::string &, std::vector<uint8_t> &)> pullSensoMotoricData
     ) = 0;
 };
 
@@ -38,7 +39,7 @@ public:
     virtual const char *GetType() override;
 
     virtual void Simulate(
-        std::function<void(std::string &, std::vector<unsigned char> &)> pushSensoMotoricData,
-        std::function<void(std::string &, std::vector<unsigned char> &)> pullSensoMotoricData
+        std::function<void(std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
+        std::function<void(std::string &, std::vector<uint8_t> &)> pullSensoMotoricData
     ) override;
 };

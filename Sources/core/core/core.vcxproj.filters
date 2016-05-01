@@ -11,6 +11,9 @@
     <None Include="region.ci">
       <Filter>Core</Filter>
     </None>
+    <None Include="neuron.ci">
+      <Filter>Core</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">

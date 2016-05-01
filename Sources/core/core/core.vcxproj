@@ -25,6 +25,7 @@
     <None Include="brain.ci" />
     <None Include="core.ci" />
     <None Include="Makefile" />
+    <None Include="neuron.ci" />
     <None Include="region.ci" />
   </ItemGroup>
   <ItemGroup>

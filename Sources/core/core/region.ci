@@ -1,24 +1,31 @@
 module region
 {
+    include "common.h";
+    include "spike.h";
+    include "synapse.h";
+
     extern module brain;
 
     array [1D] RegionBase
     {
-        entry RegionBase(CProxy_BrainBase brain, std::string type, std::string params);
+        entry RegionBase(RegionType type, RegionParams params);
 
-        entry [sync] void CreateInput(ConnectorName name, size_t size);
-        entry [sync] void DeleteInput(ConnectorName name);
-        entry [sync] void ConnectInput(ConnectorName name, RemoteConnector destination);
-        entry [sync] void DisconnectInput(ConnectorName name, RemoteConnector destination);
+        entry void CreateInput(ConnectorName name, Spike::Type spikeType, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
+        entry void DeleteInput(ConnectorName name);
+        entry void ConnectInput(ConnectorName name, RemoteConnector destination);
+        entry void DisconnectInput(ConnectorName name, RemoteConnector destination);
 
-        entry [sync] void CreateOutput(ConnectorName name, size_t size);
-        entry [sync] void DeleteOutput(ConnectorName name);
-        entry [sync] void ConnectOutput(ConnectorName name, RemoteConnector destination);
-        entry [sync] void DisconnectOutput(ConnectorName name, RemoteConnector destination);
+        entry void CreateOutput(ConnectorName name, Spike::Type spikeType, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
+        entry void DeleteOutput(ConnectorName name);
+        entry void ConnectOutput(ConnectorName name, RemoteConnector destination);
+        entry void DisconnectOutput(ConnectorName name, RemoteConnector destination);
 
-        entry [threaded] void ReceiveSensoMotoricData(Direction direction, ConnectorName from, std::vector<unsigned char> data);
-        entry [threaded] void ReceiveSpikes(Direction direction, RegionId from, std::vector<Spike::Package> spikes);
-        
-        entry [threaded] void Simulate(size_t brainStep);
+        entry void ReceiveSensoMotoricData(Direction direction, ConnectorName connectorName, Spike::BrainSource data);
+        entry void EnqueueSensoMotoricSpike(NeuronId receiver, Spike::Data data);
+
+        entry void ChangeTopology();
+        entry void Simulate(SimulateMsg *msg);
+
+        entry [reductiontarget] void NeuronSimulateDone(CkReductionMsg *msg);
     };   	
 };

@@ -34,13 +34,13 @@ void Spike::Data::pup(PUP::er &p)
     p | bits16;
     p | sender;
 
-    Editor *ac = Edit(*this);
+    Editor *ed = Edit(*this);
 
-    if (ac->ExtraBytes(*this) > 0) {
+    if (ed->ExtraBytes(*this) > 0) {
         if (p.isUnpacking()) {
-            bits64 = reinterpret_cast<uintptr_t>(ac->AllocateExtra(*this));
+            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         }
-        p(reinterpret_cast<unsigned char *>(bits64), ac->ExtraBytes(*this));
+        p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes(*this));
     } else {
         p | bits64;
     }

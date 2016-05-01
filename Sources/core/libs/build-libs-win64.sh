@@ -26,10 +26,10 @@ build_charm()
 
     cat src/arch/win64/unix2nt_cc | sed 's/$SDK_DIR\/Lib\/x64/$SDK_DIR\/Lib\/$WindowsSDKLibVersion\/um\/x64/g' > src/arch/win64/unix2nt_cc.tmp
     mv -f src/arch/win64/unix2nt_cc.tmp src/arch/win64/unix2nt_cc
-	chmod +x src/arch/win64/unix2nt_cc
+    chmod +x src/arch/win64/unix2nt_cc
 
-    ./build charm++ net-win64 --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
-    ./build charm++ net-win64 --destination=net-release --with-production -j8 | tee net-release.log
+    ./build charm++ net-win64 smp --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
+    ./build charm++ net-win64 smp --destination=net-release --with-production -j8 | tee net-release.log
 
     cd ..
 }

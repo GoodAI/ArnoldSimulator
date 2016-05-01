@@ -1,12 +1,22 @@
 #include "brain.h"
 
+#include "core.decl.h"
+#include "region.decl.h"
+#include "neuron.decl.h"
+
+extern CkGroupID gMulticastGroupId;
+extern CProxy_CompletionDetector gCompletionDetector;
+
 extern CProxy_Core gCore;
+extern CProxy_BrainBase gBrain;
+extern CProxy_RegionBase gRegions;
+extern CProxy_NeuronBase gNeurons;
 
 Brain::Brain(BrainBase &base, json &params) : mBase(base)
 {
 }
 
-Brain *BrainBase::CreateBrain(const std::string &type, BrainBase &base, json &params)
+Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &params)
 {
     if (type == ThresholdBrain::Type) {
         return new ThresholdBrain(base, params);
@@ -15,7 +25,7 @@ Brain *BrainBase::CreateBrain(const std::string &type, BrainBase &base, json &pa
     }
 }
 
-BrainBase::BrainBase(const std::string &type, const std::string &params)
+BrainBase::BrainBase(const BrainType &type, const BrainParams &params)
 {
     /*json parsedParams;
     std::stringstream streamedParams(params);
@@ -32,75 +42,65 @@ BrainBase::~BrainBase()
 {
 }
 
-void BrainBase::EnqueueClientRequest(RequestId token, std::vector<unsigned char> &request)
+void BrainBase::pup(PUP::er &p)
 {
 }
 
-const std::unordered_map<ConnectorName, BrainBase::Terminal> &BrainBase::GetTerminals() const
+const char *BrainBase::GetType()
+{
+    return nullptr;
+}
+
+const BrainBase::Terminals &BrainBase::GetTerminals() const
 {
     return mTerminals;
 }
 
-void BrainBase::AddRegion(RegionId regId, const std::string &type, const std::string &params)
+void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType, NeuronId firstNeuron, size_t neuronCount)
 {
 }
 
-void BrainBase::RemoveRegion(RegionId regId)
+void BrainBase::DeleteTerminal(const ConnectorName &name)
 {
 }
 
-void BrainBase::AddConnector(RegionId regId, Direction direction, const ConnectorName &name, size_t size)
+void BrainBase::ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
 {
 }
 
-void BrainBase::RemoveConnector(RegionId regId, Direction direction, const ConnectorName &name)
+void BrainBase::DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
 {
 }
 
-void BrainBase::AddConnection(Direction direction,
-    RegionId srcRegId, const ConnectorName &srcConnectorName,
-    RegionId destRegId, const ConnectorName &destConnectorName)
+void BrainBase::AddRegion(RegionIndex regIdx, const RegionType &type, const RegionParams &params)
 {
 }
 
-void BrainBase::RemoveConnection(Direction direction,
-    RegionId srcRegId, const ConnectorName &srcConnectorName,
-    RegionId destRegId, const ConnectorName &destConnectorName)
+void BrainBase::RemoveRegion(RegionIndex regIdx)
 {
 }
 
-void BrainBase::ReceiveTerminalData(RegionId from, const ConnectorName &to, std::vector<unsigned char> &data)
+void BrainBase::AddConnector(RegionIndex regIdx, Direction direction, const ConnectorName &name, size_t size)
 {
-    
 }
 
-void BrainBase::TriggerRegion(RegionId regId)
+void BrainBase::RemoveConnector(RegionIndex regIdx, Direction direction, const ConnectorName &name)
 {
-    /*
-    interactionsConfirmedCnt++;
-    regionsTriggeredNext->insert(regId);
-    ProgressSimulation();
-    */
 }
 
-void BrainBase::RegionSimulated(RegionId regId, size_t regionsTriggeredCnt)
+void BrainBase::AddConnection(Direction direction, 
+    RegionIndex srcRegIdx, const ConnectorName &srcConnectorName, 
+    RegionIndex destRegIdx, const ConnectorName &destConnectorName)
 {
-    /*
-    interactionsToBeConfirmedCnt += interactionsTriggeredCnt;
-    regionsSimulatedCnt++;
-    ProgressSimulation();
-    */
 }
 
-void BrainBase::InteractionConfirmed()
+void BrainBase::RemoveConnection(Direction direction, 
+    RegionIndex srcRegIdx, const ConnectorName &srcConnectorName, 
+    RegionIndex destRegIdx, const ConnectorName &destConnectorName)
 {
-    /*
-    interactionsConfirmedCnt++;
-    ProgressSimulation();
-    */
 }
 
-void BrainBase::PushSensoMotoricData(std::string &terminalName, std::vector<unsigned char> &data)
+void BrainBase::PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data)
 {
     /*
     RegionTerminalCtx &terminal = regionTerminals[regionTerminalsNameMap[sensorName]];
@@ -113,7 +113,7 @@ void BrainBase::PushSensoMotoricData(std::string &terminalName, std::vector<unsi
     */
 }
 
-void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<unsigned char> &data)
+void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data)
 {
     /*
     RegionTerminalCtx &terminal = regionTerminals[regionTerminalsIdMap[from]];
@@ -121,7 +121,7 @@ void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<unsi
     */
 }
 
-void BrainBase::ProgressSimulation()
+void BrainBase::Simulate()
 {
     // TODO(HonzaS): Incorporate the message handling into the simulation code when it's done.
 
@@ -163,6 +163,22 @@ void BrainBase::ProgressSimulation()
     */
 }
 
+void BrainBase::EnqueueClientRequest(RequestId token, std::vector<uint8_t> &request)
+{
+}
+
+void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
+{
+}
+
+void BrainBase::ChangeTopologyDone(long triggeredNeurons)
+{
+}
+
+void BrainBase::RegionSimulateDone(CkReductionMsg *msg)
+{
+}
+
 const char *ThresholdBrain::Type = "ThresholdBrain";
 
 ThresholdBrain::ThresholdBrain(BrainBase &base, json &params) : Brain(base, params)
@@ -170,6 +186,10 @@ ThresholdBrain::ThresholdBrain(BrainBase &base, json &params) : Brain(base, para
 }
 
 ThresholdBrain::~ThresholdBrain()
+{
+}
+
+void ThresholdBrain::pup(PUP::er &p)
 {
 }
 

@@ -1,28 +1,23 @@
 module brain
 {
+    include "common.h";
+
     extern module core;
+
+    message SimulateMsg
+    {
+        size_t brainStep;
+    };
 
     chare BrainBase
     {
-        entry BrainBase(std::string type, std::string params);
+        entry BrainBase(BrainType type, BrainParams params);
 
-        entry [threaded] void EnqueueClientRequest(RequestId token, std::vector<unsigned char> request);
+        entry void EnqueueClientRequest(RequestId token, std::vector<uint8_t> request);
 
-        entry [sync] void AddRegion(RegionId regId, std::string type, std::string params);
-        entry [sync] void RemoveRegion(RegionId regId);
-        entry [sync] void AddConnector(RegionId regId, Direction direction, ConnectorName name, size_t size);
-        entry [sync] void RemoveConnector(RegionId regId, Direction direction, ConnectorName name);
-        entry [sync] void AddConnection(Direction direction,
-            RegionId srcRegId, ConnectorName srcConnectorName,
-            RegionId destRegId, ConnectorName destConnectorName);
-        entry [sync] void RemoveConnection(Direction direction,
-            RegionId srcRegId, ConnectorName srcConnectorName,
-            RegionId destRegId, ConnectorName destConnectorName);
+        entry void ReceiveTerminalData(Spike::BrainSink &data);
 
-        entry [threaded] void ReceiveTerminalData(RegionId from, ConnectorName to, std::vector<unsigned char> data);
-
-        entry [threaded] void TriggerRegion(RegionId regId);
-        entry [threaded] void RegionSimulated(RegionId regId, size_t regionsTriggeredCnt);
-        entry [threaded] void InteractionConfirmed();
+        entry [reductiontarget] void ChangeTopologyDone(long triggeredNeurons);
+        entry [reductiontarget] void RegionSimulateDone(CkReductionMsg *msg);
     };   	
 };

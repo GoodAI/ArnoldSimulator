@@ -2,7 +2,7 @@
 # Common settings
 #
 CFLAGS = $(OPTS) -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
-LFLAGS = -language charm++
+LFLAGS = -language charm++ -module CkMulticast -module completion
 
 #
 # Project files
