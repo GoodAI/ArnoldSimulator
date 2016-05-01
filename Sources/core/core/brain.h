@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include <vector>
+#include <list>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -117,21 +118,23 @@ public:
     void PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
     void PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
 
+    void StartSimulation();
+    void StopSimulation();
+    void SetBrainStepsPerBodyStep(size_t steps);
+    void RequestSynapticTransfers(RequestId requestId);
+
     void Simulate();
-
-    void EnqueueClientRequest(RequestId token, std::vector<uint8_t> &request);
-
     void ReceiveTerminalData(Spike::BrainSink &data);
 
     void ChangeTopologyDone(long triggeredNeurons);
     void RegionSimulateDone(CkReductionMsg *msg);
 
 private:
-    std::vector<std::pair<RequestId, std::vector<uint8_t>>> mClientRequests;
-
     bool mShouldStop;
-    size_t mBrainStep;
     size_t mBrainStepsPerBodyStep;
+    std::list<RequestId> mSynapticTransferRequests;
+
+    size_t mBrainStep;
 
     TerminalId mTerminalIdCounter;
     Terminals mTerminals;

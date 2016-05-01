@@ -121,6 +121,22 @@ void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<uint
     */
 }
 
+void BrainBase::StartSimulation()
+{
+}
+
+void BrainBase::StopSimulation()
+{
+}
+
+void BrainBase::SetBrainStepsPerBodyStep(size_t steps)
+{
+}
+
+void BrainBase::RequestSynapticTransfers(RequestId requestId)
+{
+}
+
 void BrainBase::Simulate()
 {
     // TODO(HonzaS): Incorporate the message handling into the simulation code when it's done.
@@ -161,10 +177,6 @@ void BrainBase::Simulate()
         }
     }
     */
-}
-
-void BrainBase::EnqueueClientRequest(RequestId token, std::vector<uint8_t> &request)
-{
 }
 
 void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)

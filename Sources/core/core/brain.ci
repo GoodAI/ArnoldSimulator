@@ -9,12 +9,16 @@ module brain
         size_t brainStep;
     };
 
-    chare BrainBase
+    array [1D] BrainBase
     {
         entry BrainBase(BrainType type, BrainParams params);
 
-        entry void EnqueueClientRequest(RequestId token, std::vector<uint8_t> request);
+        entry void StartSimulation();
+        entry void StopSimulation();
+        entry void SetBrainStepsPerBodyStep(size_t steps);
+        entry void RequestSynapticTransfers(RequestId requestId);
 
+        entry void Simulate();
         entry void ReceiveTerminalData(Spike::BrainSink &data);
 
         entry [reductiontarget] void ChangeTopologyDone(long triggeredNeurons);

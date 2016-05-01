@@ -1,18 +1,25 @@
 mainmodule core
 {
     include "ckcallback-ccs.h";
+    include "common.h";
+    include "spike.h";
+    include "synapse.h";
 
+    readonly CkGroupID gMulticastGroupId;
+    readonly CProxy_CompletionDetector gCompletionDetector;
 
     readonly CProxy_Core gCore;
+    readonly CProxy_BrainBase gBrain;
+    readonly CProxy_RegionBase gRegions;
+    readonly CProxy_NeuronBase gNeurons;
 
-    mainchare Core
+    mainchare [migratable] Core
     {
         entry Core(CkArgMsg *msg);
         entry void Exit();
 
         entry void HandleRequestFromClient(CkCcsRequestMsg *msg);
 
-        entry void SendResponseToClient(RequestId token, std::vector<uint8_t> response);
-        entry void NoResponseToClient(RequestId token);
+        entry void SendSynapticTransfers(RequestId requestId, Synapse::Transfers transfers);
     };
 };

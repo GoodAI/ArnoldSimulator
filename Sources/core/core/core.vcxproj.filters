@@ -45,9 +45,6 @@
     <ClCompile Include="random.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="requesthandler.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -75,9 +72,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="random.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="requesthandler.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
