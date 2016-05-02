@@ -53,6 +53,15 @@ namespace GoodAI.Arnold
             pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
         }
 
+        private void DisableCommandButtons()
+        {
+            connectButton.Enabled = false;
+            disconnectButton.Enabled = false;
+
+            runButton.Enabled = false;
+            pauseButton.Enabled = false;
+        }
+
         private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
         {
             Invoke((MethodInvoker)UpdateButtons);
@@ -87,21 +96,26 @@ namespace GoodAI.Arnold
         private void connectButton_Click(object sender, EventArgs e)
         {
             // TODO(HonzaS): Handle the core type (local/remote).
+            DisableCommandButtons();
             m_uiMain.ConnectToCore();
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
         {
+            DisableCommandButtons();
             m_uiMain.Disconnect();
         }
 
         private void runButton_Click(object sender, EventArgs e)
         {
+            DisableCommandButtons();
             m_uiMain.StartSimulation();
         }
 
         private void pauseButton_Click(object sender, EventArgs e)
         {
+            DisableCommandButtons();
+            m_uiMain.PauseSimulation();
         }
     }
 }
