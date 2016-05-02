@@ -72,5 +72,10 @@ namespace ArnoldUI
 
             Conductor.KillSimulation();
         }
+
+        public void Disconnect()
+        {
+            Conductor.Shutdown();
+        }
     }
 }

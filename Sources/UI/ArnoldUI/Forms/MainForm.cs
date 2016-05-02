@@ -92,7 +92,7 @@ namespace GoodAI.Arnold
 
         private void disconnectButton_Click(object sender, EventArgs e)
         {
-
+            m_uiMain.Disconnect();
         }
 
         private void runButton_Click(object sender, EventArgs e)
