@@ -57,21 +57,21 @@ namespace ArnoldUI
 
         public void StartSimulation()
         {
-            // TODO(HonzaS): Here will be some logic governing local/remote core setup.
-            if (Conductor.CoreProxy == null)
-                Conductor.ConnectToCore();
-
-            // The play button has been pushed.
             Conductor.StartSimulation();
         }
 
-        public void KillSimulation()
+        public void PauseSimulation()
         {
-            if (Conductor.CoreProxy == null)
-                return;
-
-            Conductor.KillSimulation();
+            Conductor.PauseSimulation();
         }
+
+        //public void KillSimulation()
+        //{
+        //    if (Conductor.CoreProxy == null)
+        //        return;
+
+        //    Conductor.KillSimulation();
+        //}
 
         public void Disconnect()
         {

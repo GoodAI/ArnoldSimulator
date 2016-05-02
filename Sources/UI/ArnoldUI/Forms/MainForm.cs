@@ -97,12 +97,11 @@ namespace GoodAI.Arnold
 
         private void runButton_Click(object sender, EventArgs e)
         {
-
+            m_uiMain.StartSimulation();
         }
 
         private void pauseButton_Click(object sender, EventArgs e)
         {
-
         }
     }
 }

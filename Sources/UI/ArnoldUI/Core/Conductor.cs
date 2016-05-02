@@ -46,7 +46,6 @@ namespace GoodAI.Arnold.Core
     {
         public event EventHandler<StateUpdatedEventArgs> StateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
-        private bool m_shouldKill;
 
         private readonly ICoreProcessFactory m_coreProcessFactory;
         private ICoreProcess m_process;
@@ -201,7 +200,6 @@ namespace GoodAI.Arnold.Core
             if (CoreProxy == null)
                 throw new InvalidOperationException("Simulation does not exist, cannot start.");
 
-            m_shouldKill = false;
             CoreProxy.Run(stepsToRun);
         }
 
