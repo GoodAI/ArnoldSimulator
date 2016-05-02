@@ -9,6 +9,7 @@
 #include <pup.h>
 #include <pup_stl.h>
 #include <completion.h>
+#include <ckmulticast.h>
 
 #include "requests_generated.h"
 #include "responses_generated.h"

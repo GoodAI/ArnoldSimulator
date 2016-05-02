@@ -26,7 +26,10 @@ Core::Core(CkArgMsg *msg) : mRequestIdCounter(0)
 
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 
-    // TODO(PetrK): build completion detector and multicast group
+    // TODO(PetrK): prepare array maps
+
+    gMulticastGroupId = CProxy_CkMulticastMgr::ckNew();
+    gCompletionDetector = CProxy_CompletionDetector::ckNew();
 
     gCore = thisProxy;
     gBrain = CProxy_BrainBase::ckNew();

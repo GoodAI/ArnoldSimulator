@@ -11,6 +11,7 @@
 #include <pup.h>
 #include <pup_stl.h>
 #include <completion.h>
+#include <ckmulticast.h>
 
 #include "common.h"
 #include "spike.h"
