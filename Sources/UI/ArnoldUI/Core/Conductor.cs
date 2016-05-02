@@ -56,7 +56,6 @@ namespace GoodAI.Arnold.Core
         public ICoreProxy CoreProxy { get; private set; }
 
         private readonly ICoreControllerFactory m_coreControllerFactory;
-        private ICoreController m_coreController;
 
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
             ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory)
@@ -83,10 +82,10 @@ namespace GoodAI.Arnold.Core
                 endPoint = m_process.EndPoint;
             }
 
-            var coreLink = m_coreLinkFactory.Create(endPoint);
-            m_coreController = m_coreControllerFactory.Create(coreLink);
+            ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
+            ICoreController coreController = m_coreControllerFactory.Create(coreLink);
 
-            CoreProxy = m_coreProxyFactory.Create(coreLink, m_coreController);
+            CoreProxy = m_coreProxyFactory.Create(coreLink, coreController);
 
             RegisterCoreEvents();
         }
