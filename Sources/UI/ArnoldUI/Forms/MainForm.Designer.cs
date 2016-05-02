@@ -49,8 +49,6 @@
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.coreTypeLabel = new System.Windows.Forms.ToolStripLabel();
-            this.coreTypeComboBox = new System.Windows.Forms.ToolStripComboBox();
             this.connectButton = new System.Windows.Forms.ToolStripButton();
             this.disconnectButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -148,8 +146,6 @@
             // 
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.coreTypeLabel,
-            this.coreTypeComboBox,
             this.connectButton,
             this.disconnectButton,
             this.toolStripSeparator1,
@@ -161,18 +157,6 @@
             this.toolStrip1.Size = new System.Drawing.Size(963, 25);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
-            // 
-            // coreTypeLabel
-            // 
-            this.coreTypeLabel.Name = "coreTypeLabel";
-            this.coreTypeLabel.Size = new System.Drawing.Size(35, 22);
-            this.coreTypeLabel.Text = "Core:";
-            // 
-            // coreTypeComboBox
-            // 
-            this.coreTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.coreTypeComboBox.Name = "coreTypeComboBox";
-            this.coreTypeComboBox.Size = new System.Drawing.Size(121, 25);
             // 
             // connectButton
             // 
@@ -266,8 +250,6 @@
         private System.Windows.Forms.ToolStripButton disconnectButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripComboBox coreTypeComboBox;
-        private System.Windows.Forms.ToolStripLabel coreTypeLabel;
         private System.Windows.Forms.ToolStripButton connectButton;
         private System.Windows.Forms.StatusStrip statusStrip;
     }

@@ -223,7 +223,7 @@ namespace GoodAI.Arnold.Core
             //}
         }
 
-        public bool IsConnected => m_process != null && m_coreController != null;
+        public bool IsConnected => CoreProxy != null;
 
         public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
 

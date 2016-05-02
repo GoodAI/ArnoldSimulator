@@ -49,7 +49,7 @@ namespace ArnoldUI
             //Simulation.Clear();
         }
 
-        public void ConnectToCore(string coreId)
+        public void ConnectToCore()
         {
             // TODO(HonzaS): endPoint = null means local.
             Conductor.ConnectToCore(endPoint: null);

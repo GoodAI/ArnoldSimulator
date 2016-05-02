@@ -40,8 +40,6 @@ namespace GoodAI.Arnold
             m_uiMain.SimulationStateUpdated += SimulationOnStateUpdated;
             m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
 
-            PopulateCoreTypes();
-
             UpdateButtons();
             //Simulation = new RemoteSimulation(new CoreLink(new ConverseProtoBufClient(new DummyConnector())));
         }
@@ -55,19 +53,9 @@ namespace GoodAI.Arnold
             pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
         }
 
-        private void PopulateCoreTypes()
-        {
-            coreTypeComboBox.Items.Add("Local");
-            coreTypeComboBox.SelectedIndex = 0;
-            // TODO(HonzaS): Add saved remotes.
-
-            // TODO(HonzaS): Dialog for adding new remotes.
-            //coreTypeComboBox.Items.Add("Add remote...");
-        }
-
-
         private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
         {
+            Invoke((MethodInvoker)UpdateButtons);
         }
 
         private void SimulationOnStateChangeFailed(object sender, StateChangeFailedEventArgs e)
@@ -99,7 +87,7 @@ namespace GoodAI.Arnold
         private void connectButton_Click(object sender, EventArgs e)
         {
             // TODO(HonzaS): Handle the core type (local/remote).
-            m_uiMain.ConnectToCore(coreTypeComboBox.SelectedText);
+            m_uiMain.ConnectToCore();
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)

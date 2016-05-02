@@ -110,6 +110,8 @@ namespace GoodAI.Arnold.Simulation
             m_controller = controller;
             State = CoreState.Empty;
 
+            RefreshState();
+
             Model = new SimulationModel();
         }
 
@@ -207,7 +209,7 @@ namespace GoodAI.Arnold.Simulation
             m_coreLink.Request(conversation).ContinueWith(task =>
             {
                 TimeoutResult<Response<StateResponse>> timeoutResult = task.Result;
-                if (!timeoutResult.TimedOut && timeoutResult.Result.Error != null)
+                if (!timeoutResult.TimedOut && timeoutResult.Result.Data != null)
                     State = ReadState(timeoutResult.Result.Data);
             });
         }
