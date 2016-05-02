@@ -12,23 +12,24 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreLinkFactory
     {
-        ICoreLink Create(EndPoint endPoint, IResponseParser responseParser);
+        ICoreLink Create(EndPoint endPoint);
     }
 
     // TODO(HonzaS): This class still does some composition.
     public class CoreLinkFactory : ICoreLinkFactory
     {
+        private readonly IResponseParser m_responseParser;
         private const int TcpTimeoutMs = 5000;
 
-        public ICoreLink Create(EndPoint endPoint, IResponseParser responseParser)
+        public CoreLinkFactory(IResponseParser responseParser)
         {
-            var connector = new TcpConnector(endPoint.Hostname, endPoint.Port, TcpTimeoutMs);
-            return Create(connector, responseParser);
+            m_responseParser = responseParser;
         }
 
-        private ICoreLink Create(ITcpConnector connector, IResponseParser responseParser)
+        public ICoreLink Create(EndPoint endPoint)
         {
-            return new CoreLink(new ConverseFlatBuffersClient(connector, responseParser));
+            var connector = new TcpConnector(endPoint.Hostname, endPoint.Port, TcpTimeoutMs);
+            return new CoreLink(new ConverseFlatBuffersClient(connector, m_responseParser));
         }
     }
 }

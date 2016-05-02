@@ -66,7 +66,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             var conv = new CommandConversation(CommandType.Run);
 
-            var response = StateResponseBuilder.Build(StateType.Invalid);
+            var response = StateResponseBuilder.Build(StateType.Paused);
 
             var converseClientMock = new Mock<IConverseFlatBuffersClient>();
             converseClientMock.Setup(client => client.SendQuery<CommandRequest, ResponseMessage>(Conversation.Handler, It.IsAny<CommandRequest>()))

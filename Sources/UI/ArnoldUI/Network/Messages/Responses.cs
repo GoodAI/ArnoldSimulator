@@ -12,7 +12,6 @@ public enum StateType : sbyte
  Running = 1,
  Paused = 2,
  ShuttingDown = 3,
- Invalid = 4,
 };
 
 public enum Response : byte

@@ -17,20 +17,20 @@ namespace ArnoldUI
     {
         public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated
         {
-            add { Conductor.SimulationStateUpdated += value; }
-            remove { Conductor.SimulationStateUpdated -= value; }
+            add { Conductor.StateUpdated += value; }
+            remove { Conductor.StateUpdated -= value; }
         }
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed
         {
-            add { Conductor.SimulationStateChangeFailed += value; }
-            remove { Conductor.SimulationStateChangeFailed -= value; }
+            add { Conductor.StateChangeFailed += value; }
+            remove { Conductor.StateChangeFailed -= value; }
         }
 
         public AgentBlueprint AgentBlueprint { get; }
 
         public IConductor Conductor { get; set; }
 
-        public ISimulation Simulation => Conductor.Simulation;
+        public ICoreProxy CoreProxy => Conductor.CoreProxy;
 
         public UIMain(IConductor conductor)
         {
@@ -49,11 +49,17 @@ namespace ArnoldUI
             //Simulation.Clear();
         }
 
+        public void ConnectToCore(string coreId)
+        {
+            // TODO(HonzaS): endPoint = null means local.
+            Conductor.ConnectToCore(endPoint: null);
+        }
+
         public void StartSimulation()
         {
             // TODO(HonzaS): Here will be some logic governing local/remote core setup.
-            if (Conductor.Simulation == null)
-                Conductor.Setup();
+            if (Conductor.CoreProxy == null)
+                Conductor.ConnectToCore();
 
             // The play button has been pushed.
             Conductor.StartSimulation();
@@ -61,7 +67,7 @@ namespace ArnoldUI
 
         public void KillSimulation()
         {
-            if (Conductor.Simulation == null)
+            if (Conductor.CoreProxy == null)
                 return;
 
             Conductor.KillSimulation();

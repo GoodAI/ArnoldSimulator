@@ -14,14 +14,14 @@ namespace GoodAI.Arnold.Core
 {
     public interface IConductor
     {
-        ICoreLink CoreLink { get; }
-        ISimulation Simulation { get; }
+        ICoreProxy CoreProxy { get; }
 
-        event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
-        event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
+        event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
+        event EventHandler<StateUpdatedEventArgs> StateUpdated;
 
-        void Setup(EndPoint endPoint = null);
-        void Teardown();
+        void ConnectToCore(EndPoint endPoint = null);
+        void Disconnect();
+        void Shutdown();
         void LoadBlueprint(AgentBlueprint blueprint);
         void StartSimulation(uint stepsToRun = 0);
         void PauseSimulation();
@@ -29,201 +29,214 @@ namespace GoodAI.Arnold.Core
 
         bool IsConnected { get; }
 
-        SimulationState SimulationState { get; }
+        CoreState CoreState { get; }
     }
 
     public class SimulationInstanceEventArgs : EventArgs
     {
-        private ISimulation Simulation { get; set; }
+        private ICoreProxy CoreProxy { get; set; }
 
-        public SimulationInstanceEventArgs(ISimulation simulation)
+        public SimulationInstanceEventArgs(ICoreProxy coreProxy)
         {
-            Simulation = simulation;
+            CoreProxy = coreProxy;
         }
     }
 
     public class Conductor : IConductor
     {
-        public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated;
-        public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed;
+        public event EventHandler<StateUpdatedEventArgs> StateUpdated;
+        public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         private bool m_shouldKill;
 
-        private readonly ICoreProxyFactory m_coreProxyFactory;
-        private ICoreProxy m_proxy;
+        private readonly ICoreProcessFactory m_coreProcessFactory;
+        private ICoreProcess m_process;
 
         private readonly ICoreLinkFactory m_coreLinkFactory;
-        public ICoreLink CoreLink { get; private set; }
 
-        private readonly ISimulationFactory m_simulationFactory;
-        public ISimulation Simulation { get; private set; }
+        private readonly ICoreProxyFactory m_coreProxyFactory;
+        public ICoreProxy CoreProxy { get; private set; }
 
         private readonly ICoreControllerFactory m_coreControllerFactory;
-        public ICoreController CoreController { get; private set; }
+        private ICoreController m_coreController;
 
-        public Conductor(ICoreProxyFactory coreProxyFactory, ICoreLinkFactory coreLinkFactory,
-            ICoreControllerFactory coreControllerFactory, ISimulationFactory simulationFactory)
+        public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
+            ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory)
         {
-            m_coreProxyFactory = coreProxyFactory;
+            m_coreProcessFactory = coreProcessFactory;
             m_coreLinkFactory = coreLinkFactory;
             m_coreControllerFactory = coreControllerFactory;
-            m_simulationFactory = simulationFactory;
+            m_coreProxyFactory = coreProxyFactory;
         }
 
-        public void Setup(EndPoint endPoint = null)
+        public void ConnectToCore(EndPoint endPoint = null)
         {
-            if (Simulation != null)
+            if (CoreProxy != null)
             {
                 throw new InvalidOperationException(
-                    "There is still a Simulation present. It must be cleaned up before Setup().");
+                    "There is still a core proxy present");
             }
 
-            if (m_proxy != null)
+            if (endPoint == null)
             {
-                throw new InvalidOperationException(
-                    "There is still a Core present. It must be cleaned up before Setup().");
+                if (m_process == null)
+                    m_process = m_coreProcessFactory.Create();
+
+                endPoint = m_process.EndPoint;
             }
 
-            m_proxy = m_coreProxyFactory.Create(endPoint);
+            var coreLink = m_coreLinkFactory.Create(endPoint);
+            m_coreController = m_coreControllerFactory.Create(coreLink);
 
-            endPoint = m_proxy.Start();
+            CoreProxy = m_coreProxyFactory.Create(coreLink, m_coreController);
 
-            CoreLink = m_coreLinkFactory.Create(endPoint, new CoreResponseParser());
-
-            CoreController = m_coreControllerFactory.Create(CoreLink);
-
-            // TODO(HonzaS): Simulation should only be present after there has been a blueprint upload.
-            Simulation = m_simulationFactory.Create(CoreLink, CoreController);
-
-            Simulation.StateUpdated += SimulationOnStateUpdated;
-            Simulation.StateChangeFailed += SimulationOnStateChangeFailed;
-
-            // Handshake.
-            Simulation.RefreshState();
+            RegisterCoreEvents();
         }
 
-        public void Teardown()
+        private void RegisterCoreEvents()
         {
-            if (m_proxy == null)
-                throw new InvalidOperationException("Not set up, cannot tear down.");
+            CoreProxy.StateUpdated += OnCoreStateUpdated;
+            CoreProxy.StateChangeFailed += OnCoreStateChangeFailed;
+            CoreProxy.CommandTimedOut += OnCoreCommandTimedOut;
+        }
 
-            if (CoreLink == null)
+        private void UnregisterCoreEvents()
+        {
+            CoreProxy.StateUpdated -= OnCoreStateUpdated;
+            CoreProxy.StateChangeFailed -= OnCoreStateChangeFailed;
+            CoreProxy.CommandTimedOut -= OnCoreCommandTimedOut;
+        }
+
+        public void Disconnect()
+        {
+            if (CoreProxy == null)
             {
-                Reset();
+                // TODO(HonzaS): logging.
                 return;
             }
 
-            var conversation = new CommandConversation(CommandType.Shutdown);
+            if (m_process != null)
+            {
+                // TODO(HonzaS): We might want to ask the user if he wants to kill the local process when disconnecting.
+            }
 
-            CoreController.Command(conversation, AfterTeardown, TeardownTimeout);
+            FinishDisconnect();
         }
 
-        private TimeoutAction TeardownTimeout()
+        public void Shutdown()
         {
-            // TODO(HonzaS): Ask the user what to do.
-            return TimeoutAction.Wait;
+            if (CoreProxy != null)
+            {
+                CoreProxy.Shutdown();
+                return;
+            }
+
+            AfterShutdown();
+        }
+
+        private void OnCoreCommandTimedOut(object sender, TimeoutActionEventArgs args)
+        {
+            if (args.Command == CommandType.Shutdown)
+            {
+                args.Action = TimeoutAction.Cancel;
+
+                AfterShutdown();
+            }
+        }
+
+        private void AfterShutdown()
+        {
+            if (m_process != null)
+            {
+                m_process.Dispose();
+                m_process = null;
+            }
+
+            FinishDisconnect();
+        }
+
+        private void FinishDisconnect()
+        {
+            CoreState oldState = CoreProxy.State;
+
+            UnregisterCoreEvents();
+            CoreProxy = null;
+
+            StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, CoreState.Disconnected));
         }
 
         public void LoadBlueprint(AgentBlueprint blueprint)
         {
             // TODO(HonzaS): Add this when blueprints come into play.
-            Simulation.LoadBlueprint(blueprint);
+            CoreProxy.LoadBlueprint(blueprint);
         }
 
-        private void AfterTeardown(Response<StateResponse> result)
+        private void OnCoreStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
         {
-            if (result.Error != null)
-            {
-                // TODO(HonzaS): Logging.
-            }
+            if (stateUpdatedEventArgs.CurrentState == CoreState.ShuttingDown)
+                AfterShutdown();
 
-            // TODO(HonzaS): This will force-reset, should we give the user a say in that?
-            Reset();
+
+            //if (m_shouldKill)
+            //{
+            //    if (stateUpdatedEventArgs.CurrentState == CoreState.Empty)
+            //    {
+            //        CleanupSimulation();
+            //    }
+            //    else
+            //    {
+            //        // TODO(HonzaS): Log an error/warning.
+            //    }
+            //}
+
+            StateUpdated?.Invoke(this, stateUpdatedEventArgs);
         }
 
-        private void Reset()
+        private void OnCoreStateChangeFailed(object sender, StateChangeFailedEventArgs stateChangeFailedEventArgs)
         {
-            CoreLink = null;
-
-            // This will kill the local process.
-            m_proxy.Dispose();
-            m_proxy = null;
-
-            // TODO(HonzaS): Is the previousState correct?
-            SimulationStateUpdated?.Invoke(this, new StateUpdatedEventArgs(SimulationState.Empty, SimulationState.Null));
-        }
-
-        private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
-        {
-            if (m_shouldKill)
-            {
-                if (stateUpdatedEventArgs.CurrentState == SimulationState.Empty)
-                {
-                    CleanupSimulation();
-                }
-                else
-                {
-                    // TODO(HonzaS): Log an error/warning.
-                }
-            }
-
-            SimulationStateUpdated?.Invoke(this, stateUpdatedEventArgs);
-        }
-
-        private void SimulationOnStateChangeFailed(object sender, StateChangeFailedEventArgs stateChangeFailedEventArgs)
-        {
-            SimulationStateChangeFailed?.Invoke(this, stateChangeFailedEventArgs);
+            StateChangeFailed?.Invoke(this, stateChangeFailedEventArgs);
         }
 
         public void StartSimulation(uint stepsToRun = 0)
         {
-            if (Simulation == null)
+            if (CoreProxy == null)
                 throw new InvalidOperationException("Simulation does not exist, cannot start.");
 
             m_shouldKill = false;
-            Simulation.Run(stepsToRun);
+            CoreProxy.Run(stepsToRun);
         }
 
         public void PauseSimulation()
         {
-            Simulation.Pause();
+            CoreProxy.Pause();
         }
 
         public void KillSimulation()
         {
-            m_shouldKill = true;
-            if (Simulation != null && Simulation.State != SimulationState.Empty)
-            {
-                Simulation?.Clear();
-            }
-            else
-            {
-                CleanupSimulation();
-            }
+            //m_shouldKill = true;
+            //if (CoreProxy != null && CoreProxy.State != CoreState.Empty)
+            //{
+            //    CoreProxy?.Clear();
+            //}
+            //else
+            //{
+            //    CleanupSimulation();
+            //}
         }
 
-        public bool IsConnected => m_proxy != null && CoreController != null;
+        public bool IsConnected => m_process != null && m_coreController != null;
 
-        public SimulationState SimulationState
-        {
-            get
-            {
-                if (Simulation != null)
-                    return Simulation.State;
+        public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
 
-                return SimulationState.Null;
-            }
-        }
+        // TODO(HonzaS): Clean up this when we start using it.
+        //private void CleanupSimulation()
+        //{
+        //    CoreProxy.StateUpdated -= OnCoreStateUpdated;
+        //    CoreProxy.StateChangeFailed -= OnCoreStateChangeFailed;
 
-        private void CleanupSimulation()
-        {
-            //Simulation.Dispose();
-            Simulation.StateUpdated -= SimulationOnStateUpdated;
-            Simulation.StateChangeFailed -= SimulationOnStateChangeFailed;
+        //    CoreState previousState = CoreProxy.State;
+        //    CoreProxy = null;
 
-            SimulationState previousState = Simulation.State;
-            Simulation = null;
-
-            SimulationStateUpdated?.Invoke(this, new StateUpdatedEventArgs(previousState, SimulationState.Null));
-        }
+        //    StateUpdated?.Invoke(this, new StateUpdatedEventArgs(previousState, CoreState.Disconnected));
+        //}
     }
 }

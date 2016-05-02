@@ -51,8 +51,8 @@ namespace GoodAI.Arnold
             connectButton.Enabled = !m_uiMain.Conductor.IsConnected;
             disconnectButton.Enabled = !connectButton.Enabled;
 
-            runButton.Enabled = m_uiMain.Conductor.SimulationState == SimulationState.Paused || m_uiMain.Conductor.SimulationState == SimulationState.Empty;
-            pauseButton.Enabled = m_uiMain.Conductor.SimulationState == SimulationState.Running;
+            runButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Paused || m_uiMain.Conductor.CoreState == CoreState.Empty;
+            pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
         }
 
         private void PopulateCoreTypes()
@@ -98,7 +98,8 @@ namespace GoodAI.Arnold
 
         private void connectButton_Click(object sender, EventArgs e)
         {
-
+            // TODO(HonzaS): Handle the core type (local/remote).
+            m_uiMain.ConnectToCore(coreTypeComboBox.SelectedText);
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)

@@ -10,10 +10,10 @@ namespace GoodAI.Arnold.Simulation
 {
     public class StateUpdatedEventArgs : EventArgs
     {
-        public SimulationState PreviousState { get; set; }
-        public SimulationState CurrentState { get; set; }
+        public CoreState PreviousState { get; set; }
+        public CoreState CurrentState { get; set; }
 
-        public StateUpdatedEventArgs(SimulationState previousState, SimulationState currentState)
+        public StateUpdatedEventArgs(CoreState previousState, CoreState currentState)
         {
             PreviousState = previousState;
             CurrentState = currentState;

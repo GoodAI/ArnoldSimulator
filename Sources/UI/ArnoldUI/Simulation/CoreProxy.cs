@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
@@ -7,10 +8,32 @@ using GoodAI.Arnold.Project;
 
 namespace GoodAI.Arnold.Simulation
 {
-    public interface ISimulation
+    public enum CoreState
+    {
+        Disconnected,  // Only for event signaling - not a true state.
+        Empty,  // The core is ready, but no blueprint has been loaded.
+        Paused,  // There is a blueprint but the simulation is not running.
+        Running,
+        ShuttingDown
+    }
+
+    public class TimeoutActionEventArgs : EventArgs
+    {
+        public CommandType Command { get; }
+        public TimeoutAction Action { get; set; }
+
+        public TimeoutActionEventArgs(CommandType command, TimeoutAction action = TimeoutAction.Wait)
+        {
+            Command = command;
+            Action = action;
+        }
+    }
+
+    public interface ICoreProxy
     {
         event EventHandler<StateUpdatedEventArgs> StateUpdated;
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
+        event EventHandler<TimeoutActionEventArgs> CommandTimedOut;
 
         /// <summary>
         /// Loads an agent into the handler, creates a new simulation.
@@ -38,158 +61,135 @@ namespace GoodAI.Arnold.Simulation
         void Clear();
 
         /// <summary>
-        /// Requests a state refresh.
+        /// Shut down the core.
+        /// The core should shut down after it confirms the ShuttingDown state.
         /// </summary>
-        void RefreshState();
+        void Shutdown();
 
-        SimulationState State { get; }
+        CoreState State { get; }
 
         ISimulationModel Model { get; }
     }
 
-    public enum SimulationState
-    {
-        Null,  // The simulation doesn't exist. Don't set this as Simulation.State!
-        Empty,  // The core is ready, but no blueprint has been loaded.
-        Paused,
-        Running,
-        ShuttingDown,
-        Invalid  // Invalid state - something really wrong happened in the core.
-    }
 
     public class WrongHandlerStateException : Exception
     {
         public WrongHandlerStateException(string message) : base(message) { }
 
-        public WrongHandlerStateException(string methodName, SimulationState state)
+        public WrongHandlerStateException(string methodName, CoreState state)
             : base($"Cannot run {methodName}, simulation is in {state} state.")
         { }
     }
 
-    public class SimulationProxy : ISimulation
+    public class CoreProxy : ICoreProxy
     {
         public ISimulationModel Model { get; private set; }
 
         public event EventHandler<StateUpdatedEventArgs> StateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
+        public event EventHandler<TimeoutActionEventArgs> CommandTimedOut;
 
-        public SimulationState State
+        public CoreState State
         {
             get { return m_state; }
             private set
             {
-                if (value == SimulationState.Null)
-                    throw new InvalidOperationException("The simulation state cannot be Null.");
-
-                SimulationState oldState = m_state;
+                CoreState oldState = m_state;
                 m_state = value;
                 StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, m_state));
             }
         }
+        private CoreState m_state;
 
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_controller;
-        private SimulationState m_state;
 
-        public SimulationProxy(ICoreLink coreLink, ICoreController controller)
+        public CoreProxy(ICoreLink coreLink, ICoreController controller)
         {
             m_coreLink = coreLink;
             m_controller = controller;
-            State = SimulationState.Empty;
+            State = CoreState.Empty;
 
             Model = new SimulationModel();
         }
 
         public void LoadBlueprint(AgentBlueprint agentBlueprint)
         {
-            if (State != SimulationState.Empty)
+            if (State != CoreState.Empty)
                 throw new WrongHandlerStateException("LoadAgent", State);
 
             // TODO(HonzaS): Add the blueprint data.
-            var conversation = new CommandConversation(CommandType.Load);
-
-            SendCommand(conversation);
+            SendCommand(new CommandConversation(CommandType.Load));
         }
 
         public void Clear()
         {
-            var conversation = new CommandConversation(CommandType.Clear);
+            SendCommand(new CommandConversation(CommandType.Clear));
+        }
 
-            SendCommand(conversation);
+        public void Shutdown()
+        {
+            SendCommand(new CommandConversation(CommandType.Shutdown));
         }
 
         public void Run(uint stepsToRun = 0)
         {
-            if (State != SimulationState.Paused && State != SimulationState.Running)
+            if (State != CoreState.Paused && State != CoreState.Running)
                 throw new WrongHandlerStateException("Run", State);
 
-            RunSimulation(stepsToRun);
+            if (State == CoreState.Running)
+                return;
+
+            SendCommand(new CommandConversation(CommandType.Run, stepsToRun));
         }
 
         public void Pause()
         {
-            if (State != SimulationState.Paused && State != SimulationState.Running)
+            if (State != CoreState.Paused && State != CoreState.Running)
                 throw new WrongHandlerStateException("Pause", State);
 
-            if (State == SimulationState.Paused)
+            if (State == CoreState.Paused)
                 return;
 
-            var conversation = new CommandConversation(CommandType.Pause);
-
-            SendCommand(conversation);
-
-            // TODO(HonzaS): Signal the Core.
-            // TODO(HonzaS): Logging!
-            //if (!signalled)
-            //    deal with it
-        }
-
-        private void RunSimulation(uint stepsToRun)
-        {
-            if (State == SimulationState.Running)
-                return;
-
-            var conversation = new CommandConversation(CommandType.Run, stepsToRun);
-
-            SendCommand(conversation);
+            SendCommand(new CommandConversation(CommandType.Pause));
         }
 
         private void SendCommand(CommandConversation conversation)
         {
-            m_controller.Command(conversation, HandleStateResponse, HandleTimeoutCancellation);
+            m_controller.Command(conversation, HandleStateResponse, CreateTimeoutHandler(conversation.RequestData.Command));
         }
 
-        private TimeoutAction HandleTimeoutCancellation()
+        private Func<TimeoutAction> CreateTimeoutHandler(CommandType type)
         {
-            throw new NotImplementedException();
+            return () =>
+            {
+                var args = new TimeoutActionEventArgs(type);
+                CommandTimedOut?.Invoke(this, args);
+
+                return args.Action;
+            };
         }
 
         private void HandleStateResponse(Response<StateResponse> response)
         {
             if (response.Error != null)
-            {
                 HandleError(response.Error);
-            }
             else
-            {
                 State = ReadState(response.Data);
-            }
         }
 
-        public static SimulationState ReadState(StateResponse stateData)
+        private static CoreState ReadState(StateResponse stateData)
         {
             switch (stateData.State)
             {
                 case StateType.Empty:
-                    return SimulationState.Empty;
+                    return CoreState.Empty;
                 case StateType.Running:
-                    return SimulationState.Running;
+                    return CoreState.Running;
                 case StateType.Paused:
-                    return SimulationState.Paused;
+                    return CoreState.Paused;
                 case StateType.ShuttingDown:
-                    return SimulationState.ShuttingDown;
-                case StateType.Invalid:
-                    return SimulationState.Invalid;
+                    return CoreState.ShuttingDown;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

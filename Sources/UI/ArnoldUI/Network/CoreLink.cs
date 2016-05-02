@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlatBuffers;
+using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 
@@ -11,7 +12,8 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreLink
     {
-        Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation,
+        Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(
+            IConversation<TRequest, TResponse> conversation,
             int timeoutMs = 0)
             where TRequest : Table
             where TResponse : Table, new();
@@ -47,13 +49,15 @@ namespace GoodAI.Arnold.Network
             m_converseClient = converseClient;
         }
 
-        public Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs = 0)
+        public Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(
+            IConversation<TRequest, TResponse> conversation, int timeoutMs = 0)
             where TRequest : Table
             where TResponse : Table, new()
         {
             return Task<ResponseMessage>.Factory.StartNew(
-                () => m_converseClient.SendQuery<TRequest, ResponseMessage>(Conversation.Handler, conversation.RequestData)).ContinueWith(task
-                    =>
+                () =>
+                    m_converseClient.SendQuery<TRequest, ResponseMessage>(Conversation.Handler, conversation.RequestData))
+                .ContinueWith(task =>
                 {
                     ResponseMessage result = task.Result;
                     if (result.ResponseType == Response.ErrorResponse)

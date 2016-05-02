@@ -18,8 +18,7 @@ enum StateType:byte {
 	Empty,
 	Running,
 	Paused,
-	ShuttingDown,
-	Invalid
+	ShuttingDown
 }
 
 table StateResponse {

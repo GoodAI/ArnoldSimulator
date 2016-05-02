@@ -47,7 +47,7 @@ namespace GoodAI.Arnold.Graphics
         private float m_fps;
 
         private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
-        private ISimulation m_simulation;
+        private ICoreProxy m_coreProxy;
         private readonly ISimulationModel m_simulationModel;
         private IConductor m_conductor;
 
@@ -56,8 +56,8 @@ namespace GoodAI.Arnold.Graphics
         {
             m_control = glControl;
             m_conductor = conductor;
-            m_simulation = m_conductor.Simulation;
-            m_simulationModel = m_simulation.Model;
+            m_coreProxy = m_conductor.CoreProxy;
+            m_simulationModel = m_coreProxy.Model;
 
             m_camera = new Camera
             {

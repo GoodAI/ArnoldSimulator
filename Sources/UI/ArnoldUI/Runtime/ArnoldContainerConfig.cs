@@ -8,6 +8,7 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Logging;
+using GoodAI.Net.ConverseSharpFlatBuffers;
 using GoodAI.TypeMapping;
 using SimpleInjector;
 
@@ -31,10 +32,11 @@ namespace GoodAI.Arnold
                 Lifestyle.Transient,
                 predicateContext => predicateContext.Consumer == null);
 
+            container.RegisterSingleton<IResponseParser, CoreResponseParser>();
             container.RegisterSingleton<ICoreProxyFactory, CoreProxyFactory>();
+            container.RegisterSingleton<ICoreProcessFactory, CoreProcessFactory>();
             container.RegisterSingleton<ICoreLinkFactory, CoreLinkFactory>();
             container.RegisterSingleton<ICoreControllerFactory, CoreControllerFactory>();
-            container.RegisterSingleton<ISimulationFactory, SimulationFactory>();
             container.RegisterSingleton<IConductor, Conductor>();
             container.RegisterSingleton<UIMain>();
         }
