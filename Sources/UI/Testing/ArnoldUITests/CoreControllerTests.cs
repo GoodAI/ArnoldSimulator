@@ -17,6 +17,8 @@ namespace GoodAI.Arnold.UI.Tests
         private CoreController m_controller;
         private Mock<ICoreLink> m_coreLinkMock;
 
+        private const int TimeoutMs = 30;
+
         public CoreControllerTests()
         {
             m_coreLinkMock = new Mock<ICoreLink>();
@@ -80,7 +82,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            await m_controller.Command(conversation, response => { }, () => TimeoutAction.Retry, 30);
+            await m_controller.Command(conversation, response => { }, () => TimeoutAction.Retry, TimeoutMs);
 
             Assert.Equal(2, noOfRuns);
         }
@@ -115,7 +117,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            await m_controller.Command(conversation, response => { }, () => TimeoutAction.Wait, 30);
+            await m_controller.Command(conversation, response => { }, () => TimeoutAction.Wait, TimeoutMs);
 
             Assert.Equal(1, noOfRuns);
         }
@@ -145,9 +147,32 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
             
-            await m_controller.Command(conversation, response => successCalled = true, () => TimeoutAction.Cancel, 30);
+            await m_controller.Command(conversation, response => successCalled = true, () => TimeoutAction.Cancel, TimeoutMs);
 
             Assert.False(successCalled);
+        }
+
+        [Fact]
+        public void ChecksState()
+        {
+            m_coreLinkMock.Setup(link => link.Request(It.IsAny<GetStateConversation>(), It.IsAny<int>())).Returns(
+                () =>
+                {
+                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
+                    {
+                        var result = new TimeoutResult<Response<StateResponse>>
+                        {
+                            Result = new Response<StateResponse>(new StateResponse())
+                        };
+                        return result;
+                    });
+                    task.Start();
+                    return task;
+                });
+
+            var stateUpdatedEvent = new AutoResetEvent(false);
+            m_controller.StartStateChecking(timeoutResult => stateUpdatedEvent.Set());
+            Assert.True(stateUpdatedEvent.WaitOne(TimeoutMs));
         }
     }
 }

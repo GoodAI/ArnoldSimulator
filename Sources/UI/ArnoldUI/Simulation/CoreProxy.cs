@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Project;
+using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Simulation
 {
@@ -29,7 +31,7 @@ namespace GoodAI.Arnold.Simulation
         }
     }
 
-    public interface ICoreProxy
+    public interface ICoreProxy : IDisposable
     {
         event EventHandler<StateUpdatedEventArgs> StateUpdated;
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
@@ -110,9 +112,14 @@ namespace GoodAI.Arnold.Simulation
             m_controller = controller;
             State = CoreState.Empty;
 
-            RefreshState();
+            m_controller.StartStateChecking(HandleKeepaliveStateResponse);
 
             Model = new SimulationModel();
+        }
+
+        public void Dispose()
+        {
+            m_controller.Dispose();
         }
 
         public void LoadBlueprint(AgentBlueprint agentBlueprint)
@@ -170,6 +177,18 @@ namespace GoodAI.Arnold.Simulation
 
                 return args.Action;
             };
+        }
+
+        private void HandleKeepaliveStateResponse(TimeoutResult<Response<StateResponse>> timeoutResult)
+        {
+            if (timeoutResult.TimedOut)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                HandleStateResponse(timeoutResult.Result);
+            }
         }
 
         private void HandleStateResponse(Response<StateResponse> response)
