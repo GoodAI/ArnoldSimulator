@@ -6,6 +6,10 @@ module neuron
 
     extern module region;
 
+    group [migratable] NeuronMap : CkArrayMap {
+        entry NeuronMap();
+    };
+
     array [2D] NeuronBase
     {
         entry NeuronBase(NeuronType type, NeuronParams params);

@@ -25,6 +25,14 @@ class SimulateMsg;
 
 class NeuronBase;
 
+class NeuronMap : public CkArrayMap
+{
+public:
+    NeuronMap();
+    NeuronMap(CkMigrateMessage *msg);
+    int procNum(int arrayHdl, const CkArrayIndex &index);
+};
+
 class Neuron
 {
 public:

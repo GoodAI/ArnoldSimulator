@@ -9,6 +9,10 @@ module brain
         size_t brainStep;
     };
 
+    group [migratable] BrainMap : CkArrayMap {
+        entry BrainMap();
+    };
+
     array [1D] BrainBase
     {
         entry BrainBase(BrainType type, BrainParams params);

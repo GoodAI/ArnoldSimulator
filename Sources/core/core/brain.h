@@ -35,6 +35,14 @@ public:
 
 class BrainBase;
 
+class BrainMap : public CkArrayMap
+{
+public:
+    BrainMap();
+    BrainMap(CkMigrateMessage *msg);
+    int procNum(int arrayHdl, const CkArrayIndex &index);
+};
+
 class Brain
 {
 public:

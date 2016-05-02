@@ -6,6 +6,10 @@ module region
 
     extern module brain;
 
+    group [migratable] RegionMap : CkArrayMap {
+        entry RegionMap();
+    };
+
     array [1D] RegionBase
     {
         entry RegionBase(RegionType type, RegionParams params);

@@ -14,6 +14,25 @@ extern CProxy_BrainBase gBrain;
 extern CProxy_RegionBase gRegions;
 extern CProxy_NeuronBase gNeurons;
 
+RegionMap::RegionMap()
+{
+}
+
+RegionMap::RegionMap(CkMigrateMessage *msg)
+{
+}
+
+int RegionMap::procNum(int arrayHdl, const CkArrayIndex &index)
+{
+    int regionIndex = index.data()[0];
+
+    int nodeNum = regionIndex % CkNumNodes();
+    int rankNum = regionIndex % CkNodeSize(nodeNum);
+    int peNum = rankNum + CkNodeFirst(nodeNum);
+
+    return peNum;
+}
+
 Region::Region(RegionBase &base, json &params) : mBase(base)
 {
 }

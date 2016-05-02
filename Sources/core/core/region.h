@@ -24,6 +24,14 @@ class SimulateMsg;
 
 class RegionBase;
 
+class RegionMap : public CkArrayMap
+{
+public:
+    RegionMap();
+    RegionMap(CkMigrateMessage *msg);
+    int procNum(int arrayHdl, const CkArrayIndex &index);
+};
+
 class Region
 {
 public:

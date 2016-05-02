@@ -12,6 +12,19 @@ extern CProxy_BrainBase gBrain;
 extern CProxy_RegionBase gRegions;
 extern CProxy_NeuronBase gNeurons;
 
+BrainMap::BrainMap()
+{
+}
+
+BrainMap::BrainMap(CkMigrateMessage *msg)
+{
+}
+
+int BrainMap::procNum(int arrayHdl, const CkArrayIndex &index)
+{
+    return 0;
+}
+
 Brain::Brain(BrainBase &base, json &params) : mBase(base)
 {
 }
@@ -36,6 +49,7 @@ BrainBase::BrainBase(const BrainType &type, const BrainParams &params)
 
 BrainBase::BrainBase(CkMigrateMessage *msg)
 {
+    setMigratable(false);
 }
 
 BrainBase::~BrainBase()

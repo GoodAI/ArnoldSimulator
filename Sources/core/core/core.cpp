@@ -26,15 +26,25 @@ Core::Core(CkArgMsg *msg) : mRequestIdCounter(0)
 
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 
-    // TODO(PetrK): prepare array maps
-
     gMulticastGroupId = CProxy_CkMulticastMgr::ckNew();
     gCompletionDetector = CProxy_CompletionDetector::ckNew();
 
+    CProxy_BrainMap brainMap = CProxy_BrainMap::ckNew();
+    CkArrayOptions brainOpts;
+    brainOpts.setMap(brainMap);
+
+    CProxy_RegionMap regionMap = CProxy_RegionMap::ckNew();
+    CkArrayOptions regionOpts;
+    regionOpts.setMap(regionMap);
+
+    CProxy_NeuronMap neuronMap = CProxy_NeuronMap::ckNew();
+    CkArrayOptions neuronOpts;
+    neuronOpts.setMap(neuronMap);
+
     gCore = thisProxy;
-    gBrain = CProxy_BrainBase::ckNew();
-    gRegions = CProxy_RegionBase::ckNew();
-    gNeurons = CProxy_NeuronBase::ckNew();
+    gBrain = CProxy_BrainBase::ckNew(brainOpts);
+    gRegions = CProxy_RegionBase::ckNew(regionOpts);
+    gNeurons = CProxy_NeuronBase::ckNew(neuronOpts);
 }
 
 Core::Core(CkMigrateMessage *msg)
