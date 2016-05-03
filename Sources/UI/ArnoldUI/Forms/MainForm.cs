@@ -117,5 +117,10 @@ namespace GoodAI.Arnold
             DisableCommandButtons();
             m_uiMain.PauseSimulation();
         }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            m_uiMain.Dispose();
+        }
     }
 }

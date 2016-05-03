@@ -13,7 +13,7 @@ using Region = GoodAI.Arnold.Project.Region;
 namespace ArnoldUI
 {
     // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
-    public class UIMain
+    public class UIMain : IDisposable
     {
         public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated
         {
@@ -75,7 +75,13 @@ namespace ArnoldUI
 
         public void Disconnect()
         {
+            // TODO(HonzaS): Change this to Disconnect when we allow that.
             Conductor.Shutdown();
+        }
+
+        public void Dispose()
+        {
+            Conductor.Dispose();
         }
     }
 }

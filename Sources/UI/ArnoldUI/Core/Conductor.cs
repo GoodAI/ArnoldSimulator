@@ -12,7 +12,7 @@ using GoodAI.Net.ConverseSharp;
 
 namespace GoodAI.Arnold.Core
 {
-    public interface IConductor
+    public interface IConductor : IDisposable
     {
         ICoreProxy CoreProxy { get; }
 
@@ -107,15 +107,12 @@ namespace GoodAI.Arnold.Core
         public void Disconnect()
         {
             if (CoreProxy == null)
-            {
-                // TODO(HonzaS): logging.
                 return;
-            }
 
-            if (m_process != null)
-            {
-                // TODO(HonzaS): We might want to ask the user if he wants to kill the local process when disconnecting.
-            }
+            // TODO(HonzaS): We might want to ask the user if he wants to kill the local process when disconnecting.
+            //if (m_process != null)
+            //{
+            //}
 
             FinishDisconnect();
         }
@@ -235,5 +232,20 @@ namespace GoodAI.Arnold.Core
 
         //    StateUpdated?.Invoke(this, new StateUpdatedEventArgs(previousState, CoreState.Disconnected));
         //}
+        public void Dispose()
+        {
+            if (m_process != null)
+            {
+                Shutdown();
+                // Process will wait for a while to let the core process finish gracefully.
+                // TODO(HonzaS): Wait for the core to finish before killing.
+                // When the local simulation is auto-saving before closing, it might take a long time.
+                m_process.Dispose();
+            }
+            else
+            {
+                Disconnect();
+            }
+        }
     }
 }
