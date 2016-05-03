@@ -25,11 +25,12 @@ namespace GoodAI.Logging.Tests
             container.RegisterConditional(
                 typeof(ILog),
                 typeFactory => typeof(SerilogRobe<>).MakeGenericType(typeFactory.Consumer.ImplementationType),
-                Lifestyle.Transient,
+                Lifestyle.Singleton,
                 predicateContext => true);
 
-            container.Register<Fool, Fool>();
-            container.Register<PropertyJester, PropertyJester>();
+            container.Register<Fool>();
+            container.Register<PropertyJester>();
+            container.Register<PropertyMute>();
         }
     }
 
@@ -61,6 +62,11 @@ namespace GoodAI.Logging.Tests
         {
             Log.Warn("I'm not a fool!");
         }
+    }
+
+    public class PropertyMute
+    {
+        public ILog Log { get; set; }
     }
 
     public class LoggerInjectionTests
@@ -114,6 +120,17 @@ namespace GoodAI.Logging.Tests
 
             Assert.Null(jester.DontInjectToMe);
             Assert.Null(jester.DontInjectToDerivedType);
+        }
+
+        [Fact]
+        public void SingletonLogsDifferBetweenClients()
+        {
+            var jester = m_container.GetInstance<PropertyJester>();
+            var jester2 = m_container.GetInstance<PropertyJester>();
+            var mute = m_container.GetInstance<PropertyMute>();
+
+            Assert.Equal(jester.Log, jester2.Log);
+            Assert.NotEqual(jester.Log, mute.Log);
         }
     }
 }

@@ -24,12 +24,12 @@ namespace GoodAI.Arnold
             container.RegisterConditional(
                 typeof(ILog),
                 typeFactory => typeof(SerilogRobe<>).MakeGenericType(typeFactory.Consumer.ImplementationType),
-                Lifestyle.Transient,
+                Lifestyle.Singleton,
                 predicateContext => predicateContext.Consumer != null);
             container.RegisterConditional(
                 typeof(ILog),
                 typeFactory => typeof(SerilogRobe),
-                Lifestyle.Transient,
+                Lifestyle.Singleton,
                 predicateContext => predicateContext.Consumer == null);
 
             container.RegisterSingleton<IResponseParser, CoreResponseParser>();
