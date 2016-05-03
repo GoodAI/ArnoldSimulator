@@ -85,6 +85,8 @@ namespace GoodAI.Arnold.Simulation
 
     public class CoreProxy : ICoreProxy
     {
+        public ILog Log { get; set; }
+
         public ISimulationModel Model { get; private set; }
 
         public event EventHandler<StateUpdatedEventArgs> StateUpdated;
@@ -195,8 +197,12 @@ namespace GoodAI.Arnold.Simulation
         {
             if (response.Error != null)
                 HandleError(response.Error);
-            else
+            else if (response.Data != null)
                 State = ReadState(response.Data);
+            else
+                // This only happened so far when the request handler was misspelled.
+                // Keep it as warning for a while and switch to debug later?
+                Log.Warn("The server rejected the message.");
         }
 
         private static CoreState ReadState(StateResponse stateData)
