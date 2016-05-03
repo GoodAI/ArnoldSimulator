@@ -30,6 +30,9 @@ namespace GoodAI.Arnold
 
             var uiMain = container.GetInstance<UIMain>();
 
+            // NOTE(HonzaS): Consider this.
+            //container.Dispose();
+
             Application.Run(new MainForm(uiMain));
         }
 
