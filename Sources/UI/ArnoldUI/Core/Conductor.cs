@@ -90,6 +90,11 @@ namespace GoodAI.Arnold.Core
                 endPoint = m_process.EndPoint;
             }
 
+            if (endPoint == null)
+            {
+                Log.Error("Endpoint not set up, cannot connect to core");
+                throw new InvalidOperationException("Endpoint not set");
+            }
 
             Log.Info("Connecting to Core running at {hostname}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);

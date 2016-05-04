@@ -32,6 +32,8 @@ namespace GoodAI.Arnold.UI.Tests
         public ConductorTests()
         {
             m_coreProcessMock = new Mock<ICoreProcess>();
+            m_coreProcessMock.Setup(process => process.EndPoint).Returns(new EndPoint("localhost", 42));
+
             m_coreLinkMock = new Mock<ICoreLink>();
 
             m_coreProxyMock = new Mock<ICoreProxy>();
@@ -125,6 +127,14 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.True(waitEvent.WaitOne());
 
             Assert.Equal(CoreState.Empty, m_conductor.CoreState);
+        }
+
+        [Fact]
+        public void NeedsEndpointToStartWithLocalCore()
+        {
+            m_coreProcessMock.Setup(process => process.EndPoint).Returns(null as EndPoint);
+
+            Assert.Throws<InvalidOperationException>(() => m_conductor.ConnectToCore());
         }
     }
 }
