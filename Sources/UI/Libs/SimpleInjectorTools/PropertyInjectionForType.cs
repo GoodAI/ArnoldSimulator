@@ -24,7 +24,7 @@ namespace GoodAI.TypeMapping
             // Do not check if the property type is registered, we want to fail in Verify when it isn't.
             // (Also, m_container.GetRegistration(property.PropertyType) crashes on null pointer
             // inside RegisterConditional lambda, because typeFactoryContext.Consumer is not set at the time.)
-            return IsInjectableProperty(property) && property.PropertyType.IsAssignableFrom(typeof(T));
+            return IsInjectableProperty(property) && property.PropertyType == typeof(T);
         }
 
         private static bool IsInjectableProperty(PropertyInfo property)
