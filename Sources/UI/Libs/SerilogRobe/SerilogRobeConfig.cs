@@ -38,7 +38,7 @@ namespace GoodAI.Logging
         {
             return SerilogRobeConfig.Setup(configuration => configuration.WriteTo.RollingFile(
                 Path.Combine(logPath, logName + "-{Date}.log"),
-                LogEventLevel.Information,
+                DefaultLevel,
                 outputTemplate: SerilogRobeConfig.DefaultOutputTemplate,
                 fileSizeLimitBytes: sizeLimit / DefaultFileCountLimit,
                 retainedFileCountLimit: DefaultFileCountLimit));
