@@ -56,7 +56,9 @@ namespace GoodAI.Arnold.Network
             m_stateResultAction = stateResultAction;
             try
             {
+#pragma warning disable 4014 // This is supposed to start a parallel task and continue.
                 RepeatGetStateAsync(2000);
+#pragma warning restore 4014
             }
             catch (AggregateException exception)
             {

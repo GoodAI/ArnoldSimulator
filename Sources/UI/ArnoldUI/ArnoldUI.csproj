@@ -91,9 +91,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Composition\PropertyInjectingFactory.cs" />
     <Compile Include="Core\Conductor.cs" />
     <Compile Include="Core\CoreProcess.cs" />
-    <Compile Include="Core\CoreProcessFactory.cs" />
+    <Compile Include="Composition\CoreProcessFactory.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Forms\VisualizationForm.cs">
       <SubType>Form</SubType>
@@ -110,9 +111,9 @@
     <Compile Include="Graphics\Models\SynapseModel.cs" />
     <Compile Include="Network\CommandConversation.cs" />
     <Compile Include="Network\Conversation.cs" />
-    <Compile Include="Network\CoreControllerFactory.cs" />
+    <Compile Include="Composition\CoreControllerFactory.cs" />
     <Compile Include="Network\CoreLink.cs" />
-    <Compile Include="Network\CoreLinkFactory.cs" />
+    <Compile Include="Composition\CoreLinkFactory.cs" />
     <Compile Include="Network\CoreResponseParser.cs" />
     <Compile Include="Network\GetStateConversation.cs" />
     <Compile Include="Network\Messages\RequestBuilders.cs" />
@@ -151,12 +152,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
-    <Compile Include="Runtime\ArnoldContainerConfig.cs" />
+    <Compile Include="Composition\ArnoldContainerConfig.cs" />
     <Compile Include="Runtime\LoggingConfig.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
     <Compile Include="Network\CoreController.cs" />
     <Compile Include="Simulation\CoreStateEvents.cs" />
-    <Compile Include="Simulation\CoreProxyFactory.cs" />
+    <Compile Include="Composition\CoreProxyFactory.cs" />
     <Compile Include="Simulation\SimulationModel.cs" />
     <Compile Include="Simulation\CoreProxy.cs" />
     <Compile Include="Graphics\Visualization.cs" />

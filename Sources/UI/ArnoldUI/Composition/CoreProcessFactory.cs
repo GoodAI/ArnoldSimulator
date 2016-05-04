@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SimpleInjector;
 
 namespace GoodAI.Arnold.Core
 {
@@ -11,11 +12,15 @@ namespace GoodAI.Arnold.Core
         ICoreProcess Create();
     }
 
-    public class CoreProcessFactory : ICoreProcessFactory
+    public class CoreProcessFactory : PropertyInjectingFactory, ICoreProcessFactory
     {
+        public CoreProcessFactory(Container container) : base(container)
+        {
+        }
+
         public ICoreProcess Create()
         {
-            return new CoreProcess();
+            return InjectProperties(new CoreProcess());
         }
     }
 }

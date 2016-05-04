@@ -7,8 +7,9 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Net.ConverseSharp;
 using GoodAI.Net.ConverseSharpFlatBuffers;
+using SimpleInjector;
 
-namespace GoodAI.Arnold.Network
+namespace GoodAI.Arnold
 {
     public interface ICoreLinkFactory
     {
@@ -16,12 +17,12 @@ namespace GoodAI.Arnold.Network
     }
 
     // TODO(HonzaS): This class still does some composition.
-    public class CoreLinkFactory : ICoreLinkFactory
+    public class CoreLinkFactory : PropertyInjectingFactory, ICoreLinkFactory
     {
         private readonly IResponseParser m_responseParser;
         private const int TcpTimeoutMs = 5000;
 
-        public CoreLinkFactory(IResponseParser responseParser)
+        public CoreLinkFactory(Container container, IResponseParser responseParser) : base(container)
         {
             m_responseParser = responseParser;
         }
@@ -29,7 +30,7 @@ namespace GoodAI.Arnold.Network
         public ICoreLink Create(EndPoint endPoint)
         {
             var connector = new TcpConnector(endPoint.Hostname, endPoint.Port, TcpTimeoutMs);
-            return new CoreLink(new ConverseFlatBuffersClient(connector, m_responseParser));
+            return InjectProperties(new CoreLink(new ConverseFlatBuffersClient(connector, m_responseParser)));
         }
     }
 }
