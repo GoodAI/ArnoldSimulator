@@ -17,8 +17,7 @@ namespace GoodAI.Arnold
     public class CoreProxyFactory : PropertyInjectingFactory, ICoreProxyFactory
     {
         public CoreProxyFactory(Container container) : base(container)
-        {
-        }
+        { }
 
         public ICoreProxy Create(ICoreLink coreLink, ICoreController controller)
         {

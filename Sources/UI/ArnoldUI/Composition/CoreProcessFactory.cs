@@ -14,9 +14,7 @@ namespace GoodAI.Arnold.Core
 
     public class CoreProcessFactory : PropertyInjectingFactory, ICoreProcessFactory
     {
-        public CoreProcessFactory(Container container) : base(container)
-        {
-        }
+        public CoreProcessFactory(Container container) : base(container) { }
 
         public ICoreProcess Create()
         {
