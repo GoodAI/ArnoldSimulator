@@ -98,6 +98,7 @@ namespace GoodAI.Arnold.Core
             get { return m_state; }
             private set
             {
+                Log.Debug("Changing state from {previousState} to {currentState}", m_state, value);
                 CoreState oldState = m_state;
                 m_state = value;
                 StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, m_state));
@@ -114,6 +115,7 @@ namespace GoodAI.Arnold.Core
             m_controller = controller;
             State = CoreState.Empty;
 
+            Log.Debug("Starting periodic core state checking");
             m_controller.StartStateChecking(HandleKeepaliveStateResponse);
 
             Model = new SimulationModel();
@@ -121,13 +123,17 @@ namespace GoodAI.Arnold.Core
 
         public void Dispose()
         {
+            Log.Debug("Disposing");
             m_controller.Dispose();
         }
 
         public void LoadBlueprint(AgentBlueprint agentBlueprint)
         {
             if (State != CoreState.Empty)
-                throw new WrongHandlerStateException("LoadAgent", State);
+            {
+                Log.Warn("Loading of blueprint failed - the core is in state: {state}", State);
+                throw new WrongHandlerStateException("LoadBlueprint", State);
+            }
 
             // TODO(HonzaS): Add the blueprint data.
             SendCommand(new CommandConversation(CommandType.Load));
@@ -146,7 +152,10 @@ namespace GoodAI.Arnold.Core
         public void Run(uint stepsToRun = 0)
         {
             if (State != CoreState.Paused && State != CoreState.Running)
+            {
+                Log.Warn("Run failed - the core is in state: {State} state", State);
                 throw new WrongHandlerStateException("Run", State);
+            }
 
             if (State == CoreState.Running)
                 return;
@@ -157,7 +166,10 @@ namespace GoodAI.Arnold.Core
         public void Pause()
         {
             if (State != CoreState.Paused && State != CoreState.Running)
+            {
+                Log.Warn("Pause failed - the core is in state: {State} state", State);
                 throw new WrongHandlerStateException("Pause", State);
+            }
 
             if (State == CoreState.Paused)
                 return;
@@ -174,6 +186,7 @@ namespace GoodAI.Arnold.Core
         {
             return () =>
             {
+                Log.Debug("Timeout occured for command: {command}", type);
                 var args = new TimeoutActionEventArgs(type);
                 CommandTimedOut?.Invoke(this, args);
 
@@ -185,6 +198,7 @@ namespace GoodAI.Arnold.Core
         {
             if (timeoutResult.TimedOut)
             {
+                Log.Warn("Keepalive timed out");
                 throw new NotImplementedException();
             }
             else
@@ -224,19 +238,8 @@ namespace GoodAI.Arnold.Core
 
         private void HandleError(ErrorResponse error)
         {
+            Log.Warn("Core error: {error}", error);
             StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(error));
-        }
-
-        public void RefreshState()
-        {
-            var conversation = new GetStateConversation();
-
-            m_coreLink.Request(conversation).ContinueWith(task =>
-            {
-                TimeoutResult<Response<StateResponse>> timeoutResult = task.Result;
-                if (!timeoutResult.TimedOut && timeoutResult.Result.Data != null)
-                    State = ReadState(timeoutResult.Result.Data);
-            });
         }
     }
 }

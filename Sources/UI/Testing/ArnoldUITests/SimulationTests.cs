@@ -164,7 +164,6 @@ namespace GoodAI.Arnold.UI.Tests
 
             simulation.StateUpdated += (sender, args) => waitEvent.Set();
 
-            simulation.RefreshState();
             waitEvent.WaitOne(timeoutMs);
             Assert.Equal(CoreState.Empty, simulation.State);
         }

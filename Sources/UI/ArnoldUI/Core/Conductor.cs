@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Project;
+using GoodAI.Logging;
 using GoodAI.Net.ConverseSharp;
 
 namespace GoodAI.Arnold.Core
@@ -43,6 +44,9 @@ namespace GoodAI.Arnold.Core
 
     public class Conductor : IConductor
     {
+        // Injected.
+        public ILog Log { get; set; } = NullLogger.Instance;
+
         public event EventHandler<StateUpdatedEventArgs> StateUpdated;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
 
@@ -69,6 +73,7 @@ namespace GoodAI.Arnold.Core
         {
             if (CoreProxy != null)
             {
+                Log.Error("Cannot connect to core, there is still a core proxy present");
                 throw new InvalidOperationException(
                     "There is still a core proxy present");
             }
@@ -76,12 +81,20 @@ namespace GoodAI.Arnold.Core
             if (endPoint == null)
             {
                 if (m_process == null)
+                {
+                    // TODO(HonzaS): Move this elsewhere when we have finer local process control.
+                    Log.Info("Starting a local core process");
                     m_process = m_coreProcessFactory.Create();
+                }
 
                 endPoint = m_process.EndPoint;
             }
 
+
+            Log.Info("Connecting to Core running at {hostname}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
+            // TODO(HonzaS): Check here if we can connect to the core so that we could abort immediatelly.
+
             ICoreController coreController = m_coreControllerFactory.Create(coreLink);
 
             CoreProxy = m_coreProxyFactory.Create(coreLink, coreController);
@@ -120,6 +133,7 @@ namespace GoodAI.Arnold.Core
         {
             if (CoreProxy != null)
             {
+                Log.Info("Shutting down the core");
                 CoreProxy.Shutdown();
                 return;
             }
@@ -129,6 +143,7 @@ namespace GoodAI.Arnold.Core
 
         private void OnCoreCommandTimedOut(object sender, TimeoutActionEventArgs args)
         {
+            Log.Debug("Core command {command} timed out", args.Command);
             if (args.Command == CommandType.Shutdown)
             {
                 args.Action = TimeoutAction.Cancel;
@@ -156,11 +171,13 @@ namespace GoodAI.Arnold.Core
             CoreProxy = null;
 
             StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, CoreState.Disconnected));
+            Log.Info("Disconnected from core");
         }
 
         public void LoadBlueprint(AgentBlueprint blueprint)
         {
             // TODO(HonzaS): Add this when blueprints come into play.
+            Log.Info("Loading blueprint");
             CoreProxy.LoadBlueprint(blueprint);
         }
 
@@ -181,25 +198,32 @@ namespace GoodAI.Arnold.Core
             //        // TODO(HonzaS): Log an error/warning.
             //    }
             //}
+            Log.Debug("Core state changed: {previousState} -> {currentState}", stateUpdatedEventArgs.PreviousState, stateUpdatedEventArgs.CurrentState);
 
             StateUpdated?.Invoke(this, stateUpdatedEventArgs);
         }
 
         private void OnCoreStateChangeFailed(object sender, StateChangeFailedEventArgs stateChangeFailedEventArgs)
         {
+            Log.Warn("Core state change failed with: {error}", stateChangeFailedEventArgs.Error);
             StateChangeFailed?.Invoke(this, stateChangeFailedEventArgs);
         }
 
         public void StartSimulation(uint stepsToRun = 0)
         {
             if (CoreProxy == null)
-                throw new InvalidOperationException("Simulation does not exist, cannot start.");
+            {
+                Log.Error("Cannot start simulation, not connected to a core");
+                throw new InvalidOperationException("Core proxy does not exist, cannot start");
+            }
 
+            Log.Info("Starting simulation");
             CoreProxy.Run(stepsToRun);
         }
 
         public void PauseSimulation()
         {
+            Log.Info("Pausing simulation");
             CoreProxy.Pause();
         }
 
@@ -233,6 +257,7 @@ namespace GoodAI.Arnold.Core
         //}
         public void Dispose()
         {
+            Log.Debug("Disposing conductor");
             if (m_process != null)
             {
                 Shutdown();

@@ -88,6 +88,7 @@ namespace GoodAI.Arnold.Network
 
         public void Dispose()
         {
+            Log.Debug("Disposing");
             m_cancellationTokenSource.Cancel();
         }
 
@@ -123,6 +124,7 @@ namespace GoodAI.Arnold.Network
                 if (result.TimedOut)
                 {
                     TimeoutAction timeoutAction = timeoutCallback();
+                    Log.Info("Command {command} timed out, {action} requested", conversation.RequestData.Command, timeoutAction);
                     if (timeoutAction == TimeoutAction.Cancel)
                         break;
 
@@ -135,6 +137,7 @@ namespace GoodAI.Arnold.Network
                 }
                 else
                 {
+                    Log.Debug("Successful command {command}", conversation.RequestData.Command);
                     successAction(result.Result);
                     break;
                 }
@@ -142,9 +145,11 @@ namespace GoodAI.Arnold.Network
 
             m_runningCommand = null;
 
-            // Restart the keepalive.
             if (m_stateResultAction != null)
+            {
+                Log.Debug("Restarting regular state checking");
                 StartStateChecking(m_stateResultAction);
+            }
         }
     }
 }
