@@ -85,7 +85,8 @@ namespace GoodAI.Arnold.Simulation
 
     public class CoreProxy : ICoreProxy
     {
-        public ILog Log { get; set; }
+        // Injected.
+        public ILog Log { get; set; } = NullLogger.Instance;
 
         public ISimulationModel Model { get; private set; }
 

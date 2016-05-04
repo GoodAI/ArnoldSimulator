@@ -18,7 +18,7 @@ namespace GoodAI.Arnold.Network
             Func<TimeoutAction> timeoutAction, int timeoutMs = 0);
 
         bool IsCommandInProgress { get; }
-        void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> action);
+        void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> stateResultAction);
     }
 
     public enum TimeoutAction
@@ -30,11 +30,12 @@ namespace GoodAI.Arnold.Network
 
     public class CoreController : ICoreController
     {
+        // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
         private readonly ICoreLink m_coreLink;
         private Task<TimeoutResult<Response<StateResponse>>> m_runningCommand;
-        private Action<TimeoutResult<Response<StateResponse>>> m_action;
+        private Action<TimeoutResult<Response<StateResponse>>> m_stateResultAction;
         private CancellationTokenSource m_cancellationTokenSource;
         private const int CommandTimeoutMs = 15 * 1000;
 
@@ -47,19 +48,19 @@ namespace GoodAI.Arnold.Network
             m_cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> action)
+        public void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> stateResultAction)
         {
-            if (action != null)
+            if (stateResultAction == null)
+                throw new ArgumentNullException(nameof(stateResultAction));
+
+            m_stateResultAction = stateResultAction;
+            try
             {
-                m_action = action;
-                try
-                {
-                    RepeatGetStateAsync(2000);
-                }
-                catch (AggregateException exception)
-                {
-                    Log.Warn(exception, "Error in state checking.");
-                }
+                RepeatGetStateAsync(2000);
+            }
+            catch (AggregateException exception)
+            {
+                Log.Warn(exception, "Error in state checking.");
             }
         }
 
@@ -73,7 +74,12 @@ namespace GoodAI.Arnold.Network
                 if (!IsCommandInProgress)
                 {
                     // TODO(HonzaS): Handle timeout here.
-                    m_action(await m_coreLink.Request(new GetStateConversation()).ConfigureAwait(false));
+                    TimeoutResult<Response<StateResponse>> stateCheckResult =
+                        await m_coreLink.Request(new GetStateConversation()).ConfigureAwait(false);
+
+                    // Check this again - the cancellation could have come during the request.
+                    if (!m_cancellationTokenSource.IsCancellationRequested)
+                        m_stateResultAction(stateCheckResult);
                 }
                 await Task.Delay(repeatMillis, m_cancellationTokenSource.Token).ConfigureAwait(false);
             }
@@ -134,6 +140,10 @@ namespace GoodAI.Arnold.Network
             }
 
             m_runningCommand = null;
+
+            // Restart the keepalive.
+            if (m_stateResultAction != null)
+                StartStateChecking(m_stateResultAction);
         }
     }
 }

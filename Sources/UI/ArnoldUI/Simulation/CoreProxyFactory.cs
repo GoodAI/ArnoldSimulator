@@ -16,12 +16,11 @@ namespace GoodAI.Arnold.Simulation
 
     public class CoreProxyFactory : ICoreProxyFactory
     {
-        private Registration m_logRegistration;
+        private readonly Registration m_logRegistration;
 
         public CoreProxyFactory(Container container)
         {
-            InstanceProducer instanceProducer = container.GetRegistration(typeof(ILog), throwOnFailure: true);
-            m_logRegistration = instanceProducer.Registration;
+            m_logRegistration = Lifestyle.Transient.CreateRegistration<CoreProxy>(container);
         }
 
         public ICoreProxy Create(ICoreLink coreLink, ICoreController controller)
