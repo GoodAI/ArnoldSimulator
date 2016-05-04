@@ -26,7 +26,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             var message = GetStateRequestBuilder.Build();
 
-            Assert.NotNull(message.GetRequest(new GetStateRequest()));
+            Assert.Equal(Request.GetStateRequest, message.RequestType);
         }
 
         [Fact]

@@ -104,7 +104,7 @@ namespace GoodAI.Arnold.Core
                 StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, m_state));
             }
         }
-        private CoreState m_state;
+        private CoreState m_state = CoreState.Empty;
 
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_controller;
@@ -113,7 +113,6 @@ namespace GoodAI.Arnold.Core
         {
             m_coreLink = coreLink;
             m_controller = controller;
-            State = CoreState.Empty;
 
             Log.Debug("Starting periodic core state checking");
             m_controller.StartStateChecking(HandleKeepaliveStateResponse);

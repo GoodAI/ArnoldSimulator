@@ -44,7 +44,7 @@ namespace GoodAI.Arnold.Network.Messages
             GetStateRequest.StartGetStateRequest(builder);
             Offset<GetStateRequest> requestOffset = GetStateRequest.EndGetStateRequest(builder);
 
-            return RequestMessageBuilder.Build(builder, Request.CommandRequest, requestOffset);
+            return RequestMessageBuilder.Build(builder, Request.GetStateRequest, requestOffset);
         }
     }
 }
