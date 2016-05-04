@@ -12,9 +12,9 @@ CProxy_BrainBase gBrain;
 CProxy_RegionBase gRegions;
 CProxy_NeuronBase gNeurons;
 
-Core::Core(CkArgMsg *msg) : mRequestIdCounter(0)
+Core::Core(CkArgMsg *msg) : mState(StateType_Empty), mRequestIdCounter(0)
 {
-    mStart = CmiWallTimer();
+    mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
 
     //if (msg->argc > 1) someParam1 = atoi(msg->argv[1]);
@@ -45,6 +45,10 @@ Core::Core(CkArgMsg *msg) : mRequestIdCounter(0)
     gBrain = CProxy_BrainBase::ckNew(brainOpts);
     gRegions = CProxy_RegionBase::ckNew(regionOpts);
     gNeurons = CProxy_NeuronBase::ckNew(neuronOpts);
+
+    // TODO(Premek): remove
+    // assume hardcoder blueprint for now
+    mState = StateType_Paused;
 }
 
 Core::Core(CkMigrateMessage *msg)
@@ -66,7 +70,7 @@ void Core::pup(PUP::er &p)
 
 void Core::Exit()
 {
-    CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStart);
+    CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStartTime);
     CkExit();
 }
 
@@ -96,7 +100,7 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
             }
             default:
             {
-                CkPrintf("Unknown request type %d", requestType);
+                CkPrintf("Unknown request type %d\n", requestType);
             }
         }
 
@@ -135,21 +139,34 @@ void Core::ProcessCommandRequest(const CommandRequest *commandRequest, RequestId
         BuildStateResponse(StateType_ShuttingDown, builder);
         SendResponseToClient(requestId, builder);
         throw ShutdownRequestedException("Shutdown requested by the client");
-
-    } else {
-
-        // TODO(HonzaS): Add actual logic here.
-        BuildStateResponse(StateType_Running, builder);
-        SendResponseToClient(requestId, builder);
-
     }
+    
+    if (commandType == CommandType_Run) {
+        if (mState != StateType_Paused) {
+            // TODO(Premek): return error response
+            CkPrintf("Run command failed: invalid state\n");
+        }
+
+        mState = StateType_Running;  // TODO(): Add actual logic here.
+
+    } else if (commandType == CommandType_Pause) {
+        if (mState != StateType_Running) {
+            // TODO(Premek): return error response
+            CkPrintf("Pause command failed: invalid state\n");
+        }
+
+        mState = StateType_Paused;  // TODO(): Add actual logic here.
+    }
+
+    BuildStateResponse(mState, builder);
+    SendResponseToClient(requestId, builder);
 }
 
 void Core::ProcessGetStateRequest(const GetStateRequest *getStateRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
-    BuildStateResponse(StateType_Running, builder);
+    BuildStateResponse(mState, builder);
     SendResponseToClient(requestId, builder);
 }
 

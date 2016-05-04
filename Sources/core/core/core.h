@@ -54,7 +54,9 @@ protected:
     void BuildSynapticTransfersResponse(Synapse::Transfers &transfers, flatbuffers::FlatBufferBuilder &builder);
 
 private:
-    double mStart;
+    StateType mState;
+
+    double mStartTime;
 
     RequestId mRequestIdCounter;
     std::unordered_map<RequestId, CkCcsRequestMsg *> mRequests;
