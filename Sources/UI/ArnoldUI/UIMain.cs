@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Project;
 using Region = GoodAI.Arnold.Project.Region;
 

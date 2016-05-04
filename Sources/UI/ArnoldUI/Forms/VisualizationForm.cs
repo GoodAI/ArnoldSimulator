@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Graphics;
 using GoodAI.Arnold.Properties;
-using GoodAI.Arnold.Simulation;
 using OpenTK;
 using OpenTK.Input;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;

@@ -8,7 +8,7 @@ using GoodAI.Arnold.Project;
 using OpenTK;
 using OpenTK.Platform.Windows;
 
-namespace GoodAI.Arnold.Simulation
+namespace GoodAI.Arnold.Core
 {
     public class ExpertAddedEventArgs : EventArgs
     {

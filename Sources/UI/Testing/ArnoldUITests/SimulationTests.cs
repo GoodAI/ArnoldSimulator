@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FlatBuffers;
+using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Network.Messages;
 using GoodAI.Arnold.Project;
-using GoodAI.Arnold.Simulation;
 using Moq;
 using Xunit;
 

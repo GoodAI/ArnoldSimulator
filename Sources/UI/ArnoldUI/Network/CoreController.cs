@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Logging;
 

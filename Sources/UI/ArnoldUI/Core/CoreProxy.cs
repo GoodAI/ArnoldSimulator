@@ -3,12 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Project;
 using GoodAI.Logging;
 
-namespace GoodAI.Arnold.Simulation
+namespace GoodAI.Arnold.Core
 {
     public enum CoreState
     {

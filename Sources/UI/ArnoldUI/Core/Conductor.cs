@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Project;
 using GoodAI.Net.ConverseSharp;

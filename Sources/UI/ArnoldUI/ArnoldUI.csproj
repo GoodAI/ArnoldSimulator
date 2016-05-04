@@ -156,10 +156,10 @@
     <Compile Include="Runtime\LoggingConfig.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
     <Compile Include="Network\CoreController.cs" />
-    <Compile Include="Simulation\CoreStateEvents.cs" />
+    <Compile Include="Core\CoreStateEvents.cs" />
     <Compile Include="Composition\CoreProxyFactory.cs" />
-    <Compile Include="Simulation\SimulationModel.cs" />
-    <Compile Include="Simulation\CoreProxy.cs" />
+    <Compile Include="Core\SimulationModel.cs" />
+    <Compile Include="Core\CoreProxy.cs" />
     <Compile Include="Graphics\Visualization.cs" />
     <Compile Include="UIMain.cs" />
     <EmbeddedResource Include="Forms\GraphForm.resx">

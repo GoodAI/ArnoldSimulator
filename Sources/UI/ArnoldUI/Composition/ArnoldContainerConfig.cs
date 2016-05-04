@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Simulation;
 using GoodAI.Logging;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 using GoodAI.TypeMapping;
