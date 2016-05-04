@@ -31,6 +31,7 @@ namespace GoodAI.Logging.Tests
             container.Register<Fool>();
             container.Register<PropertyJester>();
             container.Register<PropertyMute>();
+            container.Register<PropertyObject>();
         }
     }
 
@@ -67,6 +68,11 @@ namespace GoodAI.Logging.Tests
     public class PropertyMute
     {
         public ILog Log { get; set; }
+    }
+
+    public class PropertyObject
+    {
+        public object NotLog { get; set; }
     }
 
     public class LoggerInjectionTests
@@ -131,6 +137,14 @@ namespace GoodAI.Logging.Tests
 
             Assert.Equal(jester.Log, jester2.Log);
             Assert.NotEqual(jester.Log, mute.Log);
+        }
+
+        [Fact]
+        public void WillNotAssignToObjectTypesProperty()
+        {
+            var propertyObject = m_container.GetInstance<PropertyObject>();
+
+            Assert.Null(propertyObject.NotLog);
         }
     }
 }

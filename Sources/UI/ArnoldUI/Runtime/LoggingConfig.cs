@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GoodAI.Arnold.Runtime;
 using GoodAI.Logging;
 using Serilog;
 
@@ -12,7 +13,7 @@ namespace GoodAI.Arnold
 {
     internal static class LoggingConfig
     {
-        public static LoggerConfiguration Setup(string logPath = null)
+        public static LoggerConfiguration Setup(IWinFormsLogSink logSink, string logPath = null)
         {
             try
             {
@@ -24,7 +25,7 @@ namespace GoodAI.Arnold
                     logPath = InitLogDirectory(appName.Replace('.', '\\'), "Logs");
                 }
 
-                return SerilogRobeConfig.SetupLoggingToFile(logPath, appName);
+                return SerilogRobeConfig.SetupLoggingToFile(logPath, appName).WriteTo.Sink(logSink);
             }
             catch (Exception ex)
             {

@@ -21,23 +21,23 @@ namespace GoodAI.Arnold
         {
             UnhandledExceptionCatcher.RegisterHandlers();
 
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             Container container = ContainerFactory.Create<ArnoldContainerConfig>();
 
             var log = container.GetInstance<ILog>();
             UnhandledExceptionCatcher.Log = log;
             log.Debug("Container configured");
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
             // This should not fail as the container configuration verifies the setup.
-            var uiMain = container.GetInstance<UIMain>();
+            var mainForm = container.GetInstance<MainForm>();
 
             // NOTE(HonzaS): Consider this.
             //container.Dispose();
 
             log.Info("Application set up, starting");
-            Application.Run(new MainForm(uiMain));
+            Application.Run(mainForm);
         }
     }
 }

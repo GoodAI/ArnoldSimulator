@@ -17,5 +17,10 @@ namespace GoodAI.Arnold.Forms
         {
             InitializeComponent();
         }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            logContent.Clear();
+        }
     }
 }

@@ -22,16 +22,16 @@ namespace GoodAI.Arnold
         public GraphForm GraphForm { get; }
         public VisualizationForm VisualizationForm { get; set; }
 
-        public MainForm(UIMain uiMain)
+        public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm)
         {
             InitializeComponent();
 
             m_uiMain = uiMain;
 
-            LogForm = new LogForm();
+            LogForm = logForm;
             LogForm.Show(dockPanel, DockState.DockBottom);
 
-            GraphForm = new GraphForm();
+            GraphForm = graphForm;
             GraphForm.Show(dockPanel, DockState.Document);
 
             // TODO(HonzaS): The blueprint should be in the Designer later.
