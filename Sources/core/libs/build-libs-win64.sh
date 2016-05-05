@@ -3,8 +3,8 @@
 build_charm()
 {
     echo "Building Charm++"
-    CHARM_VERSION=6.7.0
-    CHARM_LINK=http://charm.cs.illinois.edu/distrib/charm-6.7.0.tar.gz
+    CHARM_VERSION=6.7.1
+    CHARM_LINK=http://charm.cs.illinois.edu/distrib/charm-6.7.1.tar.gz
 
     echo "...cleaning"
     rm -r -f charm
