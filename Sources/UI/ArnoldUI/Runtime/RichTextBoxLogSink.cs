@@ -42,9 +42,43 @@ namespace GoodAI.Arnold.Runtime
             int selectionLength = m_textBox.SelectionLength;
             bool wasCaretAtEnd = selectionStart == m_textBox.TextLength;
 
+            if (m_textBox.Text.Length > m_maxTextLength)
+            {
+                int endMarker = m_textBox.Text.IndexOf('\n', m_dropLength) + 1;
+                if (endMarker < m_dropLength)
+                    endMarker = m_dropLength;
+
+                m_textBox.Select(0, endMarker);
+                m_textBox.Cut();
+
+                selectionStart -= endMarker;
+            }
+
+            m_textBox.SelectionStart = m_textBox.Text.Length;
+            m_textBox.SelectionLength = 0;
+            m_textBox.SelectionColor = ColorForEvent(logEvent);
+
             var output = new StringWriter();
             m_textFormatter.Format(logEvent, output);
+            m_textBox.AppendText(output.ToString());
 
+            if (wasCaretAtEnd)
+                selectionStart = m_textBox.TextLength;  // Move the caret to the end again.
+            else if (selectionStart < 0)
+            {
+                selectionStart = 0;  // The position was deleted, move to start.
+                selectionLength = 0;
+            }
+
+            m_textBox.SelectionStart = selectionStart;
+            m_textBox.SelectionLength = selectionLength;
+
+            if (wasCaretAtEnd)
+                m_textBox.ScrollToCaret();
+        }
+
+        private static Color ColorForEvent(LogEvent logEvent)
+        {
             Color eventColor;
             switch (logEvent.Level)
             {
@@ -69,40 +103,7 @@ namespace GoodAI.Arnold.Runtime
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            if (m_textBox.Text.Length > m_maxTextLength)
-            {
-                // this method preserves the text colouring
-                // find the first end-of-line past the endmarker
-
-                Int32 endmarker = m_textBox.Text.IndexOf('\n', m_dropLength) + 1;
-                if (endmarker < m_dropLength)
-                    endmarker = m_dropLength;
-
-                m_textBox.Select(0, endmarker);
-                m_textBox.Cut();
-
-                selectionStart -= endmarker;
-            }
-
-            m_textBox.SelectionStart = m_textBox.Text.Length;
-            m_textBox.SelectionLength = 0;
-            m_textBox.SelectionColor = eventColor;
-            m_textBox.AppendText(output.ToString());
-
-            if (wasCaretAtEnd)
-                selectionStart = m_textBox.TextLength;  // Move the caret to the end again.
-            else if (selectionStart < 0)
-            {
-                selectionStart = 0;  // The position was deleted, move to start.
-                selectionLength = 0;
-            }
-
-            m_textBox.SelectionStart = selectionStart;
-            m_textBox.SelectionLength = selectionLength;
-
-            if (wasCaretAtEnd)
-                m_textBox.ScrollToCaret();
+            return eventColor;
         }
     }
 
