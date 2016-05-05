@@ -191,18 +191,6 @@ namespace GoodAI.Arnold.Core
             if (stateUpdatedEventArgs.CurrentState == CoreState.ShuttingDown)
                 AfterShutdown();
 
-
-            //if (m_shouldKill)
-            //{
-            //    if (stateUpdatedEventArgs.CurrentState == CoreState.Empty)
-            //    {
-            //        CleanupSimulation();
-            //    }
-            //    else
-            //    {
-            //        // TODO(HonzaS): Log an error/warning.
-            //    }
-            //}
             Log.Debug("Core state changed: {previousState} -> {currentState}", stateUpdatedEventArgs.PreviousState, stateUpdatedEventArgs.CurrentState);
 
             StateUpdated?.Invoke(this, stateUpdatedEventArgs);
@@ -234,32 +222,13 @@ namespace GoodAI.Arnold.Core
 
         public void KillSimulation()
         {
-            //m_shouldKill = true;
-            //if (CoreProxy != null && CoreProxy.State != CoreState.Empty)
-            //{
-            //    CoreProxy?.Clear();
-            //}
-            //else
-            //{
-            //    CleanupSimulation();
-            //}
+            throw new NotImplementedException();
         }
 
         public bool IsConnected => CoreProxy != null;
 
         public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
 
-        // TODO(HonzaS): Clean up this when we start using it.
-        //private void CleanupSimulation()
-        //{
-        //    CoreProxy.StateUpdated -= OnCoreStateUpdated;
-        //    CoreProxy.StateChangeFailed -= OnCoreStateChangeFailed;
-
-        //    CoreState previousState = CoreProxy.State;
-        //    CoreProxy = null;
-
-        //    StateUpdated?.Invoke(this, new StateUpdatedEventArgs(previousState, CoreState.Disconnected));
-        //}
         public void Dispose()
         {
             Log.Debug("Disposing conductor");

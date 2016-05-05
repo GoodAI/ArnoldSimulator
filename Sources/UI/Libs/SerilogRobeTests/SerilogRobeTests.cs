@@ -36,11 +36,6 @@ namespace GoodAI.Logging.Tests
             log.Info("info 1");
             log.Info("info 2: {AnotherMessage:l}", "bar");
 
-            // TODO(Premek)
-            //var logger = log.ForContext<SerilogRobeTests>();
-            //logger.Debug("debug 3");
-            //logger.Information("info 3");
-
             Assert.Equal(4, debugSink.Events.Count);
             Assert.Equal(2, infoSink.Events.Count);
 

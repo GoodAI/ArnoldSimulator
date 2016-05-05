@@ -46,11 +46,10 @@ namespace GoodAI.Arnold.Graphics
         private float m_fps;
 
         private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
-        private ICoreProxy m_coreProxy;
+        private readonly ICoreProxy m_coreProxy;
         private readonly ISimulationModel m_simulationModel;
-        private IConductor m_conductor;
+        private readonly IConductor m_conductor;
 
-        // TODO: Move stuff from the VisualizationForm here.
         public Visualization(GLControl glControl, IConductor conductor)
         {
             m_control = glControl;

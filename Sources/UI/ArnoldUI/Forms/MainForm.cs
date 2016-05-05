@@ -11,12 +11,16 @@ using System.Windows.Forms;
 using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
+using GoodAI.Logging;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace GoodAI.Arnold
 {
     public partial class MainForm : Form
     {
+        // Injected.
+        public ILog Log { get; set; } = NullLogger.Instance;
+
         private readonly UIMain m_uiMain;
         public LogForm LogForm { get; }
         public GraphForm GraphForm { get; }
@@ -110,8 +114,7 @@ namespace GoodAI.Arnold
         {
             if (m_uiMain.Conductor.CoreState == CoreState.Empty)
             {
-                // TODO(P): change to log (or remove when BPs implemented)
-                MessageBox.Show("Cannot run empty simulation, loading blueprint not yet implemented");
+                Log.Warn("Cannot run empty simulation, loading blueprint not yet implemented");
                 return;
             }
 

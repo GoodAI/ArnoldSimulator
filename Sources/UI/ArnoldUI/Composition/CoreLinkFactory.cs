@@ -16,7 +16,6 @@ namespace GoodAI.Arnold
         ICoreLink Create(EndPoint endPoint);
     }
 
-    // TODO(HonzaS): This class still does some composition.
     public class CoreLinkFactory : PropertyInjectingFactory, ICoreLinkFactory
     {
         private readonly IResponseParser m_responseParser;
