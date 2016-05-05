@@ -43,8 +43,6 @@ namespace GoodAI.Arnold.Network
         public CoreController(ICoreLink coreLink)
         {
             m_coreLink = coreLink;
-
-            m_cancellationTokenSource = new CancellationTokenSource();
         }
 
         public void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> stateResultAction)
@@ -55,6 +53,7 @@ namespace GoodAI.Arnold.Network
             m_stateResultAction = stateResultAction;
             try
             {
+                m_cancellationTokenSource = new CancellationTokenSource();
 #pragma warning disable 4014 // This is supposed to start a parallel task and continue.
                 RepeatGetStateAsync(2000);
 #pragma warning restore 4014
