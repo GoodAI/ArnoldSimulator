@@ -38,6 +38,14 @@ namespace GoodAI.Arnold.Logging
             if (logEvent == null)
                 throw new ArgumentNullException(nameof(logEvent));
 
+            if (m_textBox.InvokeRequired)
+                m_textBox.BeginInvoke((MethodInvoker)(() => Log(logEvent)));
+            else
+                Log(logEvent);
+        }
+
+        private void Log(LogEvent logEvent)
+        {
             int selectionStart = m_textBox.SelectionStart;
             int selectionLength = m_textBox.SelectionLength;
             bool wasCaretAtEnd = selectionStart == m_textBox.TextLength;
@@ -63,10 +71,10 @@ namespace GoodAI.Arnold.Logging
             m_textBox.AppendText(output.ToString());
 
             if (wasCaretAtEnd)
-                selectionStart = m_textBox.TextLength;  // Move the caret to the end again.
+                selectionStart = m_textBox.TextLength; // Move the caret to the end again.
             else if (selectionStart < 0)
             {
-                selectionStart = 0;  // The position was deleted, move to start.
+                selectionStart = 0; // The position was deleted, move to start.
                 selectionLength = 0;
             }
 
