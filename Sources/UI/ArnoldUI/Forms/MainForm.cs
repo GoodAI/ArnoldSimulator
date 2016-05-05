@@ -108,6 +108,13 @@ namespace GoodAI.Arnold
 
         private void runButton_Click(object sender, EventArgs e)
         {
+            if (m_uiMain.Conductor.CoreState == CoreState.Empty)
+            {
+                // TODO(P): change to log (or remove when BPs implemented)
+                MessageBox.Show("Cannot run empty simulation, loading blueprint not yet implemented");
+                return;
+            }
+
             DisableCommandButtons();
             m_uiMain.StartSimulation();
         }
