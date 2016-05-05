@@ -43,6 +43,7 @@ namespace GoodAI.Arnold.Network
         public CoreController(ICoreLink coreLink)
         {
             m_coreLink = coreLink;
+            m_cancellationTokenSource = new CancellationTokenSource();
         }
 
         public void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> stateResultAction)

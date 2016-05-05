@@ -21,6 +21,8 @@ namespace GoodAI.Arnold.UI.Tests
         {
             public bool Fail { get; set; }
 
+            private StateType m_lastState = StateType.Empty;
+
             private static readonly string m_errorMessage = "Foo bar";
 
             Task<TimeoutResult<Response<TResponse>>> ICoreLink.Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs)
@@ -65,11 +67,12 @@ namespace GoodAI.Arnold.UI.Tests
                                 default:
                                     throw new ArgumentOutOfRangeException();
                             }
+                            m_lastState = resultState;
                         }
 
                         var getStateRequest = request as GetStateRequest;
                         if (getStateRequest != null)
-                            resultState = StateType.Empty;
+                            resultState = m_lastState;
 
                         ResponseMessage responseMessage = StateResponseBuilder.Build(resultState);
 
