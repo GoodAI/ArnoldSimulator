@@ -10,7 +10,7 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 
-namespace GoodAI.Arnold.Runtime
+namespace GoodAI.Arnold.Logging
 {
     public static class RichTextBoxConfigurationExtensions
     {

@@ -13,7 +13,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Display;
 
-namespace GoodAI.Arnold.Runtime
+namespace GoodAI.Arnold.Logging
 {
     public interface IUiLogSink : ILogEventSink
     { }

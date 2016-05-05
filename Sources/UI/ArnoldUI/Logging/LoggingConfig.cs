@@ -5,12 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using GoodAI.Arnold.Runtime;
 using GoodAI.Logging;
 using Serilog;
 using Serilog.Events;
 
-namespace GoodAI.Arnold
+namespace GoodAI.Arnold.Logging
 {
     internal static class LoggingConfig
     {

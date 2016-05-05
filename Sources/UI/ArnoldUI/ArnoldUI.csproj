@@ -153,9 +153,9 @@
     <Compile Include="Graphics\Models\ExpertModel.cs" />
     <Compile Include="Graphics\Models\RegionModel.cs" />
     <Compile Include="Composition\ArnoldContainerConfig.cs" />
-    <Compile Include="Runtime\RichTextBoxConfigurationExtensions.cs" />
-    <Compile Include="Runtime\RichTextBoxLogSink.cs" />
-    <Compile Include="Runtime\LoggingConfig.cs" />
+    <Compile Include="Logging\RichTextBoxConfigurationExtensions.cs" />
+    <Compile Include="Logging\RichTextBoxLogSink.cs" />
+    <Compile Include="Logging\LoggingConfig.cs" />
     <Compile Include="Runtime\UnhandledExceptionCatcher.cs" />
     <Compile Include="Network\CoreController.cs" />
     <Compile Include="Core\CoreStateEvents.cs" />
