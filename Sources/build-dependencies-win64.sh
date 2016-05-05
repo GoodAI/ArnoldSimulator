@@ -93,6 +93,10 @@ do
             build_messages
             build_corelibs
         ;;
+        *)
+            echo "Unknown target: '$option'"
+            exit 1
+        ;;
     esac
 done
 
