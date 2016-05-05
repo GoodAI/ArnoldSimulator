@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
@@ -11,6 +12,7 @@ using GoodAI.Arnold.Runtime;
 using GoodAI.Logging;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 using GoodAI.TypeMapping;
+using Serilog;
 using SimpleInjector;
 
 namespace GoodAI.Arnold
@@ -21,9 +23,9 @@ namespace GoodAI.Arnold
         {
             container.Options.PropertySelectionBehavior = new PropertyInjectionForType<ILog>(container);
 
-            container.RegisterSingleton<IWinFormsLogSink, RichTextBoxLogSink>();
+            // Keep the type so that it is clear what is being registered here.
+            container.RegisterSingleton<LoggerConfiguration>(() => LoggingConfig.Setup(container.GetInstance<LogForm>().TextBox));
 
-            container.RegisterSingleton(() => LoggingConfig.Setup(container.GetInstance<IWinFormsLogSink>()));
             container.RegisterConditional(
                 typeof(ILog),
                 typeFactory => typeof(SerilogRobe<>).MakeGenericType(typeFactory.Consumer.ImplementationType),

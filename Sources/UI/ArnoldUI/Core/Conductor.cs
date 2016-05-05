@@ -96,7 +96,7 @@ namespace GoodAI.Arnold.Core
                 throw new InvalidOperationException("Endpoint not set");
             }
 
-            Log.Info("Connecting to Core running at {hostname}:{port}", endPoint.Hostname, endPoint.Port);
+            Log.Info("Connecting to Core running at {hostname:l}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
             // TODO(HonzaS): Check here if we can connect to the core so that we could abort immediatelly.
 

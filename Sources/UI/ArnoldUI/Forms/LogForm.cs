@@ -13,6 +13,8 @@ namespace GoodAI.Arnold.Forms
 {
     public partial class LogForm : DockContent
     {
+        public RichTextBox TextBox => logContent;
+
         public LogForm()
         {
             InitializeComponent();

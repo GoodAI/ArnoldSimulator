@@ -8,12 +8,13 @@ using System.Windows.Forms;
 using GoodAI.Arnold.Runtime;
 using GoodAI.Logging;
 using Serilog;
+using Serilog.Events;
 
 namespace GoodAI.Arnold
 {
     internal static class LoggingConfig
     {
-        public static LoggerConfiguration Setup(IWinFormsLogSink logSink, string logPath = null)
+        public static LoggerConfiguration Setup(RichTextBox textBox, string logPath = null)
         {
             try
             {
@@ -25,7 +26,8 @@ namespace GoodAI.Arnold
                     logPath = InitLogDirectory(appName.Replace('.', '\\'), "Logs");
                 }
 
-                return SerilogRobeConfig.SetupLoggingToFile(logPath, appName).WriteTo.Sink(logSink);
+                return SerilogRobeConfig.SetupLoggingToFile(logPath, appName)
+                    .WriteTo.RichTextBox(textBox, maxTextLength: 1000, restrictedToMinimumLevel: LogEventLevel.Debug);
             }
             catch (Exception ex)
             {

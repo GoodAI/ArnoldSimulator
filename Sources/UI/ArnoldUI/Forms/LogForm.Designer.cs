@@ -93,6 +93,7 @@
             // 
             this.logContent.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.logContent.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.logContent.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.logContent.Location = new System.Drawing.Point(3, 0);
             this.logContent.Name = "logContent";
             this.logContent.Size = new System.Drawing.Size(885, 332);
