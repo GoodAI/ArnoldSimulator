@@ -98,7 +98,9 @@ namespace GoodAI.Arnold.Core
             get { return m_state; }
             private set
             {
-                Log.Debug("Changing state from {previousState} to {currentState}", m_state, value);
+                if (value == m_state)  // Pass only changes, not updates keeping the state unchanged.
+                    return;
+
                 CoreState oldState = m_state;
                 m_state = value;
                 StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
