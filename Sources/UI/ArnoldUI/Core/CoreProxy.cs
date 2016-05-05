@@ -47,8 +47,8 @@ namespace GoodAI.Arnold.Core
         /// This moves the simulation from Paused to Running. When the requested number
         /// of steps are performed, moves to state Paused.
         /// </summary>
-        /// <param name="stepsToRun">The number of steps to run. 0 is infinity.</param>
-        void Run(uint stepsToRun = 0);
+        /// <param name="brainStepsToRun">The number of steps to run. 0 is infinity.</param>
+        void Run(uint brainStepsToRun = 0);
 
         /// <summary>
         /// Pauses the running simulation. If the simulation is not running, this does nothing.
@@ -150,7 +150,7 @@ namespace GoodAI.Arnold.Core
             SendCommand(new CommandConversation(CommandType.Shutdown));
         }
 
-        public void Run(uint stepsToRun = 0)
+        public void Run(uint brainStepsToRun = 0)
         {
             if (State != CoreState.Paused && State != CoreState.Running)
             {
@@ -161,7 +161,7 @@ namespace GoodAI.Arnold.Core
             if (State == CoreState.Running)
                 return;
 
-            SendCommand(new CommandConversation(CommandType.Run, stepsToRun));
+            SendCommand(new CommandConversation(CommandType.Run, brainStepsToRun));
         }
 
         public void Pause()

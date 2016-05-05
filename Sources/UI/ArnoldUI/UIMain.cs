@@ -82,5 +82,10 @@ namespace ArnoldUI
         {
             Conductor.Dispose();
         }
+
+        public void PerformBrainStep()
+        {
+            Conductor.PerformBrainStep();
+        }
     }
 }

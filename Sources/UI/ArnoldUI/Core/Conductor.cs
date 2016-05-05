@@ -30,6 +30,7 @@ namespace GoodAI.Arnold.Core
         bool IsConnected { get; }
 
         CoreState CoreState { get; }
+        void PerformBrainStep();
     }
 
     public class SimulationInstanceEventArgs : EventArgs
@@ -228,6 +229,18 @@ namespace GoodAI.Arnold.Core
         public bool IsConnected => CoreProxy != null;
 
         public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
+
+        public void PerformBrainStep()
+        {
+            if (CoreProxy == null)
+            {
+                Log.Error("Cannot perform brain step, not connected to a core");
+                throw new InvalidOperationException("Core proxy does not exist, cannot step");
+            }
+
+            Log.Info("Performing brain step");
+            CoreProxy.Run(1);
+        }
 
         public void Dispose()
         {

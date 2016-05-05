@@ -54,6 +54,7 @@ namespace GoodAI.Arnold
             disconnectButton.Enabled = !connectButton.Enabled;
 
             runButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Paused || m_uiMain.Conductor.CoreState == CoreState.Empty;
+            brainStepButton.Enabled = runButton.Enabled;
             pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
         }
 
@@ -63,6 +64,7 @@ namespace GoodAI.Arnold
             disconnectButton.Enabled = false;
 
             runButton.Enabled = false;
+            brainStepButton.Enabled = false;
             pauseButton.Enabled = false;
         }
 
@@ -131,6 +133,11 @@ namespace GoodAI.Arnold
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             m_uiMain.Dispose();
+        }
+
+        private void brainStepButton_Click(object sender, EventArgs e)
+        {
+            m_uiMain.PerformBrainStep();
         }
     }
 }
