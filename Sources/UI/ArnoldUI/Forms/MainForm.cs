@@ -41,7 +41,7 @@ namespace GoodAI.Arnold
             // TODO(HonzaS): The blueprint should be in the Designer later.
             GraphForm.AgentBlueprint = m_uiMain.AgentBlueprint;
 
-            m_uiMain.SimulationStateUpdated += SimulationOnStateUpdated;
+            m_uiMain.SimulationStateChanged += SimulationOnStateChanged;
             m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
 
             UpdateButtons();
@@ -66,7 +66,7 @@ namespace GoodAI.Arnold
             pauseButton.Enabled = false;
         }
 
-        private void SimulationOnStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
+        private void SimulationOnStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
         {
             Invoke((MethodInvoker)UpdateButtons);
         }

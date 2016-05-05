@@ -7,12 +7,12 @@ using GoodAI.Arnold.Network;
 
 namespace GoodAI.Arnold.Core
 {
-    public class StateUpdatedEventArgs : EventArgs
+    public class StateChangedEventArgs : EventArgs
     {
         public CoreState PreviousState { get; set; }
         public CoreState CurrentState { get; set; }
 
-        public StateUpdatedEventArgs(CoreState previousState, CoreState currentState)
+        public StateChangedEventArgs(CoreState previousState, CoreState currentState)
         {
             PreviousState = previousState;
             CurrentState = currentState;

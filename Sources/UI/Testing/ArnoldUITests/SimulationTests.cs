@@ -98,7 +98,7 @@ namespace GoodAI.Arnold.UI.Tests
             var simulation = new CoreProxy(coreLink, coreController);
             Assert.Equal(CoreState.Empty, simulation.State);
 
-            simulation.StateUpdated += (sender, args) => waitEvent.Set();
+            simulation.StateChanged += (sender, args) => waitEvent.Set();
 
             simulation.LoadBlueprint(new AgentBlueprint());
             await WaitFor(waitEvent);
@@ -162,7 +162,7 @@ namespace GoodAI.Arnold.UI.Tests
             var simulation = new CoreProxy(coreLink, coreController);
             Assert.Equal(CoreState.Empty, simulation.State);
 
-            simulation.StateUpdated += (sender, args) => waitEvent.Set();
+            simulation.StateChanged += (sender, args) => waitEvent.Set();
 
             waitEvent.WaitOne(timeoutMs);
             Assert.Equal(CoreState.Empty, simulation.State);

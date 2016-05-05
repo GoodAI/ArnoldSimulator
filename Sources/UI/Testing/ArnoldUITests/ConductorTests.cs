@@ -38,8 +38,8 @@ namespace GoodAI.Arnold.UI.Tests
 
             m_coreProxyMock = new Mock<ICoreProxy>();
             m_coreProxyMock.Setup(coreProxy => coreProxy.Shutdown())
-                .Raises(coreProxy => coreProxy.StateUpdated += null,
-                    new StateUpdatedEventArgs(CoreState.Empty, CoreState.ShuttingDown));
+                .Raises(coreProxy => coreProxy.StateChanged += null,
+                    new StateChangedEventArgs(CoreState.Empty, CoreState.ShuttingDown));
 
             m_coreProcessFactoryMock = new Mock<ICoreProcessFactory>();
             m_coreProcessFactoryMock.Setup(factory => factory.Create())
@@ -81,7 +81,7 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.Equal(m_coreProxyMock.Object, m_conductor.CoreProxy);
 
             var waitEvent = new AutoResetEvent(false);
-            m_conductor.StateUpdated += (sender, args) => waitEvent.Set();
+            m_conductor.StateChanged += (sender, args) => waitEvent.Set();
             m_conductor.Shutdown();
 
             waitEvent.WaitOne();
@@ -113,13 +113,13 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreProxyMock.Setup(coreProxy => coreProxy.Clear())
                 .Callback(() =>
                 {
-                    m_coreProxyMock.Raise(coreProxy => coreProxy.StateUpdated += null,
-                        new StateUpdatedEventArgs(CoreState.Paused, CoreState.Empty));
+                    m_coreProxyMock.Raise(coreProxy => coreProxy.StateChanged += null,
+                        new StateChangedEventArgs(CoreState.Paused, CoreState.Empty));
                 });
 
 
             var waitEvent = new AutoResetEvent(false);
-            m_conductor.StateUpdated += (sender, args) => waitEvent.Set();
+            m_conductor.StateChanged += (sender, args) => waitEvent.Set();
             m_conductor.KillSimulation();
             m_coreProxyMock.Verify(coreProxy => coreProxy.Clear());
 

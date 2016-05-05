@@ -14,10 +14,10 @@ namespace ArnoldUI
     // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
     public class UIMain : IDisposable
     {
-        public event EventHandler<StateUpdatedEventArgs> SimulationStateUpdated
+        public event EventHandler<StateChangedEventArgs> SimulationStateChanged
         {
-            add { Conductor.StateUpdated += value; }
-            remove { Conductor.StateUpdated -= value; }
+            add { Conductor.StateChanged += value; }
+            remove { Conductor.StateChanged -= value; }
         }
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed
         {

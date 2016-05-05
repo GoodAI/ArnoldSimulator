@@ -17,7 +17,7 @@ namespace GoodAI.Arnold.Core
         ICoreProxy CoreProxy { get; }
 
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
-        event EventHandler<StateUpdatedEventArgs> StateUpdated;
+        event EventHandler<StateChangedEventArgs> StateChanged;
 
         void ConnectToCore(EndPoint endPoint = null);
         void Disconnect();
@@ -47,7 +47,7 @@ namespace GoodAI.Arnold.Core
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
-        public event EventHandler<StateUpdatedEventArgs> StateUpdated;
+        public event EventHandler<StateChangedEventArgs> StateChanged;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
 
         private readonly ICoreProcessFactory m_coreProcessFactory;
@@ -109,14 +109,14 @@ namespace GoodAI.Arnold.Core
 
         private void RegisterCoreEvents()
         {
-            CoreProxy.StateUpdated += OnCoreStateUpdated;
+            CoreProxy.StateChanged += OnCoreStateChanged;
             CoreProxy.StateChangeFailed += OnCoreStateChangeFailed;
             CoreProxy.CommandTimedOut += OnCoreCommandTimedOut;
         }
 
         private void UnregisterCoreEvents()
         {
-            CoreProxy.StateUpdated -= OnCoreStateUpdated;
+            CoreProxy.StateChanged -= OnCoreStateChanged;
             CoreProxy.StateChangeFailed -= OnCoreStateChangeFailed;
             CoreProxy.CommandTimedOut -= OnCoreCommandTimedOut;
         }
@@ -175,7 +175,7 @@ namespace GoodAI.Arnold.Core
             UnregisterCoreEvents();
             CoreProxy = null;
 
-            StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, CoreState.Disconnected));
+            StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, CoreState.Disconnected));
             Log.Info("Disconnected from core");
         }
 
@@ -186,14 +186,14 @@ namespace GoodAI.Arnold.Core
             CoreProxy.LoadBlueprint(blueprint);
         }
 
-        private void OnCoreStateUpdated(object sender, StateUpdatedEventArgs stateUpdatedEventArgs)
+        private void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
         {
-            if (stateUpdatedEventArgs.CurrentState == CoreState.ShuttingDown)
+            if (stateChangedEventArgs.CurrentState == CoreState.ShuttingDown)
                 AfterShutdown();
 
-            Log.Debug("Core state changed: {previousState} -> {currentState}", stateUpdatedEventArgs.PreviousState, stateUpdatedEventArgs.CurrentState);
+            Log.Debug("Core state changed: {previousState} -> {currentState}", stateChangedEventArgs.PreviousState, stateChangedEventArgs.CurrentState);
 
-            StateUpdated?.Invoke(this, stateUpdatedEventArgs);
+            StateChanged?.Invoke(this, stateChangedEventArgs);
         }
 
         private void OnCoreStateChangeFailed(object sender, StateChangeFailedEventArgs stateChangeFailedEventArgs)

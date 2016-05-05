@@ -32,7 +32,7 @@ namespace GoodAI.Arnold.Core
 
     public interface ICoreProxy : IDisposable
     {
-        event EventHandler<StateUpdatedEventArgs> StateUpdated;
+        event EventHandler<StateChangedEventArgs> StateChanged;
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         event EventHandler<TimeoutActionEventArgs> CommandTimedOut;
 
@@ -89,7 +89,7 @@ namespace GoodAI.Arnold.Core
 
         public ISimulationModel Model { get; private set; }
 
-        public event EventHandler<StateUpdatedEventArgs> StateUpdated;
+        public event EventHandler<StateChangedEventArgs> StateChanged;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         public event EventHandler<TimeoutActionEventArgs> CommandTimedOut;
 
@@ -101,7 +101,7 @@ namespace GoodAI.Arnold.Core
                 Log.Debug("Changing state from {previousState} to {currentState}", m_state, value);
                 CoreState oldState = m_state;
                 m_state = value;
-                StateUpdated?.Invoke(this, new StateUpdatedEventArgs(oldState, m_state));
+                StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
             }
         }
         private CoreState m_state = CoreState.Empty;
