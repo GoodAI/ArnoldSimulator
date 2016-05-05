@@ -3,6 +3,7 @@
 #include "brain.decl.h"
 #include "region.decl.h"
 #include "neuron.decl.h"
+#include <future>
 
 CkGroupID gMulticastGroupId;
 CProxy_CompletionDetector gCompletionDetector;
@@ -140,7 +141,7 @@ void Core::ProcessCommandRequest(const CommandRequest *commandRequest, RequestId
         SendResponseToClient(requestId, builder);
         throw ShutdownRequestedException("Shutdown requested by the client");
     }
-    
+
     if (commandType == CommandType_Run) {
         if (mState != StateType_Paused) {
             // TODO(Premek): return error response
@@ -148,6 +149,18 @@ void Core::ProcessCommandRequest(const CommandRequest *commandRequest, RequestId
         }
 
         mState = StateType_Running;  // TODO(): Add actual logic here.
+
+        uint32_t runSteps = commandRequest->stepsToRun();
+        if (runSteps != 0)
+        {
+            // TODO(HonzaS): Handle the exact number of brain steps here.
+            // For now, we'll just schedule a delayed state change.
+            std::thread{ [this]()
+            {
+                std::this_thread::sleep_for(std::chrono::seconds{ 1 });
+                mState = StateType_Paused;
+            } }.detach();
+        }
 
     } else if (commandType == CommandType_Pause) {
         if (mState != StateType_Running) {
