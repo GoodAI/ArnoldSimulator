@@ -40,11 +40,9 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 
 BrainBase::BrainBase(const BrainType &type, const BrainParams &params)
 {
-    /*json parsedParams;
-    std::stringstream streamedParams(params);
-    streamedParams >> parsedParams;
+    json p = json::parse(params);
 
-    mBrain = BrainBase::CreateBrain(type, *this, parsedParams);*/
+    mBrain = BrainBase::CreateBrain(type, *this, p);
 }
 
 BrainBase::BrainBase(CkMigrateMessage *msg)

@@ -99,12 +99,12 @@ public:
     void RequestChildAddition(NeuronId parent, NeuronId child);
     void RequestChildRemoval(NeuronId parent, NeuronId child);
 
-    void CreateInput(const ConnectorName &name, Spike::Type spikeType, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
+    void CreateInput(const ConnectorName &name, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
     void DeleteInput(const ConnectorName &name);
     void ConnectInput(const ConnectorName &name, const RemoteConnector &destination);
     void DisconnectInput(const ConnectorName &name, const RemoteConnector &destination);
 
-    void CreateOutput(const ConnectorName &name, Spike::Type spikeType, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
+    void CreateOutput(const ConnectorName &name, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
     void DeleteOutput(const ConnectorName &name);
     void ConnectOutput(const ConnectorName &name, const RemoteConnector &destination);
     void DisconnectOutput(const ConnectorName &name, const RemoteConnector &destination);

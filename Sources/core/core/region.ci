@@ -14,12 +14,12 @@ module region
     {
         entry RegionBase(RegionType type, RegionParams params);
 
-        entry void CreateInput(ConnectorName name, Spike::Type spikeType, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
+        entry void CreateInput(ConnectorName name, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
         entry void DeleteInput(ConnectorName name);
         entry void ConnectInput(ConnectorName name, RemoteConnector destination);
         entry void DisconnectInput(ConnectorName name, RemoteConnector destination);
 
-        entry void CreateOutput(ConnectorName name, Spike::Type spikeType, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
+        entry void CreateOutput(ConnectorName name, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
         entry void DeleteOutput(ConnectorName name);
         entry void ConnectOutput(ConnectorName name, RemoteConnector destination);
         entry void DisconnectOutput(ConnectorName name, RemoteConnector destination);

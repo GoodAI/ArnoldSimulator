@@ -12,6 +12,28 @@ Spike::Spike()
     mEditors[static_cast<size_t>(Type::Functional)].reset(new FunctionalSpike());
 }
 
+Spike::Type Spike::ParseType(const std::string &type)
+{
+    if (type == "Binary") return Type::Binary;
+    if (type == "Discrete") return Type::Discrete;
+    if (type == "Continuous") return Type::Continuous;
+    if (type == "Visual") return Type::Visual;
+    if (type == "Functional") return Type::Functional;
+
+    return Type::Binary;
+}
+
+const char *Spike::SerializeType(Type type)
+{
+    if (type == Type::Binary) return "Binary";
+    if (type == Type::Discrete) return "Discrete";
+    if (type == Type::Continuous) return "Continuous";
+    if (type == Type::Visual) return "Visual";
+    if (type == Type::Functional) return "Functional";
+
+    return "Binary";
+}
+
 Spike Spike::instance;
 
 Spike::Data::Data()

@@ -10,6 +10,28 @@ Synapse::Synapse()
     mEditors[static_cast<size_t>(Type::Probabilistic)].reset(new ProbabilisticSynapse());
 }
 
+Synapse::Type Synapse::ParseType(const std::string &type)
+{
+    if (type == "Empty") return Type::Empty;
+    if (type == "Weighted") return Type::Weighted;
+    if (type == "Lagging") return Type::Lagging;
+    if (type == "Conductive") return Type::Conductive;
+    if (type == "Probabilistic") return Type::Probabilistic;
+
+    return Type::Empty;
+}
+
+const char *Synapse::SerializeType(Type type)
+{
+    if (type == Type::Empty) return "Empty";
+    if (type == Type::Weighted) return "Weighted";
+    if (type == Type::Lagging) return "Lagging";
+    if (type == Type::Conductive) return "Conductive";
+    if (type == Type::Probabilistic) return "Probabilistic";
+
+    return "Empty";
+}
+
 Synapse Synapse::instance;
 
 Synapse::Data::Data()

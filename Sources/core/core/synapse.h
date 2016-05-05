@@ -22,6 +22,9 @@ public:
         Probabilistic = 4
     };
 
+    static Type ParseType(const std::string &type);
+    static const char *SerializeType(Type type);
+
     struct Data
     {
         Data();

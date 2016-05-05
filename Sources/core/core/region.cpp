@@ -48,11 +48,9 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
 
 RegionBase::RegionBase(const RegionType &type, const RegionParams &params)
 {
-    json parsedParams;
-    std::stringstream streamedParams(params);
-    streamedParams >> parsedParams;
+    json p = json::parse(params);
 
-    mRegion = RegionBase::CreateRegion(type, *this, parsedParams);
+    mRegion = RegionBase::CreateRegion(type, *this, p);
 }
 
 RegionBase::RegionBase(CkMigrateMessage *msg)
@@ -157,7 +155,7 @@ void RegionBase::RequestChildRemoval(NeuronId parent, NeuronId child)
 {
 }
 
-void RegionBase::CreateInput(const ConnectorName &name, Spike::Type spikeType, 
+void RegionBase::CreateInput(const ConnectorName &name,
     const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount)
 {
 }
@@ -174,7 +172,7 @@ void RegionBase::DisconnectInput(const ConnectorName &name, const RemoteConnecto
 {
 }
 
-void RegionBase::CreateOutput(const ConnectorName &name, Spike::Type spikeType, 
+void RegionBase::CreateOutput(const ConnectorName &name,
     const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount)
 {
 }

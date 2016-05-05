@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 #include <tbb/scalable_allocator.h>
 
@@ -22,6 +23,9 @@ public:
         Visual = 3,
         Functional = 4
     };
+
+    static Type ParseType(const std::string &type);
+    static const char *SerializeType(Type type);
 
     struct Data
     {

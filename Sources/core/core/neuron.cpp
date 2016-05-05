@@ -79,13 +79,10 @@ bool Neuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Dat
 
 NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 {
+    json p = json::parse(params);
+
     mTempIdCounter = TEMP_REGION_INDEX;
-
-    json parsedParams;
-    std::stringstream streamedParams(params);
-    streamedParams >> parsedParams;
-
-    mNeuron = CreateNeuron(type, *this, parsedParams);
+    mNeuron = CreateNeuron(type, *this, p);
     mParent = DELETED_NEURON_ID;
     mChildren.set_deleted_key(DELETED_NEURON_ID);
     mInputSynapses.set_deleted_key(DELETED_NEURON_ID);
@@ -275,8 +272,7 @@ void NeuronBase::CommitInputSynapse(NeuronId from)
 {
     auto it = mInputSynapses.find(from);
     if (it != mInputSynapses.end()) {
-        // TODO
-        //gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).SynchronizeOutputSynapse(GetId(), it->second);
+        gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).SynchronizeOutputSynapse(GetId(), it->second);
     }
 }
 
@@ -299,8 +295,7 @@ void NeuronBase::CommitOutputSynapse(NeuronId to)
 {
     auto it = mOutputSynapses.find(to);
     if (it != mOutputSynapses.end()) {
-        // TODO
-        //gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).SynchronizeInputSynapse(GetId(), it->second);
+        gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).SynchronizeInputSynapse(GetId(), it->second);
     }
 }
 
@@ -394,8 +389,7 @@ void NeuronBase::RemoveOutputSynapse(NeuronId to)
 
 void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
 {
-    // TODO
-    //gNeurons(GetRegionIndex(receiver), GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
+    gNeurons(GetRegionIndex(receiver), GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
 }
 
 void NeuronBase::EnqueueSpike(Direction direction, const Spike::Data &data)
@@ -444,8 +438,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     */
 }
 
-ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) :
-    Neuron(base, params)
+ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
     // TODO extract mThreshold value from json params (can be empty)
     mThreshold = 0;
