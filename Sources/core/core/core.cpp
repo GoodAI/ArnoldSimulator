@@ -99,6 +99,13 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
                 ProcessGetStateRequest(getStateRequest, requestId);
                 break;
             }
+            case Network::Request_GetModelRequest:
+            {
+                const Network::GetStateRequest *getStateRequest =
+                    static_cast<const Network::GetStateRequest*>(requestMessage->request());
+                ProcessGetStateRequest(getStateRequest, requestId);
+                break;
+            }
             default:
             {
                 CkPrintf("Unknown request type %d\n", requestType);
@@ -205,11 +212,22 @@ void Core::ProcessGetStateRequest(const Network::GetStateRequest *getStateReques
     SendResponseToClient(requestId, builder);
 }
 
+template <typename TResponse>
+void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Network::Response responseType, flatbuffers::Offset<TResponse> &responseOffset)
+{
+    auto responseMessage = Network::CreateResponseMessage(builder, responseType, responseOffset.Union());
+    builder.Finish(responseMessage);
+}
+
 void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder)
 {
-    flatbuffers::Offset<Network::StateResponse> stateResponseOffset = CreateStateResponse(builder, state);
-    auto responseMessage = Network::CreateResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset.Union());
-    builder.Finish(responseMessage);
+    flatbuffers::Offset<Network::StateResponse> stateResponseOffset = Network::CreateStateResponse(builder, state);
+    BuildResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset);
+}
+
+bool chance()
+{
+    return rand() % 60;
 }
 
 void Core::BuildViewportUpdateResponse(
@@ -230,7 +248,55 @@ void Core::BuildViewportUpdateResponse(
     const ChildLinks &removedChildren,
     flatbuffers::FlatBufferBuilder &builder)
 {
-    // TODO(HonzaS)
+    auto addedRegionName = builder.CreateString("FooRegion");
+    auto addedRegionType = builder.CreateString("FooRegionType");
+    auto addedRegionPosition = Network::CreatePosition(builder, 10, 20, 30);
+
+    uint32_t regionId = 1;
+
+    auto addedRegion = Network::CreateRegion(builder, regionId, addedRegionName, addedRegionType, addedRegionPosition); 
+    auto addedRegions = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Region>>{addedRegion});
+    auto removedRegions = builder.CreateVector(std::vector<uint32_t>());
+
+    auto addedConnectors = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Connector>>());
+    auto removedConnectors = builder.CreateVector(std::vector<flatbuffers::Offset<Network::ConnectorId>>());
+    
+    auto addedConnections = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Connection>>());
+    auto removedConnections = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Connection>>());
+
+    auto upperBound = Network::CreatePosition(builder, 10, 10, 10);
+
+    auto neuron1Position = Network::CreatePosition(builder, 1, 1, 1);
+    auto neuron1 = Network::CreateNeuron(builder, 1, neuron1Position, chance());
+
+    auto neuron2Position = Network::CreatePosition(builder, 5, 1, 3);
+    auto neuron2 = Network::CreateNeuron(builder, 2, neuron2Position, chance());
+
+    auto neuron3Position = Network::CreatePosition(builder, 6, 6, 6);
+    auto neuron3 = Network::CreateNeuron(builder, 3, neuron3Position, chance());
+
+    auto neurons = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Neuron>>{neuron1, neuron2, neuron3});
+
+    auto synapse12 = Network::CreateSynapse(builder, 1, 2, chance());
+    auto synapse13 = Network::CreateSynapse(builder, 1, 3, chance());
+    auto synapse23 = Network::CreateSynapse(builder, 2, 3, chance());
+
+    auto synapses = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Synapse>>{synapse12, synapse13, synapse23});
+
+    auto regionView = Network::CreateRegionView(builder, regionId, upperBound, neurons, synapses);
+    auto regionViews = builder.CreateVector(std::vector<flatbuffers::Offset<Network::RegionView>>{regionView});
+
+    flatbuffers::Offset<Network::ModelResponse> modelResponseOffset = Network::CreateModelResponse(
+        builder,
+        addedRegions,
+        removedRegions,
+        addedConnectors,
+        removedConnectors,
+        addedConnections,
+        removedConnections,
+        regionViews);
+
+    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
 }
 
 

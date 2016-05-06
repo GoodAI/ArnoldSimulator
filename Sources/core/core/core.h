@@ -85,7 +85,7 @@ protected:
         const ChildLinks &removedChildren,
         flatbuffers::FlatBufferBuilder &builder);
     void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder);
-
+    
 private:
     Network::StateType mState;
 

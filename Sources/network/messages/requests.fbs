@@ -18,12 +18,12 @@ table CommandRequest {
 table GetStateRequest {}
 
 // TODO: Add filter specification in the request later.
-table ModelRequest {}
+table GetModelRequest {}
 
 union Request {
 	CommandRequest,
 	GetStateRequest,
-	ModelRequest
+	GetModelRequest
 }
 
 table RequestMessage {

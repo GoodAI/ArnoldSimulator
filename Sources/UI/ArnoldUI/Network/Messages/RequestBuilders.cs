@@ -47,4 +47,18 @@ namespace GoodAI.Arnold.Network.Messages
             return RequestMessageBuilder.Build(builder, Request.GetStateRequest, requestOffset);
         }
     }
+
+    public static class GetModelRequestBuilder
+    {
+        public static RequestMessage Build()
+        {
+            var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
+
+            // Tables without fields don't have the Create...() static method, it needs to be done like this.
+            GetModelRequest.StartGetModelRequest(builder);
+            Offset<GetModelRequest> requestOffset = GetModelRequest.EndGetModelRequest(builder);
+
+            return RequestMessageBuilder.Build(builder, Request.GetModelRequest, requestOffset);
+        }
+    }
 }

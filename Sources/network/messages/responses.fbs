@@ -39,6 +39,7 @@ table Position {
 table Region {
 	id:uint;
 	name:string;
+	type:string;
 	position:Position;
 }
 
@@ -79,7 +80,6 @@ table Synapse {
 
 table RegionView {
 	regionId:uint;
-	lowerBound:Position;
 	upperBound:Position;
 	neurons:[Neuron];
 	synapses:[Synapse];

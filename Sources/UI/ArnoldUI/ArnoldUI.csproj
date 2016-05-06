@@ -115,6 +115,7 @@
     <Compile Include="Network\CoreLink.cs" />
     <Compile Include="Composition\CoreLinkFactory.cs" />
     <Compile Include="Network\CoreResponseParser.cs" />
+    <Compile Include="Network\GetModelConversation.cs" />
     <Compile Include="Network\GetStateConversation.cs" />
     <Compile Include="Network\Messages\RequestBuilders.cs" />
     <Compile Include="Network\Messages\Requests.cs" />

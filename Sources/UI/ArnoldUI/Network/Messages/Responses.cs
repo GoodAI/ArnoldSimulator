@@ -111,24 +111,29 @@ public sealed class Region : Table {
   public uint Id { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
   public string Name { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
   public ArraySegment<byte>? GetNameBytes() { return __vector_as_arraysegment(6); }
+  public string Type { get { int o = __offset(8); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(8); }
   public Position Position { get { return GetPosition(new Position()); } }
-  public Position GetPosition(Position obj) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public Position GetPosition(Position obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<Region> CreateRegion(FlatBufferBuilder builder,
       uint id = 0,
       StringOffset nameOffset = default(StringOffset),
+      StringOffset typeOffset = default(StringOffset),
       Offset<Position> positionOffset = default(Offset<Position>)) {
-    builder.StartObject(3);
+    builder.StartObject(4);
     Region.AddPosition(builder, positionOffset);
+    Region.AddType(builder, typeOffset);
     Region.AddName(builder, nameOffset);
     Region.AddId(builder, id);
     return Region.EndRegion(builder);
   }
 
-  public static void StartRegion(FlatBufferBuilder builder) { builder.StartObject(3); }
+  public static void StartRegion(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddId(FlatBufferBuilder builder, uint id) { builder.AddUint(0, id, 0); }
   public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset.Value, 0); }
-  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(2, positionOffset.Value, 0); }
+  public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(2, typeOffset.Value, 0); }
+  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(3, positionOffset.Value, 0); }
   public static Offset<Region> EndRegion(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Region>(o);
@@ -296,40 +301,35 @@ public sealed class RegionView : Table {
   public RegionView __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public uint RegionId { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public Position LowerBound { get { return GetLowerBound(new Position()); } }
-  public Position GetLowerBound(Position obj) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   public Position UpperBound { get { return GetUpperBound(new Position()); } }
-  public Position GetUpperBound(Position obj) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public Position GetUpperBound(Position obj) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   public Neuron GetNeurons(int j) { return GetNeurons(new Neuron(), j); }
-  public Neuron GetNeurons(Neuron obj, int j) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int NeuronsLength { get { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; } }
+  public Neuron GetNeurons(Neuron obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int NeuronsLength { get { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; } }
   public Synapse GetSynapses(int j) { return GetSynapses(new Synapse(), j); }
-  public Synapse GetSynapses(Synapse obj, int j) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int SynapsesLength { get { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; } }
+  public Synapse GetSynapses(Synapse obj, int j) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int SynapsesLength { get { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; } }
 
   public static Offset<RegionView> CreateRegionView(FlatBufferBuilder builder,
       uint regionId = 0,
-      Offset<Position> lowerBoundOffset = default(Offset<Position>),
       Offset<Position> upperBoundOffset = default(Offset<Position>),
       VectorOffset neuronsOffset = default(VectorOffset),
       VectorOffset synapsesOffset = default(VectorOffset)) {
-    builder.StartObject(5);
+    builder.StartObject(4);
     RegionView.AddSynapses(builder, synapsesOffset);
     RegionView.AddNeurons(builder, neuronsOffset);
     RegionView.AddUpperBound(builder, upperBoundOffset);
-    RegionView.AddLowerBound(builder, lowerBoundOffset);
     RegionView.AddRegionId(builder, regionId);
     return RegionView.EndRegionView(builder);
   }
 
-  public static void StartRegionView(FlatBufferBuilder builder) { builder.StartObject(5); }
+  public static void StartRegionView(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddRegionId(FlatBufferBuilder builder, uint regionId) { builder.AddUint(0, regionId, 0); }
-  public static void AddLowerBound(FlatBufferBuilder builder, Offset<Position> lowerBoundOffset) { builder.AddOffset(1, lowerBoundOffset.Value, 0); }
-  public static void AddUpperBound(FlatBufferBuilder builder, Offset<Position> upperBoundOffset) { builder.AddOffset(2, upperBoundOffset.Value, 0); }
-  public static void AddNeurons(FlatBufferBuilder builder, VectorOffset neuronsOffset) { builder.AddOffset(3, neuronsOffset.Value, 0); }
+  public static void AddUpperBound(FlatBufferBuilder builder, Offset<Position> upperBoundOffset) { builder.AddOffset(1, upperBoundOffset.Value, 0); }
+  public static void AddNeurons(FlatBufferBuilder builder, VectorOffset neuronsOffset) { builder.AddOffset(2, neuronsOffset.Value, 0); }
   public static VectorOffset CreateNeuronsVector(FlatBufferBuilder builder, Offset<Neuron>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartNeuronsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddSynapses(FlatBufferBuilder builder, VectorOffset synapsesOffset) { builder.AddOffset(4, synapsesOffset.Value, 0); }
+  public static void AddSynapses(FlatBufferBuilder builder, VectorOffset synapsesOffset) { builder.AddOffset(3, synapsesOffset.Value, 0); }
   public static VectorOffset CreateSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static Offset<RegionView> EndRegionView(FlatBufferBuilder builder) {
