@@ -30,6 +30,14 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
+        public void WritesReadsGetModel()
+        {
+            var message = GetModelRequestBuilder.Build();
+
+            Assert.Equal(Request.GetModelRequest, message.RequestType);
+        }
+
+        [Fact]
         public void WritesReadsStateResponse()
         {
             var message = StateResponseBuilder.Build(StateType.ShuttingDown);
