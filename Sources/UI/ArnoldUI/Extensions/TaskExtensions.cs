@@ -7,38 +7,28 @@ using System.Threading.Tasks;
 
 namespace GoodAI.Arnold.Extensions
 {
-    public class TimeoutResult<TResult>
+    public class TaskTimeoutException<TResult> : TimeoutException
     {
-        public TResult Result { get; set; }
-        public bool TimedOut { get; set; }
         public Task<TResult> OriginalTask { get; set; }
-    }
 
+        public TaskTimeoutException(Task<TResult> originalTask)
+        {
+            OriginalTask = originalTask;
+        }
+    }
+    
     public static class TaskExtensions
     {
-        public static async Task<TimeoutResult<TResult>> TimeoutAfter<TResult>(this Task<TResult> task,
+        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task,
             int timeoutMs)
         {
-            var result = new TimeoutResult<TResult> {OriginalTask = task};
-
             if (timeoutMs <= 0)
-            {
-                result.Result = await task;
-            }
-            else
-            {
-                if (task == await Task.WhenAny(task, Task.Delay(timeoutMs)))
-                {
-                    await task;
-                    result.Result = task.Result;
-                }
-                else
-                {
-                    result.TimedOut = true;
-                }
-            }
+                return await task;
 
-            return result;
+            if (task == await Task.WhenAny(task, Task.Delay(timeoutMs)))
+                return await task;
+
+            throw new TaskTimeoutException<TResult>(task);
         }
     }
 }

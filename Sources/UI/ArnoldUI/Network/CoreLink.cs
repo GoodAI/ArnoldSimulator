@@ -12,7 +12,7 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreLink
     {
-        Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(
+        Task<TResponse> Request<TRequest, TResponse>(
             IConversation<TRequest, TResponse> conversation,
             int timeoutMs)
             where TRequest : Table
@@ -24,20 +24,10 @@ namespace GoodAI.Arnold.Network
         TRequest RequestData { get; }
     }
 
-    public class Response<TResponse>
+    public class RemoteCoreException : Exception
     {
-        public Response(ErrorResponse error)
-        {
-            Error = error;
-        }
-
-        public Response(TResponse data)
-        {
-            Data = data;
-        }
-
-        public ErrorResponse Error { get; private set; }
-        public TResponse Data { get; private set; }
+        public RemoteCoreException(string message) : base(message)
+        { }
     }
 
     public class CoreLink : ICoreLink
@@ -49,22 +39,22 @@ namespace GoodAI.Arnold.Network
             m_converseClient = converseClient;
         }
 
-        public Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(
+        public Task<TResponse> Request<TRequest, TResponse>(
             IConversation<TRequest, TResponse> conversation, int timeoutMs)
             where TRequest : Table
             where TResponse : Table, new()
         {
-            return Task<ResponseMessage>.Factory.StartNew(
-                () =>
+            return Task<ResponseMessage>.Factory.StartNew(() =>
                     m_converseClient.SendQuery<TRequest, ResponseMessage>(Conversation.Handler, conversation.RequestData))
                 .ContinueWith(task =>
                 {
                     ResponseMessage result = task.Result;
                     if (result.ResponseType == Response.ErrorResponse)
-                        return new Response<TResponse>(result.GetResponse(new ErrorResponse()));
-                    else
-                        return new Response<TResponse>(result.GetResponse(new TResponse()));
-                }).TimeoutAfter(timeoutMs);
+                        throw new RemoteCoreException(result.GetResponse(new ErrorResponse()).Message);
+
+                    return result.GetResponse(new TResponse());
+                })
+                .TimeoutAfter(timeoutMs);
         }
     }
 }

@@ -199,7 +199,7 @@ namespace GoodAI.Arnold.Core
 
         private void OnCoreStateChangeFailed(object sender, StateChangeFailedEventArgs stateChangeFailedEventArgs)
         {
-            Log.Warn("Core state change failed with: {error}", stateChangeFailedEventArgs.Error);
+            Log.Warn("Core state change failed with: {error}", stateChangeFailedEventArgs.ErrorMessage);
             StateChangeFailed?.Invoke(this, stateChangeFailedEventArgs);
         }
 

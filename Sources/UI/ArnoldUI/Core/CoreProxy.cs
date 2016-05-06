@@ -180,7 +180,16 @@ namespace GoodAI.Arnold.Core
 
         private void SendCommand(CommandConversation conversation)
         {
-            m_controller.Command(conversation, HandleStateResponse, CreateTimeoutHandler(conversation.RequestData.Command));
+
+            try
+            {
+                m_controller.Command(conversation, HandleStateResponse, CreateTimeoutHandler(conversation.RequestData.Command));
+            }
+            catch (RemoteCoreException ex)
+            {
+                HandleError(ex.Message);
+            }
+            // TODO(Premek): Handle timeout here...
         }
 
         private Func<TimeoutAction> CreateTimeoutHandler(CommandType type)
@@ -195,29 +204,20 @@ namespace GoodAI.Arnold.Core
             };
         }
 
-        private void HandleKeepaliveStateResponse(TimeoutResult<Response<StateResponse>> timeoutResult)
+        private void HandleKeepaliveStateResponse(StateResponse response)
         {
-            if (timeoutResult.TimedOut)
-            {
-                Log.Warn("Keepalive timed out");
-                throw new NotImplementedException();
-            }
-            else
-            {
-                HandleStateResponse(timeoutResult.Result);
-            }
+            HandleStateResponse(response);
         }
 
-        private void HandleStateResponse(Response<StateResponse> response)
+        private void HandleStateResponse(StateResponse response)
         {
-            if (response.Error != null)
-                HandleError(response.Error);
-            else if (response.Data != null)
-                State = ReadState(response.Data);
-            else
-                // This only happened so far when the request handler was misspelled.
-                // Keep it as warning for a while and switch to debug later?
-                Log.Warn("The server rejected the message.");
+            State = ReadState(response);
+            
+            // TODO(Premek): check that this is handled elsewhere...
+            //else
+            //    // This only happened so far when the request handler was misspelled.
+            //    // Keep it as warning for a while and switch to debug later?
+            //    Log.Warn("The server rejected the message.");
         }
 
         private static CoreState ReadState(StateResponse stateData)
@@ -237,10 +237,10 @@ namespace GoodAI.Arnold.Core
             }
         }
 
-        private void HandleError(ErrorResponse error)
+        private void HandleError(string errorMessage)
         {
-            Log.Warn("Core error: {error}", error);
-            StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(error));
+            Log.Warn("Core error: {error}", errorMessage);
+            StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(errorMessage));
         }
     }
 }

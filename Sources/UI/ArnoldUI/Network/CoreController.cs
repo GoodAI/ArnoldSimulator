@@ -8,16 +8,17 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Logging;
+using TaskExtensions = GoodAI.Arnold.Extensions.TaskExtensions;
 
 namespace GoodAI.Arnold.Network
 {
     public interface ICoreController : IDisposable
     {
-        Task Command(CommandConversation conversation, Action<Response<StateResponse>> successAction,
+        Task Command(CommandConversation conversation, Action<StateResponse> successAction,
             Func<TimeoutAction> timeoutAction, int timeoutMs = 0);
 
         bool IsCommandInProgress { get; }
-        void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> stateResultAction);
+        void StartStateChecking(Action<StateResponse> stateResultAction);
     }
 
     public enum TimeoutAction
@@ -33,8 +34,8 @@ namespace GoodAI.Arnold.Network
         public ILog Log { get; set; } = NullLogger.Instance;
 
         private readonly ICoreLink m_coreLink;
-        private Task<TimeoutResult<Response<StateResponse>>> m_runningCommand;
-        private Action<TimeoutResult<Response<StateResponse>>> m_stateResultAction;
+        private Task<StateResponse> m_runningCommand;
+        private Action<StateResponse> m_stateResultAction;
         private CancellationTokenSource m_cancellationTokenSource;
 
         private const int CommandTimeoutMs = 15*1000;
@@ -49,7 +50,7 @@ namespace GoodAI.Arnold.Network
             m_cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public void StartStateChecking(Action<TimeoutResult<Response<StateResponse>>> stateResultAction)
+        public void StartStateChecking(Action<StateResponse> stateResultAction)
         {
             if (stateResultAction == null)
                 throw new ArgumentNullException(nameof(stateResultAction));
@@ -77,8 +78,8 @@ namespace GoodAI.Arnold.Network
 
                 if (!IsCommandInProgress)
                 {
-                    // TODO(HonzaS): Handle timeout here.
-                    TimeoutResult<Response<StateResponse>> stateCheckResult =
+                    // TODO(): Handle timeout and other exceptions here.
+                    StateResponse stateCheckResult =
                         await m_coreLink.Request(new GetStateConversation(), KeepaliveTimeoutMs)
                         .ConfigureAwait(false);
 
@@ -96,7 +97,7 @@ namespace GoodAI.Arnold.Network
             m_cancellationTokenSource.Cancel();
         }
 
-        public async Task Command(CommandConversation conversation, Action<Response<StateResponse>> successAction,
+        public async Task Command(CommandConversation conversation, Action<StateResponse> successAction,
             Func<TimeoutAction> timeoutCallback, int timeoutMs = CommandTimeoutMs)
         {
             if (m_runningCommand != null)
@@ -107,44 +108,47 @@ namespace GoodAI.Arnold.Network
 
             m_cancellationTokenSource.Cancel();
 
-            var retry = true;
+            var retry = true;  // Count the first try as a retry.
 
             while (true)
             {
-                TimeoutResult<Response<StateResponse>> result;
+                StateResponse result;
 
-                if (retry)
+                try
                 {
-                    m_runningCommand = m_coreLink.Request(conversation, timeoutMs);
+                    if (retry)
+                    {
+                        retry = false;
+                        m_runningCommand = m_coreLink.Request(conversation, timeoutMs);
+                    }
+
                     result = await m_runningCommand.ConfigureAwait(false);
-
-                    retry = false;
                 }
-                else
-                {
-                    result = await m_runningCommand.Result.OriginalTask.TimeoutAfter(CommandTimeoutMs).ConfigureAwait(false);
-                }
-
-                if (result.TimedOut)
+                catch (TaskTimeoutException<StateResponse> ex)
                 {
                     TimeoutAction timeoutAction = timeoutCallback();
-                    Log.Info("Command {command} timed out, {action} requested", conversation.RequestData.Command, timeoutAction);
+                    Log.Info("Command {command} timed out, {action} requested", conversation.RequestData.Command,
+                        timeoutAction);
                     if (timeoutAction == TimeoutAction.Cancel)
                         break;
 
                     if (timeoutAction == TimeoutAction.Retry)
                         retry = true;
 
-                    // Redundant.
-                    //if (timeoutAction == TimeoutAction.Wait)
-                    //    continue;
+                    if (timeoutAction == TimeoutAction.Wait)
+                        m_runningCommand = ex.OriginalTask.TimeoutAfter(CommandTimeoutMs);
+
+                    continue;
                 }
-                else
+                catch (Exception ex)
                 {
-                    Log.Debug("Successful command {command}", conversation.RequestData.Command);
-                    successAction(result.Result);
-                    break;
+                    Log.Error(ex, "Request failed");
+                    throw;
                 }
+
+                Log.Debug("Successful command {command}", conversation.RequestData.Command);
+                successAction(result);
+                break;
             }
 
             m_runningCommand = null;

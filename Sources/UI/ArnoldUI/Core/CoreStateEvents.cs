@@ -21,11 +21,11 @@ namespace GoodAI.Arnold.Core
 
     public class StateChangeFailedEventArgs : EventArgs
     {
-        public StateChangeFailedEventArgs(ErrorResponse error)
+        public StateChangeFailedEventArgs(string errorMessage)
         {
-            Error = error;
+            ErrorMessage = errorMessage;
         }
 
-        public ErrorResponse Error { get; set; }
+        public string ErrorMessage { get; }
     }
 }
