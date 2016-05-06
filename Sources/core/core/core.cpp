@@ -129,7 +129,7 @@ void Core::SendViewportUpdate(
     ChildLinks &removedChildren)
 {
     flatbuffers::FlatBufferBuilder builder;
-    BuildSynapticTransfersResponse(
+    BuildViewportUpdateResponse(
         addedRegions, repositionedRegions, removedRegions,
         addedConnectors, removedConnectors, 
         addedConnections, removedConnections,
