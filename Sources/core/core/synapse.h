@@ -43,11 +43,11 @@ public:
 
     typedef std::tuple<Direction, NeuronId, NeuronId, Data> Addition;
     typedef std::tuple<Direction, NeuronId, NeuronId> Removal;
-    typedef std::pair<NeuronId, NeuronId> Transfer;
+    typedef std::tuple<NeuronId, NeuronId> Link;
 
     typedef std::vector<Addition> Additions;
     typedef std::vector<Removal> Removals;
-    typedef std::vector<Transfer> Transfers;
+    typedef std::vector<Link> Links;
 
     class Editor
     {

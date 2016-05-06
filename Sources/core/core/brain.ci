@@ -17,10 +17,10 @@ module brain
     {
         entry BrainBase(BrainType type, BrainParams params);
 
-        entry void StartSimulation();
+        entry void RunSimulation(size_t brainSteps, bool untilStopped);
         entry void StopSimulation();
-        entry void SetBrainStepsPerBodyStep(size_t steps);
-        entry void RequestSynapticTransfers(RequestId requestId);
+        entry void SetBrainStepsPerBodyStep(size_t brainSteps);
+        entry void RequestViewportUpdate(RequestId requestId, Boxes roiBoxes, bool full);
 
         entry void Simulate();
         entry void ReceiveTerminalData(Spike::BrainSink &data);

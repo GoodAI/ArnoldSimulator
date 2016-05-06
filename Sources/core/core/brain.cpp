@@ -58,9 +58,14 @@ void BrainBase::pup(PUP::er &p)
 {
 }
 
-const char *BrainBase::GetType()
+const char *BrainBase::GetType() const
 {
     return nullptr;
+}
+
+const char *BrainBase::GetName() const
+{
+    return mName.c_str();
 }
 
 const BrainBase::Terminals &BrainBase::GetTerminals() const
@@ -133,7 +138,7 @@ void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<uint
     */
 }
 
-void BrainBase::StartSimulation()
+void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
 {
 }
 
@@ -145,7 +150,7 @@ void BrainBase::SetBrainStepsPerBodyStep(size_t steps)
 {
 }
 
-void BrainBase::RequestSynapticTransfers(RequestId requestId)
+void BrainBase::RequestViewportUpdate(RequestId requestId, Boxes &roiBoxes, bool full)
 {
 }
 
@@ -217,7 +222,7 @@ void ThresholdBrain::pup(PUP::er &p)
 {
 }
 
-const char *ThresholdBrain::GetType()
+const char *ThresholdBrain::GetType() const
 {
     return Type;
 }

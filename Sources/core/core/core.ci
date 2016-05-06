@@ -20,6 +20,23 @@ mainmodule core
 
         entry void HandleRequestFromClient(CkCcsRequestMsg *msg);
 
-        entry void SendSynapticTransfers(RequestId requestId, Synapse::Transfers transfers);
+        entry [inline] void SendViewportUpdate(
+            RequestId requestId,
+            RegionAdditionReports addedRegions,
+            RegionAdditionReports repositionedRegions,
+            RegionRemovals removedRegions,
+            ConnectorAdditionReports addedConnectors,
+            ConnectorRemovals removedConnectors,
+            Connections addedConnections,
+            Connections removedConnections,
+            NeuronAdditionReports addedNeurons,
+            NeuronAdditionReports repositionedNeurons,
+            NeuronRemovals removedNeurons,
+            Synapse::Links addedSynapses,
+            Synapse::Links spikedSynapses,
+            Synapse::Links removedSynapses,
+            ChildLinks addedChildren,
+            ChildLinks removedChildren
+        );
     };
 };

@@ -44,7 +44,7 @@ public:
 
     virtual void pup(PUP::er &p) = 0;
 
-    virtual const char *GetType() = 0;
+    virtual const char *GetType() const = 0;
 
     virtual void Control(size_t brainStep) = 0;
 
@@ -77,7 +77,7 @@ public:
 
     void pup(PUP::er &p);
 
-    const char *GetType();
+    const char *GetType() const;
     NeuronIndex GetIndex() const;
     NeuronId GetId() const;
 
@@ -129,12 +129,12 @@ protected:
     Synapses mInputSynapses;
     Synapses mOutputSynapses;
 
-    NeuronAdditions mNeuronAdditions;
+    NeuronAdditionRequests mNeuronAdditions;
     NeuronRemovals mNeuronRemovals;
     Synapse::Additions mSynapseAdditions;
     Synapse::Removals mSynapseRemovals;
-    ChildAdditions mChildAdditions;
-    ChildRemovals mChildRemovals;
+    ChildLinks mChildAdditions;
+    ChildLinks mChildRemovals;
 
     NeuronsTriggered mNeuronsTriggered;
 
@@ -156,7 +156,7 @@ public:
 
     virtual void pup(PUP::er &p) override;
 
-    virtual const char *GetType() override;
+    virtual const char *GetType() const override;
 
     virtual bool HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data) override;
     virtual bool HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data) override;

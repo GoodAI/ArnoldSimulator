@@ -65,9 +65,14 @@ void RegionBase::pup(PUP::er &p)
 {
 }
 
-const char *RegionBase::GetType()
+const char *RegionBase::GetType() const
 {
     return nullptr;
+}
+
+const char *RegionBase::GetName() const
+{
+    return mName.c_str();
 }
 
 RegionIndex RegionBase::GetIndex() const
@@ -100,7 +105,7 @@ const RegionBase::Connector &RegionBase::GetOutput(const ConnectorName &name) co
     return mOutputConnectors.at(name);
 }
 
-const NeuronAdditions &RegionBase::GetNeuronAdditions() const
+const NeuronAdditionRequests &RegionBase::GetNeuronAdditions() const
 {
     return mNeuronAdditions;
 }
@@ -120,12 +125,12 @@ const Synapse::Removals &RegionBase::GetSynapseRemovals() const
     return mSynapseRemovals;
 }
 
-const ChildAdditions &RegionBase::GetChildAdditions() const
+const ChildLinks &RegionBase::GetChildAdditions() const
 {
     return mChildAdditions;
 }
 
-const ChildRemovals &RegionBase::GetChildRemovals() const
+const ChildLinks &RegionBase::GetChildRemovals() const
 {
     return mChildRemovals;
 }
@@ -353,7 +358,7 @@ void ThresholdRegion::pup(PUP::er &p)
 {
 }
 
-const char *ThresholdRegion::GetType()
+const char *ThresholdRegion::GetType() const
 {
     return Type;
 }

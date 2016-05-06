@@ -5,6 +5,7 @@
 #include <tuple>
 #include <string>
 #include <vector>
+#include <list>
 
 #include <tbb/tbbmalloc_proxy.h>
 
@@ -15,6 +16,7 @@
 
 typedef uint32_t RegionIndex;
 typedef uint32_t NeuronIndex;
+typedef uint32_t TerminalId;
 typedef uint32_t NeuronId;
 typedef uint64_t RequestId;
 
@@ -49,8 +51,10 @@ inline void operator|(PUP::er &p, Direction &direction) {
 
 #define OPPOSITE_DIRECTION(direction) (direction == Direction::Forward ? Direction::Backward : Direction::Forward)
 
+typedef std::string BrainName;
 typedef std::string BrainType;
 typedef std::string BrainParams;
+typedef std::string RegionName;
 typedef std::string RegionType;
 typedef std::string RegionParams;
 typedef std::string NeuronType;
@@ -59,16 +63,36 @@ typedef std::string NeuronParams;
 typedef std::string ConnectorName;
 typedef std::pair<RegionIndex, ConnectorName> RemoteConnector;
 
-typedef std::tuple<NeuronId, NeuronType, NeuronParams> NeuronAddition;
-typedef std::pair<NeuronId, NeuronId> ChildAddition;
-typedef std::pair<NeuronId, NeuronId> ChildRemoval;
+typedef std::tuple<float, float, float> Point3D;
+typedef std::tuple<float, float, float> Size3D;
+typedef std::pair<Point3D, Size3D> Box3D;
+typedef std::vector<Box3D> Boxes;
 
-typedef std::vector<NeuronAddition> NeuronAdditions;
+typedef std::tuple<NeuronId, NeuronType, NeuronParams> NeuronAdditionRequest;
+typedef std::tuple<NeuronId, Point3D> NeuronAdditionReport;
+typedef std::pair<NeuronId, NeuronId> ChildLink;
+
+typedef std::vector<NeuronAdditionRequest> NeuronAdditionRequests;
+typedef std::vector<NeuronAdditionReport> NeuronAdditionReports;
 typedef std::vector<NeuronId> NeuronRemovals;
-typedef std::vector<ChildAddition> ChildAdditions;
-typedef std::vector<ChildRemoval> ChildRemovals;
+typedef std::vector<ChildLink> ChildLinks;
 
 typedef std::vector<NeuronId> NeuronsTriggered;
+
+typedef std::tuple<RegionIndex, RegionType, RegionParams> RegionAdditionRequest;
+typedef std::tuple<RegionIndex, RegionName, Box3D> RegionAdditionReport;
+typedef std::tuple<RegionIndex, Direction, ConnectorName, NeuronType, NeuronParams, size_t> ConnectorAdditionRequest;
+typedef std::tuple<RegionIndex, Direction, ConnectorName, size_t> ConnectorAdditionReport;
+typedef std::tuple<RegionIndex, Direction, ConnectorName> ConnectorRemoval;
+typedef std::tuple<Direction, RegionIndex, ConnectorName, RegionIndex, ConnectorName> Connection;
+
+typedef std::vector<RegionAdditionRequest> RegionAdditionRequests;
+typedef std::vector<RegionAdditionReport> RegionAdditionReports;
+typedef std::vector<RegionIndex> RegionRemovals;
+typedef std::vector<ConnectorAdditionRequest> ConnectorAdditionRequests;
+typedef std::vector<ConnectorAdditionReport> ConnectorAdditionReports;
+typedef std::vector<ConnectorRemoval> ConnectorRemovals;
+typedef std::vector<Connection> Connections;
 
 namespace PUP {
 

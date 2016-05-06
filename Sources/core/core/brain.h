@@ -54,7 +54,7 @@ public:
 
     virtual void pup(PUP::er &p) = 0;
 
-    virtual const char *GetType() = 0;
+    virtual const char *GetType() const = 0;
 
     virtual void Control(size_t brainStep) = 0;
 
@@ -65,20 +65,6 @@ protected:
 class BrainBase : public CBase_BrainBase
 {
 public:
-    typedef std::tuple<RegionIndex, RegionType, RegionParams> RegionAddition;
-    typedef std::tuple<RegionIndex, Direction, ConnectorName, NeuronType, NeuronParams, size_t> ConnectorAddition;
-    typedef std::tuple<RegionIndex, Direction, ConnectorName> ConnectorRemoval;
-    typedef std::tuple<Direction, RegionIndex, ConnectorName, RegionIndex, ConnectorName> Connection;
-
-    typedef std::vector<RegionAddition> RegionAdditions;
-    typedef std::vector<RegionIndex> RegionRemovals;
-    typedef std::vector<ConnectorAddition> ConnectorAdditions;
-    typedef std::vector<ConnectorRemoval> ConnectorRemovals;
-    typedef std::vector<Connection> ConnectionAdditions;
-    typedef std::vector<Connection> ConnectionRemovals;
-
-    typedef uint32_t TerminalId;
-
     struct Terminal
     {
         TerminalId id;
@@ -94,6 +80,9 @@ public:
     typedef std::unordered_map<ConnectorName, TerminalId> TerminalNameToId;
     typedef google::sparse_hash_map<NeuronId, TerminalId> NeuronToTerminalId;
 
+    typedef std::tuple<RequestId, Boxes, bool> ViewportUpdateRequest;
+    typedef std::list<ViewportUpdateRequest> ViewportUpdateRequests;
+
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
 
     BrainBase(const BrainType &type, const BrainParams &params);
@@ -105,7 +94,8 @@ public:
 
     void pup(PUP::er &p);
 
-    const char *GetType();
+    const char *GetType() const;
+    const char *GetName() const;
 
     const Terminals &GetTerminals() const;
     void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, NeuronId firstNeuron, size_t neuronCount);
@@ -127,10 +117,10 @@ public:
     void PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
     void PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
 
-    void StartSimulation();
+    void RunSimulation(size_t brainSteps, bool untilStopped);
     void StopSimulation();
-    void SetBrainStepsPerBodyStep(size_t steps);
-    void RequestSynapticTransfers(RequestId requestId);
+    void SetBrainStepsPerBodyStep(size_t brainSteps);
+    void RequestViewportUpdate(RequestId requestId, Boxes &roiBoxes, bool full);
 
     void Simulate();
     void ReceiveTerminalData(Spike::BrainSink &data);
@@ -140,23 +130,24 @@ public:
 
 private:
     bool mShouldStop;
+    size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
-    std::list<RequestId> mSynapticTransferRequests;
+    ViewportUpdateRequests mViewportUpdateRequests;
 
     size_t mBrainStep;
-
     TerminalId mTerminalIdCounter;
     Terminals mTerminals;
     TerminalNameToId mTerminalNameToId;
     NeuronToTerminalId mNeuronToTerminalId;
 
-    RegionAdditions mRegionAdditions;
-    RegionRemovals mRegionsToRemove;
-    std::vector<ConnectorAddition> mConnectorsToAdd;
-    std::vector<ConnectorRemoval> mConnectorsToRemove;
-    std::vector<Connection> mConnectionsToAdd;
-    std::vector<Connection> mConnectionsToRemove;
+    RegionAdditionRequests mRegionAdditions;
+    RegionRemovals mRegionsRemovals;
+    ConnectorAdditionRequests mConnectorAdditions;
+    ConnectorRemovals mConnectorRemovals;
+    Connections mConnectionAdditions;
+    Connections mConnectionRemovals;
 
+    BrainName mName;
     Body *mBody;
     Brain *mBrain;
 };
@@ -171,7 +162,7 @@ public:
 
     virtual void pup(PUP::er &p) override;
 
-    virtual const char *GetType() override;
+    virtual const char *GetType() const override;
 
     virtual void Control(size_t brainStep) override;
 

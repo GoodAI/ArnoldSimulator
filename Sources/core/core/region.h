@@ -43,7 +43,7 @@ public:
 
     virtual void pup(PUP::er &p) = 0;
 
-    virtual const char *GetType() = 0;
+    virtual const char *GetType() const = 0;
 
     virtual void Control(size_t brainStep) = 0;
 
@@ -74,7 +74,8 @@ public:
 
     void pup(PUP::er &p);
 
-    const char *GetType();
+    const char *GetType() const;
+    const char *GetName() const;
     RegionIndex GetIndex() const;
 
     NeuronId GetNewNeuronId();
@@ -85,12 +86,12 @@ public:
     const Connectors &GetOutputs() const;
     const Connector &GetOutput(const ConnectorName &name) const;
 
-    const NeuronAdditions &GetNeuronAdditions() const;
+    const NeuronAdditionRequests &GetNeuronAdditions() const;
     const NeuronRemovals &GetNeuronRemovals() const;
     const Synapse::Additions &GetSynapseAdditions() const;
     const Synapse::Removals &GetSynapseRemovals() const;
-    const ChildAdditions &GetChildAdditions() const;
-    const ChildRemovals &GetChildRemovals() const;
+    const ChildLinks &GetChildAdditions() const;
+    const ChildLinks &GetChildRemovals() const;
 
     NeuronId RequestNeuronAddition(const NeuronType &type, const NeuronParams &params);
     void RequestNeuronRemoval(NeuronId neuronId);
@@ -123,17 +124,17 @@ private:
     Connectors mInputConnectors;
     Connectors mOutputConnectors;
 
-    NeuronAdditions mNeuronAdditions;
+    NeuronAdditionRequests mNeuronAdditions;
     NeuronRemovals mNeuronRemovals;
     Synapse::Additions mSynapseAdditions;
     Synapse::Removals mSynapseRemovals;
-    ChildAdditions mChildAdditions;
-    ChildRemovals mChildRemovals;  
+    ChildLinks mChildAdditions;
+    ChildLinks mChildRemovals;
 
     std::vector<CkArrayIndex2D> mNeuronsTriggered;
-    Synapse::Transfers mSynapticTransfers;
     Spike::BrainSink mBrainSink;
 
+    RegionName mName;
     Region *mRegion;
 };
 
@@ -147,7 +148,7 @@ public:
 
     virtual void pup(PUP::er &p) override;
 
-    virtual const char *GetType() override;
+    virtual const char *GetType() const override;
 
     virtual void Control(size_t brainStep) override;
 

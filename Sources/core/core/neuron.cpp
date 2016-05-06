@@ -199,7 +199,7 @@ void NeuronBase::pup(PUP::er &p)
     }
 }
 
-const char *NeuronBase::GetType()
+const char *NeuronBase::GetType() const
 {
     return mNeuron->GetType();
 }
@@ -455,7 +455,7 @@ void ThresholdNeuron::pup(PUP::er &p)
 
 const char *ThresholdNeuron::Type = "ThresholdNeuron";
 
-const char *ThresholdNeuron::GetType()
+const char *ThresholdNeuron::GetType() const
 {
     return Type;
 }

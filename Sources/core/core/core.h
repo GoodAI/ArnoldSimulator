@@ -42,7 +42,24 @@ public:
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
     
-    void SendSynapticTransfers(RequestId requestId, Synapse::Transfers &transfers);
+    void SendViewportUpdate(
+        RequestId requestId,
+        RegionAdditionReports &addedRegions,
+        RegionAdditionReports &repositionedRegions,
+        RegionRemovals &removedRegions,
+        ConnectorAdditionReports &addedConnectors,
+        ConnectorRemovals &removedConnectors,
+        Connections &addedConnections,
+        Connections &removedConnections,
+        NeuronAdditionReports &addedNeurons,
+        NeuronAdditionReports &repositionedNeurons,
+        NeuronRemovals &removedNeurons,
+        Synapse::Links &addedSynapses,
+        Synapse::Links &spikedSynapses,
+        Synapse::Links &removedSynapses,
+        ChildLinks &addedChildren,
+        ChildLinks &removedChildren
+    );
 
 protected:
     void SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuilder &builder);
@@ -51,7 +68,23 @@ protected:
     void ProcessGetStateRequest(const GetStateRequest *getStateRequest, RequestId requestId);
 
     void BuildStateResponse(const StateType state, flatbuffers::FlatBufferBuilder &builder);
-    void BuildSynapticTransfersResponse(Synapse::Transfers &transfers, flatbuffers::FlatBufferBuilder &builder);
+    void BuildViewportUpdateResponse(
+        const RegionAdditionReports &addedRegions,
+        const RegionAdditionReports &repositionedRegions,
+        const RegionRemovals &removedRegions,
+        const ConnectorAdditionReports &addedConnectors,
+        const ConnectorRemovals &removedConnectors,
+        const Connections &addedConnections,
+        const Connections &removedConnections,
+        const NeuronAdditionReports &addedNeurons,
+        const NeuronAdditionReports &repositionedNeurons,
+        const NeuronRemovals &removedNeurons,
+        const Synapse::Links &addedSynapses,
+        const Synapse::Links &spikedSynapses,
+        const Synapse::Links &removedSynapses,
+        const ChildLinks &addedChildren,
+        const ChildLinks &removedChildren,
+        flatbuffers::FlatBufferBuilder &builder);
 
 private:
     StateType mState;
