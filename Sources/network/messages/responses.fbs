@@ -28,10 +28,84 @@ table StateResponse {
 // End of state response.
 
 
+// Model (topology and activity) response.
+
+table Position {
+	x:float;
+	y:float;
+	z:float;
+}
+
+table Region {
+	id:uint;
+	name:string;
+	position:Position;
+}
+
+enum ConnectorType:byte {
+	Input,
+	Output
+}
+
+table ConnectorId {
+	regionId:uint;
+	name:string;
+}
+
+table Connector {
+	id:ConnectorId;
+	type:ConnectorType;
+	size:uint;
+}
+
+table Connection {
+	fromRegion:uint;
+	fromConnector:string;
+	toRegion:uint;
+	toConnector:string;
+}
+
+table Neuron {
+	id:uint;
+	position:Position;
+	spiked:bool;
+}
+
+table Synapse {
+	fromNeuron:uint;
+	toNeuron:uint;
+	spiked:bool;  // Is this redundant? I.e. can a neuron "spike" and send spikes only on some of its synapses?
+}
+
+table RegionView {
+	regionId:uint;
+	lowerBound:Position;
+	upperBound:Position;
+	neurons:[Neuron];
+	synapses:[Synapse];
+}
+
+table ModelResponse {
+	// Region and above - incremental changes, the UI holds complete topology.
+	addedRegions:[Region];
+	removedRegions:[uint];
+	addedConnectors:[Connector];
+	removedConnectors:[ConnectorId];
+	addedConnections:[Connection];
+	removedConnections:[Connection];
+	
+	// Neuron and below - the core sends everything according to a predefined filter.
+	regionViews:[RegionView];
+}
+
+// End of model response.
+
+
 // All the responses must be here, including error.
 union Response {
 	ErrorResponse,
-	StateResponse
+	StateResponse,
+	ModelResponse
 }
 
 table ResponseMessage {

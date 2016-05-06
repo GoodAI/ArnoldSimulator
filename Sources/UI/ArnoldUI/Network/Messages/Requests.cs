@@ -20,6 +20,7 @@ public enum Request : byte
  NONE = 0,
  CommandRequest = 1,
  GetStateRequest = 2,
+ ModelRequest = 3,
 };
 
 public sealed class CommandRequest : Table {
@@ -58,6 +59,19 @@ public sealed class GetStateRequest : Table {
   public static Offset<GetStateRequest> EndGetStateRequest(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<GetStateRequest>(o);
+  }
+};
+
+public sealed class ModelRequest : Table {
+  public static ModelRequest GetRootAsModelRequest(ByteBuffer _bb) { return GetRootAsModelRequest(_bb, new ModelRequest()); }
+  public static ModelRequest GetRootAsModelRequest(ByteBuffer _bb, ModelRequest obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public ModelRequest __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+
+  public static void StartModelRequest(FlatBufferBuilder builder) { builder.StartObject(0); }
+  public static Offset<ModelRequest> EndModelRequest(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<ModelRequest>(o);
   }
 };
 

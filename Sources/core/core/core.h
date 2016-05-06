@@ -18,7 +18,7 @@
 
 #include "core.decl.h"
 
-using namespace GoodAI::Arnold::Network;
+using namespace GoodAI::Arnold;
 
 class ShutdownRequestedException : public std::runtime_error
 {
@@ -64,10 +64,9 @@ public:
 protected:
     void SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuilder &builder);
 
-    void ProcessCommandRequest(const CommandRequest *commandRequest, RequestId requestId);
-    void ProcessGetStateRequest(const GetStateRequest *getStateRequest, RequestId requestId);
+    void ProcessCommandRequest(const Network::CommandRequest *commandRequest, RequestId requestId);
+    void ProcessGetStateRequest(const Network::GetStateRequest *getStateRequest, RequestId requestId);
 
-    void BuildStateResponse(const StateType state, flatbuffers::FlatBufferBuilder &builder);
     void BuildViewportUpdateResponse(
         const RegionAdditionReports &addedRegions,
         const RegionAdditionReports &repositionedRegions,
@@ -85,9 +84,10 @@ protected:
         const ChildLinks &addedChildren,
         const ChildLinks &removedChildren,
         flatbuffers::FlatBufferBuilder &builder);
+    void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder);
 
 private:
-    StateType mState;
+    Network::StateType mState;
 
     double mStartTime;
 

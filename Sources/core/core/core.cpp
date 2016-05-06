@@ -13,7 +13,7 @@ CProxy_BrainBase gBrain;
 CProxy_RegionBase gRegions;
 CProxy_NeuronBase gNeurons;
 
-Core::Core(CkArgMsg *msg) : mState(StateType_Empty), mRequestIdCounter(0)
+Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0)
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -49,7 +49,7 @@ Core::Core(CkArgMsg *msg) : mState(StateType_Empty), mRequestIdCounter(0)
 
     // TODO(Premek): remove
     // assume hardcoder blueprint for now
-    mState = StateType_Paused;
+    mState = Network::StateType_Paused;
 }
 
 Core::Core(CkMigrateMessage *msg)
@@ -80,22 +80,22 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
     RequestId requestId = mRequestIdCounter++;
     mRequests.insert(std::make_pair(requestId, msg));
 
-    const RequestMessage *requestMessage = GetRequestMessage(msg->data);
-    Request requestType = requestMessage->request_type();
+    const Network::RequestMessage *requestMessage = Network::GetRequestMessage(msg->data);
+    Network::Request requestType = requestMessage->request_type();
 
     try {
         switch (requestType) {
-            case Request_CommandRequest:
+            case Network::Request_CommandRequest:
             {
-                const CommandRequest *commandRequest =
-                    static_cast<const CommandRequest*>(requestMessage->request());
+                const Network::CommandRequest *commandRequest =
+                    static_cast<const Network::CommandRequest*>(requestMessage->request());
                 ProcessCommandRequest(commandRequest, requestId);
                 break;
             }
-            case Request_GetStateRequest:
+            case Network::Request_GetStateRequest:
             {
-                const GetStateRequest *getStateRequest =
-                    static_cast<const GetStateRequest*>(requestMessage->request());
+                const Network::GetStateRequest *getStateRequest =
+                    static_cast<const Network::GetStateRequest*>(requestMessage->request());
                 ProcessGetStateRequest(getStateRequest, requestId);
                 break;
             }
@@ -152,25 +152,25 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
     delete requestMessage;
 }
 
-void Core::ProcessCommandRequest(const CommandRequest *commandRequest, RequestId requestId)
+void Core::ProcessCommandRequest(const Network::CommandRequest *commandRequest, RequestId requestId)
 {
     flatbuffers::FlatBufferBuilder builder;
-    CommandType commandType = commandRequest->command();
+    Network::CommandType commandType = commandRequest->command();
 
-    if (commandType == CommandType_Shutdown) {
+    if (commandType == Network::CommandType_Shutdown) {
 
-        BuildStateResponse(StateType_ShuttingDown, builder);
+        BuildStateResponse(Network::StateType_ShuttingDown, builder);
         SendResponseToClient(requestId, builder);
         throw ShutdownRequestedException("Shutdown requested by the client");
     }
 
-    if (commandType == CommandType_Run) {
-        if (mState != StateType_Paused) {
+    if (commandType == Network::CommandType_Run) {
+        if (mState != Network::StateType_Paused) {
             // TODO(Premek): return error response
             CkPrintf("Run command failed: invalid state\n");
         }
 
-        mState = StateType_Running;  // TODO(): Add actual logic here.
+        mState = Network::StateType_Running;  // TODO(): Add actual logic here.
 
         uint32_t runSteps = commandRequest->stepsToRun();
         if (runSteps != 0)
@@ -180,24 +180,24 @@ void Core::ProcessCommandRequest(const CommandRequest *commandRequest, RequestId
             std::thread{ [this]()
             {
                 std::this_thread::sleep_for(std::chrono::seconds{ 1 });
-                mState = StateType_Paused;
+                mState = Network::StateType_Paused;
             } }.detach();
         }
 
-    } else if (commandType == CommandType_Pause) {
-        if (mState != StateType_Running) {
+    } else if (commandType == Network::CommandType_Pause) {
+        if (mState != Network::StateType_Running) {
             // TODO(Premek): return error response
             CkPrintf("Pause command failed: invalid state\n");
         }
 
-        mState = StateType_Paused;  // TODO(): Add actual logic here.
+        mState = Network::StateType_Paused;  // TODO(): Add actual logic here.
     }
 
     BuildStateResponse(mState, builder);
     SendResponseToClient(requestId, builder);
 }
 
-void Core::ProcessGetStateRequest(const GetStateRequest *getStateRequest, RequestId requestId)
+void Core::ProcessGetStateRequest(const Network::GetStateRequest *getStateRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
@@ -205,10 +205,10 @@ void Core::ProcessGetStateRequest(const GetStateRequest *getStateRequest, Reques
     SendResponseToClient(requestId, builder);
 }
 
-void Core::BuildStateResponse(StateType state, flatbuffers::FlatBufferBuilder &builder)
+void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder)
 {
-    flatbuffers::Offset<StateResponse> stateResponseOffset = CreateStateResponse(builder, state);
-    auto responseMessage = CreateResponseMessage(builder, Response_StateResponse, stateResponseOffset.Union());
+    flatbuffers::Offset<Network::StateResponse> stateResponseOffset = CreateStateResponse(builder, state);
+    auto responseMessage = Network::CreateResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset.Union());
     builder.Finish(responseMessage);
 }
 
