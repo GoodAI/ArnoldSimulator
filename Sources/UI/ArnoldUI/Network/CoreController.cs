@@ -36,7 +36,10 @@ namespace GoodAI.Arnold.Network
         private Task<TimeoutResult<Response<StateResponse>>> m_runningCommand;
         private Action<TimeoutResult<Response<StateResponse>>> m_stateResultAction;
         private CancellationTokenSource m_cancellationTokenSource;
-        private const int CommandTimeoutMs = 15 * 1000;
+
+        private const int CommandTimeoutMs = 15*1000;
+        private const int KeepaliveIntervalMs = 2*1000;
+        private const int KeepaliveTimeoutMs = KeepaliveIntervalMs;
 
         public bool IsCommandInProgress => m_runningCommand != null;
 
@@ -56,7 +59,7 @@ namespace GoodAI.Arnold.Network
             {
                 m_cancellationTokenSource = new CancellationTokenSource();
 #pragma warning disable 4014 // This is supposed to start a parallel task and continue.
-                RepeatGetStateAsync(2000);
+                RepeatGetStateAsync(KeepaliveIntervalMs);
 #pragma warning restore 4014
             }
             catch (AggregateException exception)
@@ -76,7 +79,8 @@ namespace GoodAI.Arnold.Network
                 {
                     // TODO(HonzaS): Handle timeout here.
                     TimeoutResult<Response<StateResponse>> stateCheckResult =
-                        await m_coreLink.Request(new GetStateConversation()).ConfigureAwait(false);
+                        await m_coreLink.Request(new GetStateConversation(), KeepaliveTimeoutMs)
+                        .ConfigureAwait(false);
 
                     // Check this again - the cancellation could have come during the request.
                     if (!m_cancellationTokenSource.IsCancellationRequested)

@@ -26,7 +26,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             ICoreLink coreLink = GenerateCoreLink(conversation, responseMessage);
 
-            var futureResponse = coreLink.Request(conversation);
+            var futureResponse = coreLink.Request(conversation, WaitMs);
 
             Response<StateResponse> receivedResponse = ReadResponse(futureResponse);
             Assert.NotNull(receivedResponse.Data);
@@ -54,7 +54,7 @@ namespace GoodAI.Arnold.UI.Tests
             ICoreLink coreLink = GenerateCoreLink(conv, responseMessage);
 
 
-            var futureResponse = coreLink.Request(conv);
+            var futureResponse = coreLink.Request(conv, WaitMs);
 
             Response<StateResponse> receivedResponse = ReadResponse(futureResponse);
             Assert.Null(receivedResponse.Data);

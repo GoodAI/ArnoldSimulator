@@ -14,7 +14,7 @@ namespace GoodAI.Arnold.Network
     {
         Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(
             IConversation<TRequest, TResponse> conversation,
-            int timeoutMs = 0)
+            int timeoutMs)
             where TRequest : Table
             where TResponse : Table, new();
     }
@@ -50,7 +50,7 @@ namespace GoodAI.Arnold.Network
         }
 
         public Task<TimeoutResult<Response<TResponse>>> Request<TRequest, TResponse>(
-            IConversation<TRequest, TResponse> conversation, int timeoutMs = 0)
+            IConversation<TRequest, TResponse> conversation, int timeoutMs)
             where TRequest : Table
             where TResponse : Table, new()
         {
