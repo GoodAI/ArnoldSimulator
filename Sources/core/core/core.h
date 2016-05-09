@@ -68,6 +68,8 @@ protected:
     void ProcessGetStateRequest(const Network::GetStateRequest *getStateRequest, RequestId requestId);
     void ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId);
 
+    static flatbuffers::Offset<Network::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
+
     void BuildViewportUpdateResponse(
         const RegionAdditionReports &addedRegions,
         const RegionAdditionReports &repositionedRegions,
@@ -84,9 +86,8 @@ protected:
         const Synapse::Links &removedSynapses,
         const ChildLinks &addedChildren,
         const ChildLinks &removedChildren,
-        flatbuffers::FlatBufferBuilder &builder);
+        flatbuffers::FlatBufferBuilder &builder) const;
     void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder);
-    
 private:
     Network::StateType mState;
 

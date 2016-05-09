@@ -224,11 +224,12 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     RegionIndex regionIndex = 1;
     RegionName regionName("FooRegion");
+    RegionName regionType("Basic region");
     Point3D origin(10, 20, 30);
     Size3D size(40, 10, 20);
     Box3D regionBounds {origin, size};
 
-    RegionAdditionReport addedRegion(regionIndex, regionName, regionBounds);
+    RegionAdditionReport addedRegion(regionIndex, regionName, regionType, regionBounds);
     RegionAdditionReports addedRegions {addedRegion};
 
     RegionAdditionReports repositionedRegions;
@@ -277,6 +278,11 @@ void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferB
     BuildResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset);
 }
 
+flatbuffers::Offset<Network::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
+{
+    return Network::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
+}
+
 void Core::BuildViewportUpdateResponse(
     const RegionAdditionReports &addedRegions,
     const RegionAdditionReports &repositionedRegions,
@@ -294,55 +300,31 @@ void Core::BuildViewportUpdateResponse(
     const Synapse::Links &removedSynapses,
     const ChildLinks &addedChildren,
     const ChildLinks &removedChildren,
-    flatbuffers::FlatBufferBuilder &builder)
+    flatbuffers::FlatBufferBuilder &builder) const
 {
-    /*auto addedRegionName = builder.CreateString();
-    auto addedRegionPosition = Network::CreatePosition(builder, 10, 20, 30);
+    std::vector<flatbuffers::Offset<Network::Region>> addedRegionOffsets;
 
-    uint32_t regionId = 1;
+    for (auto addedRegion : addedRegions)
+    {
+        auto index = std::get<0>(addedRegion);
 
-    auto addedRegion = Network::CreateRegion(builder, regionId, addedRegionName, addedRegionType, addedRegionPosition); 
-    auto addedRegions = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Region>>{addedRegion});
-    auto removedRegions = builder.CreateVector(std::vector<uint32_t>());
+        auto regionName = builder.CreateString(std::get<1>(addedRegion));
+        auto regionType = builder.CreateString(std::get<2>(addedRegion));
 
-    auto addedConnectors = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Connector>>());
-    auto removedConnectors = builder.CreateVector(std::vector<flatbuffers::Offset<Network::ConnectorId>>());
-    
-    auto addedConnections = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Connection>>());
-    auto removedConnections = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Connection>>());
+        auto box3d = std::get<3>(addedRegion);
 
-    auto upperBound = Network::CreatePosition(builder, 10, 10, 10);
+        auto lowerBound = CreatePosition(builder, box3d.first);
+        auto upperBound = CreatePosition(builder, box3d.second);
 
-    auto neuron1Position = Network::CreatePosition(builder, 1, 1, 1);
-    auto neuron1 = Network::CreateNeuron(builder, 1, neuron1Position, chance());
+        addedRegionOffsets.push_back(Network::CreateRegion(builder, index, regionName, regionType, lowerBound, upperBound));
+    }
+    auto addedRegionsOffset = builder.CreateVector(addedRegionOffsets);
 
-    auto neuron2Position = Network::CreatePosition(builder, 5, 1, 3);
-    auto neuron2 = Network::CreateNeuron(builder, 2, neuron2Position, chance());
+    Network::ModelResponseBuilder responseBuilder(builder);
+    responseBuilder.add_addedRegions(addedRegionsOffset);
+    auto modelResponseOffset = responseBuilder.Finish();
 
-    auto neuron3Position = Network::CreatePosition(builder, 6, 6, 6);
-    auto neuron3 = Network::CreateNeuron(builder, 3, neuron3Position, chance());
-
-    auto neurons = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Neuron>>{neuron1, neuron2, neuron3});
-
-    auto synapse12 = Network::CreateSynapse(builder, 1, 2, chance());
-    auto synapse13 = Network::CreateSynapse(builder, 1, 3, chance());
-    auto synapse23 = Network::CreateSynapse(builder, 2, 3, chance());
-
-    auto synapses = builder.CreateVector(std::vector<flatbuffers::Offset<Network::Synapse>>{synapse12, synapse13, synapse23});
-
-    auto regionView = Network::CreateRegionView(builder, regionId, upperBound, neurons, synapses);
-    auto regionViews = builder.CreateVector(std::vector<flatbuffers::Offset<Network::RegionView>>{regionView});
-
-    flatbuffers::Offset<Network::ModelResponse> modelResponseOffset = Network::CreateModelResponse(
-        builder,
-        addedRegions,
-        removedRegions,
-        addedConnectors,
-        removedConnectors,
-        addedConnections,
-        removedConnections,
-        regionViews);
-    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);*/
+    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
 }
 
 

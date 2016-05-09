@@ -37,25 +37,22 @@ table Position {
 }
 
 table Region {
-	id:uint;
+	index:uint;
 	name:string;
 	type:string;
-	position:Position;
+	lowerBound:Position;
+	upperBound:Position;
 }
 
-enum ConnectorType:byte {
-	Input,
-	Output
-}
-
-table ConnectorId {
-	regionId:uint;
-	name:string;
+enum Direction:byte {
+	Forward,
+	Backward
 }
 
 table Connector {
-	id:ConnectorId;
-	type:ConnectorType;
+	regionIndex:uint;
+	name:string;
+	direction:Direction;
 	size:uint;
 }
 
@@ -64,38 +61,40 @@ table Connection {
 	fromConnector:string;
 	toRegion:uint;
 	toConnector:string;
+	direction:Direction;
 }
 
 table Neuron {
 	id:uint;
+	type:string;
 	position:Position;
-	spiked:bool;
 }
 
 table Synapse {
-	fromNeuron:uint;
-	toNeuron:uint;
-	spiked:bool;  // Is this redundant? I.e. can a neuron "spike" and send spikes only on some of its synapses?
-}
-
-table RegionView {
-	regionId:uint;
-	upperBound:Position;
-	neurons:[Neuron];
-	synapses:[Synapse];
+	from:uint;
+	to:uint;
 }
 
 table ModelResponse {
 	// Region and above - incremental changes, the UI holds complete topology.
 	addedRegions:[Region];
+	repositionedRegions:[Region];
 	removedRegions:[uint];
+	
 	addedConnectors:[Connector];
-	removedConnectors:[ConnectorId];
+	removedConnectors:[Connector];
+	
 	addedConnections:[Connection];
 	removedConnections:[Connection];
 	
 	// Neuron and below - the core sends everything according to a predefined filter.
-	regionViews:[RegionView];
+	addedNeurons:[Neuron];
+	repositionedNeurons:[Neuron];
+	removedNeurons:[uint];
+	
+	addedSynapses:[Synapse];
+	SpikedSynapses:[Synapse];
+	removedSynapses:[Synapse];
 }
 
 // End of model response.

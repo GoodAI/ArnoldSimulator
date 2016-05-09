@@ -69,7 +69,7 @@ typedef std::pair<Point3D, Size3D> Box3D;
 typedef std::vector<Box3D> Boxes;
 
 typedef std::tuple<NeuronId, NeuronType, NeuronParams> NeuronAdditionRequest;
-typedef std::tuple<NeuronId, Point3D> NeuronAdditionReport;
+typedef std::tuple<NeuronId, NeuronType, Point3D> NeuronAdditionReport;
 typedef std::pair<NeuronId, NeuronId> ChildLink;
 
 typedef std::vector<NeuronAdditionRequest> NeuronAdditionRequests;
@@ -80,7 +80,7 @@ typedef std::vector<ChildLink> ChildLinks;
 typedef std::vector<NeuronId> NeuronsTriggered;
 
 typedef std::tuple<RegionIndex, RegionType, RegionParams> RegionAdditionRequest;
-typedef std::tuple<RegionIndex, RegionName, Box3D> RegionAdditionReport;
+typedef std::tuple<RegionIndex, RegionName, RegionType, Box3D> RegionAdditionReport;
 typedef std::tuple<RegionIndex, Direction, ConnectorName, NeuronType, NeuronParams, size_t> ConnectorAdditionRequest;
 typedef std::tuple<RegionIndex, Direction, ConnectorName, size_t> ConnectorAdditionReport;
 typedef std::tuple<RegionIndex, Direction, ConnectorName> ConnectorRemoval;
