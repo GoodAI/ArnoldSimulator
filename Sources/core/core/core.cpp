@@ -212,12 +212,56 @@ void Core::ProcessGetStateRequest(const Network::GetStateRequest *getStateReques
     SendResponseToClient(requestId, builder);
 }
 
+bool chance()
+{
+    return rand() % 60;
+}
+
 void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
-    BuildModelResponse(builder);
-    SendResponseToClient(requestId, builder);
+
+    RegionIndex regionIndex = 1;
+    RegionName regionName("FooRegion");
+    Point3D origin(10, 20, 30);
+    Size3D size(40, 10, 20);
+    Box3D regionBounds {origin, size};
+
+    RegionAdditionReport addedRegion(regionIndex, regionName, regionBounds);
+    RegionAdditionReports addedRegions {addedRegion};
+
+    RegionAdditionReports repositionedRegions;
+    RegionRemovals removedRegions;
+    ConnectorAdditionReports addedConnectors;
+    ConnectorRemovals removedConnectors;
+    Connections addedConnections;
+    Connections removedConnections;
+    NeuronAdditionReports addedNeurons;
+    NeuronAdditionReports repositionedNeurons;
+    NeuronRemovals removedNeurons;
+    Synapse::Links addedSynapses;
+    Synapse::Links spikedSynapses;
+    Synapse::Links removedSynapses;
+    ChildLinks addedChildren;
+    ChildLinks removedChildren;
+
+    SendViewportUpdate(requestId,
+        addedRegions,
+        repositionedRegions,
+        removedRegions,
+        addedConnectors,
+        removedConnectors,
+        addedConnections,
+        removedConnections,
+        addedNeurons,
+        repositionedNeurons,
+        removedNeurons,
+        addedSynapses,
+        spikedSynapses,
+        removedSynapses,
+        addedChildren,
+        removedChildren);
 }
 
 template <typename TResponse>
@@ -233,11 +277,6 @@ void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferB
     BuildResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset);
 }
 
-bool chance()
-{
-    return rand() % 60;
-}
-
 void Core::BuildViewportUpdateResponse(
     const RegionAdditionReports &addedRegions,
     const RegionAdditionReports &repositionedRegions,
@@ -246,6 +285,7 @@ void Core::BuildViewportUpdateResponse(
     const ConnectorRemovals &removedConnectors,
     const Connections &addedConnections,
     const Connections &removedConnections,
+
     const NeuronAdditionReports &addedNeurons,
     const NeuronAdditionReports &repositionedNeurons,
     const NeuronRemovals &removedNeurons,
@@ -256,8 +296,7 @@ void Core::BuildViewportUpdateResponse(
     const ChildLinks &removedChildren,
     flatbuffers::FlatBufferBuilder &builder)
 {
-    auto addedRegionName = builder.CreateString("FooRegion");
-    auto addedRegionType = builder.CreateString("FooRegionType");
+    /*auto addedRegionName = builder.CreateString();
     auto addedRegionPosition = Network::CreatePosition(builder, 10, 20, 30);
 
     uint32_t regionId = 1;
@@ -303,8 +342,7 @@ void Core::BuildViewportUpdateResponse(
         addedConnections,
         removedConnections,
         regionViews);
-
-    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
+    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);*/
 }
 
 
