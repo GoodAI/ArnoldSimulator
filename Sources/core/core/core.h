@@ -66,6 +66,7 @@ protected:
 
     void ProcessCommandRequest(const Network::CommandRequest *commandRequest, RequestId requestId);
     void ProcessGetStateRequest(const Network::GetStateRequest *getStateRequest, RequestId requestId);
+    void ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId);
 
     void BuildViewportUpdateResponse(
         const RegionAdditionReports &addedRegions,

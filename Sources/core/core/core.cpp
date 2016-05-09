@@ -101,9 +101,9 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
             }
             case Network::Request_GetModelRequest:
             {
-                const Network::GetStateRequest *getStateRequest =
-                    static_cast<const Network::GetStateRequest*>(requestMessage->request());
-                ProcessGetStateRequest(getStateRequest, requestId);
+                const Network::GetModelRequest *getModelRequest =
+                    static_cast<const Network::GetModelRequest*>(requestMessage->request());
+                ProcessGetModelRequest(getModelRequest, requestId);
                 break;
             }
             default:
@@ -209,6 +209,14 @@ void Core::ProcessGetStateRequest(const Network::GetStateRequest *getStateReques
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
     BuildStateResponse(mState, builder);
+    SendResponseToClient(requestId, builder);
+}
+
+void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId)
+{
+    // TODO(HonzaS): Add actual logic here.
+    flatbuffers::FlatBufferBuilder builder;
+    BuildModelResponse(builder);
     SendResponseToClient(requestId, builder);
 }
 
