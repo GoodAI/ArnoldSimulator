@@ -80,7 +80,7 @@ public:
     typedef std::unordered_map<ConnectorName, TerminalId> TerminalNameToId;
     typedef google::sparse_hash_map<NeuronId, TerminalId> NeuronToTerminalId;
 
-    typedef std::tuple<RequestId, Boxes, bool> ViewportUpdateRequest;
+    typedef std::pair<RequestId, bool> ViewportUpdateRequest;
     typedef std::list<ViewportUpdateRequest> ViewportUpdateRequests;
 
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
@@ -120,7 +120,8 @@ public:
     void RunSimulation(size_t brainSteps, bool untilStopped);
     void StopSimulation();
     void SetBrainStepsPerBodyStep(size_t brainSteps);
-    void RequestViewportUpdate(RequestId requestId, Boxes &roiBoxes, bool full);
+    void UpdateRegionOfInterest(Boxes &roiBoxes);
+    void RequestViewportUpdate(RequestId requestId, bool full);
 
     void Simulate();
     void ReceiveTerminalData(Spike::BrainSink &data);
@@ -132,6 +133,7 @@ private:
     bool mShouldStop;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
+    Boxes mRoiBoxes;
     ViewportUpdateRequests mViewportUpdateRequests;
 
     size_t mBrainStep;

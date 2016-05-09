@@ -150,7 +150,11 @@ void BrainBase::SetBrainStepsPerBodyStep(size_t steps)
 {
 }
 
-void BrainBase::RequestViewportUpdate(RequestId requestId, Boxes &roiBoxes, bool full)
+void BrainBase::UpdateRegionOfInterest(Boxes &roiBoxes)
+{
+}
+
+void BrainBase::RequestViewportUpdate(RequestId requestId, bool full)
 {
 }
 
