@@ -122,6 +122,7 @@
     <Compile Include="Network\Messages\ResponseBuilders.cs" />
     <Compile Include="Network\Messages\Responses.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
+    <Compile Include="Network\ModelUpdater.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">
       <SubType>Form</SubType>
