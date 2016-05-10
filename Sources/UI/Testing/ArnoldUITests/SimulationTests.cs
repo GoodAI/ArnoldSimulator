@@ -25,61 +25,50 @@ namespace GoodAI.Arnold.UI.Tests
 
             private static readonly string m_errorMessage = "Foo bar";
 
-            Task<TimeoutResult<Response<TResponse>>> ICoreLink.Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs)
+            Task<TResponse> ICoreLink.Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs)
             {
-                return Task<TimeoutResult<Response<TResponse>>>.Factory.StartNew(() =>
+                return Task<TResponse>.Factory.StartNew(() =>
                 {
                     TRequest request = conversation.RequestData;
 
-                    var result = new TimeoutResult<Response<TResponse>>();
-
                     if (Fail)
+                        throw new RemoteCoreException(m_errorMessage);
+
+                    StateType resultState = StateType.Empty;
+
+                    var commandRequest = request as CommandRequest;
+                    if (commandRequest != null)
                     {
-                        ResponseMessage responseMessage = ErrorResponseBuilder.Build(m_errorMessage);
-
-                        result.Result = new Response<TResponse>(responseMessage.GetResponse(new ErrorResponse()));
-                    }
-                    else
-                    {
-
-                        StateType resultState = StateType.Empty;
-
-                        var commandRequest = request as CommandRequest;
-                        if (commandRequest != null)
+                        switch (commandRequest.Command)
                         {
-                            switch (commandRequest.Command)
-                            {
-                                case CommandType.Load:
-                                    resultState = StateType.Paused;
-                                    break;
-                                case CommandType.Run:
-                                    resultState = StateType.Running;
-                                    break;
-                                case CommandType.Pause:
-                                    resultState = StateType.Paused;
-                                    break;
-                                case CommandType.Clear:
-                                    resultState = StateType.Empty;
-                                    break;
-                                case CommandType.Shutdown:
-                                    resultState = StateType.ShuttingDown;
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
-                            m_lastState = resultState;
+                            case CommandType.Load:
+                                resultState = StateType.Paused;
+                                break;
+                            case CommandType.Run:
+                                resultState = StateType.Running;
+                                break;
+                            case CommandType.Pause:
+                                resultState = StateType.Paused;
+                                break;
+                            case CommandType.Clear:
+                                resultState = StateType.Empty;
+                                break;
+                            case CommandType.Shutdown:
+                                resultState = StateType.ShuttingDown;
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
-
-                        var getStateRequest = request as GetStateRequest;
-                        if (getStateRequest != null)
-                            resultState = m_lastState;
-
-                        ResponseMessage responseMessage = StateResponseBuilder.Build(resultState);
-
-                        result.Result = new Response<TResponse>(responseMessage.GetResponse(new TResponse()));
+                        m_lastState = resultState;
                     }
-                    
-                    return result;
+
+                    var getStateRequest = request as GetStateRequest;
+                    if (getStateRequest != null)
+                        resultState = m_lastState;
+
+                    ResponseMessage responseMessage = StateResponseBuilder.Build(resultState);
+
+                    return responseMessage.GetResponse(new TResponse());
                 });
             }
         }
@@ -146,6 +135,7 @@ namespace GoodAI.Arnold.UI.Tests
             simulation.StateChangeFailed += (sender, args) => waitEvent.Set();
 
             simulation.LoadBlueprint(new AgentBlueprint());
+
             // The event should be fired via StateChangeFailed.
             Assert.True(waitEvent.WaitOne(timeoutMs), "Timed out");
         }

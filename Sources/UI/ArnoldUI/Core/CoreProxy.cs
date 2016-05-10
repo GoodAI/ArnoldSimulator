@@ -178,12 +178,12 @@ namespace GoodAI.Arnold.Core
             SendCommand(new CommandConversation(CommandType.Pause));
         }
 
-        private void SendCommand(CommandConversation conversation)
+        private async void SendCommand(CommandConversation conversation)
         {
 
             try
             {
-                m_controller.Command(conversation, HandleStateResponse, CreateTimeoutHandler(conversation.RequestData.Command));
+                await m_controller.Command(conversation, HandleStateResponse, CreateTimeoutHandler(conversation.RequestData.Command));
             }
             catch (RemoteCoreException ex)
             {

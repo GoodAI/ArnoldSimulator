@@ -33,10 +33,10 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
+                    var task = new Task<StateResponse>(() =>
                     {
                         Thread.Sleep(100);
-                        return new TimeoutResult<Response<StateResponse>>();
+                        return new StateResponse();
                     });
                     task.Start();
                     return task;
@@ -63,18 +63,14 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
+                    var task = new Task<StateResponse>(() =>
                     {
-                        var result = new TimeoutResult<Response<StateResponse>>();
-                        if (noOfRuns == 0)
+                        if (noOfRuns++ == 0)
                         {
-                            result.TimedOut = true;
-                        } else
-                        {
-                            result.Result = new Response<StateResponse>(new StateResponse());
+                            throw new TaskTimeoutException<StateResponse>(null);
                         }
-                        noOfRuns++;
-                        return result;
+
+                        return new StateResponse();
                     });
                     task.Start();
                     return task;
@@ -94,22 +90,20 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
+                    var task = new Task<StateResponse>(() =>
                     {
                         // Set up the "continuation" task.
-                        var result = new TimeoutResult<Response<StateResponse>>
-                        {
-                            OriginalTask = new Task<Response<StateResponse>>(() => new Response<StateResponse>(new StateResponse()))
-                        };
-                        result.OriginalTask.Start();
+                        var result = new Task<StateResponse>(() => new StateResponse());
+                        result.Start();
                         
-                        // If this is the first run, simulate timeout.
-                        if (noOfRuns == 0)
-                            result.TimedOut = true;
-
                         // This should only get called once, because the OriginalTask will be called on the second go.
                         noOfRuns++;
-                        return result;
+
+                        // If this is the first run, simulate timeout.
+                        if (noOfRuns == 1)
+                            throw new TaskTimeoutException<StateResponse>(result);
+
+                        return result.Result;
                     });
                     task.Start();
                     return task;
@@ -125,31 +119,36 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void CancelsOnTimeout()
         {
-            bool successCalled = false;
-
+            var noOfRuns = 0;
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
+                    var task = new Task<StateResponse>(() =>
                     {
-                        var result = new TimeoutResult<Response<StateResponse>>
-                        {
-                            OriginalTask = new Task<Response<StateResponse>>(() => new Response<StateResponse>(new StateResponse()))
-                        };
-                        result.OriginalTask.Start();
-                        result.TimedOut = true;
+                        // Set up the "continuation" task.
+                        var result = new Task<StateResponse>(() => new StateResponse());
+                        result.Start();
+                        
+                        // This should only get called once, because the OriginalTask will be called on the second go.
+                        noOfRuns++;
 
-                        return result;
+                        // If this is the first run, simulate timeout.
+                        if (noOfRuns == 1)
+                            throw new TaskTimeoutException<StateResponse>(result);
+
+                        return result.Result;
                     });
                     task.Start();
                     return task;
                 });
 
             var conversation = new CommandConversation(CommandType.Run);
-            
-            await m_controller.Command(conversation, response => successCalled = true, () => TimeoutAction.Cancel, TimeoutMs);
 
-            Assert.False(successCalled);
+            bool successfulResult = false;
+            await m_controller.Command(conversation, response => { successfulResult = true; }, () => TimeoutAction.Cancel, TimeoutMs);
+
+            Assert.Equal(1, noOfRuns);
+            Assert.False(successfulResult);
         }
 
         [Fact]
@@ -158,14 +157,7 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<GetStateConversation>(), It.IsAny<int>())).Returns(
                 () =>
                 {
-                    var task = new Task<TimeoutResult<Response<StateResponse>>>(() =>
-                    {
-                        var result = new TimeoutResult<Response<StateResponse>>
-                        {
-                            Result = new Response<StateResponse>(new StateResponse())
-                        };
-                        return result;
-                    });
+                    var task = new Task<StateResponse>(() => new StateResponse());
                     task.Start();
                     return task;
                 });

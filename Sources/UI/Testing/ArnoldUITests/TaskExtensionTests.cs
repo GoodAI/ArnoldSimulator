@@ -14,32 +14,33 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void TimeoutAfterFinishesBeforeTheLimit()
         {
-            Task<TimeoutResult<bool>> task = Task<bool>.Factory.StartNew(() =>
+            Task<bool> task = Task<bool>.Factory.StartNew(() =>
             {
                 Thread.Sleep(50);
                 return true;
             }).TimeoutAfter(100);
-            TimeoutResult<bool> result = task.Result;
 
-            Assert.False(result.TimedOut);
-            Assert.Equal(true, result.Result);
+            bool result = task.Result;
+
+            Assert.True(result);
         }
 
         [Fact]
-        public void TimeoutAfterTimesOut()
+        public async Task TimeoutAfterTimesOut()
         {
-            Task<TimeoutResult<bool>> task = Task<bool>.Factory.StartNew(() =>
+            Task<bool> task = Task<bool>.Factory.StartNew(() =>
             {
                 Thread.Sleep(100);
                 return true;
             }).TimeoutAfter(50);
-            TimeoutResult<bool> result = task.Result;
 
-            Assert.True(result.TimedOut);
+            await Assert.ThrowsAsync<TaskTimeoutException<bool>>(() => task);
 
-            // Ensure that the task doesn't set the result even after the inner task finished.
-            Thread.Sleep(100);
-            Assert.False(result.Result);
+            // Ensure that the task doesn't set the result even after the inner task finished. TODO(Premek)
+            //Thread.Sleep(100);
+            //Assert.False(result.Result);
         }
+
+        // TODO(Premek): add also test for TimeoutAfter(0) ?
     }
 }

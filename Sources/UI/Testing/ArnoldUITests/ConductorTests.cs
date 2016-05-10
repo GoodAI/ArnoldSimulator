@@ -59,8 +59,8 @@ namespace GoodAI.Arnold.UI.Tests
 
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>())).Returns(() =>
             {
-                return Task<TimeoutResult<Response<StateResponse>>>.Factory.StartNew(
-                    () => new TimeoutResult<Response<StateResponse>> {Result = new Response<StateResponse>(stateResponse)});
+                return Task<StateResponse>.Factory.StartNew(
+                    () => stateResponse);
             });
 
 
