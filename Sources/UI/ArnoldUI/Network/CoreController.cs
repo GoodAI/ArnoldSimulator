@@ -58,9 +58,11 @@ namespace GoodAI.Arnold.Network
             m_stateResultAction = stateResultAction;
             try
             {
+                m_cancellationTokenSource.Cancel();
                 m_cancellationTokenSource = new CancellationTokenSource();
+
 #pragma warning disable 4014 // This is supposed to start a parallel task and continue.
-                RepeatGetStateAsync(KeepaliveIntervalMs);
+                RepeatGetStateAsync(KeepaliveIntervalMs, m_cancellationTokenSource);
 #pragma warning restore 4014
             }
             catch (TaskCanceledException)
@@ -73,11 +75,11 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private async Task RepeatGetStateAsync(int repeatMillis)
+        private async Task RepeatGetStateAsync(int repeatMillis, CancellationTokenSource tokenSource)
         {
             while (true)
             {
-                if (m_cancellationTokenSource.IsCancellationRequested)
+                if (tokenSource.IsCancellationRequested)
                     return;
 
                 if (!IsCommandInProgress)
@@ -90,7 +92,7 @@ namespace GoodAI.Arnold.Network
                                 .ConfigureAwait(false);
 
                         // Check this again - the cancellation could have come during the request.
-                        if (!m_cancellationTokenSource.IsCancellationRequested)
+                        if (!tokenSource.IsCancellationRequested)
                             m_stateResultAction(stateCheckResult);
                     }
                     catch (Exception ex)
@@ -99,7 +101,7 @@ namespace GoodAI.Arnold.Network
                     }
                 }
 
-                await Task.Delay(repeatMillis, m_cancellationTokenSource.Token).ConfigureAwait(false);
+                await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
             }
         }
 
