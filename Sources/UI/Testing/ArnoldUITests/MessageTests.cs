@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlatBuffers;
+using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Network.Messages;
+using OpenTK;
 using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
@@ -43,6 +45,21 @@ namespace GoodAI.Arnold.UI.Tests
             var message = StateResponseBuilder.Build(StateType.ShuttingDown);
 
             Assert.Equal(StateType.ShuttingDown, message.GetResponse(new StateResponse()).State);
+        }
+
+        [Fact]
+        public void WritesReadsModelResponse()
+        {
+            const string regionName = "test region name";
+            const string regionType = "test region type";
+
+            var message =
+                ModelResponseBuilder.Build(new List<RegionModel>
+                {
+                    new RegionModel(regionName, regionType, new Vector3(10, 20, 30), new Vector3(40, 30, 20))
+                });
+
+            Assert.Equal(regionName, message.GetResponse(new ModelResponse()).GetAddedRegions(0).Name);
         }
 
         [Fact]

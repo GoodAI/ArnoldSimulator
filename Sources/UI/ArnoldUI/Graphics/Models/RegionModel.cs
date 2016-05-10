@@ -14,6 +14,9 @@ namespace GoodAI.Arnold.Graphics.Models
         private Vector3 m_size;
         public const float RegionMargin = 2f;
 
+        public string Name { get; set; }
+        public string Type { get; set; }
+
         public Vector3 Size
         {
             get { return m_size; }
@@ -29,16 +32,13 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public Vector3 HalfSize { get; private set; }
 
-        public RegionModel(Vector3 position)
+        public RegionModel(string name, string type, Vector3 position, Vector3 size)
         {
-            Position = position;
+            Name = name;
+            Type = type;
 
-            Size = new Vector3
-            {
-                X = 10f,
-                Y = 10f,
-                Z = 10f
-            };
+            Position = position;
+            Size = size;
 
             Translucent = true;
 

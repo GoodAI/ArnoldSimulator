@@ -73,8 +73,12 @@ namespace GoodAI.Arnold.Core
             foreach (Region region in AgentBlueprint.Brain.Regions)
             {
                 var newSimulationRegion =
-                    new RegionModel(new Vector3((region.Location.X - halfSize.X)*ResizeFactor, 0,
-                        (region.Location.Y - halfSize.Y)*ResizeFactor));
+                    new RegionModel(
+                        "foo region name",
+                        "foo region type",
+                        new Vector3((region.Location.X - halfSize.X)*ResizeFactor, 0,
+                            (region.Location.Y - halfSize.Y)*ResizeFactor),
+                        new Vector3(10, 10, 10));
                 GenerateExperts(newSimulationRegion);
 
                 Regions.Add(newSimulationRegion);
