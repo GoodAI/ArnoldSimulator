@@ -49,10 +49,21 @@ namespace GoodAI.Arnold.Network
                 .ContinueWith(task =>
                 {
                     ResponseMessage result = task.Result;
-                    if (result.ResponseType == Response.ErrorResponse)
-                        throw new RemoteCoreException(result.GetResponse(new ErrorResponse()).Message);
 
-                    return result.GetResponse(new TResponse());
+                    // ReSharper disable once SwitchStatementMissingSomeCases
+                    switch (result.ResponseType)
+                    {
+                        case Response.NONE:
+                            throw new RemoteCoreException("Response type NONE, server rejected the message(?)");
+                        case Response.ErrorResponse:
+                            throw new RemoteCoreException(result.GetResponse(new ErrorResponse()).Message);
+                    }
+
+                    TResponse response = result.GetResponse(new TResponse());
+                    if (response == null)
+                        throw new RemoteCoreException("Null response.");
+
+                    return response;
                 })
                 .TimeoutAfter(timeoutMs);
         }

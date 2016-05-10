@@ -63,9 +63,13 @@ namespace GoodAI.Arnold.Network
                 RepeatGetStateAsync(KeepaliveIntervalMs);
 #pragma warning restore 4014
             }
-            catch (AggregateException exception)
+            catch (TaskCanceledException)
             {
-                Log.Warn(exception, "Error in state checking.");
+                Log.Debug("Delay cancelled.");  // TODO(Premek): remove.
+            }
+            catch (AggregateException ex)
+            {
+                Log.Warn(ex, "Error in state checking.");
             }
         }
 
@@ -78,15 +82,23 @@ namespace GoodAI.Arnold.Network
 
                 if (!IsCommandInProgress)
                 {
-                    // TODO(): Handle timeout and other exceptions here.
-                    StateResponse stateCheckResult =
-                        await m_coreLink.Request(new GetStateConversation(), KeepaliveTimeoutMs)
-                        .ConfigureAwait(false);
+                    try
+                    {
+                        // TODO(): Handle timeout and other exceptions here.
+                        StateResponse stateCheckResult =
+                            await m_coreLink.Request(new GetStateConversation(), KeepaliveTimeoutMs)
+                                .ConfigureAwait(false);
 
-                    // Check this again - the cancellation could have come during the request.
-                    if (!m_cancellationTokenSource.IsCancellationRequested)
-                        m_stateResultAction(stateCheckResult);
+                        // Check this again - the cancellation could have come during the request.
+                        if (!m_cancellationTokenSource.IsCancellationRequested)
+                            m_stateResultAction(stateCheckResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(ex, "Keepalive check failed.");
+                    }
                 }
+
                 await Task.Delay(repeatMillis, m_cancellationTokenSource.Token).ConfigureAwait(false);
             }
         }

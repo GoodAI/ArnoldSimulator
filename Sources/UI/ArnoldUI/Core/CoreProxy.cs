@@ -212,12 +212,6 @@ namespace GoodAI.Arnold.Core
         private void HandleStateResponse(StateResponse response)
         {
             State = ReadState(response);
-            
-            // TODO(Premek): check that this is handled elsewhere...
-            //else
-            //    // This only happened so far when the request handler was misspelled.
-            //    // Keep it as warning for a while and switch to debug later?
-            //    Log.Warn("The server rejected the message.");
         }
 
         private static CoreState ReadState(StateResponse stateData)
