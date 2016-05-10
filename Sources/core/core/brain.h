@@ -98,19 +98,20 @@ public:
     const char *GetName() const;
 
     const Terminals &GetTerminals() const;
-    void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, NeuronId firstNeuron, size_t neuronCount);
+    void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount);
     void DeleteTerminal(const ConnectorName &name);
     void ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
     void DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
 
-    void AddRegion(RegionIndex regIdx, const RegionType &type, const RegionParams &params);
-    void RemoveRegion(RegionIndex regIdx);
-    void AddConnector(RegionIndex regIdx, Direction direction, const ConnectorName &name, size_t size);
-    void RemoveConnector(RegionIndex regIdx, Direction direction, const ConnectorName &name);
-    void AddConnection(Direction direction,
+    RegionIndex RequestRegionAddition(const RegionType &type, const RegionParams &params);
+    void RequestRegionRemoval(RegionIndex regIdx);
+    void RequestConnectorAddition(RegionIndex regIdx, Direction direction, const ConnectorName &name, 
+        const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
+    void RequestConnectorRemoval(RegionIndex regIdx, Direction direction, const ConnectorName &name);
+    void RequestConnectionAddition(Direction direction,
         RegionIndex srcRegIdx, const ConnectorName &srcConnectorName,
         RegionIndex destRegIdx, const ConnectorName &destConnectorName);
-    void RemoveConnection(Direction direction,
+    void RequestConnectionRemoval(Direction direction,
         RegionIndex srcRegIdx, const ConnectorName &srcConnectorName,
         RegionIndex destRegIdx, const ConnectorName &destConnectorName);
 
@@ -131,12 +132,15 @@ public:
 
 private:
     bool mShouldStop;
+    bool mShouldRunUntilStopped;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
     Boxes mRoiBoxes;
     ViewportUpdateRequests mViewportUpdateRequests;
 
     size_t mBrainStep;
+    NeuronId mNeuronIdCounter;
+    RegionIndex mRegionIdxCounter;
     TerminalId mTerminalIdCounter;
     Terminals mTerminals;
     TerminalNameToId mTerminalNameToId;
