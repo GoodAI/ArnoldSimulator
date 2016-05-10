@@ -103,6 +103,16 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap observer_icon {
+            get {
+                object obj = ResourceManager.GetObject("observer_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap StatusAnnotations_Pause_16xLG_color {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Pause_16xLG_color", resourceCulture);

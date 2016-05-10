@@ -47,7 +47,6 @@ namespace GoodAI.Arnold
             m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
 
             UpdateButtons();
-            //Simulation = new RemoteSimulation(new CoreLink(new ConverseProtoBufClient(new DummyConnector())));
         }
 
         private void UpdateButtons()
@@ -58,6 +57,9 @@ namespace GoodAI.Arnold
             runButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Paused || m_uiMain.Conductor.CoreState == CoreState.Empty;
             brainStepButton.Enabled = runButton.Enabled;
             pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
+
+            showVisualizationButton.Enabled = m_uiMain.Conductor.CoreState != CoreState.Disconnected;
+            showVisualizationButton.Checked = VisualizationForm != null && !VisualizationForm.IsDisposed;
         }
 
         private void DisableCommandButtons()
@@ -68,6 +70,8 @@ namespace GoodAI.Arnold
             runButton.Enabled = false;
             brainStepButton.Enabled = false;
             pauseButton.Enabled = false;
+
+            showVisualizationButton.Enabled = false;
         }
 
         private void SimulationOnStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
@@ -82,7 +86,12 @@ namespace GoodAI.Arnold
         private void VisualizationFormOnClosed(object sender, FormClosedEventArgs e)
         {
             VisualizationForm.FormClosed -= VisualizationFormOnClosed;
+            VisualizationForm.Dispose();
+            VisualizationForm = null;
+
             m_uiMain.VisualizationClosed();
+
+            UpdateButtons();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -90,16 +99,15 @@ namespace GoodAI.Arnold
             Close();
         }
 
-        private void StartSimulation()
+        private void StartVisualization()
         {
-            m_uiMain.StartSimulation();
-
             if (VisualizationForm == null || VisualizationForm.IsDisposed)
                 VisualizationForm = new VisualizationForm(m_uiMain.Conductor);
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;
         }
+
 
         private void connectButton_Click(object sender, EventArgs e)
         {
@@ -146,6 +154,14 @@ namespace GoodAI.Arnold
         {
             ModelResponse response =
                 await m_uiMain.Conductor.CoreLink.Request(new GetModelConversation(), 60000).ConfigureAwait(false);
+        }
+
+        private void showVisualizationButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (showVisualizationButton.Checked)
+                StartVisualization();
+            else
+                VisualizationForm.Close();
         }
     }
 }
