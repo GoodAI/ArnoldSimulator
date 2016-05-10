@@ -27,10 +27,37 @@
 
 using namespace nlohmann;
 
+struct ViewportUpdate
+{
+    ViewportUpdate();
+
+    size_t sinceBrainStep;
+    size_t brainStepCount;
+    RegionAdditionReports addedRegions;
+    RegionAdditionReports repositionedRegions;
+    RegionRemovals removedRegions;
+    ConnectorAdditionReports addedConnectors;
+    ConnectorRemovals removedConnectors;
+    Connections addedConnections;
+    Connections removedConnections;
+    NeuronAdditionReports addedNeurons;
+    NeuronAdditionReports repositionedNeurons;
+    NeuronRemovals removedNeurons;
+    Synapse::Links addedSynapses;
+    Synapse::Links spikedSynapses;
+    Synapse::Links removedSynapses;
+    ChildLinks addedChildren;
+    ChildLinks removedChildren;
+
+    void pup(PUP::er &p);
+};
+
 class SimulateMsg : public CkMcastBaseMsg, public CMessage_SimulateMsg
 {
 public:
+    bool doProgress;
     size_t brainStep;
+    Boxes roiBoxes;
 };
 
 class BrainBase;
@@ -135,8 +162,10 @@ private:
     bool mShouldRunUntilStopped;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
+
     Boxes mRoiBoxes;
     ViewportUpdateRequests mViewportUpdateRequests;
+    ViewportUpdate mViewportUpdateAccumulator;
 
     size_t mBrainStep;
     NeuronId mNeuronIdCounter;

@@ -12,6 +12,31 @@ extern CProxy_BrainBase gBrain;
 extern CProxy_RegionBase gRegions;
 extern CProxy_NeuronBase gNeurons;
 
+ViewportUpdate::ViewportUpdate() : sinceBrainStep(0), brainStepCount(0)
+{
+}
+
+void ViewportUpdate::pup(PUP::er &p)
+{
+    p | sinceBrainStep;
+    p | brainStepCount;
+    p | addedRegions;
+    p | repositionedRegions;
+    p | removedRegions;
+    p | addedConnectors;
+    p | removedConnectors;
+    p | addedConnections;
+    p | removedConnections;
+    p | addedNeurons;
+    p | repositionedNeurons;
+    p | removedNeurons;
+    p | addedSynapses;
+    p | spikedSynapses;
+    p | removedSynapses;
+    p | addedChildren;
+    p | removedChildren;
+}
+
 BrainMap::BrainMap()
 {
 }

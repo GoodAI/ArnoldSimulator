@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <vector>
 #include <unordered_map>
 
@@ -19,6 +18,8 @@
 #include "core.decl.h"
 
 using namespace GoodAI::Arnold;
+
+class ViewportUpdate;
 
 class ShutdownRequestedException : public std::runtime_error
 {
@@ -42,24 +43,7 @@ public:
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
     
-    void SendViewportUpdate(
-        RequestId requestId,
-        RegionAdditionReports &addedRegions,
-        RegionAdditionReports &repositionedRegions,
-        RegionRemovals &removedRegions,
-        ConnectorAdditionReports &addedConnectors,
-        ConnectorRemovals &removedConnectors,
-        Connections &addedConnections,
-        Connections &removedConnections,
-        NeuronAdditionReports &addedNeurons,
-        NeuronAdditionReports &repositionedNeurons,
-        NeuronRemovals &removedNeurons,
-        Synapse::Links &addedSynapses,
-        Synapse::Links &spikedSynapses,
-        Synapse::Links &removedSynapses,
-        ChildLinks &addedChildren,
-        ChildLinks &removedChildren
-    );
+    void SendViewportUpdate(RequestId requestId, const ViewportUpdate &update);
 
 protected:
     void SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuilder &builder);
@@ -70,24 +54,8 @@ protected:
 
     static flatbuffers::Offset<Network::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
 
-    void BuildViewportUpdateResponse(
-        const RegionAdditionReports &addedRegions,
-        const RegionAdditionReports &repositionedRegions,
-        const RegionRemovals &removedRegions,
-        const ConnectorAdditionReports &addedConnectors,
-        const ConnectorRemovals &removedConnectors,
-        const Connections &addedConnections,
-        const Connections &removedConnections,
-        const NeuronAdditionReports &addedNeurons,
-        const NeuronAdditionReports &repositionedNeurons,
-        const NeuronRemovals &removedNeurons,
-        const Synapse::Links &addedSynapses,
-        const Synapse::Links &spikedSynapses,
-        const Synapse::Links &removedSynapses,
-        const ChildLinks &addedChildren,
-        const ChildLinks &removedChildren,
-        flatbuffers::FlatBufferBuilder &builder) const;
-    void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder);
+    void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
+    void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const;
 private:
     Network::StateType mState;
 

@@ -1,9 +1,11 @@
+#include <future>
+
 #include "core.h"
+#include "brain.h"
 
 #include "brain.decl.h"
 #include "region.decl.h"
 #include "neuron.decl.h"
-#include <future>
 
 CkGroupID gMulticastGroupId;
 CProxy_CompletionDetector gCompletionDetector;
@@ -117,32 +119,10 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
     }
 }
 
-void Core::SendViewportUpdate(
-    RequestId requestId, 
-    RegionAdditionReports &addedRegions,
-    RegionAdditionReports &repositionedRegions,
-    RegionRemovals &removedRegions,
-    ConnectorAdditionReports &addedConnectors,
-    ConnectorRemovals &removedConnectors,
-    Connections &addedConnections,
-    Connections &removedConnections,
-    NeuronAdditionReports &addedNeurons,
-    NeuronAdditionReports &repositionedNeurons,
-    NeuronRemovals &removedNeurons,
-    Synapse::Links &addedSynapses,
-    Synapse::Links &spikedSynapses,
-    Synapse::Links &removedSynapses,
-    ChildLinks &addedChildren,
-    ChildLinks &removedChildren)
+void Core::SendViewportUpdate(RequestId requestId, const ViewportUpdate &update)
 {
     flatbuffers::FlatBufferBuilder builder;
-    BuildViewportUpdateResponse(
-        addedRegions, repositionedRegions, removedRegions,
-        addedConnectors, removedConnectors, 
-        addedConnections, removedConnections,
-        addedNeurons, repositionedNeurons, removedNeurons,
-        addedSynapses, spikedSynapses, removedSynapses,
-        addedChildren, removedChildren, builder);
+    BuildViewportUpdateResponse(update, builder);
     SendResponseToClient(requestId, builder);
 }
 
@@ -224,45 +204,15 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     RegionIndex regionIndex = 1;
     RegionName regionName("FooRegion");
-    RegionName regionType("Basic region");
-    Point3D origin(10, 20, 30);
-    Size3D size(40, 10, 20);
-    Box3D regionBounds {origin, size};
+    RegionName regionType("BasicRegion");
+    Point3D origin(10.f, 20.f, 30.f);
+    Size3D size(40.f, 10.f, 20.f);
+    Box3D regionBounds(origin, size);
 
-    RegionAdditionReport addedRegion(regionIndex, regionName, regionType, regionBounds);
-    RegionAdditionReports addedRegions {addedRegion};
+    ViewportUpdate update;
+    update.addedRegions.push_back(RegionAdditionReport(regionIndex, regionName, regionType, regionBounds));
 
-    RegionAdditionReports repositionedRegions;
-    RegionRemovals removedRegions;
-    ConnectorAdditionReports addedConnectors;
-    ConnectorRemovals removedConnectors;
-    Connections addedConnections;
-    Connections removedConnections;
-    NeuronAdditionReports addedNeurons;
-    NeuronAdditionReports repositionedNeurons;
-    NeuronRemovals removedNeurons;
-    Synapse::Links addedSynapses;
-    Synapse::Links spikedSynapses;
-    Synapse::Links removedSynapses;
-    ChildLinks addedChildren;
-    ChildLinks removedChildren;
-
-    SendViewportUpdate(requestId,
-        addedRegions,
-        repositionedRegions,
-        removedRegions,
-        addedConnectors,
-        removedConnectors,
-        addedConnections,
-        removedConnections,
-        addedNeurons,
-        repositionedNeurons,
-        removedNeurons,
-        addedSynapses,
-        spikedSynapses,
-        removedSynapses,
-        addedChildren,
-        removedChildren);
+    SendViewportUpdate(requestId, update);
 }
 
 template <typename TResponse>
@@ -272,7 +222,7 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Network::Resp
     builder.Finish(responseMessage);
 }
 
-void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder)
+void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const
 {
     flatbuffers::Offset<Network::StateResponse> stateResponseOffset = Network::CreateStateResponse(builder, state);
     BuildResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset);
@@ -283,29 +233,11 @@ flatbuffers::Offset<Network::Position> Core::CreatePosition(flatbuffers::FlatBuf
     return Network::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
 }
 
-void Core::BuildViewportUpdateResponse(
-    const RegionAdditionReports &addedRegions,
-    const RegionAdditionReports &repositionedRegions,
-    const RegionRemovals &removedRegions,
-    const ConnectorAdditionReports &addedConnectors,
-    const ConnectorRemovals &removedConnectors,
-    const Connections &addedConnections,
-    const Connections &removedConnections,
-
-    const NeuronAdditionReports &addedNeurons,
-    const NeuronAdditionReports &repositionedNeurons,
-    const NeuronRemovals &removedNeurons,
-    const Synapse::Links &addedSynapses,
-    const Synapse::Links &spikedSynapses,
-    const Synapse::Links &removedSynapses,
-    const ChildLinks &addedChildren,
-    const ChildLinks &removedChildren,
-    flatbuffers::FlatBufferBuilder &builder) const
+void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
 {
     std::vector<flatbuffers::Offset<Network::Region>> addedRegionOffsets;
 
-    for (auto addedRegion : addedRegions)
-    {
+    for (auto addedRegion : update.addedRegions) {
         auto index = std::get<0>(addedRegion);
 
         auto regionName = builder.CreateString(std::get<1>(addedRegion));
