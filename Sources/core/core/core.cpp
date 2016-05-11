@@ -197,12 +197,19 @@ bool chance()
     return rand() % 60;
 }
 
+template <typename TResponse>
+void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Network::Response responseType, flatbuffers::Offset<TResponse> &responseOffset)
+{
+    auto responseMessage = Network::CreateResponseMessage(builder, responseType, responseOffset.Union());
+    builder.Finish(responseMessage);
+}
+
 void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
 
-    RegionIndex regionIndex = 1;
+    /*RegionIndex regionIndex = 1;
     RegionName regionName("FooRegion");
     RegionName regionType("BasicRegion");
     Point3D origin(10.f, 20.f, 30.f);
@@ -212,14 +219,25 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     ViewportUpdate update;
     update.addedRegions.push_back(RegionAdditionReport(regionIndex, regionName, regionType, regionBounds));
 
-    SendViewportUpdate(requestId, update);
-}
+    SendViewportUpdate(requestId, update);*/
 
-template <typename TResponse>
-void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Network::Response responseType, flatbuffers::Offset<TResponse> &responseOffset)
-{
-    auto responseMessage = Network::CreateResponseMessage(builder, responseType, responseOffset.Union());
-    builder.Finish(responseMessage);
+    std::vector<flatbuffers::Offset<Network::Region>> addedRegionsOffsets;
+
+    auto regionName = builder.CreateString("testname");
+    auto regionType = builder.CreateString("testtype");
+    auto lowerBound = Network::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
+    auto upperBound = Network::CreatePosition(builder, 40.0f, 20.0f, 15.0f);
+    auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
+
+    addedRegionsOffsets.push_back(regionOffset);
+    auto addedRegionsVector = builder.CreateVector(addedRegionsOffsets);
+
+    Network::ModelResponseBuilder responseBuilder(builder);
+    responseBuilder.add_addedRegions(addedRegionsVector);
+    auto modelResponseOffset = responseBuilder.Finish();
+
+    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
+    SendResponseToClient(requestId, builder);
 }
 
 void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const
@@ -238,18 +256,28 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     std::vector<flatbuffers::Offset<Network::Region>> addedRegionOffsets;
 
     for (auto addedRegion : update.addedRegions) {
-        auto index = std::get<0>(addedRegion);
+        RegionIndex index = std::get<0>(addedRegion);
 
         auto regionName = builder.CreateString(std::get<1>(addedRegion));
         auto regionType = builder.CreateString(std::get<2>(addedRegion));
 
-        auto box3d = std::get<3>(addedRegion);
+        Box3D box3d = std::get<3>(addedRegion);
 
-        auto lowerBound = CreatePosition(builder, box3d.first);
-        auto upperBound = CreatePosition(builder, box3d.second);
+        auto lowerBound = Network::CreatePosition(builder, std::get<0>(box3d.first), std::get<1>(box3d.first), std::get<2>(box3d.first));
+        auto upperBound = Network::CreatePosition(builder, std::get<0>(box3d.second), std::get<1>(box3d.second), std::get<2>(box3d.second));
 
-        addedRegionOffsets.push_back(Network::CreateRegion(builder, index, regionName, regionType, lowerBound, upperBound));
+        auto regionOffset = Network::CreateRegion(builder, index, regionName, regionType, lowerBound, upperBound);
+
+        addedRegionOffsets.push_back(regionOffset);
     }
+
+    auto regionName = builder.CreateString("testname");
+    auto regionType = builder.CreateString("testtype");
+    auto lowerBound = Network::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
+    auto upperBound = Network::CreatePosition(builder, 40.0f, 20.0f, 15.0f);
+    auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
+    addedRegionOffsets.push_back(regionOffset);
+
     auto addedRegionsOffset = builder.CreateVector(addedRegionOffsets);
 
     Network::ModelResponseBuilder responseBuilder(builder);

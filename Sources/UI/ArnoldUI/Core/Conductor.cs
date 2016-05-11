@@ -30,6 +30,9 @@ namespace GoodAI.Arnold.Core
         bool IsConnected { get; }
 
         CoreState CoreState { get; }
+
+        ICoreLink CoreLink { get; }
+
         void PerformBrainStep();
     }
 
@@ -100,6 +103,7 @@ namespace GoodAI.Arnold.Core
             Log.Info("Connecting to Core running at {hostname:l}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
             // TODO(HonzaS): Check here if we can connect to the core so that we could abort immediatelly.
+            CoreLink = coreLink;
 
             ICoreController coreController = m_coreControllerFactory.Create(coreLink);
 
@@ -107,6 +111,9 @@ namespace GoodAI.Arnold.Core
 
             RegisterCoreEvents();
         }
+
+        // TODO(HonzaS): Remove this at a later stage, it's here only for testing purposes.
+        public ICoreLink CoreLink { get; private set; }
 
         private void RegisterCoreEvents()
         {

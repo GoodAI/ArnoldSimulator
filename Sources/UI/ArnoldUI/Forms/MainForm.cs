@@ -10,7 +10,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArnoldUI;
 using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Forms;
+using GoodAI.Arnold.Network;
 using GoodAI.Logging;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -138,6 +140,12 @@ namespace GoodAI.Arnold
         private void brainStepButton_Click(object sender, EventArgs e)
         {
             m_uiMain.PerformBrainStep();
+        }
+
+        private async void testButton_Click(object sender, EventArgs e)
+        {
+            ModelResponse response =
+                await m_uiMain.Conductor.CoreLink.Request(new GetModelConversation(), 60000).ConfigureAwait(false);
         }
     }
 }
