@@ -183,7 +183,7 @@ namespace GoodAI.Arnold.Core
         {
             try
             {
-                StateResponse response = await m_controller.Command(conversation, CreateTimeoutHandler(conversation.RequestData.Command), restartKeepaliveAfterSuccess: !stopChecking);
+                StateResponse response = await m_controller.Command(conversation, CreateTimeoutHandler(conversation.RequestData.Command), restartKeepaliveOnSuccess: !stopChecking);
                 HandleStateResponse(response);
             }
             catch (RemoteCoreException ex)

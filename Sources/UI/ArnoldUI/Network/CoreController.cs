@@ -14,7 +14,7 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreController : IDisposable
     {
-        Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, bool restartKeepaliveAfterSuccess = true, int timeoutMs = 0);
+        Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, bool restartKeepaliveOnSuccess = true, int timeoutMs = 0);
 
         bool IsCommandInProgress { get; }
         void StartStateChecking(Action<StateResponse> stateResultAction);
@@ -114,7 +114,7 @@ namespace GoodAI.Arnold.Network
         }
 
         public async Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback,
-            bool restartAfterSuccess = true, int timeoutMs = CommandTimeoutMs)
+            bool restartKeepaliveOnSuccess = true, int timeoutMs = CommandTimeoutMs)
         {
             if (m_runningCommand != null)
             {
@@ -169,7 +169,7 @@ namespace GoodAI.Arnold.Network
 
             m_runningCommand = null;
 
-            if (restartAfterSuccess)
+            if (restartKeepaliveOnSuccess)
                 RestartStateChecking();
 
             return result;

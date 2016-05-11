@@ -49,8 +49,7 @@ namespace GoodAI.Arnold.UI.Tests
             var exception = Assert.Throws<AggregateException>(() => m_controller.Command(conversation, () => TimeoutAction.Wait).Wait());
             Assert.Contains(exception.InnerExceptions, ex => ex is InvalidOperationException);
 
-            var firstResult = firstTask.Result;
-            Assert.NotNull(firstResult);
+            Assert.NotNull(firstTask.Result);
         }
 
         [Fact]
