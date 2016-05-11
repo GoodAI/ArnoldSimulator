@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Network
 {
@@ -19,6 +20,8 @@ namespace GoodAI.Arnold.Network
 
     public class ModelUpdater : IModelUpdater
     {
+        public ILog Log { get; set; }
+
         private const int TimeoutMs = 1000;
 
         private readonly ICoreLink m_coreLink;
@@ -69,18 +72,38 @@ namespace GoodAI.Arnold.Network
         /// <returns></returns>
         public SimulationModel GetNewModel()
         {
-            // If a new model is not ready, return null.
-            if (!m_isNewModelReady)
-                return null;
+            SimulationModel result = null;
 
-            // A new model is ready - retrieve it.
-            m_isNewModelReady = false;
-            SimulationModel newModel = m_newModel;
+            // If a new model is not ready, return null.
+            if (m_isNewModelReady)
+            {
+                m_isNewModelReady = false;
+                result = m_newModel;
+            }
 
             // Allow the network thread to replace the model with whatever it has buffered.
             m_modelReadEvent.Set();
 
-            return newModel;
+            // A new model is ready - retrieve it.
+            return result;
+        }
+
+        enum WaitEventResult
+        {
+            EventSet,
+            Cancelled
+        }
+
+        private static Task<WaitEventResult> WaitForEvent(AutoResetEvent resetEvent, CancellationTokenSource cancellationTokenSource)
+        {
+            return Task<WaitEventResult>.Factory.StartNew(() =>
+            {
+                while (!resetEvent.WaitOne(TimeoutMs))
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        return WaitEventResult.Cancelled;
+
+                return WaitEventResult.EventSet;
+            });
         }
 
         // TODO(HonzaS): Add filtering.
@@ -90,9 +113,8 @@ namespace GoodAI.Arnold.Network
             // Can we replace this with another reset event?
             while (true)
             {
-                while(!m_requestModelEvent.WaitOne(TimeoutMs))
-                    if (cancellationTokenSource.IsCancellationRequested)
-                        return;
+                if (await WaitForEvent(m_requestModelEvent, cancellationTokenSource) == WaitEventResult.Cancelled)
+                    return;
 
                 if (cancellationTokenSource.IsCancellationRequested)
                     return;
@@ -101,22 +123,29 @@ namespace GoodAI.Arnold.Network
                 {
                     // TODO(HonzaS): If this is a first model request, request a full model.
 
-                    ModelResponse modelResponse =
-                        await m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
+                    try
+                    {
+                        ModelResponse modelResponse =
+                            await m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
 
-                    // Process the model message.
-                    SimulationModel newModel = ProcessModel(modelResponse);
-                    
-                    // Wait for the visualization to read the previous model.
-                    while(!m_modelReadEvent.WaitOne(TimeoutMs))
+                        // Process the model message.
+                        SimulationModel newModel = ProcessModel(modelResponse);
+
+                        // Wait for the visualization to read the previous model.
+                        if (await WaitForEvent(m_modelReadEvent, cancellationTokenSource) == WaitEventResult.Cancelled)
+                            return;
+
                         if (cancellationTokenSource.IsCancellationRequested)
                             return;
 
-                    if (cancellationTokenSource.IsCancellationRequested)
-                        return;
-
-                    m_newModel = newModel;
-                    m_isNewModelReady = true;
+                        m_newModel = newModel;
+                        m_isNewModelReady = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO(HonzaS): Handle TaskTimeoutException better - wait, exponential backoff, ...
+                        Log.Error(ex, "Model retrieval failed");
+                    }
                 }
             }
         }

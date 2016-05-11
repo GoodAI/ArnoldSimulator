@@ -74,6 +74,7 @@
     <Compile Include="MathTestHelpers.cs" />
     <Compile Include="MessageTests.cs" />
     <Compile Include="ModelBaseTests.cs" />
+    <Compile Include="ModelUpdaterTests.cs" />
     <Compile Include="PickRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimulationTests.cs" />
