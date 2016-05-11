@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
-        public async void OnlyAllowsOneCommand()
+        public void OnlyAllowsOneCommand()
         {
             m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>()))
                 .Returns(() =>

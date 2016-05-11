@@ -101,11 +101,11 @@ namespace GoodAI.Arnold.Network
                 {
                     // TODO(HonzaS): If this is a first model request, request a full model.
 
-                    TimeoutResult<Response<ModelResponse>> modelResponse =
-                        await m_coreLink.Request(new GetModelConversation()).ConfigureAwait(false);
+                    ModelResponse modelResponse =
+                        await m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
 
                     // Process the model message.
-                    SimulationModel newModel = ProcessModel(modelResponse.Result.Data);
+                    SimulationModel newModel = ProcessModel(modelResponse);
                     
                     // Wait for the visualization to read the previous model.
                     while(!m_modelReadEvent.WaitOne(TimeoutMs))
