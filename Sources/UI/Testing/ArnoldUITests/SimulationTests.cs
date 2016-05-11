@@ -87,35 +87,37 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new CoreProxy(coreLink, coreController);
-            Assert.Equal(CoreState.Empty, simulation.State);
+            var coreProxy = new CoreProxy(coreLink, coreController);
+            Assert.Equal(CoreState.Empty, coreProxy.State);
 
-            simulation.StateChanged += (sender, args) => waitEvent.Set();
+            coreProxy.StateChanged += (sender, args) => waitEvent.Set();
 
-            simulation.LoadBlueprint(new AgentBlueprint());
+            coreProxy.LoadBlueprint(new AgentBlueprint());
             await WaitFor(waitEvent);
-            Assert.Equal(CoreState.Paused, simulation.State);
+            Assert.Equal(CoreState.Paused, coreProxy.State);
 
-            simulation.Run();
+            coreProxy.Run();
             await WaitFor(waitEvent);
-            Assert.Equal(CoreState.Running, simulation.State);
+            Assert.Equal(CoreState.Running, coreProxy.State);
 
-            simulation.Pause();
+            coreProxy.Pause();
             await WaitFor(waitEvent);
-            Assert.Equal(CoreState.Paused, simulation.State);
+            Assert.Equal(CoreState.Paused, coreProxy.State);
 
-            simulation.Clear();
+            coreProxy.Clear();
             await WaitFor(waitEvent);
-            Assert.Equal(CoreState.Empty, simulation.State);
+            Assert.Equal(CoreState.Empty, coreProxy.State);
 
             // Test direct Clear from a Running state.
-            simulation.LoadBlueprint(new AgentBlueprint());
+            coreProxy.LoadBlueprint(new AgentBlueprint());
             await WaitFor(waitEvent);
-            simulation.Run();
+            coreProxy.Run();
             await WaitFor(waitEvent);
-            simulation.Clear();
+            coreProxy.Clear();
             await WaitFor(waitEvent);
-            Assert.Equal(CoreState.Empty, simulation.State);
+            coreProxy.Shutdown();
+            await WaitFor(waitEvent);
+            Assert.Equal(CoreState.ShuttingDown, coreProxy.State);
         }
 
         [Fact]

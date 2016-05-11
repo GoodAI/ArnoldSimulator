@@ -33,19 +33,21 @@ namespace GoodAI.Arnold.Network
         public ILog Log { get; set; } = NullLogger.Instance;
 
         private readonly ICoreLink m_coreLink;
+        private readonly int m_keepaliveIntervalMs;
         private Task<StateResponse> m_runningCommand;
         private Action<StateResponse> m_stateResultAction;
         private CancellationTokenSource m_cancellationTokenSource;
 
         private const int CommandTimeoutMs = 15*1000;
-        private const int KeepaliveIntervalMs = 1000;
-        private const int KeepaliveTimeoutMs = KeepaliveIntervalMs;
+        private const int DefaultKeepaliveIntervalMs = 1000;
+        private const int DefaultKeepaliveTimeoutMs = DefaultKeepaliveIntervalMs;
 
         public bool IsCommandInProgress => m_runningCommand != null;
 
-        public CoreController(ICoreLink coreLink)
+        public CoreController(ICoreLink coreLink, int keepaliveIntervalMs = DefaultKeepaliveIntervalMs)
         {
             m_coreLink = coreLink;
+            m_keepaliveIntervalMs = keepaliveIntervalMs;
             m_cancellationTokenSource = new CancellationTokenSource();
         }
 
@@ -61,7 +63,7 @@ namespace GoodAI.Arnold.Network
                 m_cancellationTokenSource = new CancellationTokenSource();
 
 #pragma warning disable 4014 // This is supposed to start a parallel task and continue.
-                RepeatGetStateAsync(KeepaliveIntervalMs, m_cancellationTokenSource);
+                RepeatGetStateAsync(m_keepaliveIntervalMs, m_cancellationTokenSource);
 #pragma warning restore 4014
             }
             catch (TaskCanceledException)
@@ -89,7 +91,7 @@ namespace GoodAI.Arnold.Network
                     {
                         // TODO(): Handle timeout and other exceptions here.
                         StateResponse stateCheckResult =
-                            await m_coreLink.Request(new GetStateConversation(), KeepaliveTimeoutMs)
+                            await m_coreLink.Request(new GetStateConversation(), DefaultKeepaliveTimeoutMs)
                                 .ConfigureAwait(false);
 
                         // Check this again - the cancellation could have come during the request.
