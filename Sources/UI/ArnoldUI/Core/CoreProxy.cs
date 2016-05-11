@@ -147,7 +147,8 @@ namespace GoodAI.Arnold.Core
 
         public void Shutdown()
         {
-            SendCommand(new CommandConversation(CommandType.Shutdown));
+            // Prevent the state checking from being restarted after the shutdown completes.
+            SendCommand(new CommandConversation(CommandType.Shutdown), stopChecking: true);
         }
 
         public void Run(uint brainStepsToRun = 0)
@@ -178,18 +179,17 @@ namespace GoodAI.Arnold.Core
             SendCommand(new CommandConversation(CommandType.Pause));
         }
 
-        private async void SendCommand(CommandConversation conversation)
+        private async Task SendCommand(CommandConversation conversation, bool stopChecking = false)
         {
-
             try
             {
-                await m_controller.Command(conversation, CreateTimeoutHandler(conversation.RequestData.Command));
+                StateResponse response = await m_controller.Command(conversation, CreateTimeoutHandler(conversation.RequestData.Command), restartKeepaliveAfterSuccess: !stopChecking);
+                HandleStateResponse(response);
             }
             catch (RemoteCoreException ex)
             {
                 HandleError(ex.Message);
             }
-            // TODO(Premek): Handle timeout here...
         }
 
         private Func<TimeoutAction> CreateTimeoutHandler(CommandType type)

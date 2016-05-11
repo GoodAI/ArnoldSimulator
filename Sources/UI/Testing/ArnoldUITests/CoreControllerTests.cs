@@ -75,7 +75,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            await m_controller.Command(conversation, () => TimeoutAction.Retry, TimeoutMs);
+            await m_controller.Command(conversation, () => TimeoutAction.Retry, timeoutMs: TimeoutMs);
 
             Assert.Equal(2, noOfRuns);
         }
@@ -108,7 +108,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            await m_controller.Command(conversation, () => TimeoutAction.Wait, TimeoutMs);
+            await m_controller.Command(conversation, () => TimeoutAction.Wait, timeoutMs: TimeoutMs);
 
             Assert.Equal(1, noOfRuns);
         }
@@ -141,7 +141,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            var successfulResult = await m_controller.Command(conversation, () => TimeoutAction.Cancel, TimeoutMs);
+            var successfulResult = await m_controller.Command(conversation, () => TimeoutAction.Cancel, timeoutMs: TimeoutMs);
 
             Assert.Equal(1, noOfRuns);
             Assert.Null(successfulResult);

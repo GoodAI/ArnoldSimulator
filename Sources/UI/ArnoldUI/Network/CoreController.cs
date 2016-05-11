@@ -14,7 +14,7 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreController : IDisposable
     {
-        Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, int timeoutMs = 0);
+        Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, bool restartKeepaliveAfterSuccess = true, int timeoutMs = 0);
 
         bool IsCommandInProgress { get; }
         void StartStateChecking(Action<StateResponse> stateResultAction);
@@ -100,6 +100,7 @@ namespace GoodAI.Arnold.Network
                     }
                     catch (Exception ex)
                     {
+                        // TODO(HonzaS): if this keeps on failing, notify the user.
                         Log.Warn(ex, "Keepalive check failed.");
                     }
                 }
@@ -112,7 +113,8 @@ namespace GoodAI.Arnold.Network
             m_cancellationTokenSource.Cancel();
         }
 
-        public async Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, int timeoutMs = CommandTimeoutMs)
+        public async Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback,
+            bool restartAfterSuccess = true, int timeoutMs = CommandTimeoutMs)
         {
             if (m_runningCommand != null)
             {
@@ -123,7 +125,7 @@ namespace GoodAI.Arnold.Network
 
             m_cancellationTokenSource.Cancel();
 
-            var retry = true;  // Count the first try as a retry.
+            var retry = true; // Count the first try as a retry.
 
             StateResponse result = null;
             while (true)
@@ -157,6 +159,7 @@ namespace GoodAI.Arnold.Network
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Request failed");
+                    RestartStateChecking();
                     throw;
                 }
 
@@ -166,13 +169,19 @@ namespace GoodAI.Arnold.Network
 
             m_runningCommand = null;
 
+            if (restartAfterSuccess)
+                RestartStateChecking();
+
+            return result;
+        }
+
+        private void RestartStateChecking()
+        {
             if (m_stateResultAction != null)
             {
                 Log.Debug("Restarting regular state checking");
                 StartStateChecking(m_stateResultAction);
             }
-
-            return result;
         }
     }
 }

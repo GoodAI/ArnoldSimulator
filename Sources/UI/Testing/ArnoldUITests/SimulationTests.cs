@@ -17,6 +17,8 @@ namespace GoodAI.Arnold.UI.Tests
 {
     public class SimulationTests
     {
+        public const int TimeoutMs = 100;
+
         public class DummyCoreLink : ICoreLink
         {
             public bool Fail { get; set; }
@@ -75,7 +77,10 @@ namespace GoodAI.Arnold.UI.Tests
 
         private async Task WaitFor(AutoResetEvent waitEvent)
         {
-            await Task.Factory.StartNew(waitEvent.WaitOne).ConfigureAwait(false);
+            await Task.Factory.StartNew(() =>
+            {
+                Assert.True(waitEvent.WaitOne(TimeoutMs));
+            }).ConfigureAwait(false);
         }
 
         [Fact]
@@ -83,7 +88,7 @@ namespace GoodAI.Arnold.UI.Tests
         {
             ICoreLink coreLink = new DummyCoreLink();
 
-            var coreController = new CoreController(coreLink);
+            var coreController = new CoreController(coreLink, keepaliveIntervalMs: 20);
 
             var waitEvent = new AutoResetEvent(false);
 
