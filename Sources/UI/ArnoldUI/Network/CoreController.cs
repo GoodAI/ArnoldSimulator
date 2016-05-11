@@ -38,7 +38,7 @@ namespace GoodAI.Arnold.Network
         private CancellationTokenSource m_cancellationTokenSource;
 
         private const int CommandTimeoutMs = 15*1000;
-        private const int KeepaliveIntervalMs = 2*1000;
+        private const int KeepaliveIntervalMs = 1000;
         private const int KeepaliveTimeoutMs = KeepaliveIntervalMs;
 
         public bool IsCommandInProgress => m_runningCommand != null;
@@ -78,6 +78,8 @@ namespace GoodAI.Arnold.Network
         {
             while (true)
             {
+                await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
+
                 if (tokenSource.IsCancellationRequested)
                     return;
 
@@ -99,8 +101,6 @@ namespace GoodAI.Arnold.Network
                         Log.Warn(ex, "Keepalive check failed.");
                     }
                 }
-
-                await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
             }
         }
 
