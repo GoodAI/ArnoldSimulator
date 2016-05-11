@@ -14,8 +14,7 @@ namespace GoodAI.Arnold.Network
 {
     public interface ICoreController : IDisposable
     {
-        Task Command(CommandConversation conversation, Action<StateResponse> successAction,
-            Func<TimeoutAction> timeoutAction, int timeoutMs = 0);
+        Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, int timeoutMs = 0);
 
         bool IsCommandInProgress { get; }
         void StartStateChecking(Action<StateResponse> stateResultAction);
@@ -111,23 +110,22 @@ namespace GoodAI.Arnold.Network
             m_cancellationTokenSource.Cancel();
         }
 
-        public async Task Command(CommandConversation conversation, Action<StateResponse> successAction,
-            Func<TimeoutAction> timeoutCallback, int timeoutMs = CommandTimeoutMs)
+        public async Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, int timeoutMs = CommandTimeoutMs)
         {
             if (m_runningCommand != null)
             {
-                Log.Info("A command is already running: {commandType}", conversation.RequestData.Command);
-                return;
+                CommandType commandType = conversation.RequestData.Command;
+                Log.Info("A command is already running: {commandType}", commandType);
+                throw new InvalidOperationException($"A command is already running {commandType}");
             }
 
             m_cancellationTokenSource.Cancel();
 
             var retry = true;  // Count the first try as a retry.
 
+            StateResponse result = null;
             while (true)
             {
-                StateResponse result;
-
                 try
                 {
                     if (retry)
@@ -161,7 +159,6 @@ namespace GoodAI.Arnold.Network
                 }
 
                 Log.Debug("Successful command {command}", conversation.RequestData.Command);
-                successAction(result);
                 break;
             }
 
@@ -172,6 +169,8 @@ namespace GoodAI.Arnold.Network
                 Log.Debug("Restarting regular state checking");
                 StartStateChecking(m_stateResultAction);
             }
+
+            return result;
         }
     }
 }

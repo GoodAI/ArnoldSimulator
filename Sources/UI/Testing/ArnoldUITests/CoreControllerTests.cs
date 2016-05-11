@@ -44,16 +44,13 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            bool first = false;
-            bool second = false;
+            var firstTask = m_controller.Command(conversation, () => TimeoutAction.Wait);
 
-            Task firstTask = m_controller.Command(conversation, response => first = true, () => TimeoutAction.Wait);
-            await m_controller.Command(conversation, response => second = true, () => TimeoutAction.Wait);
+            var exception = Assert.Throws<AggregateException>(() => m_controller.Command(conversation, () => TimeoutAction.Wait).Wait());
+            Assert.Contains(exception.InnerExceptions, ex => ex is InvalidOperationException);
 
-            firstTask.Wait();
-
-            Assert.True(first);
-            Assert.False(second);
+            var firstResult = firstTask.Result;
+            Assert.NotNull(firstResult);
         }
 
         [Fact]
@@ -78,7 +75,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            await m_controller.Command(conversation, response => { }, () => TimeoutAction.Retry, TimeoutMs);
+            await m_controller.Command(conversation, () => TimeoutAction.Retry, TimeoutMs);
 
             Assert.Equal(2, noOfRuns);
         }
@@ -111,7 +108,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            await m_controller.Command(conversation, response => { }, () => TimeoutAction.Wait, TimeoutMs);
+            await m_controller.Command(conversation, () => TimeoutAction.Wait, TimeoutMs);
 
             Assert.Equal(1, noOfRuns);
         }
@@ -144,11 +141,10 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conversation = new CommandConversation(CommandType.Run);
 
-            bool successfulResult = false;
-            await m_controller.Command(conversation, response => { successfulResult = true; }, () => TimeoutAction.Cancel, TimeoutMs);
+            var successfulResult = await m_controller.Command(conversation, () => TimeoutAction.Cancel, TimeoutMs);
 
             Assert.Equal(1, noOfRuns);
-            Assert.False(successfulResult);
+            Assert.Null(successfulResult);
         }
 
         [Fact]
