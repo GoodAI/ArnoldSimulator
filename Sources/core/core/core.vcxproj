@@ -67,12 +67,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeBuildCommandLine>call "$(VCInstallDir)vcvarsall" amd64
-bash -c "make debug-build"</NMakeBuildCommandLine>
+bash -c "make -j4 debug-build"</NMakeBuildCommandLine>
     <NMakeOutput>debug\core.exe</NMakeOutput>
     <NMakeCleanCommandLine>bash -c "make debug-clean"</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>bash -c "make debug-clean"
 call "$(VCInstallDir)vcvarsall" amd64
-bash -c "make debug-build"</NMakeReBuildCommandLine>
+bash -c "make -j4 debug-build"</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\libs\charm\net-debug\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src;..\libs\flatbuffers\include;.\debug</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)debug</OutDir>
@@ -81,12 +81,12 @@ bash -c "make debug-build"</NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeBuildCommandLine>call "$(VCInstallDir)vcvarsall" amd64
-bash -c "make release-build"</NMakeBuildCommandLine>
+bash -c "make -j4 release-build"</NMakeBuildCommandLine>
     <NMakeOutput>release\core.exe</NMakeOutput>
     <NMakeCleanCommandLine>bash -c "make release-clean"</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>bash -c "make release-clean"
 call "$(VCInstallDir)vcvarsall" amd64
-bash -c "make release-build"</NMakeReBuildCommandLine>
+bash -c "make -j4 release-build"</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\libs\charm\net-release\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src;..\libs\flatbuffers\include;.\release</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)release</OutDir>
