@@ -9,7 +9,6 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Logging;
-using OpenTK;
 
 namespace GoodAI.Arnold.Network
 {
@@ -137,42 +136,42 @@ namespace GoodAI.Arnold.Network
                 if (await WaitForEvent(m_requestModelEvent, cancellation) == WaitEventResult.Cancelled)
                     return;
 
-                if (!m_coreController.IsCommandInProgress)
+                if (m_coreController.IsCommandInProgress)
+                    continue;
+
+                try
                 {
-                    try
-                    {
-                        // Request a model diff from the core.
-                        // TODO(HonzaS): If this is a first model request in this "session", request a full model.
-                        var modelResponseTask = m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
+                    // Request a model diff from the core.
+                    // TODO(HonzaS): If this is a first model request in this "session", request a full model.
+                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
 
-                        // Wait until the model has been read. This happens before the first request as well.
-                        if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
-                            return;
+                    // Wait until the model has been read. This happens before the first request as well.
+                    if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
+                        return;
 
-                        // Wait for the previous diff to be applied to the new model (skip if this is the first request).
-                        if (modelResponse != null)
-                            await ApplyModelDiffAsync(modelResponse);
-
-                        // Wait for a new diff from the core.
-                        modelResponse = await modelResponseTask;
-
-                        // Apply current diff to the new model.
+                    // Wait for the previous diff to be applied to the new model (skip if this is the first request).
+                    if (modelResponse != null)
                         await ApplyModelDiffAsync(modelResponse);
 
-                        // Allow visualization to read current (updated) model.
-                        m_isNewModelReady = true;
-                    }
-                    catch (TaskTimeoutException<ModelResponse> timeoutException)
-                    {
-                        // TODO(HonzaS): handle this. Wait for a while and then request a new full model state.
-                        Log.Error(timeoutException, "Model request timed out");
-                    }
-                    catch (Exception exception)
-                    {
-                        Log.Error(exception, "Model retrieval failed");
-                        Stop();
-                        return;
-                    }
+                    // Wait for a new diff from the core.
+                    modelResponse = await modelResponseTask;
+
+                    // Apply current diff to the new model.
+                    await ApplyModelDiffAsync(modelResponse);
+
+                    // Allow visualization to read current (updated) model.
+                    m_isNewModelReady = true;
+                }
+                catch (TaskTimeoutException<ModelResponse> timeoutException)
+                {
+                    // TODO(HonzaS): handle this. Wait for a while and then request a new full model state.
+                    Log.Error(timeoutException, "Model request timed out");
+                }
+                catch (Exception exception)
+                {
+                    Log.Error(exception, "Model retrieval failed");
+                    Stop();
+                    return;
                 }
             }
         }

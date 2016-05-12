@@ -22,12 +22,12 @@ namespace GoodAI.Arnold.Network
             {
                 Region addedRegion = diff.GetAddedRegions(i);
 
-                var lowerBound = addedRegion.LowerBound;
-                var upperBound = addedRegion.UpperBound;
+                Position lowerBound = addedRegion.LowerBound;
+                Position upperBound = addedRegion.UpperBound;
 
                 var size = new Vector3(upperBound.X-lowerBound.X, upperBound.Y-lowerBound.Y, upperBound.Z-lowerBound.Z);
 
-                var position = new Vector3(lowerBound.X, lowerBound.Y, lowerBound.Z) + size/2;
+                Vector3 position = new Vector3(lowerBound.X, lowerBound.Y, lowerBound.Z) + size/2;
 
                 model.Regions.Add(new RegionModel(addedRegion.Name, addedRegion.Type, position, size));
             }
