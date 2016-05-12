@@ -93,7 +93,7 @@ table ModelResponse {
 	removedNeurons:[uint];
 	
 	addedSynapses:[Synapse];
-	SpikedSynapses:[Synapse];
+	spikedSynapses:[Synapse];
 	removedSynapses:[Synapse];
 }
 
