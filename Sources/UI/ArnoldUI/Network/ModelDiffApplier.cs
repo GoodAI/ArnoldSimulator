@@ -29,7 +29,7 @@ namespace GoodAI.Arnold.Network
 
                 Vector3 position = new Vector3(lowerBound.X, lowerBound.Y, lowerBound.Z) + size/2;
 
-                model.Regions.Add(new RegionModel(addedRegion.Name, addedRegion.Type, position, size));
+                model.AddChild(new RegionModel(addedRegion.Name, addedRegion.Type, position, size));
             }
         }
     }

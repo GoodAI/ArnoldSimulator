@@ -103,7 +103,6 @@
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Graphics\Blender.cs" />
-    <Compile Include="Graphics\Models\BrainModel.cs" />
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\Models\GridModel.cs" />
     <Compile Include="Graphics\ModelBase.cs" />

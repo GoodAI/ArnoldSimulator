@@ -68,8 +68,6 @@ namespace GoodAI.Arnold.Core
         void Shutdown();
 
         CoreState State { get; }
-
-        ISimulationModel Model { get; }
     }
 
 
@@ -86,8 +84,6 @@ namespace GoodAI.Arnold.Core
     {
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
-
-        public ISimulationModel Model { get; private set; }
 
         public event EventHandler<StateChangedEventArgs> StateChanged;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
@@ -118,8 +114,6 @@ namespace GoodAI.Arnold.Core
 
             Log.Debug("Starting periodic core state checking");
             m_controller.StartStateChecking(HandleKeepaliveStateResponse);
-
-            Model = new SimulationModel();
         }
 
         public void Dispose()

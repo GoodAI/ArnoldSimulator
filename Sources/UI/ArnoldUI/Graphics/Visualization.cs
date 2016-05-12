@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Graphics.Models;
+using GoodAI.Arnold.Network;
 using GoodAI.Arnold.Properties;
 using OpenTK;
 using OpenTK.Graphics;
@@ -34,9 +35,6 @@ namespace GoodAI.Arnold.Graphics
 
         private readonly ICamera m_camera;
         private readonly GridModel m_gridModel;
-        private readonly BrainModel m_brainModel;
-
-        private readonly IList<IModel> m_models = new List<IModel>();
 
         private PickRay m_pickRay;
         private readonly Dictionary<IModel, float> m_translucentDistanceCache = new Dictionary<IModel, float>();
@@ -46,16 +44,16 @@ namespace GoodAI.Arnold.Graphics
         private float m_fps;
 
         private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
-        private readonly ICoreProxy m_coreProxy;
-        private readonly ISimulationModel m_simulationModel;
         private readonly IConductor m_conductor;
 
-        public Visualization(GLControl glControl, IConductor conductor)
+        private SimulationModel m_simulationModel;
+        private IModelUpdater m_modelUpdater;
+
+        public Visualization(GLControl glControl, IConductor conductor, IModelUpdater modelUpdater)
         {
             m_control = glControl;
             m_conductor = conductor;
-            m_coreProxy = m_conductor.CoreProxy;
-            m_simulationModel = m_coreProxy.Model;
+            m_modelUpdater = modelUpdater;
 
             m_camera = new Camera
             {
@@ -65,11 +63,7 @@ namespace GoodAI.Arnold.Graphics
 
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
 
-            m_models.Add(m_gridModel);
-
-            m_brainModel = new BrainModel();
-
-            m_models.Add(m_brainModel);
+            m_simulationModel = modelUpdater.GetNewModel();
 
             InjectCamera();
         }
@@ -78,13 +72,9 @@ namespace GoodAI.Arnold.Graphics
         {
             // TODO: Nasty! Change!
             // If (when) experts are drawn via shaders, they might not actually need the camera position? (no sprites)
-            foreach (var region in m_simulationModel.Regions)
-            {
+            foreach (var region in m_simulationModel.Models)
                 foreach (ExpertModel expert in region.Experts)
                     expert.Camera = m_camera;
-
-                m_brainModel.AddChild(region);
-            }
         }
 
         public void Init()
@@ -134,12 +124,12 @@ namespace GoodAI.Arnold.Graphics
         {
             m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
-            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Regions);
+            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Models);
             if (expert != null)
                 ToggleExpert(expert);
         }
 
-        private ExpertModel FindFirstExpert(PickRay pickRay, IList<RegionModel> regions)
+        private ExpertModel FindFirstExpert(PickRay pickRay, IEnumerable<RegionModel> regions)
         {
             float closestDistance = float.MaxValue;
             ExpertModel closestExpert = null;
@@ -220,9 +210,14 @@ namespace GoodAI.Arnold.Graphics
             RenderFrame(elapsedMs);
         }
 
+        private IEnumerable<IModel> AllModels()
+        {
+            return new List<IModel> {m_gridModel, m_simulationModel};
+        }
+
         private void UpdateFrame(float elapsedMs)
         {
-            foreach (IModel model in m_models)
+            foreach (IModel model in AllModels())
                 model.Update(elapsedMs);
         }
 
@@ -243,7 +238,7 @@ namespace GoodAI.Arnold.Graphics
             var translucentModels = new List<IModel>();
 
             // TODO: Do this only when necessary.
-            foreach (IModel model in m_models)
+            foreach (IModel model in AllModels())
                 CollectModels(model, ref opaqueModels, ref translucentModels);
 
             // TODO: Only if the camera is moved.
@@ -380,7 +375,7 @@ namespace GoodAI.Arnold.Graphics
 
             var compositeModel = model as ICompositeModel;
             if (compositeModel != null)
-                foreach (IModel child in compositeModel.Models)
+                foreach (IModel child in compositeModel.GenericModels)
                     CollectModels(child, ref opaqueModels, ref translucentModels);
 
             if (model.Translucent)

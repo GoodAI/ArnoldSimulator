@@ -134,7 +134,7 @@ namespace GoodAI.Arnold.Graphics
     /// </summary>
     public interface ICompositeModel : IModel
     {
-        IEnumerable<IModel> Models { get; }
+        IEnumerable<IModel> GenericModels { get; }
     }
 
     /// <summary>
@@ -144,7 +144,9 @@ namespace GoodAI.Arnold.Graphics
     /// <typeparam name="T">Type of the contained models.</typeparam>
     public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : IModel
     {
-        public IEnumerable<IModel> Models => m_children as IEnumerable<IModel>;
+        public IEnumerable<IModel> GenericModels => m_children as IEnumerable<IModel>;
+
+        public IEnumerable<T> Models => m_children;
 
         private readonly IList<T> m_children = new List<T>();
 
