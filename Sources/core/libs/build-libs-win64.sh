@@ -37,8 +37,8 @@ build_charm()
 build_tbb()
 {
     echo "Building TBB"
-    TBB_VERSION=44_20160128
-    TBB_LINK=https://www.threadingbuildingblocks.org/sites/default/files/software_releases/windows/tbb44_20160128oss_win_0.zip
+    TBB_VERSION=44_20160413
+    TBB_LINK=https://www.threadingbuildingblocks.org/sites/default/files/software_releases/windows/tbb44_20160413oss_win.zip
 
     echo "...cleaning"
     rm -r -f tbb
