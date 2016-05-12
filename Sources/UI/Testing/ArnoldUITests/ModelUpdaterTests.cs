@@ -36,7 +36,21 @@ namespace GoodAI.Arnold.UI.Tests
             }
         }
 
+        private class DummyModelDiffApplier : IModelDiffApplier
+        {
+            public Dictionary<SimulationModel, int> DiffsApplied { get; } = new Dictionary<SimulationModel, int>();
+
+            public void ApplyModelDiff(SimulationModel model, ModelResponse diff)
+            {
+                if (!DiffsApplied.ContainsKey(model))
+                    DiffsApplied[model] = 0;
+
+                DiffsApplied[model]++;
+            }
+        }
+
         private readonly ModelUpdater m_modelUpdater;
+        private DummyModelDiffApplier m_modelDiffApplier;
 
         public ModelUpdaterTests()
         {
@@ -44,8 +58,10 @@ namespace GoodAI.Arnold.UI.Tests
             ICoreController coreController = coreControllerMock.Object;
 
             var coreLink = new DummyModelResponseCoreLink();
+            
+            m_modelDiffApplier = new DummyModelDiffApplier();
 
-            m_modelUpdater = new ModelUpdater(coreLink, coreController);
+            m_modelUpdater = new ModelUpdater(coreLink, coreController, m_modelDiffApplier);
         }
 
         [Fact]
@@ -84,7 +100,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             SimulationModel model = WaitAndGetNewModel();  // Third model, apply second diff.
 
-            Assert.Equal(2, model.Regions.Count);
+            Assert.Equal(2, m_modelDiffApplier.DiffsApplied[model]);
 
             m_modelUpdater.Stop();
         }

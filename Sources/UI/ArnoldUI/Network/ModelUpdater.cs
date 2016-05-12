@@ -28,6 +28,7 @@ namespace GoodAI.Arnold.Network
 
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_coreController;
+        private readonly IModelDiffApplier m_modelDiffApplier;
 
         private AutoResetEvent m_requestModelEvent;
         private AutoResetEvent m_modelReadEvent;
@@ -42,10 +43,11 @@ namespace GoodAI.Arnold.Network
 
         private Task m_newModelPreparation;
 
-        public ModelUpdater(ICoreLink coreLink, ICoreController coreController)
+        public ModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
         {
             m_coreLink = coreLink;
             m_coreController = coreController;
+            m_modelDiffApplier = modelDiffApplier;
         }
 
         public void Start()
@@ -180,18 +182,10 @@ namespace GoodAI.Arnold.Network
         {
             return Task.Factory.StartNew(() =>
             {
-                ApplyModelDiff(diff);
+                m_modelDiffApplier.ApplyModelDiff(m_currentModel, diff);
             });
         }
 
-        private void ApplyModelDiff(ModelResponse diff)
-        {
-            for (int i = 0; i < diff.AddedRegionsLength; i++)
-            {
-                Region addedRegion = diff.GetAddedRegions(i);
-                m_currentModel.Regions.Add(new RegionModel(addedRegion.Name, addedRegion.Type, Vector3.UnitX, Vector3.UnitZ));
-            }
-        }
 
         public void Dispose()
         {
