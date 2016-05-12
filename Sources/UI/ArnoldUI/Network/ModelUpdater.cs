@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +42,6 @@ namespace GoodAI.Arnold.Network
 
         private CancellationTokenSource m_cancellation;
 
-        private Task m_newModelPreparation;
 
         public ModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
         {
@@ -131,6 +131,7 @@ namespace GoodAI.Arnold.Network
         {
             // TODO(HonzaS): If a command is in progress and visualization is fast enough, this actively waits (loops).
             // Can we replace this with another reset event?
+            ModelResponse modelResponse = null;
             while (true)
             {
                 if (await WaitForEvent(m_requestModelEvent, cancellation) == WaitEventResult.Cancelled)
@@ -140,28 +141,26 @@ namespace GoodAI.Arnold.Network
                 {
                     try
                     {
-                        // Wait for a new diff from the core.
-                        // TODO(HonzaS): If this is a first model request, request a full model.
-                        ModelResponse modelResponse =
-                            await m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
+                        // Request a model diff from the core.
+                        // TODO(HonzaS): If this is a first model request in this "session", request a full model.
+                        var modelResponseTask = m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
+
+                        // Wait until the model has been read. This happens before the first request as well.
+                        if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
+                            return;
 
                         // Wait for the previous diff to be applied to the new model (skip if this is the first request).
-                        if (m_newModelPreparation != null)
-                            await m_newModelPreparation;
+                        if (modelResponse != null)
+                            await ApplyModelDiffAsync(modelResponse);
+
+                        // Wait for a new diff from the core.
+                        modelResponse = await modelResponseTask;
 
                         // Apply current diff to the new model.
                         await ApplyModelDiffAsync(modelResponse);
 
-                        // Wait until the model has been read.
-                        if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
-                            return;
-
                         // Allow visualization to read current (updated) model.
                         m_isNewModelReady = true;
-
-                        // Start applying the diff to the old model.
-                        // Note that this is not awaited here, because we want to start requesting a new diff asap.
-                        m_newModelPreparation = ApplyModelDiffAsync(modelResponse);
                     }
                     catch (TaskTimeoutException<ModelResponse> timeoutException)
                     {

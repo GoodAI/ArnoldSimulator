@@ -93,14 +93,16 @@ namespace GoodAI.Arnold.UI.Tests
         {
             m_modelUpdater.Start();
 
-            // Get model three times (apply model diff twice).
-            m_modelUpdater.GetNewModel();  // First.
+            SimulationModel model = m_modelUpdater.GetNewModel();  // First, empty model.
 
-            WaitAndGetNewModel();  // Second model, apply first diff.
+            // Apply 100 diffs on the model.
+            for (int i = 0; i < 100; i++)
+                model = WaitAndGetNewModel();
 
-            SimulationModel model = WaitAndGetNewModel();  // Third model, apply second diff.
+            // The model we currently have must have been updated exactly 100 times.
+            Assert.Equal(100, m_modelDiffApplier.DiffsApplied[model]);
 
-            Assert.Equal(2, m_modelDiffApplier.DiffsApplied[model]);
+            // Note: The hidden (buffered) model might have been updated 99, 100 or 101 times in this moment.
 
             m_modelUpdater.Stop();
         }
