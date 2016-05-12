@@ -43,13 +43,13 @@ build_tbb()
     echo "...cleaning"
     rm -r -f tbb
 
-    if [ `ls -1 tbb${TBB_VERSION}oss_win_0.zip 2>/dev/null | wc -l` -le 0 ]
+    if [ `ls -1 tbb${TBB_VERSION}oss_win.zip 2>/dev/null | wc -l` -le 0 ]
     then
-        wget --no-check-certificate --output-document=tbb${TBB_VERSION}oss_win_0.zip $TBB_LINK
+        wget --no-check-certificate --output-document=tbb${TBB_VERSION}oss_win.zip $TBB_LINK
     fi
 
     echo "...unpacking"
-    unzip -q -n tbb${TBB_VERSION}oss_win_0.zip
+    unzip -q -n tbb${TBB_VERSION}oss_win.zip
     mv tbb${TBB_VERSION}oss tbb
 
     cp -f -r tbb/bin/intel64/vc14/* tbb/bin
