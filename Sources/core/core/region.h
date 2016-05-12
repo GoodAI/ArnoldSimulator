@@ -59,6 +59,8 @@ public:
         ConnectorName name;
         std::vector<NeuronId> neurons;
         std::unordered_set<RemoteConnector> connections;
+
+        void pup(PUP::er &p);
     };
 
     typedef std::unordered_map<ConnectorName, Connector> Connectors;

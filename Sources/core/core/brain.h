@@ -55,6 +55,7 @@ struct ViewportUpdate
 class SimulateMsg : public CkMcastBaseMsg, public CMessage_SimulateMsg
 {
 public:
+    bool fullUpdate;
     bool doProgress;
     size_t brainStep;
     Boxes roiBoxes;
@@ -94,6 +95,7 @@ class BrainBase : public CBase_BrainBase
 public:
     struct Terminal
     {
+        bool isSensor;
         TerminalId id;
         ConnectorName name;
         Spike::Type spikeType;
@@ -101,14 +103,15 @@ public:
         size_t neuronCount;
         std::vector<uint8_t> data;
         std::unordered_set<RemoteConnector> connections;
+
+        void pup(PUP::er &p);
     };
 
     typedef std::unordered_map<TerminalId, Terminal> Terminals;
     typedef std::unordered_map<ConnectorName, TerminalId> TerminalNameToId;
     typedef google::sparse_hash_map<NeuronId, TerminalId> NeuronToTerminalId;
 
-    typedef std::pair<RequestId, bool> ViewportUpdateRequest;
-    typedef std::list<ViewportUpdateRequest> ViewportUpdateRequests;
+    typedef std::list<RequestId> ViewportUpdateRequests;
 
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
 
@@ -158,19 +161,25 @@ public:
     void RegionSimulateDone(CkReductionMsg *msg);
 
 private:
-    bool mShouldStop;
-    bool mShouldRunUntilStopped;
+    BrainName mName;
+
+    bool mDoFullViewportUpdate;
+    bool mViewportUpdateFlushed;
+    bool mDoSimulationProgress;
+    bool mIsSimulationRunning;
+
+    size_t mBrainStep;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
+
+    NeuronId mNeuronIdCounter;
+    RegionIndex mRegionIdxCounter;
+    TerminalId mTerminalIdCounter;
 
     Boxes mRoiBoxes;
     ViewportUpdateRequests mViewportUpdateRequests;
     ViewportUpdate mViewportUpdateAccumulator;
 
-    size_t mBrainStep;
-    NeuronId mNeuronIdCounter;
-    RegionIndex mRegionIdxCounter;
-    TerminalId mTerminalIdCounter;
     Terminals mTerminals;
     TerminalNameToId mTerminalNameToId;
     NeuronToTerminalId mNeuronToTerminalId;
@@ -182,7 +191,6 @@ private:
     Connections mConnectionAdditions;
     Connections mConnectionRemovals;
 
-    BrainName mName;
     Body *mBody;
     Brain *mBrain;
 };

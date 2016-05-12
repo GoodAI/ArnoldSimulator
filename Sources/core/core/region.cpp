@@ -37,6 +37,26 @@ Region::Region(RegionBase &base, json &params) : mBase(base)
 {
 }
 
+void RegionBase::Connector::pup(PUP::er &p)
+{
+    p | name;
+    p | neurons;
+
+    if (p.isUnpacking()) {
+        size_t connectionCount; p | connectionCount;
+        for (size_t i = 0; i < connectionCount; ++i) {
+            RemoteConnector connector; p | connector;
+            connections.insert(connector);
+        }
+    } else {
+        size_t connectionCount = connections.size(); p | connectionCount;
+        for (auto it = connections.begin(); it != connections.end(); ++it) {
+            RemoteConnector connector(it->first, it->second);
+            p | connector;
+        }
+    }
+}
+
 Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json &params)
 {
     if (type == ThresholdRegion::Type) {

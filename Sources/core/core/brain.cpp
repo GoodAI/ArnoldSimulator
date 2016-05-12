@@ -54,6 +54,31 @@ Brain::Brain(BrainBase &base, json &params) : mBase(base)
 {
 }
 
+void BrainBase::Terminal::pup(PUP::er &p)
+{
+    p | isSensor;
+    p | id;
+    p | name;
+    p | spikeType;
+    p | firstNeuron;
+    p | neuronCount;
+    p | data;
+
+    if (p.isUnpacking()) {
+        size_t connectionCount; p | connectionCount;
+        for (size_t i = 0; i < connectionCount; ++i) {
+            RemoteConnector connector; p | connector;
+            connections.insert(connector);
+        }
+    } else {
+        size_t connectionCount = connections.size(); p | connectionCount;
+        for (auto it = connections.begin(); it != connections.end(); ++it) {
+            RemoteConnector connector(it->first, it->second);
+            p | connector;
+        }
+    }
+}
+
 Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &params)
 {
     if (type == ThresholdBrain::Type) {
@@ -64,8 +89,9 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 }
 
 BrainBase::BrainBase(const BrainType &type, const BrainParams &params) : 
-    mShouldStop(true), mShouldRunUntilStopped(true),
-    mBrainStepsToRun(0), mBrainStepsPerBodyStep(10), mBrainStep(0),
+    mDoFullViewportUpdate(false), mViewportUpdateFlushed(false),
+    mDoSimulationProgress(false), mIsSimulationRunning(false),
+    mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
     mNeuronIdCounter(0), mRegionIdxCounter(0), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -123,10 +149,10 @@ void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType,
 
 void BrainBase::DeleteTerminal(const ConnectorName &name)
 {
-    auto it = mTerminalNameToId.find(name);
-    if (it == mTerminalNameToId.end()) return;
+    auto itTerm = mTerminalNameToId.find(name);
+    if (itTerm == mTerminalNameToId.end()) return;
 
-    Terminal &terminal = mTerminals.find(it->second)->second;
+    Terminal &terminal = mTerminals.find(itTerm->second)->second;
     for (size_t i = 0; i < terminal.neuronCount; ++i) {
         mNeuronToTerminalId.erase(terminal.firstNeuron + i);
     }
@@ -136,19 +162,19 @@ void BrainBase::DeleteTerminal(const ConnectorName &name)
 
 void BrainBase::ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
 {
-    auto it = mTerminalNameToId.find(name);
-    if (it == mTerminalNameToId.end()) return;
+    auto itTerm = mTerminalNameToId.find(name);
+    if (itTerm == mTerminalNameToId.end()) return;
 
-    Terminal &terminal = mTerminals.find(it->second)->second;
+    Terminal &terminal = mTerminals.find(itTerm->second)->second;
     terminal.connections.insert(destination);
 }
 
 void BrainBase::DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
 {
-    auto it = mTerminalNameToId.find(name);
-    if (it == mTerminalNameToId.end()) return;
+    auto itTerm = mTerminalNameToId.find(name);
+    if (itTerm == mTerminalNameToId.end()) return;
 
-    Terminal &terminal = mTerminals.find(it->second)->second;
+    Terminal &terminal = mTerminals.find(itTerm->second)->second;
     terminal.connections.erase(destination);
 }
 
@@ -195,49 +221,76 @@ void BrainBase::RequestConnectionRemoval(Direction direction,
 
 void BrainBase::PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data)
 {
-    /*
-    RegionTerminalCtx &terminal = regionTerminals[regionTerminalsNameMap[sensorName]];
-    for each binding in terminal.bindings {
-    std::vector<std::pair<GateLaneIdx, PUP::able>> densePayload;
-    densePayload.push_back(make_pair(binding.third, (PUP::able)data);
-    regionsAll[binding.second].ReceivePayloads(binding.first, -1, densePayload, true);
-    interactionsToBeConfirmed++;
+    auto itTerm = mTerminalNameToId.find(terminalName);
+    if (itTerm == mTerminalNameToId.end()) return;
+
+    Terminal &terminal = mTerminals.find(itTerm->second)->second;
+    
+    size_t dataIdx = 0;
+    Spike::BrainSource spikes(terminal.neuronCount);
+    for (size_t i = 0; i < terminal.neuronCount; ++i) {
+        Spike::Data spike;
+        Spike::Initialize(terminal.spikeType, terminal.firstNeuron + i, spike);
+        size_t spikeByteCount = Spike::Edit(spike)->AllBytes(spike);
+        if (dataIdx + spikeByteCount <= data.size()) {
+            Spike::Edit(spike)->ImportAll(spike, data.data() + dataIdx, spikeByteCount);
+            dataIdx += spikeByteCount;
+            spikes.push_back(spike);
+        }
     }
-    */
+
+    Direction direction = terminal.isSensor ? Direction::Forward : Direction::Backward;
+    for (auto it = terminal.connections.begin(); it != terminal.connections.end(); ++it) {
+        gRegions[it->first].ReceiveSensoMotoricData(direction, it->second, spikes);
+    }
 }
 
 void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data)
 {
-    /*
-    RegionTerminalCtx &terminal = regionTerminals[regionTerminalsIdMap[from]];
-    std::swap(data, terminal.data); // or possibly reduce if more than 1 binding
-    */
+    auto itTerm = mTerminalNameToId.find(terminalName);
+    if (itTerm == mTerminalNameToId.end()) return;
+
+    Terminal &terminal = mTerminals.find(itTerm->second)->second;
+    std::swap(data, terminal.data);
 }
 
 void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
 {
+    mDoSimulationProgress = true;
+    mBrainStepsToRun = untilStopped ? SIZE_MAX : brainSteps;
+    if (!mIsSimulationRunning) {
+        thisProxy.Simulate();
+    }
 }
 
 void BrainBase::StopSimulation()
 {
+    mBrainStepsToRun = 0;
 }
 
 void BrainBase::SetBrainStepsPerBodyStep(size_t steps)
 {
+    mBrainStepsPerBodyStep = steps;
 }
 
 void BrainBase::UpdateRegionOfInterest(Boxes &roiBoxes)
 {
+    mRoiBoxes = roiBoxes;
 }
 
 void BrainBase::RequestViewportUpdate(RequestId requestId, bool full)
 {
+    mViewportUpdateRequests.push_back(requestId);
+    mDoFullViewportUpdate = full || mViewportUpdateFlushed;
+    mViewportUpdateFlushed = false;
+    if (!mIsSimulationRunning) {
+        mDoSimulationProgress = false;
+        thisProxy.Simulate();
+    }
 }
 
 void BrainBase::Simulate()
 {
-    // TODO(HonzaS): Incorporate the message handling into the simulation code when it's done.
-
     /*
     bool allSimulated = regionsSimulatedCnt == regionsToBeSimulatedCnt;
     bool allConfirmed = interactionsConfirmedCnt == interactionsToBeConfirmedCnt;
@@ -278,6 +331,19 @@ void BrainBase::Simulate()
 
 void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
 {
+    for (auto it = data.begin(); it != data.end(); ++it) {
+        auto itTerm = mNeuronToTerminalId.find(it->first);
+        if (itTerm == mNeuronToTerminalId.end()) continue;
+
+        Terminal &terminal = mTerminals.find(itTerm->second)->second;
+          
+        size_t spikeByteCount = Spike::Edit(it->second)->AllBytes(it->second);
+        size_t spikeOffset = (it->first - terminal.firstNeuron) * spikeByteCount;
+        size_t requiredSize = spikeOffset + spikeByteCount;
+        if (terminal.data.size() < requiredSize) terminal.data.resize(requiredSize);
+        Spike::Edit(it->second)->ExportAll(it->second,
+            terminal.data.data() + spikeOffset, spikeByteCount);
+    }
 }
 
 void BrainBase::ChangeTopologyDone(long triggeredNeurons)
