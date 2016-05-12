@@ -66,7 +66,7 @@ namespace GoodAI.Arnold.Network.Messages
                 var regionName = builder.CreateString(region.Name);
                 var regionType = builder.CreateString(region.Type);
 
-                Vector3 lowerBound = region.Position;
+                Vector3 lowerBound = region.Position - region.Size/2;
                 var lowerBounds = Position.CreatePosition(builder, lowerBound.X, lowerBound.Y, lowerBound.Z);
                 Vector3 size = region.Size;
                 var upperBounds = Position.CreatePosition(builder, lowerBound.X + size.X, lowerBound.Y + size.Y, lowerBound.Z + size.Z);

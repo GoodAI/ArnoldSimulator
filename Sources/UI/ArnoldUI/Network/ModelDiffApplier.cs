@@ -21,7 +21,15 @@ namespace GoodAI.Arnold.Network
             for (int i = 0; i < diff.AddedRegionsLength; i++)
             {
                 Region addedRegion = diff.GetAddedRegions(i);
-                model.Regions.Add(new RegionModel(addedRegion.Name, addedRegion.Type, Vector3.UnitX, Vector3.UnitZ));
+
+                var lowerBound = addedRegion.LowerBound;
+                var upperBound = addedRegion.UpperBound;
+
+                var size = new Vector3(upperBound.X-lowerBound.X, upperBound.Y-lowerBound.Y, upperBound.Z-lowerBound.Z);
+
+                var position = new Vector3(lowerBound.X, lowerBound.Y, lowerBound.Z) + size/2;
+
+                model.Regions.Add(new RegionModel(addedRegion.Name, addedRegion.Type, position, size));
             }
         }
     }
