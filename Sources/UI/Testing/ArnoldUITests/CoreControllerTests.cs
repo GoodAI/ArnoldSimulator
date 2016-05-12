@@ -17,7 +17,7 @@ namespace GoodAI.Arnold.UI.Tests
         private readonly CoreController m_controller;
         private readonly Mock<ICoreLink> m_coreLinkMock;
 
-        private const int TimeoutMs = 50;
+        private const int TimeoutMs = 100;
 
         public CoreControllerTests()
         {
@@ -158,7 +158,7 @@ namespace GoodAI.Arnold.UI.Tests
                 });
 
             var stateUpdatedEvent = new AutoResetEvent(false);
-            m_controller.StartStateChecking(timeoutResult => stateUpdatedEvent.Set());
+            m_controller.StartStateChecking(stateResponse => stateUpdatedEvent.Set());
             Assert.True(stateUpdatedEvent.WaitOne(TimeoutMs));
         }
     }

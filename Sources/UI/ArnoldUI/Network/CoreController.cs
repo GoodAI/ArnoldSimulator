@@ -57,52 +57,47 @@ namespace GoodAI.Arnold.Network
                 throw new ArgumentNullException(nameof(stateResultAction));
 
             m_stateResultAction = stateResultAction;
-            try
-            {
-                m_cancellationTokenSource.Cancel();
-                m_cancellationTokenSource = new CancellationTokenSource();
 
-#pragma warning disable 4014 // This is supposed to start a parallel task and continue.
-                RepeatGetStateAsync(m_keepaliveIntervalMs, m_cancellationTokenSource);
-#pragma warning restore 4014
-            }
-            catch (TaskCanceledException)
-            {
-                Log.Debug("Delay cancelled.");  // TODO(Premek): remove.
-            }
-            catch (AggregateException ex)
-            {
-                Log.Warn(ex, "Error in state checking.");
-            }
+            m_cancellationTokenSource.Cancel();
+            m_cancellationTokenSource = new CancellationTokenSource();
+
+            Task task = RepeatGetStateAsync(m_keepaliveIntervalMs, m_cancellationTokenSource);
         }
 
         private async Task RepeatGetStateAsync(int repeatMillis, CancellationTokenSource tokenSource)
         {
             while (true)
             {
-                await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
-
-                if (tokenSource.IsCancellationRequested)
-                    return;
-
-                if (!IsCommandInProgress)
+                try
                 {
-                    try
-                    {
-                        // TODO(): Handle timeout and other exceptions here.
-                        StateResponse stateCheckResult =
-                            await m_coreLink.Request(new GetStateConversation(), DefaultKeepaliveTimeoutMs)
-                                .ConfigureAwait(false);
+                    await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is TaskCanceledException)
+                        return;
 
-                        // Check this again - the cancellation could have come during the request.
-                        if (!tokenSource.IsCancellationRequested)
-                            m_stateResultAction(stateCheckResult);
-                    }
-                    catch (Exception ex)
-                    {
-                        // TODO(HonzaS): if this keeps on failing, notify the user.
-                        Log.Warn(ex, "Keepalive check failed.");
-                    }
+                    Log.Warn(ex, "Task.Delay threw an exception");
+                }
+
+                if (IsCommandInProgress)
+                    continue;
+
+                try
+                {
+                    // TODO(): Handle timeout and other exceptions here.
+                    StateResponse stateCheckResult =
+                        await m_coreLink.Request(new GetStateConversation(), DefaultKeepaliveTimeoutMs)
+                            .ConfigureAwait(false);
+
+                    // Check this again - the cancellation could have come during the request.
+                    if (!tokenSource.IsCancellationRequested)
+                        m_stateResultAction(stateCheckResult);
+                }
+                catch (Exception ex)
+                {
+                    // TODO(HonzaS): if this keeps on failing, notify the user.
+                    Log.Warn(ex, "Keepalive check failed.");
                 }
             }
         }
