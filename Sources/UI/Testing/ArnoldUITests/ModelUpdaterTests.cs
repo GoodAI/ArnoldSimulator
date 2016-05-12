@@ -6,8 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using FlatBuffers;
 using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Network.Messages;
 using Moq;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
@@ -24,49 +28,81 @@ namespace GoodAI.Arnold.UI.Tests
 
                 return Task<TResponse>.Factory.StartNew(() =>
                 {
-                    return new TResponse();
+                    var regionModel = new RegionModel("foo", "bar", Vector3.One, Vector3.Zero);
+
+                    return ModelResponseBuilder.Build(new List<RegionModel> {regionModel})
+                        .GetResponse(new ModelResponse()) as TResponse;
                 });
             }
         }
 
-        private readonly ICoreController m_coreController;
-        private readonly DummyModelResponseCoreLink m_coreLink;
         private readonly ModelUpdater m_modelUpdater;
 
         public ModelUpdaterTests()
         {
             var coreControllerMock = new Mock<ICoreController>();
-            m_coreController = coreControllerMock.Object;
+            ICoreController coreController = coreControllerMock.Object;
 
-            m_coreLink = new DummyModelResponseCoreLink();
-            m_modelUpdater = new ModelUpdater(m_coreLink, m_coreController);
+            var coreLink = new DummyModelResponseCoreLink();
+
+            m_modelUpdater = new ModelUpdater(coreLink, coreController);
         }
 
         [Fact]
         public void GetsModelSeveralTimes()
         {
-            const int timeoutMs = 100;
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             m_modelUpdater.Start();
+
+            // There is an "initial" empty model.
+            Assert.NotNull(m_modelUpdater.GetNewModel());
 
             for (int i = 0; i < 5; i++)
             {
+                // Now that the first model was taken, there is no other to be had.
                 Assert.Null(m_modelUpdater.GetNewModel());
 
-                m_modelUpdater.AllowModelRequest();
+                WaitAndGetNewModel();
 
-                while (true)
-                {
-                    if (m_modelUpdater.GetNewModel() != null)
-                        break;
-
-                    Assert.True(stopwatch.ElapsedMilliseconds < timeoutMs);
-                }
+                // Repeat several times to see that the dynamics work repeatedly.
             }
 
+            // A new model was not allowed to be requested, so there is no update.
+            Assert.Null(m_modelUpdater.GetNewModel());
+
             m_modelUpdater.Stop();
+        }
+
+        [Fact]
+        public void IncrementallyUpdatesModels()
+        {
+            m_modelUpdater.Start();
+
+            // Get model three times (apply model diff twice).
+            m_modelUpdater.GetNewModel();  // First.
+
+            WaitAndGetNewModel();  // Second model, apply first diff.
+
+            SimulationModel model = WaitAndGetNewModel();  // Third model, apply second diff.
+
+            Assert.Equal(2, model.Regions.Count);
+
+            m_modelUpdater.Stop();
+        }
+
+        private SimulationModel WaitAndGetNewModel()
+        {
+            const int timeoutMs = 100;
+            var stopwatch = new Stopwatch();
+
+            SimulationModel third;
+            while (true)
+            {
+                if ((third = m_modelUpdater.GetNewModel()) != null)
+                    break;
+
+                Assert.True(stopwatch.ElapsedMilliseconds < timeoutMs);
+            }
+            return third;
         }
     }
 }

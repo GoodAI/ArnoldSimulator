@@ -6,13 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Logging;
+using OpenTK;
 
 namespace GoodAI.Arnold.Network
 {
     public interface IModelUpdater : IDisposable
     {
-        void AllowModelRequest();
         SimulationModel GetNewModel();
         void Start();
         void Stop();
@@ -32,8 +33,14 @@ namespace GoodAI.Arnold.Network
         private AutoResetEvent m_modelReadEvent;
 
         private bool m_isNewModelReady;
-        private SimulationModel m_newModel;
-        private CancellationTokenSource m_cancellationTokenSource;
+
+        // Double buffering.
+        private SimulationModel m_currentModel;
+        private SimulationModel m_previousModel;
+
+        private CancellationTokenSource m_cancellation;
+
+        private Task m_newModelPreparation;
 
         public ModelUpdater(ICoreLink coreLink, ICoreController coreController)
         {
@@ -46,16 +53,22 @@ namespace GoodAI.Arnold.Network
             Stop();
 
             m_requestModelEvent = new AutoResetEvent(false);
-            m_modelReadEvent = new AutoResetEvent(true);
+            m_modelReadEvent = new AutoResetEvent(false);
 
-            m_cancellationTokenSource = new CancellationTokenSource();
-            Task task = RepeatGetModelAsync(m_cancellationTokenSource);
+            m_cancellation = new CancellationTokenSource();
+            Task task = RepeatGetModelAsync(m_cancellation);
+
+            m_currentModel = new SimulationModel();
+            m_previousModel = new SimulationModel();
+
+            // The empty model is what we have at the beginning.
+            m_isNewModelReady = true;
         }
 
         public void Stop()
         {
-            if (m_cancellationTokenSource != null && !m_cancellationTokenSource.IsCancellationRequested)
-                m_cancellationTokenSource?.Cancel();
+            if (m_cancellation != null && !m_cancellation.IsCancellationRequested)
+                m_cancellation?.Cancel();
 
             // Disposal releases all the waiting threads. That will make the repeating task stop due to the cancellation.
             m_requestModelEvent?.Dispose();
@@ -63,14 +76,6 @@ namespace GoodAI.Arnold.Network
 
             m_requestModelEvent = null;
             m_modelReadEvent = null;
-        }
-
-        /// <summary>
-        /// Called from Visualization. This limits the speed of requests.
-        /// </summary>
-        public void AllowModelRequest()
-        {
-            m_requestModelEvent.Set();
         }
 
         /// <summary>
@@ -86,11 +91,15 @@ namespace GoodAI.Arnold.Network
             if (m_isNewModelReady)
             {
                 m_isNewModelReady = false;
-                result = m_newModel;
+                result = m_currentModel;
+                m_currentModel = m_previousModel;
+                m_previousModel = result;
+
+                // Allow the network thread to replace the model with whatever it has buffered.
+                m_modelReadEvent.Set();
             }
 
-            // Allow the network thread to replace the model with whatever it has buffered.
-            m_modelReadEvent.Set();
+            m_requestModelEvent.Set();
 
             // A new model is ready - retrieve it.
             return result;
@@ -102,66 +111,86 @@ namespace GoodAI.Arnold.Network
             Cancelled
         }
 
-        private static Task<WaitEventResult> WaitForEvent(AutoResetEvent resetEvent, CancellationTokenSource cancellationTokenSource)
+        private static Task<WaitEventResult> WaitForEvent(AutoResetEvent resetEvent, CancellationTokenSource cancellation)
         {
             return Task<WaitEventResult>.Factory.StartNew(() =>
             {
                 while (!resetEvent.WaitOne(TimeoutMs))
-                    if (cancellationTokenSource.IsCancellationRequested)
+                    if (cancellation.IsCancellationRequested)
                         return WaitEventResult.Cancelled;
 
-                return WaitEventResult.EventSet;
+                // Even if the event fired, check if cancellation was done.
+                return cancellation.IsCancellationRequested ? WaitEventResult.Cancelled : WaitEventResult.EventSet;
             });
         }
 
         // TODO(HonzaS): Add filtering.
-        private async Task RepeatGetModelAsync(CancellationTokenSource cancellationTokenSource)
+        private async Task RepeatGetModelAsync(CancellationTokenSource cancellation)
         {
             // TODO(HonzaS): If a command is in progress and visualization is fast enough, this actively waits (loops).
             // Can we replace this with another reset event?
             while (true)
             {
-                if (await WaitForEvent(m_requestModelEvent, cancellationTokenSource) == WaitEventResult.Cancelled)
-                    return;
-
-                if (cancellationTokenSource.IsCancellationRequested)
+                if (await WaitForEvent(m_requestModelEvent, cancellation) == WaitEventResult.Cancelled)
                     return;
 
                 if (!m_coreController.IsCommandInProgress)
                 {
-                    // TODO(HonzaS): If this is a first model request, request a full model.
-
                     try
                     {
+                        // Wait for a new diff from the core.
+                        // TODO(HonzaS): If this is a first model request, request a full model.
                         ModelResponse modelResponse =
                             await m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
 
-                        // Process the model message.
-                        SimulationModel newModel = ProcessModel(modelResponse);
+                        // Wait for the previous diff to be applied to the new model (skip if this is the first request).
+                        if (m_newModelPreparation != null)
+                            await m_newModelPreparation;
 
-                        // Wait for the visualization to read the previous model.
-                        if (await WaitForEvent(m_modelReadEvent, cancellationTokenSource) == WaitEventResult.Cancelled)
+                        // Apply current diff to the new model.
+                        await ApplyModelDiffAsync(modelResponse);
+
+                        // Wait until the model has been read.
+                        if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
                             return;
 
-                        if (cancellationTokenSource.IsCancellationRequested)
-                            return;
-
-                        m_newModel = newModel;
+                        // Allow visualization to read current (updated) model.
                         m_isNewModelReady = true;
+
+                        // Start applying the diff to the old model.
+                        // Note that this is not awaited here, because we want to start requesting a new diff asap.
+                        m_newModelPreparation = ApplyModelDiffAsync(modelResponse);
                     }
-                    catch (Exception ex)
+                    catch (TaskTimeoutException<ModelResponse> timeoutException)
                     {
-                        // TODO(HonzaS): Handle TaskTimeoutException better - wait, exponential backoff, ...
-                        Log.Error(ex, "Model retrieval failed");
+                        // TODO(HonzaS): handle this. Wait for a while and then request a new full model state.
+                        Log.Error(timeoutException, "Model request timed out");
+                    }
+                    catch (Exception exception)
+                    {
+                        Log.Error(exception, "Model retrieval failed");
+                        Stop();
+                        return;
                     }
                 }
             }
         }
 
-        private static SimulationModel ProcessModel(ModelResponse data)
+        private Task ApplyModelDiffAsync(ModelResponse diff)
         {
-            var model = new SimulationModel();
-            return model;
+            return Task.Factory.StartNew(() =>
+            {
+                ApplyModelDiff(diff);
+            });
+        }
+
+        private void ApplyModelDiff(ModelResponse diff)
+        {
+            for (int i = 0; i < diff.AddedRegionsLength; i++)
+            {
+                Region addedRegion = diff.GetAddedRegions(i);
+                m_currentModel.Regions.Add(new RegionModel(addedRegion.Name, addedRegion.Type, Vector3.UnitX, Vector3.UnitZ));
+            }
         }
 
         public void Dispose()
