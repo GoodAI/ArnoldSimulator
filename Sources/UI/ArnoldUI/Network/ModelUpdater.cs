@@ -20,7 +20,8 @@ namespace GoodAI.Arnold.Network
 
     public class ModelUpdater : IModelUpdater
     {
-        public ILog Log { get; set; }
+        // Injected.
+        public ILog Log { get; set; } = NullLogger.Instance;
 
         private const int TimeoutMs = 1000;
 
@@ -55,6 +56,13 @@ namespace GoodAI.Arnold.Network
         {
             if (m_cancellationTokenSource != null && !m_cancellationTokenSource.IsCancellationRequested)
                 m_cancellationTokenSource?.Cancel();
+
+            // Disposal releases all the waiting threads. That will make the repeating task stop due to the cancellation.
+            m_requestModelEvent?.Dispose();
+            m_modelReadEvent?.Dispose();
+
+            m_requestModelEvent = null;
+            m_modelReadEvent = null;
         }
 
         /// <summary>

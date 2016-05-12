@@ -9,6 +9,8 @@ using OpenTK;
 
 namespace GoodAI.Arnold.Network.Messages
 {
+    // NOTE: All of these are mostly used for stubbing/testing.
+
     public static class ResponseMessageBuilder
     {
         public const int BufferInitialSize = 64;
