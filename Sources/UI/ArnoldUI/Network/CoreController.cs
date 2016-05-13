@@ -17,7 +17,7 @@ namespace GoodAI.Arnold.Network
         Task<StateResponse> Command(CommandConversation conversation, Func<TimeoutAction> timeoutCallback, bool restartKeepaliveOnSuccess = true, int timeoutMs = 0);
 
         bool IsCommandInProgress { get; }
-        void StartStateChecking(Action<StateResponse> stateResultAction);
+        void StartStateChecking(Action<KeepaliveResult> stateResultAction);
     }
 
     public enum TimeoutAction
@@ -25,6 +25,28 @@ namespace GoodAI.Arnold.Network
         Wait,
         Retry,
         Cancel
+    }
+
+    // One value, just used to describe the constructor that sets RequestFailed to true.
+    public enum KeepaliveResultTag
+    {
+        RequestFailed
+    }
+
+    public class KeepaliveResult
+    {
+        public KeepaliveResult(StateResponse stateResponse)
+        {
+            StateResponse = stateResponse;
+        }
+
+        public KeepaliveResult(KeepaliveResultTag result)
+        {
+            RequestFailed = true;
+        }
+        
+        public bool RequestFailed { get; }
+        public StateResponse StateResponse { get; }
     }
 
     public class CoreController : ICoreController
@@ -35,7 +57,7 @@ namespace GoodAI.Arnold.Network
         private readonly ICoreLink m_coreLink;
         private readonly int m_keepaliveIntervalMs;
         private Task<StateResponse> m_runningCommand;
-        private Action<StateResponse> m_stateResultAction;
+        private Action<KeepaliveResult> m_stateResultAction;
         private CancellationTokenSource m_cancellationTokenSource;
 
         private const int CommandTimeoutMs = 15*1000;
@@ -51,7 +73,7 @@ namespace GoodAI.Arnold.Network
             m_cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public void StartStateChecking(Action<StateResponse> stateResultAction)
+        public void StartStateChecking(Action<KeepaliveResult> stateResultAction)
         {
             if (stateResultAction == null)
                 throw new ArgumentNullException(nameof(stateResultAction));
@@ -92,12 +114,13 @@ namespace GoodAI.Arnold.Network
 
                     // Check this again - the cancellation could have come during the request.
                     if (!tokenSource.IsCancellationRequested)
-                        m_stateResultAction(stateCheckResult);
+                        m_stateResultAction(new KeepaliveResult(stateCheckResult));
                 }
                 catch (Exception ex)
                 {
                     // TODO(HonzaS): if this keeps on failing, notify the user.
-                    Log.Warn(ex, "Keepalive check failed.");
+                    Log.Warn("Periodic state check failed: {message}", ex.Message);
+                    m_stateResultAction(new KeepaliveResult(KeepaliveResultTag.RequestFailed));
                 }
             }
         }

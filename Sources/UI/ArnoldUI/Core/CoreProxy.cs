@@ -35,6 +35,7 @@ namespace GoodAI.Arnold.Core
         event EventHandler<StateChangedEventArgs> StateChanged;
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         event EventHandler<TimeoutActionEventArgs> CommandTimedOut;
+        event EventHandler<EventArgs> Disconnected;
 
         /// <summary>
         /// Loads an agent into the handler, creates a new simulation.
@@ -90,6 +91,7 @@ namespace GoodAI.Arnold.Core
         public event EventHandler<StateChangedEventArgs> StateChanged;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         public event EventHandler<TimeoutActionEventArgs> CommandTimedOut;
+        public event EventHandler<EventArgs> Disconnected;
 
         public CoreState State
         {
@@ -108,6 +110,10 @@ namespace GoodAI.Arnold.Core
 
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_controller;
+
+        private const int FailCountBeforeDisconnect = 3;
+
+        private int m_failCount;
 
         public IModelUpdater ModelUpdater { get; }
 
@@ -204,9 +210,22 @@ namespace GoodAI.Arnold.Core
             };
         }
 
-        private void HandleKeepaliveStateResponse(StateResponse response)
+        private void HandleKeepaliveStateResponse(KeepaliveResult keepaliveResult)
         {
-            HandleStateResponse(response);
+            if (keepaliveResult.RequestFailed)
+            {
+                m_failCount++;
+
+                if (m_failCount < FailCountBeforeDisconnect) return;
+
+                m_failCount = 0;
+                Disconnected?.Invoke(this, EventArgs.Empty);
+
+                return;
+            }
+
+            m_failCount = 0;
+            HandleStateResponse(keepaliveResult.StateResponse);
         }
 
         private void HandleStateResponse(StateResponse response)

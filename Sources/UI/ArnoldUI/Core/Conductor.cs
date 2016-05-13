@@ -128,6 +128,7 @@ namespace GoodAI.Arnold.Core
             CoreProxy.StateChanged += OnCoreStateChanged;
             CoreProxy.StateChangeFailed += OnCoreStateChangeFailed;
             CoreProxy.CommandTimedOut += OnCoreCommandTimedOut;
+            CoreProxy.Disconnected += OnDisconnected;
         }
 
         private void UnregisterCoreEvents()
@@ -135,6 +136,7 @@ namespace GoodAI.Arnold.Core
             CoreProxy.StateChanged -= OnCoreStateChanged;
             CoreProxy.StateChangeFailed -= OnCoreStateChangeFailed;
             CoreProxy.CommandTimedOut -= OnCoreCommandTimedOut;
+            CoreProxy.Disconnected -= OnDisconnected;
         }
 
         public void Disconnect()
@@ -173,6 +175,11 @@ namespace GoodAI.Arnold.Core
             }
         }
 
+        private void OnDisconnected(object sender, EventArgs args)
+        {
+            Disconnect();
+        }
+
         private void AfterShutdown()
         {
             if (m_process != null)
@@ -189,6 +196,8 @@ namespace GoodAI.Arnold.Core
             CoreState oldState = CoreProxy.State;
 
             UnregisterCoreEvents();
+
+            CoreProxy.Dispose();
             CoreProxy = null;
 
             StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, CoreState.Disconnected));
