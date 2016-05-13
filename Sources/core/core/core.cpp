@@ -226,7 +226,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     auto regionName = builder.CreateString("testname");
     auto regionType = builder.CreateString("testtype");
     auto lowerBound = Network::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
-    auto upperBound = Network::CreatePosition(builder, 40.0f, 20.0f, 15.0f);
+    auto upperBound = Network::CreatePosition(builder, 50.0f, 40.0f, 45.0f);
     auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
 
     addedRegionsOffsets.push_back(regionOffset);
