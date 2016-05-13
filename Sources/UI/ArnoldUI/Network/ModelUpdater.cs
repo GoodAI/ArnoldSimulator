@@ -86,6 +86,9 @@ namespace GoodAI.Arnold.Network
         /// <returns></returns>
         public SimulationModel GetNewModel()
         {
+            if (m_requestModelEvent == null)
+                throw new InvalidOperationException("Start() was not called");
+
             SimulationModel result = null;
 
             // If a new model is not ready, return null.

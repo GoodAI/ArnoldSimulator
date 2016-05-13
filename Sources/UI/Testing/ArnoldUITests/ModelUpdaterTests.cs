@@ -64,6 +64,22 @@ namespace GoodAI.Arnold.UI.Tests
             m_modelUpdater = new ModelUpdater(coreLink, coreController, m_modelDiffApplier);
         }
 
+        private SimulationModel WaitAndGetNewModel()
+        {
+            const int timeoutMs = 100;
+            var stopwatch = new Stopwatch();
+
+            SimulationModel third;
+            while (true)
+            {
+                if ((third = m_modelUpdater.GetNewModel()) != null)
+                    break;
+
+                Assert.True(stopwatch.ElapsedMilliseconds < timeoutMs);
+            }
+            return third;
+        }
+
         [Fact]
         public void GetsModelSeveralTimes()
         {
@@ -107,20 +123,10 @@ namespace GoodAI.Arnold.UI.Tests
             m_modelUpdater.Stop();
         }
 
-        private SimulationModel WaitAndGetNewModel()
+        [Fact]
+        public void GetNewModelFailsWhenNotStarted()
         {
-            const int timeoutMs = 100;
-            var stopwatch = new Stopwatch();
-
-            SimulationModel third;
-            while (true)
-            {
-                if ((third = m_modelUpdater.GetNewModel()) != null)
-                    break;
-
-                Assert.True(stopwatch.ElapsedMilliseconds < timeoutMs);
-            }
-            return third;
+            Assert.Throws<InvalidOperationException>(() => m_modelUpdater.GetNewModel());
         }
     }
 }

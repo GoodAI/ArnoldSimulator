@@ -47,7 +47,6 @@ namespace GoodAI.Arnold.Graphics
         private readonly IConductor m_conductor;
 
         private SimulationModel m_simulationModel;
-        private IModelUpdater m_modelUpdater;
 
         public Visualization(GLControl glControl, IConductor conductor)
         {
@@ -121,6 +120,9 @@ namespace GoodAI.Arnold.Graphics
         {
             m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
+            if (m_simulationModel == null)
+                return;
+
             ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Models);
             if (expert != null)
                 ToggleExpert(expert);
@@ -189,6 +191,10 @@ namespace GoodAI.Arnold.Graphics
 
         public void Step(InputInfo inputInfo, float elapsedMs)
         {
+            m_simulationModel = m_conductor.ModelUpdater?.GetNewModel();
+            // TODO(HonzaS): When we have incremental updates, optimize this to not go through all experts.
+            InjectCamera();
+
             m_fps = 1000/elapsedMs;
 
             if (inputInfo.CameraRotated)
