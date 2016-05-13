@@ -91,6 +91,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Composition\ModelUpdaterFactory.cs" />
     <Compile Include="Composition\PropertyInjectingFactory.cs" />
     <Compile Include="Core\Conductor.cs" />
     <Compile Include="Core\CoreProcess.cs" />

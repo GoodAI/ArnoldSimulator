@@ -38,10 +38,15 @@ namespace GoodAI.Arnold
                 predicateContext => predicateContext.Consumer == null);
 
             container.RegisterSingleton<IResponseParser, CoreResponseParser>();
-            container.RegisterSingleton<ICoreProxyFactory, CoreProxyFactory>();
-            container.RegisterSingleton<ICoreProcessFactory, CoreProcessFactory>();
             container.RegisterSingleton<ICoreLinkFactory, CoreLinkFactory>();
             container.RegisterSingleton<ICoreControllerFactory, CoreControllerFactory>();
+
+            container.RegisterSingleton<ICoreProcessFactory, CoreProcessFactory>();
+            container.RegisterSingleton<ICoreProxyFactory, CoreProxyFactory>();
+
+            container.RegisterSingleton<IModelDiffApplier, ModelDiffApplier>();
+            container.RegisterSingleton<IModelUpdaterFactory, ModelUpdaterFactory>();
+
             container.RegisterSingleton<IConductor, Conductor>();
             container.RegisterSingleton<UIMain>();
             container.RegisterSingleton<LogForm>();

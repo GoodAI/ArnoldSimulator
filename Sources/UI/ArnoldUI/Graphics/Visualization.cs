@@ -49,11 +49,10 @@ namespace GoodAI.Arnold.Graphics
         private SimulationModel m_simulationModel;
         private IModelUpdater m_modelUpdater;
 
-        public Visualization(GLControl glControl, IConductor conductor, IModelUpdater modelUpdater)
+        public Visualization(GLControl glControl, IConductor conductor)
         {
             m_control = glControl;
             m_conductor = conductor;
-            m_modelUpdater = modelUpdater;
 
             m_camera = new Camera
             {
@@ -63,9 +62,7 @@ namespace GoodAI.Arnold.Graphics
 
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
 
-            m_simulationModel = modelUpdater.GetNewModel();
-
-            InjectCamera();
+            //InjectCamera();
         }
 
         private void InjectCamera()
@@ -218,7 +215,7 @@ namespace GoodAI.Arnold.Graphics
         private void UpdateFrame(float elapsedMs)
         {
             foreach (IModel model in AllModels())
-                model.Update(elapsedMs);
+                model?.Update(elapsedMs);
         }
 
         private void RenderFrame(float elapsedMs)
@@ -370,6 +367,10 @@ namespace GoodAI.Arnold.Graphics
 
         private static void CollectModels(IModel model, ref List<IModel> opaqueModels, ref List<IModel> translucentModels)
         {
+            // This can happen if there is no SimulationModel (yet?).
+            if (model == null)
+                return;
+
             if (!model.Visible)
                 return;
 

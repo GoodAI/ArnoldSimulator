@@ -5,10 +5,8 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Project;
 using GoodAI.Logging;
-using GoodAI.Net.ConverseSharp;
 
 namespace GoodAI.Arnold.Core
 {
@@ -30,8 +28,8 @@ namespace GoodAI.Arnold.Core
         bool IsConnected { get; }
 
         CoreState CoreState { get; }
-
         ICoreLink CoreLink { get; }
+        IModelUpdater ModelUpdater { get; }
 
         void PerformBrainStep();
     }
@@ -60,17 +58,23 @@ namespace GoodAI.Arnold.Core
         private readonly ICoreLinkFactory m_coreLinkFactory;
 
         private readonly ICoreProxyFactory m_coreProxyFactory;
+        private readonly IModelUpdaterFactory m_modelUpdaterFactory;
+
         public ICoreProxy CoreProxy { get; private set; }
+
+        public IModelUpdater ModelUpdater => CoreProxy?.ModelUpdater;
 
         private readonly ICoreControllerFactory m_coreControllerFactory;
 
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
-            ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory)
+            ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory,
+            IModelUpdaterFactory modelUpdaterFactory)
         {
             m_coreProcessFactory = coreProcessFactory;
             m_coreLinkFactory = coreLinkFactory;
             m_coreControllerFactory = coreControllerFactory;
             m_coreProxyFactory = coreProxyFactory;
+            m_modelUpdaterFactory = modelUpdaterFactory;
         }
 
         public void ConnectToCore(EndPoint endPoint = null)
@@ -105,9 +109,11 @@ namespace GoodAI.Arnold.Core
             // TODO(HonzaS): Check here if we can connect to the core so that we could abort immediatelly.
             CoreLink = coreLink;
 
+            // TODO(HonzaS): Move these inside the factory method.
             ICoreController coreController = m_coreControllerFactory.Create(coreLink);
+            IModelUpdater modelUpdater = m_modelUpdaterFactory.Create(coreLink, coreController);
 
-            CoreProxy = m_coreProxyFactory.Create(coreLink, coreController);
+            CoreProxy = m_coreProxyFactory.Create(coreLink, coreController, modelUpdater);
 
             RegisterCoreEvents();
         }

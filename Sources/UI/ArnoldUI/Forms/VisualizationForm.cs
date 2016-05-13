@@ -28,8 +28,7 @@ namespace GoodAI.Arnold.Forms
         {
             InitializeComponent();
 
-            throw new NotImplementedException("ModelUpdater missing");
-            //m_visualization = new Visualization(glControl, conductor, modelUpdater);
+            m_visualization = new Visualization(glControl, conductor);
         }
 
         // Resize the glControl

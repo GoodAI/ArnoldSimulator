@@ -68,6 +68,8 @@ namespace GoodAI.Arnold.Core
         void Shutdown();
 
         CoreState State { get; }
+
+        IModelUpdater ModelUpdater { get; }
     }
 
 
@@ -107,10 +109,13 @@ namespace GoodAI.Arnold.Core
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_controller;
 
-        public CoreProxy(ICoreLink coreLink, ICoreController controller)
+        public IModelUpdater ModelUpdater { get; }
+
+        public CoreProxy(ICoreLink coreLink, ICoreController controller, IModelUpdater modelUpdater)
         {
             m_coreLink = coreLink;
             m_controller = controller;
+            ModelUpdater = modelUpdater;
 
             Log.Debug("Starting periodic core state checking");
             m_controller.StartStateChecking(HandleKeepaliveStateResponse);
@@ -120,6 +125,7 @@ namespace GoodAI.Arnold.Core
         {
             Log.Debug("Disposing");
             m_controller.Dispose();
+            ModelUpdater.Dispose();
         }
 
         public void LoadBlueprint(AgentBlueprint agentBlueprint)

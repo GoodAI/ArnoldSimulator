@@ -27,6 +27,7 @@ namespace GoodAI.Arnold.UI.Tests
         private Mock<ICoreProxyFactory> m_coreProxyFactoryMock;
         private readonly Conductor m_conductor;
         private ICoreController m_coreController;
+        private Mock<IModelUpdaterFactory> m_modelUpdaterFactoryMock;
         private const int TimeoutMs = 100;
 
         public ConductorTests()
@@ -53,6 +54,8 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreControllerFactoryMock = new Mock<ICoreControllerFactory>();
             m_coreControllerFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>())).Returns(m_coreController);
 
+            m_modelUpdaterFactoryMock = new Mock<IModelUpdaterFactory>();
+
 
             var response = StateResponseBuilder.Build(StateType.ShuttingDown);
             var stateResponse = response.GetResponse(new StateResponse());
@@ -65,12 +68,12 @@ namespace GoodAI.Arnold.UI.Tests
 
 
             m_coreProxyFactoryMock = new Mock<ICoreProxyFactory>();
-            m_coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>(), It.IsAny<ICoreController>()))
+            m_coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>(), It.IsAny<ICoreController>(), It.IsAny<IModelUpdater>()))
                 .Returns(m_coreProxyMock.Object);
 
             m_conductor = new Conductor(m_coreProcessFactoryMock.Object, m_coreLinkFactoryMock.Object,
                 m_coreControllerFactoryMock.Object,
-                m_coreProxyFactoryMock.Object);
+                m_coreProxyFactoryMock.Object, m_modelUpdaterFactoryMock.Object);
         }
 
         [Fact]

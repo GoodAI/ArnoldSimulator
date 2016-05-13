@@ -17,7 +17,14 @@ namespace GoodAI.Arnold.UI.Tests
 {
     public class SimulationTests
     {
+        private IModelUpdater m_modelUpdater;
         public const int TimeoutMs = 100;
+
+        public SimulationTests()
+        {
+            var modelUpdaterMock = new Mock<IModelUpdater>();
+            m_modelUpdater = modelUpdaterMock.Object;
+        }
 
         public class DummyCoreLink : ICoreLink
         {
@@ -92,7 +99,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var coreProxy = new CoreProxy(coreLink, coreController);
+            var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
             Assert.Equal(CoreState.Empty, coreProxy.State);
 
             coreProxy.StateChanged += (sender, args) => waitEvent.Set();
@@ -136,7 +143,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new CoreProxy(coreLink, coreController);
+            var simulation = new CoreProxy(coreLink, coreController, m_modelUpdater);
             Assert.Equal(CoreState.Empty, simulation.State);
 
             simulation.StateChangeFailed += (sender, args) => waitEvent.Set();
@@ -159,7 +166,7 @@ namespace GoodAI.Arnold.UI.Tests
             var coreControllerMock = new Mock<ICoreController>();
             var coreController = coreControllerMock.Object;
 
-            var simulation = new CoreProxy(coreLink, coreController);
+            var simulation = new CoreProxy(coreLink, coreController, m_modelUpdater);
             Assert.Equal(CoreState.Empty, simulation.State);
 
             simulation.StateChanged += (sender, args) => waitEvent.Set();
