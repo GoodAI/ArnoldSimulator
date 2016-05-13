@@ -18,29 +18,30 @@ namespace GoodAI.Net.ConverseSharp
 
         public void SendMessage(string handlerName, byte[] messageBody, int realBodyLength = 0)
         {
-            WriteMessage(m_connector.GetConnectedStream(), handlerName, messageBody, realBodyLength);
-
-            m_connector.Close();
+            using (IConnectedStream connectedStream = m_connector.GetConnectedStream())
+                WriteMessage(connectedStream.Stream, handlerName, messageBody, realBodyLength);
         }
 
         public void SendQuery(string handlerName, byte[] messageBody, ref byte[] replyBuffer, int realBodyLength = 0)
         {
-            Stream stream = m_connector.GetConnectedStream();
-            WriteMessage(stream, handlerName, messageBody, realBodyLength);
+            using (IConnectedStream connectedStream = m_connector.GetConnectedStream())
+            {
+                Stream stream = connectedStream.Stream;
+                WriteMessage(stream, handlerName, messageBody, realBodyLength);
 
-            m_converseReader.ReadReply(stream, ref replyBuffer);
-
-            m_connector.Close();
+                m_converseReader.ReadReply(stream, ref replyBuffer);
+            }
         }
 
         public void SendQuery(string handlerName, byte[] messageBody, MemoryStream replyMemStream, int realBodyLength = 0)
         {
-            Stream stream = m_connector.GetConnectedStream();
-            WriteMessage(stream, handlerName, messageBody, realBodyLength);
+            using (IConnectedStream connectedStream = m_connector.GetConnectedStream())
+            {
+                Stream stream = connectedStream.Stream;
+                WriteMessage(stream, handlerName, messageBody, realBodyLength);
 
-            m_converseReader.ReadReply(stream, replyMemStream);
-
-            m_connector.Close();
+                m_converseReader.ReadReply(stream, replyMemStream);
+            }
         }
 
         private void WriteMessage(Stream stream, string handlerName, byte[] messageBody, int realBodyLength)

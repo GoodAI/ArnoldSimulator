@@ -29,7 +29,7 @@ namespace GoodAI.Net.ConverseSharp
 
             client.SendMessage("foo", Array.Empty<byte>());
 
-            Assert.False(connector.IsConnected);
+            Assert.True(connector.ConnectedStream.IsDisposed);
         }
 
         [Fact]

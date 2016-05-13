@@ -6,8 +6,12 @@ namespace GoodAI.Net.ConverseSharp
 {
     public interface ITcpConnector
     {
-        Stream GetConnectedStream();
-        void Close();
+        IConnectedStream GetConnectedStream();
+    }
+
+    public interface IConnectedStream : IDisposable
+    {
+        Stream Stream { get; }
     }
 
     public class NetworkException : Exception
@@ -16,10 +20,30 @@ namespace GoodAI.Net.ConverseSharp
         {}
     }
 
+    public class TcpConnectedStream : IConnectedStream
+    {
+        private readonly TcpClient m_tcpClient;
+
+        public TcpConnectedStream(string hostName, int port, int timeoutMs)
+        {
+            m_tcpClient = new TcpClient();  // TODO(Premek): Connect without allocations?
+
+            bool connected = m_tcpClient.ConnectAsync(hostName, port).Wait(timeoutMs);
+            if (!connected)
+                throw new NetworkException("Unable to connect within timeout");
+        }
+
+        public void Dispose()
+        {
+            m_tcpClient.Close();
+            m_tcpClient.Dispose();
+        }
+
+        public Stream Stream => m_tcpClient.GetStream();
+    }
+
     public class TcpConnector : ITcpConnector
     {
-        private TcpClient m_tcpClient;
-
         private readonly string m_hostName;
         private readonly int m_port;
         private readonly int m_timeoutMs;
@@ -31,33 +55,33 @@ namespace GoodAI.Net.ConverseSharp
             m_timeoutMs = timeoutMs;
         }
 
-        public Stream GetConnectedStream()
+        public IConnectedStream GetConnectedStream()
         {
-            // ReSharper disable once InvertIf
-            if (m_tcpClient == null)
-            {
-                m_tcpClient = new TcpClient();  // TODO(Premek): Connect without allocations?
+            return new TcpConnectedStream(m_hostName, m_port, m_timeoutMs);
+        }
+    }
 
-                bool connected = m_tcpClient.ConnectAsync(m_hostName, m_port).Wait(m_timeoutMs);
-                if (!connected)
-                    throw new NetworkException("Unable to connect within timeout");
-            }
+    public class DummyConnectedStream : IConnectedStream
+    {
+        public bool IsDisposed { get; set; }
 
-            return m_tcpClient.GetStream();
+        public DummyConnectedStream(Stream stream)
+        {
+            Stream = stream;
         }
 
-        public void Close()
+        public Stream Stream { get; }
+
+        public void Dispose()
         {
-            m_tcpClient.Close();  // Disposes the TcpClient.
-            m_tcpClient = null;
+            IsDisposed = true;
         }
     }
 
     public class DummyConnector : ITcpConnector
     {
         private readonly Stream m_stream;
-
-        public bool IsConnected { get; private set; }
+        public DummyConnectedStream ConnectedStream { get; private set; }
 
         public Action<Stream> ImplantMessage { get; set; }
 
@@ -66,18 +90,12 @@ namespace GoodAI.Net.ConverseSharp
             m_stream = stream;
         }
 
-        public Stream GetConnectedStream()
+        public IConnectedStream GetConnectedStream()
         {
-            IsConnected = true;
-
             ImplantMessage?.Invoke(m_stream);
 
-            return m_stream;
-        }
-
-        public void Close()
-        {
-            IsConnected = false;
+            ConnectedStream = new DummyConnectedStream(m_stream);
+            return ConnectedStream;
         }
     }
 }
