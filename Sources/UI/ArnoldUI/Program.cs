@@ -36,6 +36,8 @@ namespace GoodAI.Arnold
             // NOTE(HonzaS): Consider this.
             //container.Dispose();
 
+            NullLogger.Instance.FailOnUse = true;
+
             log.Info("Application set up, starting");
             Application.Run(mainForm);
         }

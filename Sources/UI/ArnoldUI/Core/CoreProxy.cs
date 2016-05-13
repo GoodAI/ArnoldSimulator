@@ -117,7 +117,6 @@ namespace GoodAI.Arnold.Core
             m_controller = controller;
             ModelUpdater = modelUpdater;
 
-            Log.Debug("Starting periodic core state checking");
             m_controller.StartStateChecking(HandleKeepaliveStateResponse);
             modelUpdater.Start();
         }
