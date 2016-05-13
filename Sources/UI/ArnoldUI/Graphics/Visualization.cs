@@ -118,10 +118,10 @@ namespace GoodAI.Arnold.Graphics
 
         public void PickObject(int x, int y)
         {
-            m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
-
             if (m_simulationModel == null)
                 return;
+
+            m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
             ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Models);
             if (expert != null)

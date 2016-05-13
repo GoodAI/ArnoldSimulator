@@ -26,7 +26,7 @@ namespace GoodAI.Net.ConverseSharp
 
         public TcpConnectedStream(string hostName, int port, int timeoutMs)
         {
-            m_tcpClient = new TcpClient();  // TODO(Premek): Connect without allocations?
+            m_tcpClient = new TcpClient();
 
             bool connected = m_tcpClient.ConnectAsync(hostName, port).Wait(timeoutMs);
             if (!connected)
