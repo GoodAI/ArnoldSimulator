@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
@@ -61,6 +62,31 @@ namespace GoodAI.Arnold.Network
 
                 targetRegionModel.AddExpert(new ExpertModel(targetRegionModel, neuron.Position.ToVector3()));
             }
+        }
+
+        private static void ApplyAddedConnectors(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.AddedConnectorsLength; i++)
+            {
+                Connector addedConnector = diff.GetAddedConnectors(i);
+
+                // TODO(HonzaS): Add support for connectors to RegionModel.
+            }
+        }
+
+        private static void ApplyAddedConnections(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.AddedConnectionsLength; i++)
+            {
+                Connection addedConnection = diff.GetAddedConnections(i);
+
+                // TODO(HonzaS): Add support for connections to RegionModel.
+            }
+        }
+
+        private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)
+        {
+            throw new NotImplementedException();
         }
     }
 }
