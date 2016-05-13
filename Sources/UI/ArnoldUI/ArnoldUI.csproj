@@ -123,6 +123,8 @@
     <Compile Include="Network\Messages\Responses.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="Network\ModelDiffApplier.cs" />
+    <Compile Include="Network\ModelProvider.cs" />
+    <Compile Include="Network\ModelProviderFactory.cs" />
     <Compile Include="Network\ModelUpdater.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">

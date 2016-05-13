@@ -46,6 +46,7 @@ namespace GoodAI.Arnold
 
             container.RegisterSingleton<IModelDiffApplier, ModelDiffApplier>();
             container.RegisterSingleton<IModelUpdaterFactory, ModelUpdaterFactory>();
+            container.RegisterSingleton<IModelProviderFactory, ModelProviderFactory>();
 
             container.RegisterSingleton<IConductor, Conductor>();
             container.RegisterSingleton<UIMain>();

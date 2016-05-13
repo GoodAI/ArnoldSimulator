@@ -119,6 +119,7 @@ namespace GoodAI.Arnold.Core
 
             Log.Debug("Starting periodic core state checking");
             m_controller.StartStateChecking(HandleKeepaliveStateResponse);
+            modelUpdater.Start();
         }
 
         public void Dispose()

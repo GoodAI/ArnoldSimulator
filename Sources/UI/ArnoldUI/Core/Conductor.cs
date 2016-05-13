@@ -29,7 +29,8 @@ namespace GoodAI.Arnold.Core
 
         CoreState CoreState { get; }
         ICoreLink CoreLink { get; }
-        IModelUpdater ModelUpdater { get; }
+
+        IModelProvider ModelProvider { get; }
 
         void PerformBrainStep();
     }
@@ -61,20 +62,21 @@ namespace GoodAI.Arnold.Core
         private readonly IModelUpdaterFactory m_modelUpdaterFactory;
 
         public ICoreProxy CoreProxy { get; private set; }
-
-        public IModelUpdater ModelUpdater => CoreProxy?.ModelUpdater;
+        public IModelProvider ModelProvider { get; }
 
         private readonly ICoreControllerFactory m_coreControllerFactory;
 
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
             ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory,
-            IModelUpdaterFactory modelUpdaterFactory)
+            IModelUpdaterFactory modelUpdaterFactory, IModelProviderFactory modelProviderFactory)
         {
             m_coreProcessFactory = coreProcessFactory;
             m_coreLinkFactory = coreLinkFactory;
             m_coreControllerFactory = coreControllerFactory;
             m_coreProxyFactory = coreProxyFactory;
             m_modelUpdaterFactory = modelUpdaterFactory;
+
+            ModelProvider = modelProviderFactory.Create(this);
         }
 
         public void ConnectToCore(EndPoint endPoint = null)

@@ -191,9 +191,10 @@ namespace GoodAI.Arnold.Graphics
 
         public void Step(InputInfo inputInfo, float elapsedMs)
         {
-            m_simulationModel = m_conductor.ModelUpdater?.GetNewModel();
+            m_simulationModel = m_conductor.ModelProvider.GetNewModel();
             // TODO(HonzaS): When we have incremental updates, optimize this to not go through all experts.
-            InjectCamera();
+            if (m_simulationModel != null)
+                InjectCamera();
 
             m_fps = 1000/elapsedMs;
 
