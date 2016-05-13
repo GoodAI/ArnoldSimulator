@@ -18,7 +18,9 @@ table CommandRequest {
 table GetStateRequest {}
 
 // TODO: Add filter specification in the request later.
-table GetModelRequest {}
+table GetModelRequest {
+	full:bool;
+}
 
 union Request {
 	CommandRequest,

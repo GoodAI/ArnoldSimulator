@@ -34,9 +34,10 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void WritesReadsGetModel()
         {
-            var message = GetModelRequestBuilder.Build();
+            var message = GetModelRequestBuilder.Build(full: true);
 
             Assert.Equal(Request.GetModelRequest, message.RequestType);
+            Assert.True(message.GetRequest(new GetModelRequest()).Full);
         }
 
         [Fact]

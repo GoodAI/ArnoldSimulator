@@ -67,8 +67,17 @@ public sealed class GetModelRequest : Table {
   public static GetModelRequest GetRootAsGetModelRequest(ByteBuffer _bb, GetModelRequest obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public GetModelRequest __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
+  public bool Full { get { int o = __offset(4); return o != 0 ? 0!=bb.Get(o + bb_pos) : (bool)false; } }
 
-  public static void StartGetModelRequest(FlatBufferBuilder builder) { builder.StartObject(0); }
+  public static Offset<GetModelRequest> CreateGetModelRequest(FlatBufferBuilder builder,
+      bool full = false) {
+    builder.StartObject(1);
+    GetModelRequest.AddFull(builder, full);
+    return GetModelRequest.EndGetModelRequest(builder);
+  }
+
+  public static void StartGetModelRequest(FlatBufferBuilder builder) { builder.StartObject(1); }
+  public static void AddFull(FlatBufferBuilder builder, bool full) { builder.AddBool(0, full, false); }
   public static Offset<GetModelRequest> EndGetModelRequest(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<GetModelRequest>(o);

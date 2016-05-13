@@ -9,9 +9,9 @@ namespace GoodAI.Arnold.Network
 {
     public sealed class GetModelConversation : Conversation<GetModelRequest, ModelResponse>
     {
-        public GetModelConversation()
+        public GetModelConversation(bool full)
         {
-            RequestMessage = GetModelRequestBuilder.Build();
+            RequestMessage = GetModelRequestBuilder.Build(full);
         }
     }
 }

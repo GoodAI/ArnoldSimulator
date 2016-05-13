@@ -145,8 +145,8 @@ namespace GoodAI.Arnold.Network
                 try
                 {
                     // Request a model diff from the core.
-                    // TODO(HonzaS): If this is a first model request in this "session", request a full model.
-                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(), TimeoutMs).ConfigureAwait(false);
+                    // TODO(HonzaS): Unless we lost connection or there was an error, request only incremental model (full: false).
+                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(full: true), TimeoutMs).ConfigureAwait(false);
 
                     // Wait until the model has been read. This happens before the first request as well.
                     if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)

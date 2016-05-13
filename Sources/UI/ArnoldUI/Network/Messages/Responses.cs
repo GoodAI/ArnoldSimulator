@@ -335,11 +335,11 @@ public sealed class ModelResponse : Table {
       VectorOffset repositionedNeuronsOffset = default(VectorOffset),
       VectorOffset removedNeuronsOffset = default(VectorOffset),
       VectorOffset addedSynapsesOffset = default(VectorOffset),
-      VectorOffset SpikedSynapsesOffset = default(VectorOffset),
+      VectorOffset spikedSynapsesOffset = default(VectorOffset),
       VectorOffset removedSynapsesOffset = default(VectorOffset)) {
     builder.StartObject(13);
     ModelResponse.AddRemovedSynapses(builder, removedSynapsesOffset);
-    ModelResponse.AddSpikedSynapses(builder, SpikedSynapsesOffset);
+    ModelResponse.AddSpikedSynapses(builder, spikedSynapsesOffset);
     ModelResponse.AddAddedSynapses(builder, addedSynapsesOffset);
     ModelResponse.AddRemovedNeurons(builder, removedNeuronsOffset);
     ModelResponse.AddRepositionedNeurons(builder, repositionedNeuronsOffset);
@@ -388,7 +388,7 @@ public sealed class ModelResponse : Table {
   public static void AddAddedSynapses(FlatBufferBuilder builder, VectorOffset addedSynapsesOffset) { builder.AddOffset(10, addedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateAddedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddSpikedSynapses(FlatBufferBuilder builder, VectorOffset SpikedSynapsesOffset) { builder.AddOffset(11, SpikedSynapsesOffset.Value, 0); }
+  public static void AddSpikedSynapses(FlatBufferBuilder builder, VectorOffset spikedSynapsesOffset) { builder.AddOffset(11, spikedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateSpikedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartSpikedSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddRemovedSynapses(FlatBufferBuilder builder, VectorOffset removedSynapsesOffset) { builder.AddOffset(12, removedSynapsesOffset.Value, 0); }
