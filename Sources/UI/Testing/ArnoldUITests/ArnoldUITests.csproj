@@ -43,6 +43,10 @@
       <HintPath>..\..\packages\AdamsLair.OpenTK.1.1.6.0\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SimpleInjector, Version=3.1.3.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SimpleInjector.3.1.3\lib\net45\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -72,6 +76,7 @@
   <ItemGroup>
     <Compile Include="CameraTests.cs" />
     <Compile Include="ConductorTests.cs" />
+    <Compile Include="ConfigurationTests.cs" />
     <Compile Include="CoreControllerTests.cs" />
     <Compile Include="CoreLinkTests.cs" />
     <Compile Include="CoreResponseParserTests.cs" />
@@ -104,6 +109,10 @@
     <ProjectReference Include="..\..\Libs\ConverseSharp\ConverseSharp.csproj">
       <Project>{6D704040-E839-41DD-9AA2-36EEADEFB0C9}</Project>
       <Name>ConverseSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\SimpleInjectorTools\SimpleInjectorTools.csproj">
+      <Project>{953FA519-4D77-4EF1-95A8-9450676E7D92}</Project>
+      <Name>SimpleInjectorTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
