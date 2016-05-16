@@ -26,7 +26,7 @@ namespace GoodAI.Arnold.Logging
                 }
 
                 return SerilogRobeConfig.SetupLoggingToFile(logPath, appName)
-                    .WriteTo.RichTextBox(textBox, maxTextLength: 1000, restrictedToMinimumLevel: LogEventLevel.Debug);
+                    .WriteTo.RichTextBox(textBox, maxTextLength: 10000, restrictedToMinimumLevel: LogEventLevel.Debug);
             }
             catch (Exception ex)
             {
