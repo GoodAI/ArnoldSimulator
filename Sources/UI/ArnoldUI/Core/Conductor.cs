@@ -177,18 +177,20 @@ namespace GoodAI.Arnold.Core
 
         private void OnDisconnected(object sender, EventArgs args)
         {
-            Disconnect();
+            AfterShutdown();
         }
 
         private void AfterShutdown()
         {
-            if (m_process != null)
-            {
-                m_process.Dispose();
-                m_process = null;
-            }
-
+            KillLocalCore();
             FinishDisconnect();
+        }
+
+        private void KillLocalCore()
+        {
+            // For remote core this is already null, for local core we have lost network contact with it.
+            m_process?.Dispose();
+            m_process = null;
         }
 
         private void FinishDisconnect()
