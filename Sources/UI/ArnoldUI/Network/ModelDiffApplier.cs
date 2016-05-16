@@ -18,6 +18,13 @@ namespace GoodAI.Arnold.Network
     {
         public void ApplyModelDiff(SimulationModel model, ModelResponse diff)
         {
+            ApplyAddedRegions(model, diff);
+            ApplyAddedNeurons(model, diff);
+        }
+
+
+        private static void ApplyAddedRegions(SimulationModel model, ModelResponse diff)
+        {
             for (int i = 0; i < diff.AddedRegionsLength; i++)
             {
                 Region addedRegion = diff.GetAddedRegions(i);
@@ -25,11 +32,26 @@ namespace GoodAI.Arnold.Network
                 Position lowerBound = addedRegion.LowerBound;
                 Position upperBound = addedRegion.UpperBound;
 
-                var size = new Vector3(upperBound.X-lowerBound.X, upperBound.Y-lowerBound.Y, upperBound.Z-lowerBound.Z);
+                var size = new Vector3(upperBound.X - lowerBound.X, upperBound.Y - lowerBound.Y, upperBound.Z - lowerBound.Z);
 
-                Vector3 position = new Vector3(lowerBound.X, lowerBound.Y, lowerBound.Z) + size/2;
+                Vector3 position = lowerBound.ToVector3() + size/2;
 
                 model.AddChild(new RegionModel(addedRegion.Name, addedRegion.Type, position, size));
+            }
+        }
+
+        private static void ApplyAddedNeurons(SimulationModel model, ModelResponse diff)
+        {
+            // TODO(Premek): remove this hack.
+            RegionModel targetRegionModel = model.Models.FirstOrDefault();
+            if (targetRegionModel == null)
+                return;
+
+            for (int i = 0; i < diff.AddedNeuronsLength; i++)
+            {
+                Neuron neuron = diff.GetAddedNeurons(i);
+
+                targetRegionModel.AddExpert(new ExpertModel(targetRegionModel, neuron.Position.ToVector3()));
             }
         }
     }

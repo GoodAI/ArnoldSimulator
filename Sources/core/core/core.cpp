@@ -237,8 +237,18 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     addedRegionsOffsets.push_back(regionOffset);
     auto addedRegionsVector = builder.CreateVector(addedRegionsOffsets);
 
+    std::vector<flatbuffers::Offset<Network::Neuron>> addedNeuronsOffsets;
+
+    auto neuronType = builder.CreateString("neurotype");
+    auto neuronPosition = Network::CreatePosition(builder, 1.f, 2.f, 3.f);  // This is relative to region lower bound in the UI (?)
+    auto neruonOffset = Network::CreateNeuron(builder, 1, neuronType, neuronPosition);
+
+    addedNeuronsOffsets.push_back(neruonOffset);
+    auto addedNeuronsVector = builder.CreateVector(addedNeuronsOffsets);
+
     Network::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVector);
+    responseBuilder.add_addedNeurons(addedNeuronsVector);
     auto modelResponseOffset = responseBuilder.Finish();
 
     BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);

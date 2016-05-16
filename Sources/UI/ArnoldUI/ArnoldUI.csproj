@@ -126,6 +126,7 @@
     <Compile Include="Network\ModelProvider.cs" />
     <Compile Include="Composition\ModelProviderFactory.cs" />
     <Compile Include="Network\ModelUpdater.cs" />
+    <Compile Include="Network\MessagesExtensions.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">
       <SubType>Form</SubType>
