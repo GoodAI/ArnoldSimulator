@@ -172,9 +172,8 @@ namespace GoodAI.Arnold.Network
                 }
                 catch (Exception exception)
                 {
+                    // Keep trying for now. TODO(Premek): Do something smarter...
                     Log.Error(exception, "Model retrieval failed");
-                    Stop();
-                    return;
                 }
             }
         }
