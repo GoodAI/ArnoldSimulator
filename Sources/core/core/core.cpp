@@ -20,7 +20,7 @@ void CoreProcInit()
     TurnManualLBOn();
 }
 
-Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0)
+Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0), mDummyTimestep(0)
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -228,22 +228,47 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     std::vector<flatbuffers::Offset<Network::Region>> addedRegionsOffsets;
 
-    auto regionName = builder.CreateString("testname");
-    auto regionType = builder.CreateString("testtype");
-    auto lowerBound = Network::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
-    auto upperBound = Network::CreatePosition(builder, 50.0f, 40.0f, 45.0f);
-    auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
+    if (mDummyTimestep == 0)
+    {
+        auto regionName = builder.CreateString("testname");
+        auto regionType = builder.CreateString("testtype");
+        auto lowerBound = Network::CreatePosition(builder, 10.0f, 00.0f, 30.0f);
+        auto upperBound = Network::CreatePosition(builder, 32.0f, 22.0f, 82.0f);
+        auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
 
-    addedRegionsOffsets.push_back(regionOffset);
+        addedRegionsOffsets.push_back(regionOffset);
+    }
+
     auto addedRegionsVector = builder.CreateVector(addedRegionsOffsets);
 
     std::vector<flatbuffers::Offset<Network::Neuron>> addedNeuronsOffsets;
 
-    auto neuronType = builder.CreateString("neurotype");
-    auto neuronPosition = Network::CreatePosition(builder, 1.f, 2.f, 3.f);  // This is relative to region lower bound in the UI (?)
-    auto neruonOffset = Network::CreateNeuron(builder, 1, neuronType, neuronPosition);
+    const auto neuronAddInterval = 5;
+    const auto maxNeruonCount = 1000;
+    static auto addedNeuronCount = 0;
 
-    addedNeuronsOffsets.push_back(neruonOffset);
+    if ((mDummyTimestep % neuronAddInterval == 0) && (addedNeuronCount < maxNeruonCount))
+    {
+        auto neuronType = builder.CreateString("neurotype");
+        // This is relative to region lower bound in the UI (?)
+
+        const auto layerSizeX = 10;
+        const auto layerSizeY = 10;
+
+        auto x = addedNeuronCount % layerSizeX;
+        auto y = (addedNeuronCount / 10) % layerSizeY;
+        auto z = addedNeuronCount / (layerSizeX * layerSizeY);
+
+        auto neuronPosition = Network::CreatePosition(builder,
+            2.f * static_cast<float>(x),
+            2.f * static_cast<float>(y),
+            5.f * static_cast<float>(z));
+        auto neruonOffset = Network::CreateNeuron(builder, 1, neuronType, neuronPosition);
+
+        addedNeuronsOffsets.push_back(neruonOffset);
+        addedNeuronCount++;
+    }
+
     auto addedNeuronsVector = builder.CreateVector(addedNeuronsOffsets);
 
     Network::ModelResponseBuilder responseBuilder(builder);
@@ -253,6 +278,8 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
     SendResponseToClient(requestId, builder);
+
+    mDummyTimestep++;
 }
 
 void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const
