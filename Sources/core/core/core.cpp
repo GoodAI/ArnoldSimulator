@@ -3,10 +3,6 @@
 #include "core.h"
 #include "brain.h"
 
-#include "brain.decl.h"
-#include "region.decl.h"
-#include "neuron.decl.h"
-
 CkGroupID gMulticastGroupId;
 CProxy_CompletionDetector gCompletionDetector;
 
@@ -14,6 +10,15 @@ CProxy_Core gCore;
 CProxy_BrainBase gBrain;
 CProxy_RegionBase gRegions;
 CProxy_NeuronBase gNeurons;
+
+void CoreNodeInit()
+{
+}
+
+void CoreProcInit()
+{
+    TurnManualLBOn();
+}
 
 Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0)
 {
@@ -286,7 +291,5 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
 
     BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
 }
-
-
 
 #include "core.def.h"

@@ -2,7 +2,7 @@ module brain
 {
     include "common.h";
 
-    extern module core;
+    
 
     message SimulateMsg
     {
@@ -17,6 +17,8 @@ module brain
     {
         entry BrainBase(BrainType type, BrainParams params);
 
+        entry void ReceiveTerminalData(Spike::BrainSink &data);
+
         entry void RunSimulation(size_t brainSteps, bool untilStopped);
         entry void StopSimulation();
         entry void SetBrainStepsPerBodyStep(size_t brainSteps);
@@ -24,9 +26,28 @@ module brain
         entry void RequestViewportUpdate(RequestId requestId, bool full);
 
         entry void Simulate();
-        entry void ReceiveTerminalData(Spike::BrainSink &data);
-
-        entry [reductiontarget] void ChangeTopologyDone(long triggeredNeurons);
-        entry [reductiontarget] void RegionSimulateDone(CkReductionMsg *msg);
+        entry void SimulateBrainControl();
+        entry void SimulateBrainControlDone();
+        entry void SimulateAddRegions();
+        entry void SimulateAddRegionsDone();
+        entry void SimulateAddConnectors();
+        entry void SimulateAddConnectorsDone();
+        entry void SimulateAddRemoveConnections();
+        entry void SimulateAddRemoveConnectionsDone();
+        entry void SimulateRemoveConnectors();
+        entry void SimulateRemoveConnectorsDone();
+        entry void SimulateRemoveRegions();
+        entry void SimulateRemoveRegionsDone();
+        entry void SimulateRegionPrepareTopologyChange();
+        entry [reductiontarget] void SimulateRegionPrepareTopologyChangeDone(size_t deletedNeurons);
+        entry void SimulateRegionCommitTopologyChange();
+        entry [reductiontarget] void SimulateRegionCommitTopologyChangeDone(size_t triggeredNeurons);
+        entry void SimulateAllTopologyChangesDelivered();
+        entry void SimulateBodySimulate();
+        entry void SimulateBodySimulateDone();
+        entry void SimulateRegionSimulate();
+        entry [reductiontarget] void SimulateRegionSimulateDone(CkReductionMsg *msg);
+        entry void SimulateAllSpikesDelivered();
+        entry void SimulateDone();
     };   	
 };

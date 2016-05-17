@@ -16,7 +16,7 @@
 #include "spike.h"
 #include "synapse.h"
 
-#include "region.decl.h"
+#include "core.decl.h"
 
 using namespace nlohmann;
 
@@ -46,6 +46,10 @@ public:
     virtual const char *GetType() const = 0;
 
     virtual void Control(size_t brainStep) = 0;
+
+    virtual void AcceptContributionFromNeuron(
+        NeuronId neuronId, const uint8_t *contribution, size_t size) = 0;
+    virtual size_t ContributeToBrain(uint8_t *&contribution) = 0;
 
 protected:
     RegionBase &mBase;
@@ -80,7 +84,7 @@ public:
     const char *GetName() const;
     RegionIndex GetIndex() const;
 
-    NeuronId GetNewNeuronId();
+    NeuronIndex GetNewNeuronIndex();
 
     const Connectors &GetInputs() const;
     const Connector &GetInput(const ConnectorName &name) const;
@@ -104,24 +108,33 @@ public:
 
     void CreateInput(const ConnectorName &name, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
     void DeleteInput(const ConnectorName &name);
-    void ConnectInput(const ConnectorName &name, const RemoteConnector &destination);
-    void DisconnectInput(const ConnectorName &name, const RemoteConnector &destination);
+    void ConnectInput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
+    void DisconnectInput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
+    void ConnectInputNeurons(const ConnectorName &name, NeuronId destFirstNeuron);
+    void DisconnectInputNeurons(const ConnectorName& name, NeuronId destFirstNeuron);
 
     void CreateOutput(const ConnectorName &name, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
     void DeleteOutput(const ConnectorName &name);
-    void ConnectOutput(const ConnectorName &name, const RemoteConnector &destination);
-    void DisconnectOutput(const ConnectorName &name, const RemoteConnector &destination);
+    void ConnectOutput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
+    void DisconnectOutput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
+    void ConnectOutputNeurons(const ConnectorName &name, NeuronId destFirstNeuron);
+    void DisconnectOutputNeurons(const ConnectorName& name, NeuronId destFirstNeuron);
 
     void ReceiveSensoMotoricData(Direction direction, const ConnectorName &connectorName, Spike::BrainSource &data);
     void EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data);
 
-    void ChangeTopology();
+    void Unlink();
+    void PrepareTopologyChange(size_t brainStep, bool doProgress);
+    void CommitTopologyChange();
     void Simulate(SimulateMsg *msg);
 
     void NeuronSimulateDone(CkReductionMsg *msg);
 
 private:
-    NeuronId mNeuronIdCounter;
+    bool mUnlinking;
+
+    NeuronIndex mNeuronIdxCounter;
+    NeuronIndices mNeuronIndices;
 
     Connectors mInputConnectors;
     Connectors mOutputConnectors;
@@ -133,7 +146,7 @@ private:
     ChildLinks mChildAdditions;
     ChildLinks mChildRemovals;
 
-    std::vector<CkArrayIndex2D> mNeuronsTriggered;
+    NeuronsTriggered mNeuronsTriggered;
     Spike::BrainSink mBrainSink;
 
     RegionName mName;
@@ -154,14 +167,7 @@ public:
 
     virtual void Control(size_t brainStep) override;
 
-    /*
-    void SomeInternalFunction(SomeType1 someArg1, SomeType2 someArg2);
-
-    void SomeFunctionForNeurons(NeuronId caller, SomeType1 someArg1, SomeType2 someArg2);
-
-    entry void SomeFunctionForRegions(Direction direction, RegionIndex caller, SomeType1 someArg1, SomeType2 someArg2);
-
-    sync entry void SomeFunctionForBrain(SomeType1 someArg1, SomeType2 someArg2);
-    entry void SomeOtherFunctionForBrain(CkFuture, future, SomeType1 someArg1, SomeType2 someArg2);
-    */
+    virtual void AcceptContributionFromNeuron(
+        NeuronId neuronId, const uint8_t *contribution, size_t size) override;
+    virtual size_t ContributeToBrain(uint8_t *&contribution) override;
 };

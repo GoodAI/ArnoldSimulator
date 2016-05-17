@@ -39,9 +39,15 @@ Synapse::Data::Data()
     type = Type::Empty;
 }
 
+Synapse::Data::~Data()
+{
+    Synapse::Release(*this);
+}
+
 Synapse::Data::Data(const Data &other)
 {
     type = other.type;
+    bits8 = other.bits8;
     bits16 = other.bits16;
     bits64 = other.bits64;
 }
@@ -49,6 +55,7 @@ Synapse::Data::Data(const Data &other)
 Synapse::Data::Data(const Data &&other)
 {
     type = other.type;
+    bits8 = other.bits8;
     bits16 = other.bits16;
     bits64 = other.bits64;
 }
@@ -58,6 +65,7 @@ Synapse::Data &Synapse::Data::operator=(const Data &other)
     if (this != &other)
     {
         type = other.type;
+        bits8 = other.bits8;
         bits16 = other.bits16;
         bits64 = other.bits64;
     }
@@ -69,6 +77,7 @@ Synapse::Data &Synapse::Data::operator=(Data &&other)
     if (this != &other)
     {
         type = other.type;
+        bits8 = other.bits8;
         bits16 = other.bits16;
         bits64 = other.bits64;
     }

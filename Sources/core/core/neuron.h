@@ -17,7 +17,7 @@
 #include "spike.h"
 #include "synapse.h"
 
-#include "neuron.decl.h"
+#include "core.decl.h"
 
 using namespace nlohmann;
 
@@ -48,12 +48,14 @@ public:
 
     virtual void Control(size_t brainStep) = 0;
 
-    virtual bool HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data);
-    virtual bool HandleSpike(Direction direction, BinarySpike &spike, Spike::Data &data);
-    virtual bool HandleSpike(Direction direction, DiscreteSpike &spike, Spike::Data &data);
-    virtual bool HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data);
-    virtual bool HandleSpike(Direction direction, VisualSpike &spike, Spike::Data &data);
-    virtual bool HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data);
+    virtual size_t ContributeToRegion(uint8_t *&contribution) = 0;
+
+    virtual void HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data);
+    virtual void HandleSpike(Direction direction, BinarySpike &spike, Spike::Data &data);
+    virtual void HandleSpike(Direction direction, DiscreteSpike &spike, Spike::Data &data);
+    virtual void HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data);
+    virtual void HandleSpike(Direction direction, VisualSpike &spike, Spike::Data &data);
+    virtual void HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data);
 
 protected:
     NeuronBase &mBase;
@@ -117,6 +119,7 @@ public:
     void SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data);
     void EnqueueSpike(Direction direction, const Spike::Data &data);
 
+    void Unlink();
     void FlipSpikeQueues();
     void Simulate(SimulateMsg *msg);
 
@@ -158,10 +161,12 @@ public:
 
     virtual const char *GetType() const override;
 
-    virtual bool HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data) override;
-    virtual bool HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data) override;
+    virtual void HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data) override;
+    virtual void HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data) override;
     
     virtual void Control(size_t brainStep) override;
+
+    virtual size_t ContributeToRegion(uint8_t *&contribution) override;
 
     enum class Function : uint8_t
     {

@@ -5,6 +5,10 @@ mainmodule core
     include "spike.h";
     include "synapse.h";
 
+    extern module brain;
+    extern module region;
+    extern module neuron;
+
     readonly CkGroupID gMulticastGroupId;
     readonly CProxy_CompletionDetector gCompletionDetector;
 
@@ -12,6 +16,9 @@ mainmodule core
     readonly CProxy_BrainBase gBrain;
     readonly CProxy_RegionBase gRegions;
     readonly CProxy_NeuronBase gNeurons;
+
+    initnode void CoreNodeInit();
+    initproc void CoreProcInit();
 
     mainchare [migratable] Core
     {

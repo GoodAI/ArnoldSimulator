@@ -4,7 +4,7 @@ module region
     include "spike.h";
     include "synapse.h";
 
-    extern module brain;
+    
 
     group [migratable] RegionMap : CkArrayMap {
         entry RegionMap();
@@ -16,18 +16,24 @@ module region
 
         entry void CreateInput(ConnectorName name, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
         entry void DeleteInput(ConnectorName name);
-        entry void ConnectInput(ConnectorName name, RemoteConnector destination);
-        entry void DisconnectInput(ConnectorName name, RemoteConnector destination);
+        entry void ConnectInput(ConnectorName name, RemoteConnector destination, bool syncSynapses);
+        entry void DisconnectInput(ConnectorName name, RemoteConnector destination, bool syncSynapses);
+        entry void ConnectInputNeurons(ConnectorName name, NeuronId destFirstNeuron);
+        entry void DisconnectInputNeurons(ConnectorName name, NeuronId destFirstNeuron);
 
         entry void CreateOutput(ConnectorName name, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
         entry void DeleteOutput(ConnectorName name);
-        entry void ConnectOutput(ConnectorName name, RemoteConnector destination);
-        entry void DisconnectOutput(ConnectorName name, RemoteConnector destination);
+        entry void ConnectOutput(ConnectorName name, RemoteConnector destination, bool syncSynapses);
+        entry void DisconnectOutput(ConnectorName name, RemoteConnector destination, bool syncSynapses);
+        entry void ConnectOutputNeurons(ConnectorName name, NeuronId destFirstNeuron);
+        entry void DisconnectOutputNeurons(ConnectorName name, NeuronId destFirstNeuron);
 
         entry void ReceiveSensoMotoricData(Direction direction, ConnectorName connectorName, Spike::BrainSource data);
         entry void EnqueueSensoMotoricSpike(NeuronId receiver, Spike::Data data);
 
-        entry void ChangeTopology();
+        entry void Unlink();
+        entry void PrepareTopologyChange(size_t brainStep, bool doProgress);
+        entry void CommitTopologyChange();
         entry void Simulate(SimulateMsg *msg);
 
         entry [reductiontarget] void NeuronSimulateDone(CkReductionMsg *msg);

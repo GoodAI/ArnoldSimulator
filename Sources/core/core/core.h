@@ -27,6 +27,9 @@ public:
     explicit ShutdownRequestedException(const char *reason) : runtime_error(reason) { }
 };
 
+void CoreNodeInit();
+void CoreProcInit();
+
 class Core : public CBase_Core
 {
 public:

@@ -28,6 +28,7 @@ public:
     struct Data
     {
         Data();
+        ~Data();
         Data(const Data &other);
         Data(const Data &&other);
         Data &operator=(const Data &other);

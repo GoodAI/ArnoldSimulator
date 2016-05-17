@@ -41,6 +41,11 @@ Spike::Data::Data()
     type = Type::Binary;
 }
 
+Spike::Data::~Data()
+{
+    Spike::Release(*this);
+}
+
 void Spike::Data::pup(PUP::er &p)
 {
     uint8_t temp;
@@ -136,14 +141,14 @@ void Spike::Release(Data &data)
     Edit(data)->Release(data);
 }
 
-bool BinarySpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+void BinarySpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
 {
-    return receiver.HandleSpike(direction, *this, data);
+    receiver.HandleSpike(direction, *this, data);
 }
 
-bool DiscreteSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+void DiscreteSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
 {
-    return receiver.HandleSpike(direction, *this, data);
+    receiver.HandleSpike(direction, *this, data);
 }
 
 size_t DiscreteSpike::AllBytes(const Spike::Data &data) const
@@ -191,9 +196,9 @@ void DiscreteSpike::SetDelay(Spike::Data &data, uint16_t delay)
     data.bits16 = delay;
 }
 
-bool ContinuousSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+void ContinuousSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
 {
-    return receiver.HandleSpike(direction, *this, data);
+    receiver.HandleSpike(direction, *this, data);
 }
 
 size_t ContinuousSpike::AllBytes(const Spike::Data &data) const
@@ -241,9 +246,9 @@ void ContinuousSpike::SetDelay(Spike::Data &data, uint16_t delay)
     data.bits16 = delay;
 }
 
-bool VisualSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+void VisualSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
 {
-    return receiver.HandleSpike(direction, *this, data);
+    receiver.HandleSpike(direction, *this, data);
 }
 
 size_t VisualSpike::AllBytes(const Spike::Data &data) const
@@ -280,9 +285,9 @@ void VisualSpike::SetPixel(Spike::Data &data, uint32_t pixel)
     data.bits64 = pixel;
 }
 
-bool FunctionalSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+void FunctionalSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
 {
-    return receiver.HandleSpike(direction, *this, data);
+    receiver.HandleSpike(direction, *this, data);
 }
 
 size_t FunctionalSpike::ExtraBytes(const Spike::Data &data) const

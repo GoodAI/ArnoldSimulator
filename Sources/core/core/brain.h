@@ -5,6 +5,7 @@
 #include <list>
 #include <set>
 #include <string>
+#include <functional>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -23,7 +24,7 @@
 #include "synapse.h"
 #include "body.h"
 
-#include "brain.decl.h"
+#include "core.decl.h"
 
 using namespace nlohmann;
 
@@ -59,6 +60,9 @@ public:
     bool doProgress;
     size_t brainStep;
     Boxes roiBoxes;
+
+    static void *pack(SimulateMsg *msg);
+    static SimulateMsg *unpack(void *buf);
 };
 
 class BrainBase;
@@ -85,6 +89,9 @@ public:
     virtual const char *GetType() const = 0;
 
     virtual void Control(size_t brainStep) = 0;
+
+    virtual void AcceptContributionFromRegion(
+        RegionIndex regIdx, const uint8_t *contribution, size_t size) = 0;
 
 protected:
     BrainBase &mBase;
@@ -127,9 +134,11 @@ public:
     const char *GetType() const;
     const char *GetName() const;
 
+    NeuronIndex GetNewNeuronIndex();
+    RegionIndex GetNewRegionIndex();
+
     const Terminals &GetTerminals() const;
     void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount);
-    void DeleteTerminal(const ConnectorName &name);
     void ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
     void DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
 
@@ -148,6 +157,8 @@ public:
     void PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
     void PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
 
+    void ReceiveTerminalData(Spike::BrainSink &data);
+
     void RunSimulation(size_t brainSteps, bool untilStopped);
     void StopSimulation();
     void SetBrainStepsPerBodyStep(size_t brainSteps);
@@ -155,10 +166,29 @@ public:
     void RequestViewportUpdate(RequestId requestId, bool full);
 
     void Simulate();
-    void ReceiveTerminalData(Spike::BrainSink &data);
-
-    void ChangeTopologyDone(long triggeredNeurons);
-    void RegionSimulateDone(CkReductionMsg *msg);
+    void SimulateBrainControl();
+    void SimulateBrainControlDone();
+    void SimulateAddRegions();
+    void SimulateAddRegionsDone();
+    void SimulateAddConnectors();
+    void SimulateAddConnectorsDone();
+    void SimulateAddRemoveConnections();
+    void SimulateAddRemoveConnectionsDone();
+    void SimulateRemoveConnectors();
+    void SimulateRemoveConnectorsDone();
+    void SimulateRemoveRegions();
+    void SimulateRemoveRegionsDone();
+    void SimulateRegionPrepareTopologyChange();
+    void SimulateRegionPrepareTopologyChangeDone(size_t deletedNeurons);
+    void SimulateRegionCommitTopologyChange();
+    void SimulateRegionCommitTopologyChangeDone(size_t triggeredNeurons);
+    void SimulateAllTopologyChangesDelivered();
+    void SimulateBodySimulate();
+    void SimulateBodySimulateDone();
+    void SimulateRegionSimulate();
+    void SimulateRegionSimulateDone(CkReductionMsg *msg);
+    void SimulateAllSpikesDelivered();
+    void SimulateDone();
 
 private:
     BrainName mName;
@@ -168,13 +198,22 @@ private:
     bool mDoSimulationProgress;
     bool mIsSimulationRunning;
 
+    bool mRegionCommitTopologyChangeDone;
+    bool mRegionSimulateDone;
+    bool mAllTopologyChangesDelivered;
+    bool mAllSpikesDelivered;
+
+    size_t mDeletedNeurons;
+    size_t mTriggeredNeurons;
+
     size_t mBrainStep;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
-
-    NeuronId mNeuronIdCounter;
+    
+    NeuronIndex mNeuronIdxCounter;
     RegionIndex mRegionIdxCounter;
     TerminalId mTerminalIdCounter;
+    RegionIndices mRegionIndices;
 
     Boxes mRoiBoxes;
     ViewportUpdateRequests mViewportUpdateRequests;
@@ -185,7 +224,7 @@ private:
     NeuronToTerminalId mNeuronToTerminalId;
 
     RegionAdditionRequests mRegionAdditions;
-    RegionRemovals mRegionsRemovals;
+    RegionRemovals mRegionRemovals;
     ConnectorAdditionRequests mConnectorAdditions;
     ConnectorRemovals mConnectorRemovals;
     Connections mConnectionAdditions;
@@ -209,9 +248,6 @@ public:
 
     virtual void Control(size_t brainStep) override;
 
-    /*
-    void SomeInternalFunction(SomeType1 someArg1, SomeType2 someArg2);
-
-    entry void SomeFunctionForRegions(RegionIndex caller, SomeType1 someArg1, SomeType2 someArg2);
-    */
+    virtual void AcceptContributionFromRegion(
+        RegionIndex regIdx, const uint8_t *contribution, size_t size) override;
 };

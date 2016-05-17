@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <unordered_set>
 
 #include <tbb/tbbmalloc_proxy.h>
 
@@ -16,16 +17,21 @@
 
 typedef uint32_t RegionIndex;
 typedef uint32_t NeuronIndex;
-typedef uint32_t TerminalId;
 typedef uint32_t NeuronId;
+typedef uint32_t TerminalId;
 typedef uint64_t RequestId;
 
 #define REGION_INDEX_MASK 0xFFC00000
 #define REGION_INDEX_OFFSET 22
 
 #define BRAIN_REGION_INDEX 0
-#define TEMP_REGION_INDEX REGION_INDEX_MASK
+#define TEMP_REGION_INDEX (REGION_INDEX_MASK >> REGION_INDEX_OFFSET)
 #define DELETED_NEURON_ID UINT32_MAX
+
+#define REGION_INDEX_MIN (BRAIN_REGION_INDEX + 1)
+#define REGION_INDEX_MAX (TEMP_REGION_INDEX - 1)
+#define NEURON_INDEX_MIN 0
+#define NEURON_INDEX_MAX ((DELETED_NEURON_ID & ~REGION_INDEX_MASK) - 1)
 
 inline NeuronId GetNeuronId(RegionIndex regionIndex, NeuronIndex neuronIndex) {
     return (regionIndex << REGION_INDEX_OFFSET) & neuronIndex;
@@ -77,7 +83,9 @@ typedef std::vector<NeuronAdditionReport> NeuronAdditionReports;
 typedef std::vector<NeuronId> NeuronRemovals;
 typedef std::vector<ChildLink> ChildLinks;
 
-typedef std::vector<NeuronId> NeuronsTriggered;
+typedef std::unordered_set<NeuronId> NeuronsTriggered;
+typedef std::unordered_set<NeuronIndex> NeuronIndices;
+typedef std::unordered_set<RegionIndex> RegionIndices;
 
 typedef std::tuple<RegionIndex, RegionType, RegionParams> RegionAdditionRequest;
 typedef std::tuple<RegionIndex, RegionName, RegionType, Box3D> RegionAdditionReport;

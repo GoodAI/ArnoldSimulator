@@ -30,6 +30,7 @@ public:
     struct Data
     {
         Data();
+        ~Data();
 
         void pup(PUP::er &p);
 
@@ -49,7 +50,7 @@ public:
     public:
         virtual ~Editor() = default;
         
-        virtual bool Accept(Direction direction, Neuron &receiver, Data &data) = 0;
+        virtual void Accept(Direction direction, Neuron &receiver, Data &data) = 0;
 
         virtual size_t ExtraBytes(const Data &data) const;
         virtual void *AllocateExtra(Data &data);
@@ -84,13 +85,13 @@ inline void operator|(PUP::er &p, Spike::Type &spikeType) {
 
 class BinarySpike : public Spike::Editor
 {
-    virtual bool Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+    virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
 };
 
 class DiscreteSpike : public Spike::Editor
 {
 public:
-    virtual bool Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+    virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
 
     virtual size_t AllBytes(const Spike::Data &data) const override;
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
@@ -107,7 +108,7 @@ public:
 class ContinuousSpike : public Spike::Editor
 {
 public:
-    virtual bool Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+    virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
 
     virtual size_t AllBytes(const Spike::Data &data) const override;
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
@@ -124,7 +125,7 @@ public:
 class VisualSpike : public Spike::Editor
 {
 public:
-    virtual bool Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+    virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
 
     virtual size_t AllBytes(const Spike::Data &data) const override;
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
@@ -139,7 +140,7 @@ public:
 class FunctionalSpike : public Spike::Editor
 {
 public:
-    virtual bool Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+    virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
 
     virtual size_t ExtraBytes(const Spike::Data &data) const override;
     virtual void *AllocateExtra(Spike::Data &data) override;
