@@ -94,22 +94,19 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
         switch (requestType) {
             case Network::Request_CommandRequest:
             {
-                const Network::CommandRequest *commandRequest =
-                    static_cast<const Network::CommandRequest*>(requestMessage->request());
+                auto commandRequest = static_cast<const Network::CommandRequest*>(requestMessage->request());
                 ProcessCommandRequest(commandRequest, requestId);
                 break;
             }
             case Network::Request_GetStateRequest:
             {
-                const Network::GetStateRequest *getStateRequest =
-                    static_cast<const Network::GetStateRequest*>(requestMessage->request());
+                auto getStateRequest = static_cast<const Network::GetStateRequest*>(requestMessage->request());
                 ProcessGetStateRequest(getStateRequest, requestId);
                 break;
             }
             case Network::Request_GetModelRequest:
             {
-                const Network::GetModelRequest *getModelRequest =
-                    static_cast<const Network::GetModelRequest*>(requestMessage->request());
+                auto getModelRequest = static_cast<const Network::GetModelRequest*>(requestMessage->request());
                 ProcessGetModelRequest(getModelRequest, requestId);
                 break;
             }
