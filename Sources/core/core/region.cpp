@@ -419,15 +419,37 @@ void RegionBase::DisconnectOutputNeurons(const ConnectorName &name, NeuronId des
 
 void RegionBase::ReceiveSensoMotoricData(Direction direction, const ConnectorName &connectorName, Spike::BrainSource &data)
 {
-    gCompletionDetector.ckLocalBranch()->produce(data.size());
-    // TODO
+    Connector *connector = nullptr;
+    
+    if (direction == Direction::Forward) {
+        auto itConn = mInputConnectors.find(connectorName);
+        if (itConn != mInputConnectors.end()) {
+            connector = &itConn->second;
+        }
+    } else {
+        auto itConn = mOutputConnectors.find(connectorName);
+        if (itConn != mOutputConnectors.end()) {
+            connector = &itConn->second;
+        }
+    }
+
+    if (connector) {
+        if (data.size() == connector->neurons.size()) {
+            gCompletionDetector.ckLocalBranch()->produce(data.size());
+            for (size_t i = 0; i < data.size(); ++i) {
+                NeuronId neuronId = connector->neurons[i];
+                gNeurons(GetRegionIndex(neuronId), GetNeuronIndex(neuronId)).EnqueueSpike(direction, data[i]);
+            }
+        }
+    }
+
     gCompletionDetector.ckLocalBranch()->done();
     gCompletionDetector.ckLocalBranch()->consume();
 }
 
 void RegionBase::EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data)
 {
-    // TODO
+    mBrainSink.push_back(std::make_pair(receiver, data));
 }
 
 void RegionBase::Unlink()
@@ -555,9 +577,9 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
     // TODO
 
     if (msg) {
-        CkReduction::setElement *current = (CkReduction::setElement *)msg->getData();
+        CkReduction::setElement *current = static_cast<CkReduction::setElement *>(msg->getData());
         while (current != nullptr) {
-            int *result = (int *)&current->data;
+            int *result = reinterpret_cast<int *>(&current->data);
             // Do something with result.
             current = current->next();
         }

@@ -390,7 +390,13 @@ void NeuronBase::RemoveOutputSynapse(NeuronId to)
 void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
 {
     gCompletionDetector.ckLocalBranch()->produce();
-    gNeurons(GetRegionIndex(receiver), GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
+    RegionIndex destRegIdx = GetRegionIndex(receiver);
+    if (destRegIdx == BRAIN_REGION_INDEX) {
+        gRegions[thisIndex.x].EnqueueSensoMotoricSpike(receiver, data);
+    } else {
+        gNeurons(destRegIdx, GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
+    }
+    
 }
 
 void NeuronBase::EnqueueSpike(Direction direction, const Spike::Data &data)
