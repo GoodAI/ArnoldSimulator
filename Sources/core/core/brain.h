@@ -72,7 +72,7 @@ class BrainMap : public CkArrayMap
 public:
     BrainMap();
     BrainMap(CkMigrateMessage *msg);
-    int procNum(int arrayHdl, const CkArrayIndex &index);
+    virtual int procNum(int arrayHdl, const CkArrayIndex &index) override;
 };
 
 class Brain
@@ -129,7 +129,7 @@ public:
     BrainBase(const BrainBase &other) = delete;
     BrainBase &operator=(const BrainBase &other) = delete;
 
-    void pup(PUP::er &p);
+    virtual void pup(PUP::er &p) override;
 
     const char *GetType() const;
     const char *GetName() const;

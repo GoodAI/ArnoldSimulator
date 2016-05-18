@@ -29,7 +29,7 @@ class RegionMap : public CkArrayMap
 public:
     RegionMap();
     RegionMap(CkMigrateMessage *msg);
-    int procNum(int arrayHdl, const CkArrayIndex &index);
+    virtual int procNum(int arrayHdl, const CkArrayIndex &index) override;
 };
 
 class Region
@@ -78,7 +78,7 @@ public:
     RegionBase(const RegionBase &other) = delete;
     RegionBase &operator=(const RegionBase &other) = delete;
 
-    void pup(PUP::er &p);
+    virtual void pup(PUP::er &p) override;
 
     const char *GetType() const;
     const char *GetName() const;

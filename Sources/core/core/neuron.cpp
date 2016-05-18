@@ -405,7 +405,38 @@ void NeuronBase::EnqueueSpike(Direction direction, const Spike::Data &data)
 
 void NeuronBase::Unlink()
 {
-    // TODO
+    if (mParent != DELETED_NEURON_ID) {
+        gCompletionDetector.ckLocalBranch()->produce();
+        gNeurons(GetRegionIndex(mParent), GetNeuronIndex(mParent)).RemoveChild(
+            GetNeuronId(thisIndex.x, thisIndex.y));
+        mParent = DELETED_NEURON_ID;
+    }
+
+    if (!mChildren.empty()) {
+        gCompletionDetector.ckLocalBranch()->produce(mChildren.size());
+        for (auto it = mChildren.begin(); it != mChildren.end(); ++it) {
+            gNeurons(GetRegionIndex(*it), GetNeuronIndex(*it)).UnsetParent();
+        }
+        mChildren.clear();
+    }
+
+    if (!mInputSynapses.empty()) {
+        gCompletionDetector.ckLocalBranch()->produce(mInputSynapses.size());
+        for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
+            gNeurons(GetRegionIndex(it->first), GetNeuronIndex(it->first)).RemoveOutputSynapse(
+                GetNeuronId(thisIndex.x, thisIndex.y));
+        }
+        mInputSynapses.clear();
+    }
+
+    if (!mOutputSynapses.empty()) {
+        gCompletionDetector.ckLocalBranch()->produce(mOutputSynapses.size());
+        for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
+            gNeurons(GetRegionIndex(it->first), GetNeuronIndex(it->first)).RemoveInputSynapse(
+                GetNeuronId(thisIndex.x, thisIndex.y));
+        }
+        mInputSynapses.clear();
+    }
 
     gCompletionDetector.ckLocalBranch()->done();
     gCompletionDetector.ckLocalBranch()->consume();

@@ -462,7 +462,71 @@ void RegionBase::PrepareTopologyChange(size_t brainStep, bool doProgress)
 
 void RegionBase::CommitTopologyChange()
 {
-    // TODO add neurons, add/remove synapses, add/remove children, unlink neurons
+    if (!mNeuronAdditions.empty()) {
+        gNeurons.beginInserting();
+        for (auto it = mNeuronAdditions.begin(); it != mNeuronAdditions.end(); ++it) {
+            mNeuronIndices.insert(std::get<0>(*it));
+            gNeurons(thisIndex, std::get<0>(*it)).insert(std::get<1>(*it), std::get<2>(*it));
+        }
+        gNeurons.doneInserting();
+    }
+
+    if (!mSynapseAdditions.empty()) {
+        for (auto it = mSynapseAdditions.begin(); it != mSynapseAdditions.end(); ++it) {
+            gCompletionDetector.ckLocalBranch()->produce(2);
+            NeuronId from = std::get<0>(*it) == Direction::Forward ? std::get<1>(*it) : std::get<2>(*it);
+            NeuronId to = std::get<0>(*it) == Direction::Forward ? std::get<2>(*it) : std::get<1>(*it);
+            gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).AddOutputSynapse(to, std::get<3>(*it));
+            gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).AddInputSynapse(from, std::get<3>(*it));
+        }
+    }
+
+    if (!mChildAdditions.empty()) {
+        for (auto it = mChildAdditions.begin(); it != mChildAdditions.end(); ++it) {
+            gCompletionDetector.ckLocalBranch()->produce(2);
+            NeuronId parent = std::get<0>(*it);
+            NeuronId child = std::get<1>(*it);
+            gNeurons(GetRegionIndex(parent), GetNeuronIndex(parent)).AddChild(child);
+            gNeurons(GetRegionIndex(child), GetNeuronIndex(child)).SetParent(parent);
+        }
+    }
+
+    if (!mChildRemovals.empty()) {
+        for (auto it = mChildRemovals.begin(); it != mChildRemovals.end(); ++it) {
+            gCompletionDetector.ckLocalBranch()->produce(2);
+            NeuronId parent = std::get<0>(*it);
+            NeuronId child = std::get<1>(*it);
+            gNeurons(GetRegionIndex(parent), GetNeuronIndex(parent)).RemoveChild(child);
+            gNeurons(GetRegionIndex(child), GetNeuronIndex(child)).UnsetParent();
+        }
+    }
+
+    if (!mSynapseRemovals.empty()) {
+        for (auto it = mSynapseRemovals.begin(); it != mSynapseRemovals.end(); ++it) {
+            gCompletionDetector.ckLocalBranch()->produce(2);
+            NeuronId from = std::get<0>(*it) == Direction::Forward ? std::get<1>(*it) : std::get<2>(*it);
+            NeuronId to = std::get<0>(*it) == Direction::Forward ? std::get<2>(*it) : std::get<1>(*it);
+            gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).RemoveOutputSynapse(to);
+            gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).RemoveInputSynapse(from);
+        }
+    }
+
+    if (!mNeuronRemovals.empty()) {
+        gCompletionDetector.ckLocalBranch()->produce(mNeuronRemovals.size());
+        CkVec<CkArrayIndex2D> deletedNeuronIndices;
+        {
+            std::unordered_set<NeuronId> deletedNeurons;
+            deletedNeurons.insert(mNeuronRemovals.begin(), mNeuronRemovals.end());
+            for (auto it = deletedNeurons.begin(); it != deletedNeurons.end(); ++it) {
+                CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
+                deletedNeuronIndices.push_back(index);
+            }
+        }
+        CProxySection_NeuronBase neuronSection = CProxySection_NeuronBase::ckNew(
+            gNeurons.ckGetArrayID(), deletedNeuronIndices.getVec(), deletedNeuronIndices.size());
+        neuronSection.ckSectionDelegate(CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch());
+        neuronSection.Unlink();
+    }
 
     gCompletionDetector.ckLocalBranch()->done();
 

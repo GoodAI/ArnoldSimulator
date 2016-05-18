@@ -30,7 +30,7 @@ class NeuronMap : public CkArrayMap
 public:
     NeuronMap();
     NeuronMap(CkMigrateMessage *msg);
-    int procNum(int arrayHdl, const CkArrayIndex &index);
+    virtual int procNum(int arrayHdl, const CkArrayIndex &index) override;
 };
 
 class Neuron
@@ -77,7 +77,7 @@ public:
     NeuronBase(const NeuronBase &other) = delete;
     NeuronBase &operator=(const NeuronBase &other) = delete;
 
-    void pup(PUP::er &p);
+    virtual void pup(PUP::er &p) override;
 
     const char *GetType() const;
     NeuronIndex GetIndex() const;

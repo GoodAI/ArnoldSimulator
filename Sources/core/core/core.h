@@ -40,7 +40,7 @@ public:
     Core(const Core &other) = delete;
     Core &operator=(const Core &other) = delete;
 
-    void pup(PUP::er &p);
+    virtual void pup(PUP::er &p) override;
 
     void Exit();
 
