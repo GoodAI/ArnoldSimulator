@@ -65,7 +65,4 @@ private:
 
     RequestId mRequestIdCounter;
     std::unordered_map<RequestId, CkCcsRequestMsg *> mRequests;
-
-    // TODO(Premek): Remove.
-    int mDummyTimestep;
 };

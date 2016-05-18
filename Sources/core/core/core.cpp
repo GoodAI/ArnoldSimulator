@@ -20,7 +20,7 @@ void CoreProcInit()
     TurnManualLBOn();
 }
 
-Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0), mDummyTimestep(0)
+Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0)
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -228,8 +228,9 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     std::vector<flatbuffers::Offset<Network::Region>> addedRegionsOffsets;
 
-    if (mDummyTimestep == 0)
-    {
+    static size_t mDummyTimestep = 0;
+
+    if (mDummyTimestep == 0) {
         auto regionName = builder.CreateString("testname");
         auto regionType = builder.CreateString("testtype");
         auto lowerBound = Network::CreatePosition(builder, 10.0f, 00.0f, 30.0f);
@@ -247,8 +248,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     const auto maxNeruonCount = 1000;
     static auto addedNeuronCount = 0;
 
-    if ((mDummyTimestep % neuronAddInterval == 0) && (addedNeuronCount < maxNeruonCount))
-    {
+    if ((mDummyTimestep % neuronAddInterval == 0) && (addedNeuronCount < maxNeruonCount)) {
         auto neuronType = builder.CreateString("neurotype");
         // This is relative to region lower bound in the UI (?)
 
