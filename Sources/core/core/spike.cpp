@@ -4,7 +4,7 @@
 
 Spike::Spike()
 {
-    mEditors.resize(((size_t)UINT8_MAX) + 1);
+    mEditors.resize((static_cast<size_t>(UINT8_MAX)) + 1);
     mEditors[static_cast<size_t>(Type::Binary)].reset(new BinarySpike());
     mEditors[static_cast<size_t>(Type::Discrete)].reset(new DiscreteSpike());
     mEditors[static_cast<size_t>(Type::Continuous)].reset(new ContinuousSpike());

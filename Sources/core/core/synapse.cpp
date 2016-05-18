@@ -2,7 +2,7 @@
 
 Synapse::Synapse()
 {
-    mEditors.resize(((size_t)UINT8_MAX) + 1);
+    mEditors.resize((static_cast<size_t>(UINT8_MAX)) + 1);
     mEditors[static_cast<size_t>(Type::Empty)].reset(new Editor());
     mEditors[static_cast<size_t>(Type::Weighted)].reset(new WeightedSynapse());
     mEditors[static_cast<size_t>(Type::Lagging)].reset(new LaggingSynapse());
@@ -37,6 +37,9 @@ Synapse Synapse::instance;
 Synapse::Data::Data()
 {
     type = Type::Empty;
+    bits8 = 0;
+    bits16 = 0;
+    bits64 = 0;
 }
 
 Synapse::Data::~Data()

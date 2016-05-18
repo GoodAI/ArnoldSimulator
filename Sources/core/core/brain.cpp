@@ -37,7 +37,7 @@ void *SimulateMsg::pack(SimulateMsg *msg)
 {
     size_t boxCnt = msg->roiBoxes.size();
     size_t size = (sizeof(bool) * 2) + (sizeof(size_t) * 2) + (sizeof(Box3D) * boxCnt);
-    char *buf = (char *)CkAllocBuffer(msg, size);
+    char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
 
     std::memcpy(cur, &msg->fullUpdate, sizeof(bool));
@@ -53,17 +53,17 @@ void *SimulateMsg::pack(SimulateMsg *msg)
     cur += sizeof(size_t);
 
     std::memcpy(cur, msg->roiBoxes.data(), sizeof(Box3D) * boxCnt);
-    cur += sizeof(Box3D) * boxCnt;
+    //cur += sizeof(Box3D) * boxCnt;
 
     delete msg;
-    return (void *)buf;
+    return static_cast<void *>(buf);
 }
 
 SimulateMsg *SimulateMsg::unpack(void *buf)
 {
-    char* cur = (char *)buf;
-    SimulateMsg* msg = (SimulateMsg *)CkAllocBuffer(buf, sizeof(SimulateMsg));
-    msg = new ((void *)msg) SimulateMsg();
+    char* cur = static_cast<char *>(buf);
+    SimulateMsg *msg = static_cast<SimulateMsg *>(CkAllocBuffer(buf, sizeof(SimulateMsg)));
+    msg = new (static_cast<void *>(msg)) SimulateMsg();
 
     int num_nodes;
     memcpy(&num_nodes, cur, sizeof(int));
@@ -84,7 +84,7 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
 
     msg->roiBoxes.reserve(boxCnt);
     std::memcpy(msg->roiBoxes.data(), cur, sizeof(Box3D) * boxCnt);
-    cur += sizeof(Box3D) * boxCnt;
+    //cur += sizeof(Box3D) * boxCnt;
 
     CkFreeMsg(buf);
     return msg;
@@ -712,9 +712,10 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
     // TODO
 
     if (msg) {
-        CkReduction::setElement *current = (CkReduction::setElement *)msg->getData();
+        CkReduction::setElement *current = 
+            static_cast<CkReduction::setElement *>(msg->getData());
         while (current != nullptr) {
-            int *result = (int *)&current->data;
+            int *result = reinterpret_cast<int *>(&current->data);
             // Do something with result.
             current = current->next();
         }

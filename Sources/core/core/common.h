@@ -5,7 +5,6 @@
 #include <tuple>
 #include <string>
 #include <vector>
-#include <list>
 #include <unordered_set>
 
 #include <tbb/tbbmalloc_proxy.h>
@@ -52,7 +51,7 @@ enum class Direction : uint8_t
 };
 
 inline void operator|(PUP::er &p, Direction &direction) {
-    pup_bytes(&p, (void *)&direction, sizeof(Direction));
+    pup_bytes(&p, static_cast<void *>(&direction), sizeof(Direction));
 }
 
 #define OPPOSITE_DIRECTION(direction) (direction == Direction::Forward ? Direction::Backward : Direction::Forward)
@@ -105,25 +104,25 @@ typedef std::vector<Connection> Connections;
 namespace PUP {
 
 template <class A, class B>
-inline void operator|(er &p, typename std::tuple<A, B> &t);
+inline void operator|(er &p, std::tuple<A, B> &t);
 template <class A, class B, class C>
-inline void operator|(er &p, typename std::tuple<A, B, C> &t);
+inline void operator|(er &p, std::tuple<A, B, C> &t);
 template <class A, class B, class C, class D>
-inline void operator|(er &p, typename std::tuple<A, B, C, D> &t);
+inline void operator|(er &p, std::tuple<A, B, C, D> &t);
 template <class A, class B, class C, class D, class E>
-inline void operator|(er &p, typename std::tuple<A, B, C, D, E> &t);
+inline void operator|(er &p, std::tuple<A, B, C, D, E> &t);
 template <class A, class B, class C, class D, class E, class F>
-inline void operator|(er &p, typename std::tuple<A, B, C, D, F> &t);
+inline void operator|(er &p, std::tuple<A, B, C, D, F> &t);
 
 template <class A, class B>
-inline void operator|(er &p, typename std::tuple<A, B> &t)
+inline void operator|(er &p, std::tuple<A, B> &t)
 {
     p | std::get<0>(t);
     p | std::get<1>(t);
 }
 
 template <class A, class B, class C>
-inline void operator|(er &p, typename std::tuple<A, B, C> &t)
+inline void operator|(er &p, std::tuple<A, B, C> &t)
 {
     p | std::get<0>(t);
     p | std::get<1>(t);
@@ -131,7 +130,7 @@ inline void operator|(er &p, typename std::tuple<A, B, C> &t)
 }
 
 template <class A, class B, class C, class D>
-inline void operator|(er &p, typename std::tuple<A, B, C, D> &t)
+inline void operator|(er &p, std::tuple<A, B, C, D> &t)
 {
     p | std::get<0>(t);
     p | std::get<1>(t);
@@ -140,7 +139,7 @@ inline void operator|(er &p, typename std::tuple<A, B, C, D> &t)
 }
 
 template <class A, class B, class C, class D, class E>
-inline void operator|(er &p, typename std::tuple<A, B, C, D, E> &t)
+inline void operator|(er &p, std::tuple<A, B, C, D, E> &t)
 {
     p | std::get<0>(t);
     p | std::get<1>(t);
@@ -150,7 +149,7 @@ inline void operator|(er &p, typename std::tuple<A, B, C, D, E> &t)
 }
 
 template <class A, class B, class C, class D, class E, class F>
-inline void operator|(er &p, typename std::tuple<A, B, C, D, F> &t)
+inline void operator|(er &p, std::tuple<A, B, C, D, F> &t)
 {
     p | std::get<0>(t);
     p | std::get<1>(t);

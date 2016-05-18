@@ -1,15 +1,12 @@
 #pragma once
 
-#include <tuple>
 #include <vector>
 #include <list>
-#include <set>
 #include <string>
 #include <functional>
 #include <unordered_set>
 #include <unordered_map>
 
-#include <sparsehash/sparse_hash_set>
 #include <sparsehash/sparse_hash_map>
 
 #include <json.hpp>

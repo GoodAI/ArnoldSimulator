@@ -80,7 +80,7 @@ private:
 };
 
 inline void operator|(PUP::er &p, Spike::Type &spikeType) {
-    pup_bytes(&p, (void *)&spikeType, sizeof(Spike::Type));
+    pup_bytes(&p, static_cast<void *>(&spikeType), sizeof(Spike::Type));
 }
 
 class BinarySpike : public Spike::Editor
