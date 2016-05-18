@@ -70,7 +70,8 @@ RegionBase::RegionBase(const RegionType &type, const RegionParams &params) :
     mRegion = RegionBase::CreateRegion(type, *this, p);
 }
 
-RegionBase::RegionBase(CkMigrateMessage *msg)
+RegionBase::RegionBase(CkMigrateMessage *msg) :
+    mUnlinking(false), mNeuronIdxCounter(0), mRegion(nullptr)
 {
 }
 

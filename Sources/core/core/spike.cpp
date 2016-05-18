@@ -39,6 +39,10 @@ Spike Spike::instance;
 Spike::Data::Data()
 {
     type = Type::Binary;
+    bits8 = 0;
+    bits16 = 0;
+    sender = 0;
+    bits64 = 0;
 }
 
 Spike::Data::~Data()

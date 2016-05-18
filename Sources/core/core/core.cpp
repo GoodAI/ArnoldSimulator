@@ -59,7 +59,9 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
     mState = Network::StateType_Paused;
 }
 
-Core::Core(CkMigrateMessage *msg)
+Core::Core(CkMigrateMessage *msg) :
+    mState(Network::StateType::StateType_Empty), mStartTime(0.0),
+    mRequestIdCounter(0), mDummyTimestep(0)
 {
 }
 

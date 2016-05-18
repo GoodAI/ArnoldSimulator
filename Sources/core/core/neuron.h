@@ -29,7 +29,7 @@ class NeuronMap : public CkArrayMap
 {
 public:
     NeuronMap();
-    NeuronMap(CkMigrateMessage *msg);
+    explicit NeuronMap(CkMigrateMessage *msg);
     virtual int procNum(int arrayHdl, const CkArrayIndex &index) override;
 };
 
@@ -71,7 +71,7 @@ public:
     static Neuron *CreateNeuron(const NeuronType &type, NeuronBase &base, json &params);
 
     NeuronBase(const NeuronType &type, const NeuronParams &params);
-    NeuronBase(CkMigrateMessage *msg);
+    explicit NeuronBase(CkMigrateMessage *msg);
     ~NeuronBase();
 
     NeuronBase(const NeuronBase &other) = delete;

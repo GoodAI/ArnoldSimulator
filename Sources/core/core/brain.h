@@ -68,7 +68,7 @@ class BrainMap : public CkArrayMap
 {
 public:
     BrainMap();
-    BrainMap(CkMigrateMessage *msg);
+    explicit BrainMap(CkMigrateMessage *msg);
     virtual int procNum(int arrayHdl, const CkArrayIndex &index) override;
 };
 
@@ -120,7 +120,7 @@ public:
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
 
     BrainBase(const BrainType &type, const BrainParams &params);
-    BrainBase(CkMigrateMessage *msg);
+    explicit BrainBase(CkMigrateMessage *msg);
     ~BrainBase();
 
     BrainBase(const BrainBase &other) = delete;

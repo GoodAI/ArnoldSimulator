@@ -89,7 +89,11 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
     mForwardSpikesNext = new Spikes();
 }
 
-NeuronBase::NeuronBase(CkMigrateMessage *msg)
+NeuronBase::NeuronBase(CkMigrateMessage *msg) :
+    mTempIdCounter(0), mParent(0),
+    mBackwardSpikesCurrent(nullptr), mBackwardSpikesNext(nullptr),
+    mForwardSpikesCurrent(nullptr), mForwardSpikesNext(nullptr),
+    mNeuron(nullptr)
 {
 }
 

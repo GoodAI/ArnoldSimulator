@@ -146,7 +146,7 @@ BrainBase::BrainBase(const BrainType &type, const BrainParams &params) :
     mDoSimulationProgress(false), mIsSimulationRunning(false),
     mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
     mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
-    mTriggeredNeurons(0), mDeletedNeurons(0),
+    mDeletedNeurons(0), mTriggeredNeurons(0),
     mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)

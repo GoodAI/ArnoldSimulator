@@ -14,7 +14,7 @@ class Body
 public:
     static Body *CreateBody(const std::string &type, json &params);
 
-    Body(json &params);
+    explicit Body(json &params);
     virtual ~Body() = default;
 
     Body(const Body &other) = delete;
@@ -33,7 +33,7 @@ class RandomBody : public Body
 public:
     static const char *Type;
 
-    RandomBody(json &params);
+    explicit RandomBody(json &params);
     virtual ~RandomBody();
 
     virtual const char *GetType() override;

@@ -28,7 +28,7 @@ class RegionMap : public CkArrayMap
 {
 public:
     RegionMap();
-    RegionMap(CkMigrateMessage *msg);
+    explicit RegionMap(CkMigrateMessage *msg);
     virtual int procNum(int arrayHdl, const CkArrayIndex &index) override;
 };
 
@@ -72,7 +72,7 @@ public:
     static Region *CreateRegion(const RegionType &type, RegionBase &base, json &params);
 
     RegionBase(const RegionType &type, const RegionParams &params);
-    RegionBase(CkMigrateMessage *msg);
+    explicit RegionBase(CkMigrateMessage *msg);
     ~RegionBase();
 
     RegionBase(const RegionBase &other) = delete;

@@ -32,8 +32,8 @@ void CoreProcInit();
 class Core : public CBase_Core
 {
 public:
-    Core(CkArgMsg *msg);
-    Core(CkMigrateMessage *msg);
+    explicit Core(CkArgMsg *msg);
+    explicit Core(CkMigrateMessage *msg);
     ~Core();
 
     Core(const Core &other) = delete;
