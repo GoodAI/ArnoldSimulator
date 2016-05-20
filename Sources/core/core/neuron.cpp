@@ -398,9 +398,9 @@ void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::
     if (destRegIdx == BRAIN_REGION_INDEX) {
         gRegions[thisIndex.x].EnqueueSensoMotoricSpike(receiver, data);
     } else {
+        mNeuronsTriggered.insert(receiver);
         gNeurons(destRegIdx, GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
     }
-    
 }
 
 void NeuronBase::EnqueueSpike(Direction direction, const Spike::Data &data)
@@ -452,47 +452,54 @@ void NeuronBase::Unlink()
     gCompletionDetector.ckLocalBranch()->consume();
 }
 
-void NeuronBase::FlipSpikeQueues()
+void NeuronBase::FlipSpikeQueues(EmptyMsg *msg)
 {
-    // TODO
-
     std::swap(mForwardSpikesCurrent, mForwardSpikesNext);
     std::swap(mBackwardSpikesCurrent, mBackwardSpikesNext);
+
+    CkGetSectionInfo(mSectionInfo, msg);
+    CkCallback cb(CkReductionTarget(RegionBase, NeuronFlipSpikeQueuesDone), gRegions[thisIndex.x]);
+    CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->contribute(
+        0, nullptr, CkReduction::nop, mSectionInfo, cb);
+
+    delete msg;
 }
 
 void NeuronBase::Simulate(SimulateMsg *msg)
 {
-    // TODO
-
     bool fullUpdate = msg->fullUpdate;
     bool doProgress = msg->doProgress;
     size_t brainStep = msg->brainStep;
-    Boxes roiBoxes = msg->roiBoxes;
-    delete msg;
+    Boxes roiBoxes = msg->roiBoxes; 
 
-    for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
-        if (mNeuron) Spike::Edit(*it)->Accept(Direction::Forward, *mNeuron, *it);
+    if (doProgress) {
+        for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
+            if (mNeuron) Spike::Edit(*it)->Accept(Direction::Forward, *mNeuron, *it);
+        }
+
+        for (auto it = mBackwardSpikesCurrent->begin(); it != mBackwardSpikesCurrent->end(); ++it) {
+            if (mNeuron) Spike::Edit(*it)->Accept(Direction::Backward, *mNeuron, *it);
+        }
+
+        mForwardSpikesCurrent->clear();
+        mBackwardSpikesCurrent->clear();
+
+        if (mNeuron) mNeuron->Control(brainStep);
     }
-
-    for (auto it = mBackwardSpikesCurrent->begin(); it != mBackwardSpikesCurrent->end(); ++it) {
-        if (mNeuron) Spike::Edit(*it)->Accept(Direction::Backward, *mNeuron, *it);
-    }
-
-    mForwardSpikesCurrent->clear();
-    mBackwardSpikesCurrent->clear();
-
-    if (mNeuron) mNeuron->Control(brainStep);
 
     gCompletionDetector.ckLocalBranch()->done();
     
-    /*
-    int result[3];
-    result[0] = 1;
-    result[1] = 2;
-    result[2] = 3;
+    uint8_t *resultPtr = nullptr;
+    size_t resultSize = 0;
+
+    // TODO generate upward result
+
+    CkGetSectionInfo(mSectionInfo, msg);
     CkCallback cb(CkReductionTarget(RegionBase, NeuronSimulateDone), gRegions[thisIndex.x]);
-    contribute(3*sizeof(int), result, CkReduction::set, cb);
-    */
+    CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->contribute(
+        resultSize, resultPtr, CkReduction::set, mSectionInfo, cb);
+
+    delete msg;
 }
 
 ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params)

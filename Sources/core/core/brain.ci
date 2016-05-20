@@ -2,12 +2,8 @@ module brain
 {
     include "common.h";
 
-    
-
-    message SimulateMsg
-    {
-        size_t brainStep;
-    };
+    message EmptyMsg;
+    message SimulateMsg;
 
     group [migratable] BrainMap : CkArrayMap {
         entry BrainMap();

@@ -63,7 +63,8 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
 }
 
 RegionBase::RegionBase(const RegionType &type, const RegionParams &params) : 
-    mUnlinking(false), mNeuronIdxCounter(NEURON_INDEX_MIN), mRegion(nullptr)
+    mUnlinking(false), mFullUpdate(false), mDoProgress(false), mBrainStep(0), 
+    mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFilled(false), mRegion(nullptr)
 {
     json p = json::parse(params);
 
@@ -71,7 +72,8 @@ RegionBase::RegionBase(const RegionType &type, const RegionParams &params) :
 }
 
 RegionBase::RegionBase(CkMigrateMessage *msg) :
-    mUnlinking(false), mNeuronIdxCounter(0), mRegion(nullptr)
+    mUnlinking(false), mFullUpdate(false), mDoProgress(false), mBrainStep(0),
+    mNeuronIdxCounter(0), mNeuronSectionFilled(false), mRegion(nullptr)
 {
 }
 
@@ -470,6 +472,7 @@ void RegionBase::Unlink()
     for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
         gNeurons(thisIndex, *it).ckDestroy();
     }
+    mNeuronIndices.clear();
 }
 
 void RegionBase::PrepareTopologyChange(size_t brainStep, bool doProgress)
@@ -560,41 +563,97 @@ void RegionBase::CommitTopologyChange()
 
 void RegionBase::Simulate(SimulateMsg *msg)
 {
-    bool fullUpdate = msg->fullUpdate;
-    bool doProgress = msg->doProgress;
-    size_t brainStep = msg->brainStep;
-    Boxes roiBoxes = msg->roiBoxes;
-    delete msg;
-
-    // TODO remove neurons
-
-    if (doProgress) {
-        // TODO flip neuron queues, simulate neurons
+    mFullUpdate = msg->fullUpdate;
+    mDoProgress = msg->doProgress;
+    mBrainStep = msg->brainStep;
+    mRoiBoxes = msg->roiBoxes;
+    
+    if (!mNeuronRemovals.empty()) {
+        std::unordered_set<NeuronId> deletedNeurons;
+        deletedNeurons.insert(mNeuronRemovals.begin(), mNeuronRemovals.end());
+        for (auto it = deletedNeurons.begin(); it != deletedNeurons.end(); ++it) {
+            mNeuronIndices.erase(*it);
+            gNeurons(GetRegionIndex(*it), GetNeuronIndex(*it)).ckDestroy();
+        }
     }
+
+    CkVec<CkArrayIndex2D> sectionNeuronIndices;
+    if (mFullUpdate && !mNeuronIndices.empty()) {
+        for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
+            CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
+            sectionNeuronIndices.push_back(index);
+        }
+
+    } else if (mDoProgress && !mNeuronsTriggered.empty()) {
+        for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
+            CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
+            sectionNeuronIndices.push_back(index);
+        }
+    }
+
+    if (sectionNeuronIndices.size() > 0) {
+        mNeuronSectionFilled = true;
+        CProxySection_NeuronBase mNeuronSection = CProxySection_NeuronBase::ckNew(
+            gNeurons.ckGetArrayID(), sectionNeuronIndices.getVec(), sectionNeuronIndices.size());
+        mNeuronSection.ckSectionDelegate(CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch());
+    }
+
+    if (mDoProgress && mNeuronSectionFilled) {
+        EmptyMsg *emptyMsg = new EmptyMsg();
+        mNeuronSection.FlipSpikeQueues(emptyMsg);
+    } else {
+        NeuronFlipSpikeQueuesDone(nullptr);
+    }
+
+    delete msg;
+}
+
+void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
+{
+    if (mNeuronSectionFilled) {
+
+        SimulateMsg *simulateMsg = new SimulateMsg();
+        simulateMsg->fullUpdate = mFullUpdate;
+        simulateMsg->doProgress = mDoProgress;
+        simulateMsg->brainStep = mBrainStep;
+        simulateMsg->roiBoxes = mRoiBoxes;
+
+        mNeuronSection.Simulate(simulateMsg);
+
+    } else {
+        NeuronSimulateDone(nullptr);
+    }
+
+    if (msg) delete msg;
 }
 
 void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 {
-    // TODO
+    if (mNeuronSectionFilled) {
+        mNeuronSectionFilled = false;
+        mNeuronSection = CProxySection_NeuronBase();
+    }
+
+    uint8_t *resultPtr = nullptr;
+    size_t resultSize = 0;
+
+    // TODO generate upward result
 
     if (msg) {
         CkReduction::setElement *current = static_cast<CkReduction::setElement *>(msg->getData());
         while (current != nullptr) {
             int *result = reinterpret_cast<int *>(&current->data);
-            // Do something with result.
+
+            // TODO integrate downward result
+
             current = current->next();
         }
+
         delete msg;
     }
 
-    /*
-    int result[3];
-    result[0] = 1;
-    result[1] = 2;
-    result[2] = 3;
     CkCallback cb(CkReductionTarget(BrainBase, SimulateRegionSimulateDone), gBrain[0]);
-    contribute(3*sizeof(int), result, CkReduction::set, cb);
-    */
+    contribute(resultSize, resultPtr, CkReduction::set, cb);
 }
 
 const char *ThresholdRegion::Type = "ThresholdRegion";

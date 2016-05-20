@@ -21,6 +21,7 @@
 
 using namespace nlohmann;
 
+class EmptyMsg;
 class SimulateMsg;
 
 class NeuronBase;
@@ -120,7 +121,7 @@ public:
     void EnqueueSpike(Direction direction, const Spike::Data &data);
 
     void Unlink();
-    void FlipSpikeQueues();
+    void FlipSpikeQueues(EmptyMsg *msg);
     void Simulate(SimulateMsg *msg);
 
 protected:
@@ -145,6 +146,8 @@ protected:
     Spikes *mBackwardSpikesNext;    
     Spikes *mForwardSpikesCurrent;
     Spikes *mForwardSpikesNext;
+
+    CkSectionInfo mSectionInfo;
 
     Neuron *mNeuron;
 };

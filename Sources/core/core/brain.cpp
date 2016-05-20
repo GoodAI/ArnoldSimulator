@@ -695,13 +695,13 @@ void BrainBase::SimulateRegionSimulate()
     }
 
     if (!mRegionIndices.empty()) {
-        SimulateMsg *msg = new SimulateMsg();
-        msg->fullUpdate = mDoFullViewportUpdate;
-        msg->doProgress = mDoSimulationProgress;
-        msg->brainStep = mBrainStep;
-        msg->roiBoxes = mRoiBoxes;
+        SimulateMsg *simulateMsg = new SimulateMsg();
+        simulateMsg->fullUpdate = mDoFullViewportUpdate;
+        simulateMsg->doProgress = mDoSimulationProgress;
+        simulateMsg->brainStep = mBrainStep;
+        simulateMsg->roiBoxes = mRoiBoxes;
 
-        gRegions.Simulate(msg);
+        gRegions.Simulate(simulateMsg);
     } else {
         this->SimulateRegionSimulateDone(nullptr);
     }
@@ -709,16 +709,19 @@ void BrainBase::SimulateRegionSimulate()
 
 void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
 {
-    // TODO
+    // TODO generate upward result
 
     if (msg) {
         CkReduction::setElement *current = 
             static_cast<CkReduction::setElement *>(msg->getData());
         while (current != nullptr) {
             int *result = reinterpret_cast<int *>(&current->data);
-            // Do something with result.
+
+            // TODO integrate downward result
+
             current = current->next();
         }
+
         delete msg;
     }
 

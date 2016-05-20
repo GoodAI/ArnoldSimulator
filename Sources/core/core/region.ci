@@ -4,8 +4,6 @@ module region
     include "spike.h";
     include "synapse.h";
 
-    
-
     group [migratable] RegionMap : CkArrayMap {
         entry RegionMap();
     };
@@ -36,6 +34,7 @@ module region
         entry void CommitTopologyChange();
         entry void Simulate(SimulateMsg *msg);
 
+        entry [reductiontarget] void NeuronFlipSpikeQueuesDone(CkReductionMsg *msg);
         entry [reductiontarget] void NeuronSimulateDone(CkReductionMsg *msg);
     };   	
 };

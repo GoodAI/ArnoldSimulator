@@ -4,8 +4,6 @@ module neuron
     include "spike.h";
     include "synapse.h";
 
-    
-
     group [migratable] NeuronMap : CkArrayMap {
         entry NeuronMap();
     };
@@ -31,7 +29,7 @@ module neuron
         entry void EnqueueSpike(Direction direction, Spike::Data data);
 
         entry void Unlink();
-        entry void FlipSpikeQueues();
+        entry void FlipSpikeQueues(EmptyMsg *msg);
         entry void Simulate(SimulateMsg *msg);
     };   	
 };

@@ -128,10 +128,16 @@ public:
     void CommitTopologyChange();
     void Simulate(SimulateMsg *msg);
 
+    void NeuronFlipSpikeQueuesDone(CkReductionMsg *msg);
     void NeuronSimulateDone(CkReductionMsg *msg);
 
 private:
     bool mUnlinking;
+
+    bool mFullUpdate;
+    bool mDoProgress;
+    size_t mBrainStep;
+    Boxes mRoiBoxes;
 
     NeuronIndex mNeuronIdxCounter;
     NeuronIndices mNeuronIndices;
@@ -146,8 +152,11 @@ private:
     ChildLinks mChildAdditions;
     ChildLinks mChildRemovals;
 
-    NeuronsTriggered mNeuronsTriggered;
     Spike::BrainSink mBrainSink;
+    NeuronsTriggered mNeuronsTriggered;
+
+    bool mNeuronSectionFilled;
+    CProxySection_NeuronBase mNeuronSection;
 
     RegionName mName;
     Region *mRegion;
