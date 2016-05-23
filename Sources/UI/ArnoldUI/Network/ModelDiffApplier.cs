@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,20 +37,19 @@ namespace GoodAI.Arnold.Network
 
                 Vector3 position = lowerBound.ToVector3() + size/2;
 
-                model.AddChild(new RegionModel(addedRegion.Name, addedRegion.Type, position, size));
+                model.AddChild(new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type, position, size));
             }
         }
 
         private static void ApplyAddedNeurons(SimulationModel model, ModelResponse diff)
         {
-            // TODO(Premek): remove this hack.
-            RegionModel targetRegionModel = model.Models.FirstOrDefault();
-            if (targetRegionModel == null)
-                return;
-
             for (int i = 0; i < diff.AddedNeuronsLength; i++)
             {
                 Neuron neuron = diff.GetAddedNeurons(i);
+
+                RegionModel targetRegionModel = model.Models.FirstOrDefault(region => region.Index == neuron.RegionIndex);
+                if (targetRegionModel == null)
+                    continue;
 
                 targetRegionModel.AddExpert(new ExpertModel(targetRegionModel, neuron.Position.ToVector3()));
             }

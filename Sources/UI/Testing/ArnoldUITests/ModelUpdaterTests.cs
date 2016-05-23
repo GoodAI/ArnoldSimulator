@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.UI.Tests
 
                 return Task<TResponse>.Factory.StartNew(() =>
                 {
-                    var regionModel = new RegionModel("foo", "bar", Vector3.One, Vector3.Zero);
+                    var regionModel = new RegionModel(1, "foo", "bar", Vector3.One, Vector3.Zero);
 
                     return ModelResponseBuilder.Build(new List<RegionModel> {regionModel})
                         .GetResponse(new ModelResponse()) as TResponse;

@@ -23,7 +23,7 @@ namespace GoodAI.Arnold.UI.Tests
             var model = new SimulationModel();
             var applier = new ModelDiffApplier();
 
-            var sourceRegion = new RegionModel("foo", "bar", new Vector3(1, 2, 3), new Vector3(6, 5, 4));
+            var sourceRegion = new RegionModel(1, "foo", "bar", new Vector3(1, 2, 3), new Vector3(6, 5, 4));
 
             ResponseMessage diff = ModelResponseBuilder.Build(new List<RegionModel> {sourceRegion});
             applier.ApplyModelDiff(model, diff.GetResponse(new ModelResponse()));

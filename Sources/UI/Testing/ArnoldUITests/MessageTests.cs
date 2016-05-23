@@ -57,7 +57,7 @@ namespace GoodAI.Arnold.UI.Tests
             var message =
                 ModelResponseBuilder.Build(new List<RegionModel>
                 {
-                    new RegionModel(regionName, regionType, new Vector3(10, 20, 30), new Vector3(40, 30, 20))
+                    new RegionModel(1, regionName, regionType, new Vector3(10, 20, 30), new Vector3(40, 30, 20))
                 });
 
             Assert.Equal(regionName, message.GetResponse(new ModelResponse()).GetAddedRegions(0).Name);
