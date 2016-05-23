@@ -13,8 +13,8 @@ namespace GoodAI.Arnold.Graphics.Models
     {
         private Vector3 m_size;
         public Vector3 HalfSize { get; private set; }
+        public const float SizeX = 0.2f;
         public const float SizeY = 0.2f;
-        public const float SizeZ = 0.2f;
 
         public Vector3 Size
         {
@@ -26,9 +26,11 @@ namespace GoodAI.Arnold.Graphics.Models
             }
         }
 
-        public ConnectorModel(int sizeX)
+        public int Slots { get; set; }
+
+        public ConnectorModel(int slots)
         {
-            Size = new Vector3(sizeX, SizeY, SizeZ);
+            Slots = slots;
         }
 
         protected override void UpdateModel(float elapsedMs)
@@ -75,6 +77,12 @@ namespace GoodAI.Arnold.Graphics.Models
 
                 GL.End();
             }
+        }
+
+        internal void Reposition(float position, float sizeZ)
+        {
+            Position = new Vector3(0, 0, position + sizeZ/2);
+            Size = new Vector3(ConnectorModel.SizeX, ConnectorModel.SizeY, sizeZ);
         }
 
         protected abstract Color4 Color { get; }

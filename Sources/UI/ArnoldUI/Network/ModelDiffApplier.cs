@@ -25,6 +25,7 @@ namespace GoodAI.Arnold.Network
         public void ApplyModelDiff(SimulationModel model, ModelResponse diff)
         {
             ApplyAddedRegions(model, diff);
+            ApplyAddedConnectors(model, diff);
             ApplyAddedNeurons(model, diff);
         }
 

@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class RegionModel : CompositeModelBase<IModel>
+    public sealed class RegionModel : CompositeModelBase<IModel>
     {
         private Vector3 m_size;
         public const float RegionMargin = 2f;
@@ -28,8 +28,10 @@ namespace GoodAI.Arnold.Graphics.Models
             }
         }
 
-        public CompositeModel<InputConnectorModel> InputConnectors { get; } = new CompositeModel<InputConnectorModel>();
-        public CompositeModel<OutputConnectorModel> OutputConnectors { get; } = new CompositeModel<OutputConnectorModel>();
+        //public CompositeModel<InputConnectorModel> InputConnectors { get; } = new CompositeModel<InputConnectorModel>();
+        //public CompositeModel<OutputConnectorModel> OutputConnectors { get; } = new CompositeModel<OutputConnectorModel>();
+        public ConnectorStripModel<InputConnectorModel> InputConnectors { get; }
+        public ConnectorStripModel<OutputConnectorModel> OutputConnectors { get; }
         public CompositeModel<ExpertModel> Experts { get; } = new CompositeModel<ExpertModel>();
         public CompositeModel<SynapseModel> Synapses { get; } = new CompositeModel<SynapseModel>();
 
@@ -46,6 +48,11 @@ namespace GoodAI.Arnold.Graphics.Models
 
             Translucent = true;
 
+            InputConnectors = new ConnectorStripModel<InputConnectorModel>(this);
+            OutputConnectors = new ConnectorStripModel<OutputConnectorModel>(this);
+
+            AddChild(InputConnectors);
+            AddChild(OutputConnectors);
             AddChild(Experts);
             AddChild(Synapses);
         }

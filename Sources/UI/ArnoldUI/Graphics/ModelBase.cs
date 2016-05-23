@@ -144,29 +144,29 @@ namespace GoodAI.Arnold.Graphics
     /// <typeparam name="T">Type of the contained models.</typeparam>
     public abstract class CompositeModelBase<T> : ModelBase, ICompositeModel, IEnumerable<T> where T : IModel
     {
-        public IEnumerable<IModel> GenericModels => m_children as IEnumerable<IModel>;
+        public IEnumerable<IModel> GenericModels => Children as IEnumerable<IModel>;
 
-        public IEnumerable<T> Models => m_children;
+        public IEnumerable<T> Models => Children;
 
-        private readonly IList<T> m_children = new List<T>();
+        protected readonly IList<T> Children = new List<T>();
 
-        public void AddChild(T child)
+        public virtual void AddChild(T child)
         {
             child.Owner = this;
-            m_children.Add(child);
+            Children.Add(child);
         }
 
-        public void Clear() => m_children.Clear();
+        public void Clear() => Children.Clear();
 
         public override void Update(float elapsedMs)
         {
             base.Update(elapsedMs);
 
-            foreach (var child in m_children)
+            foreach (var child in Children)
                 child.Update(elapsedMs);
         }
 
-        public IEnumerator<T> GetEnumerator() => m_children.GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => Children.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

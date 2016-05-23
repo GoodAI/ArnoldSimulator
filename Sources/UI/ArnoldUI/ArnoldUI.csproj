@@ -106,6 +106,7 @@
     <Compile Include="Graphics\Blender.cs" />
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\Models\ConnectorModel.cs" />
+    <Compile Include="Graphics\Models\ConnectorStripModel.cs" />
     <Compile Include="Graphics\Models\GridModel.cs" />
     <Compile Include="Graphics\ModelBase.cs" />
     <Compile Include="Graphics\PickRay.cs" />
