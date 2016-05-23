@@ -231,14 +231,40 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     if (mDummyTimestep == 0) {
         auto regionName = builder.CreateString("testname");
         auto regionType = builder.CreateString("testtype");
-        auto lowerBound = Network::CreatePosition(builder, 10.0f, 00.0f, 30.0f);
-        auto upperBound = Network::CreatePosition(builder, 32.0f, 22.0f, 82.0f);
+        auto lowerBound = Network::CreatePosition(builder, 30.0f, 00.0f, 10.0f);
+        auto upperBound = Network::CreatePosition(builder, 82.0f, 22.0f, 32.0f);
         auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
 
         addedRegionsOffsets.push_back(regionOffset);
     }
 
     auto addedRegionsVector = builder.CreateVector(addedRegionsOffsets);
+
+    std::vector<flatbuffers::Offset<Network::Connector>> addedConnectorsOffsets;
+
+    if (mDummyTimestep == 0) {
+        auto connectorName1 = builder.CreateString("connector 1");
+        auto connectorName2 = builder.CreateString("connector 2");
+
+        auto connectorName3 = builder.CreateString("connector 3");
+        auto connectorName4 = builder.CreateString("connector 4");
+        auto connectorName5 = builder.CreateString("connector 5");
+
+        auto connectorOffset1 = Network::CreateConnector(builder, 1, connectorName1, Network::Direction_Forward, 5);
+        auto connectorOffset2 = Network::CreateConnector(builder, 1, connectorName2, Network::Direction_Forward, 15);
+
+        auto connectorOffset3 = Network::CreateConnector(builder, 1, connectorName3, Network::Direction_Backward, 5);
+        auto connectorOffset4 = Network::CreateConnector(builder, 1, connectorName4, Network::Direction_Backward, 8);
+        auto connectorOffset5 = Network::CreateConnector(builder, 1, connectorName5, Network::Direction_Backward, 2);
+
+        addedConnectorsOffsets.push_back(connectorOffset1);
+        addedConnectorsOffsets.push_back(connectorOffset2);
+        addedConnectorsOffsets.push_back(connectorOffset3);
+        addedConnectorsOffsets.push_back(connectorOffset4);
+        addedConnectorsOffsets.push_back(connectorOffset5);
+    }
+
+    auto addedConnectorsVector = builder.CreateVector(addedConnectorsOffsets);
 
     std::vector<flatbuffers::Offset<Network::Neuron>> addedNeuronsOffsets;
 
@@ -253,14 +279,14 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         const auto layerSizeX = 10;
         const auto layerSizeY = 10;
 
-        auto x = addedNeuronCount % layerSizeX;
+        auto x = addedNeuronCount / (layerSizeX * layerSizeY);
         auto y = (addedNeuronCount / 10) % layerSizeY;
-        auto z = addedNeuronCount / (layerSizeX * layerSizeY);
+        auto z = addedNeuronCount % layerSizeX;
 
         auto neuronPosition = Network::CreatePosition(builder,
-            2.f * static_cast<float>(x),
+            5.f * static_cast<float>(x),
             2.f * static_cast<float>(y),
-            5.f * static_cast<float>(z));
+            2.f * static_cast<float>(z));
         auto neruonOffset = Network::CreateNeuron(builder, 1, 1, neuronType, neuronPosition);
 
         addedNeuronsOffsets.push_back(neruonOffset);
@@ -271,6 +297,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     Network::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVector);
+    responseBuilder.add_addedConnectors(addedConnectorsVector);
     responseBuilder.add_addedNeurons(addedNeuronsVector);
     auto modelResponseOffset = responseBuilder.Finish();
 

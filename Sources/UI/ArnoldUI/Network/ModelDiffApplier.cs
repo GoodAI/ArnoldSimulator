@@ -65,13 +65,28 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private static void ApplyAddedConnectors(SimulationModel model, ModelResponse diff)
+        private void ApplyAddedConnectors(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.AddedConnectorsLength; i++)
             {
                 Connector addedConnector = diff.GetAddedConnectors(i);
 
-                // TODO(HonzaS): Add support for connectors to RegionModel.
+                var targetRegionModel = model.Models.FirstOrDefault(region => region.Index == addedConnector.RegionIndex);
+
+                if (targetRegionModel == null)
+                {
+                    Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
+                        addedConnector.Name,
+                        addedConnector.RegionIndex);
+                    continue;
+                }
+
+                // TODO(HonzaS): A Shortcut for the creation of models?
+                // Replace them with factory + inject logger.
+                if (addedConnector.Direction == Direction.Forward)
+                    targetRegionModel.OutputConnectors.AddChild(new OutputConnectorModel(addedConnector.Name, (int) addedConnector.Size));
+                else
+                    targetRegionModel.InputConnectors.AddChild(new InputConnectorModel(addedConnector.Name, (int) addedConnector.Size));
             }
         }
 

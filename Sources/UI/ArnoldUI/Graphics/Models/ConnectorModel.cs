@@ -11,11 +11,14 @@ namespace GoodAI.Arnold.Graphics.Models
 {
     public abstract class ConnectorModel : ModelBase
     {
-        private Vector3 m_size;
-        public Vector3 HalfSize { get; private set; }
         public const float SizeX = 1f;
         public const float SizeY = 3f;
         public const float MarginZ = 0.5f;
+
+        private Vector3 m_size;
+        public Vector3 HalfSize { get; private set; }
+
+        public string Name { get; private set; }
 
         public Vector3 Size
         {
@@ -29,9 +32,10 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public int Slots { get; set; }
 
-        public ConnectorModel(int slots)
+        public ConnectorModel(string name, int slots)
         {
             Slots = slots;
+            Name = name;
         }
 
         protected override void UpdateModel(float elapsedMs)
@@ -91,19 +95,21 @@ namespace GoodAI.Arnold.Graphics.Models
 
     public sealed class InputConnectorModel : ConnectorModel
     {
-        public InputConnectorModel(int slots) : base(slots)
-        {
-        }
 
         protected override Color4 Color { get; } = new Color4(255, 100, 255, 30);
+
+        public InputConnectorModel(string name, int slots) : base(name, slots)
+        {
+        }
     }
 
     public sealed class OutputConnectorModel : ConnectorModel
     {
-        public OutputConnectorModel(int slots) : base(slots)
-        {
-        }
 
         protected override Color4 Color { get; } = new Color4(0, 255, 50, 30);
+
+        public OutputConnectorModel(string name, int slots) : base(name, slots)
+        {
+        }
     }
 }

@@ -55,16 +55,6 @@ namespace GoodAI.Arnold.Graphics.Models
             AddChild(OutputConnectors);
             AddChild(Experts);
             AddChild(Synapses);
-
-            InputConnectors.AddChild(new InputConnectorModel(5));
-            InputConnectors.AddChild(new InputConnectorModel(10));
-
-            OutputConnectors.AddChild(new OutputConnectorModel(2));
-            OutputConnectors.AddChild(new OutputConnectorModel(3));
-            OutputConnectors.AddChild(new OutputConnectorModel(3));
-            OutputConnectors.AddChild(new OutputConnectorModel(3));
-            OutputConnectors.AddChild(new OutputConnectorModel(3));
-            OutputConnectors.AddChild(new OutputConnectorModel(3));
         }
 
         public void AddExpert(ExpertModel expert) => Experts.AddChild(expert);
