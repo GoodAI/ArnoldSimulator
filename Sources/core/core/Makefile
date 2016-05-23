@@ -10,11 +10,11 @@ LFLAGS = -language charm++ -module CkMulticast -module completion
 BIN = core
 RUN = charmrun
 MSG_DIR = ../../network/messages
-SRCS = $(patsubst %.cpp,%.cpp,$(wildcard *.cpp))
-OBJS = $(patsubst %.cpp,%.o,$(wildcard *.cpp))
-DCLS = $(patsubst %.ci,%.decl.h,$(wildcard *.ci))
-DEFS = $(patsubst %.ci,%.def.h,$(wildcard *.ci))
-FBSS = $(patsubst $(MSG_DIR)/%.fbs,%_generated.h,$(wildcard $(MSG_DIR)/*.fbs))
+SRCS = $(wildcard *.cpp)
+OBJS = $(patsubst %.cpp, %.o, $(SRCS))
+DCLS = $(patsubst %.ci, %.decl.h, $(wildcard *.ci))
+DEFS = $(patsubst %.ci, %.def.h, $(wildcard *.ci))
+FBSS = $(patsubst $(MSG_DIR)/%.fbs, %_generated.h, $(wildcard $(MSG_DIR)/*.fbs))
 
 #
 # Debug build settings
