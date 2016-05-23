@@ -46,6 +46,8 @@ namespace GoodAI.Arnold.Graphics.Models
         {
             using (Blender.AveragingBlender())
             {
+                // Draw the body.
+
                 GL.Color4(Color);
 
                 GL.Begin(PrimitiveType.Quads);
@@ -79,6 +81,45 @@ namespace GoodAI.Arnold.Graphics.Models
                 GL.Vertex3(HalfSize.X, HalfSize.Y, -HalfSize.Z);
                 GL.Vertex3(HalfSize.X, HalfSize.Y, HalfSize.Z);
                 GL.Vertex3(-HalfSize.X, HalfSize.Y, HalfSize.Z);
+
+                GL.End();
+
+                // Draw the borders.
+
+                GL.Color4(0.7f, 0.7f, 0.7f, 0.1f);
+                GL.LineWidth(2f);
+
+                GL.Begin(PrimitiveType.LineLoop);
+
+                GL.Vertex3(-HalfSize.X, -HalfSize.Y, -HalfSize.Z);
+                GL.Vertex3(-HalfSize.X, -HalfSize.Y, HalfSize.Z);
+                GL.Vertex3(-HalfSize.X, HalfSize.Y, HalfSize.Z);
+                GL.Vertex3(-HalfSize.X, HalfSize.Y, -HalfSize.Z);
+
+                GL.End();
+
+                GL.Begin(PrimitiveType.LineLoop);
+
+                GL.Vertex3(HalfSize.X, -HalfSize.Y, -HalfSize.Z);
+                GL.Vertex3(HalfSize.X, -HalfSize.Y, HalfSize.Z);
+                GL.Vertex3(HalfSize.X, HalfSize.Y, HalfSize.Z);
+                GL.Vertex3(HalfSize.X, HalfSize.Y, -HalfSize.Z);
+
+                GL.End();
+
+                GL.Begin(PrimitiveType.Lines);
+
+                GL.Vertex3(-HalfSize.X, -HalfSize.Y, -HalfSize.Z);
+                GL.Vertex3(HalfSize.X, -HalfSize.Y, -HalfSize.Z);
+
+                GL.Vertex3(-HalfSize.X, HalfSize.Y, HalfSize.Z);
+                GL.Vertex3(HalfSize.X, HalfSize.Y, HalfSize.Z);
+
+                GL.Vertex3(-HalfSize.X, -HalfSize.Y, HalfSize.Z);
+                GL.Vertex3(HalfSize.X, -HalfSize.Y, HalfSize.Z);
+
+                GL.Vertex3(-HalfSize.X, HalfSize.Y, -HalfSize.Z);
+                GL.Vertex3(HalfSize.X, HalfSize.Y, -HalfSize.Z);
 
                 GL.End();
             }
