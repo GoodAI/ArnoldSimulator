@@ -13,8 +13,9 @@ namespace GoodAI.Arnold.Graphics.Models
     {
         private Vector3 m_size;
         public Vector3 HalfSize { get; private set; }
-        public const float SizeX = 0.2f;
-        public const float SizeY = 0.2f;
+        public const float SizeX = 1f;
+        public const float SizeY = 3f;
+        public const float MarginZ = 0.5f;
 
         public Vector3 Size
         {
@@ -39,7 +40,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         protected override void RenderModel(float elapsedMs)
         {
-            using (Blender.MultiplicativeBlender())
+            using (Blender.AveragingBlender())
             {
                 GL.Color4(Color);
 
@@ -82,7 +83,7 @@ namespace GoodAI.Arnold.Graphics.Models
         internal void Reposition(float position, float sizeZ)
         {
             Position = new Vector3(0, 0, position + sizeZ/2);
-            Size = new Vector3(ConnectorModel.SizeX, ConnectorModel.SizeY, sizeZ);
+            Size = new Vector3(ConnectorModel.SizeX, ConnectorModel.SizeY, sizeZ - MarginZ*2);
         }
 
         protected abstract Color4 Color { get; }
@@ -90,19 +91,19 @@ namespace GoodAI.Arnold.Graphics.Models
 
     public sealed class InputConnectorModel : ConnectorModel
     {
-        public InputConnectorModel(int sizeX) : base(sizeX)
+        public InputConnectorModel(int slots) : base(slots)
         {
         }
 
-        protected override Color4 Color { get; } = new Color4(200, 0, 200, 20);
+        protected override Color4 Color { get; } = new Color4(255, 100, 255, 30);
     }
 
     public sealed class OutputConnectorModel : ConnectorModel
     {
-        public OutputConnectorModel(int sizeX) : base(sizeX)
+        public OutputConnectorModel(int slots) : base(slots)
         {
         }
 
-        protected override Color4 Color { get; } = new Color4(0, 200, 200, 20);
+        protected override Color4 Color { get; } = new Color4(0, 255, 50, 30);
     }
 }

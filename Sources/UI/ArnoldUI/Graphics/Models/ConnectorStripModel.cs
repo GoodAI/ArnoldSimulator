@@ -7,31 +7,22 @@ using OpenTK;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public enum ConnectorStripType
+    public abstract class ConnectorStripModel<TConnector> : CompositeModelBase<TConnector> where TConnector : ConnectorModel
     {
-        Input,
-        Output
-    }
-
-    public class ConnectorStripModel<TConnector> : CompositeModelBase<TConnector> where TConnector : ConnectorModel
-    {
-        private readonly RegionModel m_region;
-        private readonly ConnectorStripType m_stripType;
+        protected readonly RegionModel m_region;
         public int TotalSlots { get; set; }
 
-        public ConnectorStripModel(RegionModel region, ConnectorStripType stripType)
+        public ConnectorStripModel(RegionModel region)
         {
             m_region = region;
-            m_stripType = stripType;
         }
+
+        protected abstract Vector3 AdjustedPosition { get; }
 
         protected override void UpdateModel(float elapsedMs)
         {
             // TODO(HonzaS): Only recalculate if something changed.
-
-            // Set this strip's position.
-            float positionX = m_stripType == ConnectorStripType.Input ? -m_region.HalfSize.X : m_region.HalfSize.X;
-            Position = new Vector3(positionX, 0, 0);
+            Position = AdjustedPosition;
 
             // Starting position of the connector in the strip.
             var position = -m_region.HalfSize.Z;
@@ -57,5 +48,23 @@ namespace GoodAI.Arnold.Graphics.Models
 
             TotalSlots += child.Slots;
         }
+    }
+
+    public class InputConnectorStripModel : ConnectorStripModel<InputConnectorModel>
+    {
+        public InputConnectorStripModel(RegionModel region) : base(region)
+        {
+        }
+
+        protected override Vector3 AdjustedPosition => new Vector3(-m_region.HalfSize.X, 0, 0);
+    }
+
+    public class OutputConnectorStripModel : ConnectorStripModel<OutputConnectorModel>
+    {
+        public OutputConnectorStripModel(RegionModel region) : base(region)
+        {
+        }
+
+        protected override Vector3 AdjustedPosition => new Vector3(m_region.HalfSize.X, 0, 0);
     }
 }

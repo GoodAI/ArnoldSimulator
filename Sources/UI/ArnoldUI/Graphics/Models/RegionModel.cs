@@ -48,13 +48,23 @@ namespace GoodAI.Arnold.Graphics.Models
 
             Translucent = true;
 
-            InputConnectors = new ConnectorStripModel<InputConnectorModel>(this);
-            OutputConnectors = new ConnectorStripModel<OutputConnectorModel>(this);
+            InputConnectors = new InputConnectorStripModel(this);
+            OutputConnectors = new OutputConnectorStripModel(this);
 
             AddChild(InputConnectors);
             AddChild(OutputConnectors);
             AddChild(Experts);
             AddChild(Synapses);
+
+            InputConnectors.AddChild(new InputConnectorModel(5));
+            InputConnectors.AddChild(new InputConnectorModel(10));
+
+            OutputConnectors.AddChild(new OutputConnectorModel(2));
+            OutputConnectors.AddChild(new OutputConnectorModel(3));
+            OutputConnectors.AddChild(new OutputConnectorModel(3));
+            OutputConnectors.AddChild(new OutputConnectorModel(3));
+            OutputConnectors.AddChild(new OutputConnectorModel(3));
+            OutputConnectors.AddChild(new OutputConnectorModel(3));
         }
 
         public void AddExpert(ExpertModel expert) => Experts.AddChild(expert);
