@@ -68,7 +68,7 @@ namespace GoodAI.Arnold.Graphics
         {
             // TODO: Nasty! Change!
             // If (when) experts are drawn via shaders, they might not actually need the camera position? (no sprites)
-            foreach (var region in m_simulationModel.Models)
+            foreach (var region in m_simulationModel.Regions)
                 foreach (ExpertModel expert in region.Experts)
                     expert.Camera = m_camera;
         }
@@ -123,7 +123,7 @@ namespace GoodAI.Arnold.Graphics
 
             m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
-            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Models);
+            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Regions);
             if (expert != null)
                 ToggleExpert(expert);
         }

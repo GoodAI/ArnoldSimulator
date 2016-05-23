@@ -29,7 +29,7 @@ namespace GoodAI.Arnold.UI.Tests
             applier.ApplyModelDiff(model, diff.GetResponse(new ModelResponse()));
 
             Assert.Equal(1, model.Models.Count());
-            RegionModel generatedRegion = model.Models.First();
+            RegionModel generatedRegion = model.Regions.First();
 
             CompareLogic compareLogic = new CompareLogic
             {

@@ -17,6 +17,8 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public string Name { get; private set; }
 
+        public ConnectionModel Connection { get; set; }
+
         public Vector3 Size
         {
             get { return m_size; }

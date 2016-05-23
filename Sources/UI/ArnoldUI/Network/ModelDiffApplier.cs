@@ -25,6 +25,7 @@ namespace GoodAI.Arnold.Network
         {
             ApplyAddedRegions(model, diff);
             ApplyAddedConnectors(model, diff);
+            ApplyAddedConnections(model, diff);
             ApplyAddedNeurons(model, diff);
         }
 
@@ -41,7 +42,7 @@ namespace GoodAI.Arnold.Network
 
                 Vector3 position = lowerBound.ToVector3() + size/2;
 
-                model.AddChild(new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type, position, size));
+                model.Regions.AddChild(new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type, position, size));
             }
         }
 
@@ -66,7 +67,7 @@ namespace GoodAI.Arnold.Network
 
         private static RegionModel FindRegion(SimulationModel model, uint regionIndex)
         {
-            return model.Models.FirstOrDefault(region => region.Index == regionIndex);
+            return model.Regions.FirstOrDefault(region => region.Index == regionIndex);
         }
 
         private void ApplyAddedConnectors(SimulationModel model, ModelResponse diff)
@@ -99,7 +100,20 @@ namespace GoodAI.Arnold.Network
             {
                 Connection addedConnection = diff.GetAddedConnections(i);
 
-                // TODO(HonzaS): Add support for connections to RegionModel.
+                // TODO(HonzaS): Faster lookup.
+                OutputConnectorModel fromConnector =
+                    model.Regions.FirstOrDefault(region => region.Index == addedConnection.FromRegion)?
+                        .OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
+
+                // TODO(HonzaS): Faster lookup.
+                InputConnectorModel toConnector =
+                    model.Regions.FirstOrDefault(region => region.Index == addedConnection.ToRegion)?
+                        .InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
+
+                var connectionModel = new ConnectionModel(fromConnector, toConnector);
+
+                // TODO!!!
+                model.Connections.AddChild(connectionModel);
             }
         }
 

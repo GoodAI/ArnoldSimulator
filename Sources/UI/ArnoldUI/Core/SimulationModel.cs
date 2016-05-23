@@ -10,7 +10,18 @@ using OpenTK.Platform.Windows;
 
 namespace GoodAI.Arnold.Core
 {
-    public class SimulationModel : CompositeModel<RegionModel>
+    public sealed class SimulationModel : CompositeModel<IModel>
     {
+        public CompositeModel<ConnectionModel> Connections { get; set; }
+        public CompositeModel<RegionModel> Regions { get; set; }
+
+        public SimulationModel()
+        {
+            Regions = new CompositeModel<RegionModel>();
+            Connections = new CompositeModel<ConnectionModel>();
+
+            AddChild(Regions);
+            AddChild(Connections);
+        }
     }
 }
