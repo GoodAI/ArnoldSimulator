@@ -226,26 +226,30 @@ public sealed class Neuron : Table {
   public Neuron __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public uint Id { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public string Type { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
-  public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(6); }
+  public uint RegionIndex { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public string Type { get { int o = __offset(8); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(8); }
   public Position Position { get { return GetPosition(new Position()); } }
-  public Position GetPosition(Position obj) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public Position GetPosition(Position obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<Neuron> CreateNeuron(FlatBufferBuilder builder,
       uint id = 0,
+      uint regionIndex = 0,
       StringOffset typeOffset = default(StringOffset),
       Offset<Position> positionOffset = default(Offset<Position>)) {
-    builder.StartObject(3);
+    builder.StartObject(4);
     Neuron.AddPosition(builder, positionOffset);
     Neuron.AddType(builder, typeOffset);
+    Neuron.AddRegionIndex(builder, regionIndex);
     Neuron.AddId(builder, id);
     return Neuron.EndNeuron(builder);
   }
 
-  public static void StartNeuron(FlatBufferBuilder builder) { builder.StartObject(3); }
+  public static void StartNeuron(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddId(FlatBufferBuilder builder, uint id) { builder.AddUint(0, id, 0); }
-  public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(1, typeOffset.Value, 0); }
-  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(2, positionOffset.Value, 0); }
+  public static void AddRegionIndex(FlatBufferBuilder builder, uint regionIndex) { builder.AddUint(1, regionIndex, 0); }
+  public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(2, typeOffset.Value, 0); }
+  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(3, positionOffset.Value, 0); }
   public static Offset<Neuron> EndNeuron(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Neuron>(o);

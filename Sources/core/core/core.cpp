@@ -261,7 +261,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
             2.f * static_cast<float>(x),
             2.f * static_cast<float>(y),
             5.f * static_cast<float>(z));
-        auto neruonOffset = Network::CreateNeuron(builder, 1, neuronType, neuronPosition);
+        auto neruonOffset = Network::CreateNeuron(builder, 1, 1, neuronType, neuronPosition);
 
         addedNeuronsOffsets.push_back(neruonOffset);
         addedNeuronCount++;

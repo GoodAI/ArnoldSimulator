@@ -66,6 +66,7 @@ table Connection {
 
 table Neuron {
 	id:uint;
+	regionIndex:uint;
 	type:string;
 	position:Position;
 }
