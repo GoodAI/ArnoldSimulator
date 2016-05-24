@@ -65,11 +65,6 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private static RegionModel FindRegion(SimulationModel model, uint regionIndex)
-        {
-            return model.Regions.FirstOrDefault(region => region.Index == regionIndex);
-        }
-
         private void ApplyAddedConnectors(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.AddedConnectorsLength; i++)
@@ -100,19 +95,14 @@ namespace GoodAI.Arnold.Network
             {
                 Connection addedConnection = diff.GetAddedConnections(i);
 
-                // TODO(HonzaS): Faster lookup.
-                OutputConnectorModel fromConnector =
-                    model.Regions.FirstOrDefault(region => region.Index == addedConnection.FromRegion)?
-                        .OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
+                OutputConnectorModel fromConnector = FindRegion(model, addedConnection.FromRegion)?
+                    .OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
 
-                // TODO(HonzaS): Faster lookup.
-                InputConnectorModel toConnector =
-                    model.Regions.FirstOrDefault(region => region.Index == addedConnection.ToRegion)?
-                        .InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
+                InputConnectorModel toConnector = FindRegion(model, addedConnection.ToRegion)?
+                    .InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
 
                 var connectionModel = new ConnectionModel(fromConnector, toConnector);
 
-                // TODO!!!
                 model.Connections.AddChild(connectionModel);
             }
         }
@@ -120,6 +110,12 @@ namespace GoodAI.Arnold.Network
         private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)
         {
             throw new NotImplementedException();
+        }
+
+        private static RegionModel FindRegion(SimulationModel model, uint regionIndex)
+        {
+            // TODO(HonzaS): Faster lookup.
+            return model.Regions.FirstOrDefault(region => region.Index == regionIndex);
         }
     }
 }

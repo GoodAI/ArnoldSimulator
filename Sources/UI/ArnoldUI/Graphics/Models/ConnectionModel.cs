@@ -43,15 +43,18 @@ namespace GoodAI.Arnold.Graphics.Models
             Vector3 fromPosition = From.CurrentWorldMatrix.ExtractTranslation();
             Vector3 toPosition = To.CurrentWorldMatrix.ExtractTranslation();
 
-            GL.Color4(1f, 0.6f, 0f, 0.7f);
-            GL.LineWidth(4f);
+            using (Blender.AveragingBlender())
+            {
+                GL.Color4(1f, 0.6f, 0f, 0.7f);
+                GL.LineWidth(3f);
 
-            GL.Begin(PrimitiveType.Lines);
+                GL.Begin(PrimitiveType.Lines);
 
-            GL.Vertex3(fromPosition);
-            GL.Vertex3(toPosition);
+                GL.Vertex3(fromPosition);
+                GL.Vertex3(toPosition);
 
-            GL.End();
+                GL.End();
+            }
         }
     }
 }

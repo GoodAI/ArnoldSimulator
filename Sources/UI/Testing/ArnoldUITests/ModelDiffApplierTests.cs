@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.UI.Tests
             ResponseMessage diff = ModelResponseBuilder.Build(new List<RegionModel> {sourceRegion});
             applier.ApplyModelDiff(model, diff.GetResponse(new ModelResponse()));
 
-            Assert.Equal(1, model.Models.Count());
+            Assert.Equal(1, model.Regions.Count());
             RegionModel generatedRegion = model.Regions.First();
 
             CompareLogic compareLogic = new CompareLogic
