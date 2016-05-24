@@ -751,10 +751,19 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
             bool skipDynamicityReport; p | skipDynamicityReport;
             if (!skipDynamicityReport) {
+                std::unordered_map<NeuronId, NeuronId> tempNeuronIdMap;
+
                 NeuronAdditionRequests tmpNeuronAdditionRequests; p | tmpNeuronAdditionRequests;
                 mNeuronAdditions.reserve(mNeuronAdditions.size() + tmpNeuronAdditionRequests.size());
-                mNeuronAdditions.insert(mNeuronAdditions.begin(), 
-                    tmpNeuronAdditionRequests.begin(), tmpNeuronAdditionRequests.end());
+                for (auto it = tmpNeuronAdditionRequests.begin(); it != tmpNeuronAdditionRequests.end(); ++it) {
+                    NeuronId localNeuronId = std::get<0>(*it);
+                    if (GetRegionIndex(localNeuronId) == TEMP_REGION_INDEX) {
+                        NeuronId globalNeuronId = GetNeuronId(thisIndex, GetNewNeuronIndex());
+                        tempNeuronIdMap.insert(std::make_pair(localNeuronId, globalNeuronId));
+                        std::get<0>(*it) = globalNeuronId;
+                    }
+                    mNeuronAdditions.push_back(*it);
+                }
 
                 NeuronRemovals tmpNeuronRemovals; p | tmpNeuronRemovals;
                 mNeuronRemovals.reserve(mNeuronRemovals.size() + tmpNeuronRemovals.size());
@@ -763,8 +772,17 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
                 Synapse::Additions tmpSynapseAdditions; p | tmpSynapseAdditions;
                 mSynapseAdditions.reserve(mSynapseAdditions.size() + tmpSynapseAdditions.size());
-                mSynapseAdditions.insert(mSynapseAdditions.begin(),
-                    tmpSynapseAdditions.begin(), tmpSynapseAdditions.end());
+                for (auto it = tmpSynapseAdditions.begin(); it != tmpSynapseAdditions.end(); ++it) {
+                    NeuronId fromNeuronId = std::get<1>(*it);
+                    NeuronId toNeuronId = std::get<2>(*it);
+                    if (GetRegionIndex(fromNeuronId) == TEMP_REGION_INDEX) {
+                        std::get<1>(*it) = tempNeuronIdMap[fromNeuronId];
+                    }
+                    if (GetRegionIndex(toNeuronId) == TEMP_REGION_INDEX) {
+                        std::get<2>(*it) = tempNeuronIdMap[toNeuronId];
+                    }
+                    mSynapseAdditions.push_back(*it);
+                }
 
                 Synapse::Removals tmpSynapseRemovals; p | tmpSynapseRemovals;
                 mSynapseRemovals.reserve(mSynapseRemovals.size() + tmpSynapseRemovals.size());
@@ -773,8 +791,17 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
                 ChildLinks tmpChildAdditions; p | tmpChildAdditions;
                 mChildAdditions.reserve(mChildAdditions.size() + tmpChildAdditions.size());
-                mChildAdditions.insert(mChildAdditions.begin(),
-                    tmpChildAdditions.begin(), tmpChildAdditions.end());
+                for (auto it = tmpChildAdditions.begin(); it != tmpChildAdditions.end(); ++it) {
+                    NeuronId parentNeuronId = std::get<0>(*it);
+                    NeuronId childNeuronId = std::get<1>(*it);
+                    if (GetRegionIndex(parentNeuronId) == TEMP_REGION_INDEX) {
+                        std::get<0>(*it) = tempNeuronIdMap[parentNeuronId];
+                    }
+                    if (GetRegionIndex(childNeuronId) == TEMP_REGION_INDEX) {
+                        std::get<1>(*it) = tempNeuronIdMap[childNeuronId];
+                    }
+                    mChildAdditions.push_back(*it);
+                }
 
                 ChildLinks tmpChildRemovals; p | tmpChildRemovals;
                 mChildRemovals.reserve(mChildRemovals.size() + tmpChildRemovals.size());
