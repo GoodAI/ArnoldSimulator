@@ -140,7 +140,8 @@ private:
 
     bool mUnlinking;
 
-    bool mFullUpdate;
+    bool mDoUpdate;
+    bool mDoFullUpdate;
     bool mDoProgress;
     size_t mBrainStep;
     Boxes mRoiBoxes;

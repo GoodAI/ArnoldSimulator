@@ -64,7 +64,7 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
 
 RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box3D &box, const RegionParams &params) :
     mName(name), mBoxChanged(false), mPosition(box.first), mSize(box.second),
-    mUnlinking(false), mFullUpdate(false), mDoProgress(false), mBrainStep(0),
+    mUnlinking(false), mDoUpdate(false), mDoFullUpdate(false), mDoProgress(false), mBrainStep(0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFilled(false), mRegion(nullptr)
 {
     json p = json::parse(params);
@@ -73,7 +73,7 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
 }
 
 RegionBase::RegionBase(CkMigrateMessage *msg) :
-    mBoxChanged(false), mUnlinking(false), mFullUpdate(false), mDoProgress(false), 
+    mBoxChanged(false), mUnlinking(false), mDoUpdate(false), mDoFullUpdate(false), mDoProgress(false),
     mBrainStep(0), mNeuronIdxCounter(0), mNeuronSectionFilled(false), mRegion(nullptr)
 {
 }
@@ -573,7 +573,8 @@ void RegionBase::CommitTopologyChange()
 
 void RegionBase::Simulate(SimulateMsg *msg)
 {
-    mFullUpdate = msg->fullUpdate;
+    mDoUpdate = msg->doUpdate;
+    mDoFullUpdate = msg->doFullUpdate;
     mDoProgress = msg->doProgress;
     mBrainStep = msg->brainStep;
     mRoiBoxes = msg->roiBoxes;
@@ -588,7 +589,7 @@ void RegionBase::Simulate(SimulateMsg *msg)
     }
 
     CkVec<CkArrayIndex2D> sectionNeuronIndices;
-    if (mFullUpdate && !mNeuronIndices.empty()) {
+    if (mDoFullUpdate && !mNeuronIndices.empty()) {
         for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
             CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
             sectionNeuronIndices.push_back(index);
@@ -623,7 +624,8 @@ void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
     if (mNeuronSectionFilled) {
 
         SimulateMsg *simulateMsg = new SimulateMsg();
-        simulateMsg->fullUpdate = mFullUpdate;
+        simulateMsg->doUpdate = mDoUpdate;
+        simulateMsg->doFullUpdate = mDoFullUpdate;
         simulateMsg->doProgress = mDoProgress;
         simulateMsg->brainStep = mBrainStep;
         simulateMsg->roiBoxes = mRoiBoxes;
@@ -650,7 +652,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
     ConnectorAdditionReports addedConnectors;
     Connections addedConnections;
 
-    if (mFullUpdate) {
+    if (mDoUpdate && mDoFullUpdate) {
         RegionAdditionReport additionReport(
             regionIndex, GetName(), GetType(), Box3D(mPosition, mSize));
         if (!mBoxChanged) {
@@ -680,7 +682,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
     RegionAdditionReports repositionedRegions;
 
-    if (mBoxChanged) {
+    if (mDoUpdate && mBoxChanged) {
         mBoxChanged = false;
         RegionAdditionReport additionReport(
             regionIndex, GetName(), GetType(), Box3D(mPosition, mSize));
@@ -696,7 +698,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
     ChildLinks addedChildren;
     ChildLinks removedChildren;
 
-    if (!mNeuronRemovals.empty()) {
+    if (mDoUpdate && !mNeuronRemovals.empty()) {
         std::unordered_set<NeuronId> removedNeuronSet(
             mNeuronRemovals.begin(), mNeuronRemovals.end());
         removedNeurons.insert(removedNeurons.begin(), mNeuronRemovals.begin(), mNeuronRemovals.end());
@@ -851,22 +853,24 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
         (*p)(customContribution, customContributionSize);
 
-        if (mFullUpdate) {
-            *p | addedRegions;
-            *p | addedConnectors;
-            *p | addedConnections;
+        if (mDoUpdate) {
+            if (mDoFullUpdate) {
+                *p | addedRegions;
+                *p | addedConnectors;
+                *p | addedConnections;
+            }
+
+            *p | repositionedRegions;
+
+            *p | addedNeurons;
+            *p | repositionedNeurons;
+            *p | removedNeurons;
+            *p | addedSynapses;
+            *p | spikedSynapses;
+            *p | removedSynapses;
+            *p | addedChildren;
+            *p | removedChildren;
         }
-
-        *p | repositionedRegions;
-
-        *p | addedNeurons;
-        *p | repositionedNeurons;
-        *p | removedNeurons;
-        *p | addedSynapses;
-        *p | spikedSynapses;
-        *p | removedSynapses;
-        *p | addedChildren;
-        *p | removedChildren;
 
         if (i == 0) {
             resultSize = sizer.size();

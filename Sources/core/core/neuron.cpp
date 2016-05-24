@@ -480,7 +480,8 @@ void NeuronBase::FlipSpikeQueues(EmptyMsg *msg)
 
 void NeuronBase::Simulate(SimulateMsg *msg)
 {
-    bool fullUpdate = msg->fullUpdate;
+    bool doUpdate = msg->doUpdate;
+    bool doFullUpdate = msg->doFullUpdate;
     bool doProgress = msg->doProgress;
     size_t brainStep = msg->brainStep;
     Boxes roiBoxes = msg->roiBoxes;
@@ -488,12 +489,12 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     NeuronId neuronId = GetNeuronId(thisIndex.x, thisIndex.y);
 
     bool changedPosition = false;
-    bool wasInsideOfAny = fullUpdate ? false : IsInsideOfAny(mPosition, roiBoxes);
+    bool wasInsideOfAny = doFullUpdate ? false : IsInsideOfAny(mPosition, roiBoxes);
     if (wasInsideOfAny) {
         changedPosition = AdaptPosition();
     }
     bool isInsideOfAny = IsInsideOfAny(mPosition, roiBoxes);
-    bool skipTopologyReport = (!wasInsideOfAny && !isInsideOfAny) ||
+    bool skipTopologyReport = !doUpdate || (!wasInsideOfAny && !isInsideOfAny) ||
         (wasInsideOfAny && isInsideOfAny && !changedPosition);
 
     NeuronAdditionReports addedNeurons;
@@ -634,7 +635,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
 
     mNeuronsTriggered.clear();
 
-    if (!skipTopologyReport) {
+    if (!skipDynamicityReport) {
         mNeuronAdditions.clear();
         mNeuronRemovals.clear();
         mSynapseAdditions.clear();

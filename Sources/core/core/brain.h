@@ -58,7 +58,8 @@ class EmptyMsg : public CkMcastBaseMsg, public CMessage_SimulateMsg
 class SimulateMsg : public CkMcastBaseMsg, public CMessage_SimulateMsg
 {
 public:
-    bool fullUpdate;
+    bool doUpdate;
+    bool doFullUpdate;
     bool doProgress;
     size_t brainStep;
     Boxes roiBoxes;
@@ -202,6 +203,7 @@ public:
 private:
     BrainName mName;
 
+    bool mDoViewportUpdate;
     bool mDoFullViewportUpdate;
     bool mDoFullViewportUpdateNext;
     bool mDoSimulationProgress;
