@@ -18,7 +18,7 @@
 
 using namespace GoodAI::Arnold;
 
-class ViewportUpdate;
+struct ViewportUpdate;
 
 class ShutdownRequestedException : public std::runtime_error
 {
