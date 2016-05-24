@@ -15,9 +15,6 @@ namespace GoodAI.Arnold.Graphics.Models
         public const float SizeY = 3f;
         public const float MarginZ = 0.5f;
 
-        private Vector3 m_size;
-        public Vector3 HalfSize { get; private set; }
-
         public string Name { get; private set; }
 
         public Vector3 Size
@@ -29,12 +26,15 @@ namespace GoodAI.Arnold.Graphics.Models
                 HalfSize = m_size/2;
             }
         }
+        private Vector3 m_size;
 
-        public int Slots { get; set; }
+        public Vector3 HalfSize { get; private set; }
 
-        public ConnectorModel(string name, int slots)
+        public int SlotCount { get; set; }
+
+        public ConnectorModel(string name, int slotCount)
         {
-            Slots = slots;
+            SlotCount = slotCount;
             Name = name;
         }
 
@@ -139,7 +139,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         protected override Color4 Color { get; } = new Color4(255, 100, 255, 30);
 
-        public InputConnectorModel(string name, int slots) : base(name, slots)
+        public InputConnectorModel(string name, int slotCount) : base(name, slotCount)
         {
         }
     }
@@ -149,7 +149,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         protected override Color4 Color { get; } = new Color4(0, 255, 50, 30);
 
-        public OutputConnectorModel(string name, int slots) : base(name, slots)
+        public OutputConnectorModel(string name, int slotCount) : base(name, slotCount)
         {
         }
     }

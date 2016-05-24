@@ -29,7 +29,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
             foreach (TConnector connector in Children)
             {
-                float sizeZ = (float) connector.Slots/TotalSlots * m_region.Size.Z;
+                float sizeZ = (float) connector.SlotCount/TotalSlots * m_region.Size.Z;
 
                 // Positioned relatively to the strip, which is in the center of the input or output face.
                 connector.Reposition(position, sizeZ);
@@ -46,7 +46,7 @@ namespace GoodAI.Arnold.Graphics.Models
         {
             base.AddChild(child);
 
-            TotalSlots += child.Slots;
+            TotalSlots += child.SlotCount;
         }
     }
 

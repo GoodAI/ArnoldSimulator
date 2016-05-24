@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
@@ -53,7 +52,7 @@ namespace GoodAI.Arnold.Network
                 Neuron neuron = diff.GetAddedNeurons(i);
 
                 // TODO(HonzaS): Add a lookup table instead of this.
-                RegionModel targetRegionModel = model.Models.FirstOrDefault(region => region.Index == neuron.RegionIndex);
+                var targetRegionModel = FindRegion(model, neuron.RegionIndex);
                 if (targetRegionModel == null)
                 {
                     Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id,
@@ -65,14 +64,18 @@ namespace GoodAI.Arnold.Network
             }
         }
 
+        private static RegionModel FindRegion(SimulationModel model, uint regionIndex)
+        {
+            return model.Models.FirstOrDefault(region => region.Index == regionIndex);
+        }
+
         private void ApplyAddedConnectors(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.AddedConnectorsLength; i++)
             {
                 Connector addedConnector = diff.GetAddedConnectors(i);
 
-                var targetRegionModel = model.Models.FirstOrDefault(region => region.Index == addedConnector.RegionIndex);
-
+                var targetRegionModel = FindRegion(model, addedConnector.RegionIndex);
                 if (targetRegionModel == null)
                 {
                     Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",

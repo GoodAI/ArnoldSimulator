@@ -28,8 +28,6 @@ namespace GoodAI.Arnold.Graphics.Models
             }
         }
 
-        //public CompositeModel<InputConnectorModel> InputConnectors { get; } = new CompositeModel<InputConnectorModel>();
-        //public CompositeModel<OutputConnectorModel> OutputConnectors { get; } = new CompositeModel<OutputConnectorModel>();
         public ConnectorStripModel<InputConnectorModel> InputConnectors { get; }
         public ConnectorStripModel<OutputConnectorModel> OutputConnectors { get; }
         public CompositeModel<ExpertModel> Experts { get; } = new CompositeModel<ExpertModel>();
