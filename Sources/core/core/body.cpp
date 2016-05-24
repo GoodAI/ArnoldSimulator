@@ -25,6 +25,10 @@ RandomBody::~RandomBody()
 {
 }
 
+void RandomBody::pup(PUP::er &p)
+{
+}
+
 const char *RandomBody::GetType()
 {
     return Type;

@@ -144,7 +144,7 @@ inline void operator|(er &p, std::tuple<A, B, C, D> &t);
 template <class A, class B, class C, class D, class E>
 inline void operator|(er &p, std::tuple<A, B, C, D, E> &t);
 template <class A, class B, class C, class D, class E, class F>
-inline void operator|(er &p, std::tuple<A, B, C, D, F> &t);
+inline void operator|(er &p, std::tuple<A, B, C, D, E, F> &t);
 
 template <class A, class B>
 inline void operator|(er &p, std::tuple<A, B> &t)
@@ -181,7 +181,7 @@ inline void operator|(er &p, std::tuple<A, B, C, D, E> &t)
 }
 
 template <class A, class B, class C, class D, class E, class F>
-inline void operator|(er &p, std::tuple<A, B, C, D, F> &t)
+inline void operator|(er &p, std::tuple<A, B, C, D, E, F> &t)
 {
     p | std::get<0>(t);
     p | std::get<1>(t);

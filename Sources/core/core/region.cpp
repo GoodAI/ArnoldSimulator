@@ -40,6 +40,7 @@ void RegionBase::Connector::pup(PUP::er &p)
 
     if (p.isUnpacking()) {
         size_t connectionCount; p | connectionCount;
+        connections.reserve(connectionCount);
         for (size_t i = 0; i < connectionCount; ++i) {
             RemoteConnector connector; p | connector;
             connections.insert(connector);
@@ -85,7 +86,90 @@ RegionBase::~RegionBase()
 
 void RegionBase::pup(PUP::er &p)
 {
-    // TODO
+    p | mName;
+    p | mBoxChanged;
+    p | mPosition;
+    p | mSize;
+
+    p | mUnlinking;
+
+    p | mDoUpdate;
+    p | mDoFullUpdate;
+    p | mDoProgress;
+    p | mBrainStep;
+    p | mRoiBoxes;
+
+    p | mNeuronIdxCounter;
+
+    p | mNeuronAdditions;
+    p | mNeuronRemovals;
+    p | mSynapseAdditions;
+    p | mSynapseRemovals;
+    p | mChildAdditions;
+    p | mChildRemovals;
+
+    p | mBrainSink;
+
+    if (p.isUnpacking()) {
+        size_t neuronIndicesCount; p | neuronIndicesCount;
+        mNeuronIndices.reserve(neuronIndicesCount);
+        for (size_t i = 0; i < neuronIndicesCount; ++i) {
+            NeuronIndex index; p | index;
+            mNeuronIndices.insert(index);
+        }
+
+        size_t inputConnectorsCount; p | inputConnectorsCount;
+        mInputConnectors.reserve(inputConnectorsCount);
+        for (size_t i = 0; i < inputConnectorsCount; ++i) {
+            Connector connector; p | connector;
+            mInputConnectors.insert(std::make_pair(connector.name, connector));
+        }
+
+        size_t outputConnectorsCount; p | outputConnectorsCount;
+        mOutputConnectors.reserve(outputConnectorsCount);
+        for (size_t i = 0; i < outputConnectorsCount; ++i) {
+            Connector connector; p | connector;
+            mOutputConnectors.insert(std::make_pair(connector.name, connector));
+        }
+
+        size_t triggeredCount; p | triggeredCount;
+        mNeuronsTriggered.reserve(triggeredCount);
+        for (size_t i = 0; i < triggeredCount; ++i) {
+            NeuronId triggered; p | triggered;
+            mNeuronsTriggered.insert(triggered);
+        }
+
+        json regionParams;
+        RegionType regionType;
+        p | regionType;
+        mRegion = CreateRegion(regionType, *this, regionParams);
+        if (mRegion) mRegion->pup(p);
+    } else {
+        size_t neuronIndicesCount = mNeuronIndices.size(); p | neuronIndicesCount;
+        for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
+            NeuronIndex index = *it; p | index;
+        }
+
+        size_t inputConnectorsCount = mInputConnectors.size(); p | inputConnectorsCount;
+        for (auto it = mInputConnectors.begin(); it != mInputConnectors.end(); ++it) {
+            Connector connector = it->second; p | connector;
+        }
+
+        size_t outputConnectorsCount = mOutputConnectors.size(); p | outputConnectorsCount;
+        for (auto it = mOutputConnectors.begin(); it != mOutputConnectors.end(); ++it) {
+            Connector connector = it->second; p | connector;
+        }
+
+        size_t triggeredCount = mNeuronsTriggered.size(); p | triggeredCount;
+        for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
+            NeuronId triggered = *it; p | triggered;
+        }
+
+        RegionType regionType;
+        if (mRegion) regionType = mRegion->GetType();
+        p | regionType;
+        if (mRegion) mRegion->pup(p);
+    }
 }
 
 const char *RegionBase::GetType() const

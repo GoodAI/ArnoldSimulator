@@ -127,6 +127,7 @@ void BrainBase::Terminal::pup(PUP::er &p)
 
     if (p.isUnpacking()) {
         size_t connectionCount; p | connectionCount;
+        connections.reserve(connectionCount);
         for (size_t i = 0; i < connectionCount; ++i) {
             RemoteConnector connector; p | connector;
             connections.insert(connector);
@@ -185,7 +186,133 @@ BrainBase::~BrainBase()
 
 void BrainBase::pup(PUP::er &p)
 {
-    // TODO
+    p | mName;
+
+    p | mDoViewportUpdate;
+    p | mDoFullViewportUpdate;
+    p | mDoFullViewportUpdateNext;
+    p | mDoSimulationProgress;
+    p | mDoSimulationProgressNext;
+    p | mViewportUpdateOverflowed;
+    p | mIsSimulationRunning;
+
+    p | mRegionCommitTopologyChangeDone;
+    p | mRegionSimulateDone;
+    p | mAllTopologyChangesDelivered;
+    p | mAllSpikesDelivered;
+
+    p | mDeletedNeurons;
+    p | mTriggeredNeurons;
+
+    p | mBrainStep;
+    p | mBrainStepsToRun;
+    p | mBrainStepsPerBodyStep;
+
+    p | mNeuronIdxCounter;
+    p | mRegionIdxCounter;
+    p | mTerminalIdCounter;
+
+    p | mRoiBoxes;
+    p | mViewportUpdateRequests;
+
+    p | mViewportUpdateAccumulator;
+
+    p | mRegionAdditions;
+    p | mRegionRepositions;
+    p | mRegionRemovals;
+    p | mConnectorAdditions;
+    p | mConnectorRemovals;
+    p | mConnectionAdditions;
+    p | mConnectionRemovals;
+
+    if (p.isUnpacking()) {
+        size_t regionIndicesCount; p | regionIndicesCount;
+        mRegionIndices.reserve(regionIndicesCount);
+        for (size_t i = 0; i < regionIndicesCount; ++i) {
+            RegionIndex index; p | index;
+            mRegionIndices.insert(index);
+        }
+
+        size_t regionBoxesCount; p | regionBoxesCount;
+        mRegionBoxes.reserve(regionBoxesCount);
+        for (size_t i = 0; i < regionBoxesCount; ++i) {
+            RegionIndex index; p | index;
+            Box3D box; p | box;
+            mRegionBoxes.insert(std::make_pair(index, box));
+        }
+
+        size_t terminalsCount; p | terminalsCount;
+        mTerminals.reserve(terminalsCount);
+        for (size_t i = 0; i < terminalsCount; ++i) {
+            Terminal terminal; p | terminal;
+            mTerminals.insert(std::make_pair(terminal.id, terminal));
+        }
+
+        size_t terminalNameToIdCount; p | terminalNameToIdCount;
+        mTerminalNameToId.reserve(terminalNameToIdCount);
+        for (size_t i = 0; i < terminalNameToIdCount; ++i) {
+            ConnectorName name; p | name;
+            TerminalId terminalId; p | terminalId;
+            mTerminalNameToId.insert(std::make_pair(name, terminalId));
+        }
+
+        size_t meuronToTerminalIdCount; p | meuronToTerminalIdCount;
+        for (size_t i = 0; i < meuronToTerminalIdCount; ++i) {
+            NeuronId neuronId; p | neuronId;
+            TerminalId terminalId; p | terminalId;
+            mNeuronToTerminalId.insert(std::make_pair(neuronId, terminalId));
+        }
+
+        json brainParams;
+        BrainType brainType;
+        p | brainType;
+        mBrain = CreateBrain(brainType, *this, brainParams);
+        if (mBrain) mBrain->pup(p);
+
+        json bodyParams;
+        std::string bodyType;
+        p | bodyType;
+        mBody = Body::CreateBody(bodyType, bodyParams);
+        if (mBody) mBody->pup(p);
+    } else {
+        size_t regionIndicesCount = mRegionIndices.size(); p | regionIndicesCount;
+        for (auto it = mRegionIndices.begin(); it != mRegionIndices.end(); ++it) {
+            RegionIndex index = *it; p | index;
+        }
+
+        size_t regionBoxesCount = mRegionBoxes.size(); p | regionBoxesCount;
+        for (auto it = mRegionBoxes.begin(); it != mRegionBoxes.end(); ++it) {
+            RegionIndex index = it->first; p | index;
+            Box3D box = it->second; p | box;
+        }
+
+        size_t terminalsCount = mTerminals.size(); p | terminalsCount;
+        for (auto it = mTerminals.begin(); it != mTerminals.end(); ++it) {
+            Terminal terminal = it->second; p | terminal;
+        }
+
+        size_t terminalNameToIdCount = mTerminalNameToId.size(); p | terminalNameToIdCount;
+        for (auto it = mTerminalNameToId.begin(); it != mTerminalNameToId.end(); ++it) {
+            ConnectorName name = it->first; p | name;
+            TerminalId terminalId = it->second; p | terminalId;
+        }
+
+        size_t meuronToTerminalIdCount = mNeuronToTerminalId.size(); p | meuronToTerminalIdCount;
+        for (auto it = mNeuronToTerminalId.begin(); it != mNeuronToTerminalId.end(); ++it) {
+            NeuronId neuronId = it->first; p | neuronId;
+            TerminalId terminalId = it->second; p | terminalId;
+        }
+
+        BrainType brainType;
+        if (mBrain) brainType = mBrain->GetType();
+        p | brainType;
+        if (mBrain) mBrain->pup(p);
+
+        std::string bodyType;
+        if (mBody) bodyType = mBody->GetType();
+        p | bodyType;
+        if (mBody) mBody->pup(p);
+    }
 }
 
 const char *BrainBase::GetType() const

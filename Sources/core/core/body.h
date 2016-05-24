@@ -7,6 +7,9 @@
 
 #include <json.hpp>
 
+#include <pup.h>
+#include <pup_stl.h>
+
 using namespace nlohmann;
 
 class Body
@@ -19,6 +22,8 @@ public:
 
     Body(const Body &other) = delete;
     Body &operator=(const Body &other) = delete;
+
+    virtual void pup(PUP::er &p) = 0;
 
     virtual const char *GetType() = 0;
 
@@ -35,6 +40,8 @@ public:
 
     explicit RandomBody(json &params);
     virtual ~RandomBody();
+
+    virtual void pup(PUP::er &p) override;
 
     virtual const char *GetType() override;
 

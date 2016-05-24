@@ -160,10 +160,10 @@ void NeuronBase::pup(PUP::er &p)
             mNeuronsTriggered.insert(triggered);
         }
 
-        json params;
-        std::string neuronType;
+        json neuronParams;
+        RegionType neuronType;
         p | neuronType;
-        mNeuron = CreateNeuron(neuronType, *this, params);
+        mNeuron = CreateNeuron(neuronType, *this, neuronParams);
         if (mNeuron) mNeuron->pup(p);
     } else {
         size_t childrenCount = mChildren.size(); p | childrenCount;
@@ -188,7 +188,7 @@ void NeuronBase::pup(PUP::er &p)
             NeuronId triggered = *it; p | triggered;
         }
 
-        std::string neuronType;
+        RegionType neuronType;
         if (mNeuron) neuronType = mNeuron->GetType();
         p | neuronType;
         if (mNeuron) mNeuron->pup(p);
