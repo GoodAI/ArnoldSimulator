@@ -31,13 +31,16 @@ DBG_TBBDIR = ../libs/tbb
 DBG_SHASHDIR = ../libs/sparsehash
 DBG_JSONDIR = ../libs/json
 DBG_FLATBUFDIR = ../libs/flatbuffers
+CATCH_DIR = ../libs/catch
 DBG_CHARMFLAGS = -no-optimize
-DBG_CFLAGS = $(CFLAGS) -g -I$(DBG_DIR) -I$(DBG_TBBDIR)/include -I$(DBG_SHASHDIR)/src -I$(DBG_JSONDIR)/src -I$(DBG_FLATBUFDIR)/include
+DBG_CFLAGS = $(CFLAGS) -g -I$(DBG_DIR) -I$(DBG_TBBDIR)/include -I$(DBG_SHASHDIR)/src -I$(DBG_JSONDIR)/src -I$(DBG_FLATBUFDIR)/include -I$(CATCH_DIR)/single_include
 DBG_LFLAGS = $(LFLAGS) -g -L$(DBG_TBBDIR)/lib -ltbb_debug -ltbbmalloc_debug -ltbbmalloc_proxy_debug
 DBG_CHARMC = $(DBG_CHARMDIR)/bin/charmc
 DBG_FLATC = $(DBG_FLATBUFDIR)/bin/flatc
 DBG_DEPFILE = $(DBG_DIR)/$(*F)
 DBG_DEPEND = touch $(DBG_DEPFILE).Td && makedepend $(DBG_CFLAGS) -p $(DBG_DIR)/ -f $(DBG_DEPFILE).Td $< >/dev/null 2>&1
+
+DBG_TEST_OBJS = $(patsubst $(TEST_DIR)/%, $(DBG_DIR)/%, $(TEST_OBJS))
 
 #
 # Release build settings
@@ -62,7 +65,9 @@ RLS_FLATC = $(RLS_FLATBUFDIR)/bin/flatc
 RLS_DEPFILE = $(RLS_DIR)/$(*F)
 RLS_DEPEND = touch $(RLS_DEPFILE).Td && makedepend $(RLS_CFLAGS) -f $(RLS_DEPFILE).Td $< >/dev/null 2>&1
 
-.PHONY: all clean debug-prep debug-build debug-clean debug-rebuild release-prep release-build release-clean release-rebuild
+.PHONY: all clean
+.PHONY: debug-prep debug-build debug-clean debug-rebuild test
+.PHONY: release-prep release-build release-clean release-rebuild
 
 #
 # Default build
@@ -85,8 +90,11 @@ debug-clean:
 
 debug-rebuild: debug-clean debug-build
 
-$(DBG_BIN): $(DBG_FBSS) $(DBG_DCLS) $(DBG_DEFS) $(DBG_OBJS)
-	$(DBG_CHARMC) $(DBG_LFLAGS) -o $@ $(DBG_OBJS)
+test: debug-build
+	$(DBG_BIN) --test
+
+$(DBG_BIN): $(DBG_FBSS) $(DBG_DCLS) $(DBG_DEFS) $(DBG_OBJS) $(DBG_TEST_OBJS)
+	$(DBG_CHARMC) $(DBG_LFLAGS) -o $@ $(DBG_OBJS) $(DBG_TEST_OBJS)
 	@mv -f $(RUN) $(DBG_RUN)
 	@cp -f $(DBG_TBBDIR)/bin/tbb_debug.* $(DBG_DIR)
 	@cp -f $(DBG_TBBDIR)/bin/tbbmalloc_debug.* $(DBG_DIR)

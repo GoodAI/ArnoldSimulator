@@ -26,5 +26,7 @@ mainmodule core
         entry void Exit();
 
         entry void HandleRequestFromClient(CkCcsRequestMsg *msg);
+        
+        entry void RunTests();
     };
 };

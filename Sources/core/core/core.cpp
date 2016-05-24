@@ -5,6 +5,10 @@
 #include "core.h"
 #include "brain.h"
 
+#define CATCH_IMPL  // Unofficial macro that does not add the main() function.
+#include "catch.hpp"
+#include "core_tests.h"
+
 CkGroupID gMulticastGroupId;
 CProxy_CompletionDetector gCompletionDetector;
 
@@ -51,6 +55,18 @@ Core::Core(CkArgMsg *msg) :
     gRegions = CProxy_RegionBase::ckNew(regionOpts);
     gNeurons = CProxy_NeuronBase::ckNew(neuronOpts);
 
+    // Experimental Catch tests
+    if ((msg->argc > 1) && (strcmp(msg->argv[1], "--test") == 0)) {
+        CkPrintf("Setting up Catch tests...\n");
+        SetupCharmTests();
+
+        thisProxy.RunTests();
+
+        delete msg;
+        return;
+    }
+    // TODO(Premek): Add position independent argument processing.
+
     std::ifstream blueprintFile;
     std::stringstream blueprintFilePath;
     if (msg->argc > 1) {
@@ -90,8 +106,7 @@ Core::Core(CkArgMsg *msg) :
         }
     }
 
-    // TODO(Premek): remove
-    // assume hardcoder blueprint for now
+    // Assume hardcoder blueprint for now. TODO(Premek): Remove the hack.
     mState = Communication::StateType_Paused;
 
     delete msg;
@@ -137,7 +152,7 @@ void Core::pup(PUP::er &p)
 
 void Core::Exit()
 {
-    CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStartTime);
+    CkPrintf("Exiting after %lf...\n", CmiWallTimer() - mStartTime);
     CkExit();
 }
 
@@ -179,6 +194,17 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
         CkPrintf("ShutdownRequestedException: %s\n", exception.what());
         Exit();
     }
+}
+
+void Core::RunTests()
+{
+    CkPrintf("Running Catch tests...\n");
+
+    char *arg = "tests";
+    Catch::Session().run(1, &arg);
+
+    CkPrintf("Testing done. Exiting.\n");
+    Exit();
 }
 
 void Core::LoadBrain(const BrainName &name, const BrainType &type, const BrainParams &params)

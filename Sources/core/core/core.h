@@ -49,6 +49,8 @@ public:
     void Exit();
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
+    
+    void RunTests();
 
     void LoadBrain(const BrainName &name, const BrainType &type, const BrainParams &params);
     bool IsBrainLoaded();

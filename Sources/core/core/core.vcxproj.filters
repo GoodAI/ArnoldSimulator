@@ -19,6 +19,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{10c6245b-c1d3-4fa3-add2-2c1d44d7dfe3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{038aa2dc-1c8e-4abc-96ed-06f095bd6354}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -44,6 +47,9 @@
     </ClCompile>
     <ClCompile Include="random.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="core_tests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="random.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_tests.h">
+      <Filter>Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
