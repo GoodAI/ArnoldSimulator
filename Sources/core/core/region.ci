@@ -10,7 +10,7 @@ module region
 
     array [1D] RegionBase
     {
-        entry RegionBase(RegionType type, RegionParams params);
+        entry RegionBase(RegionName name, RegionType type, Box3D box, RegionParams params);
 
         entry void CreateInput(ConnectorName name, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
         entry void DeleteInput(ConnectorName name);
@@ -29,6 +29,7 @@ module region
         entry void ReceiveSensoMotoricData(Direction direction, ConnectorName connectorName, Spike::BrainSource data);
         entry void EnqueueSensoMotoricSpike(NeuronId receiver, Spike::Data data);
 
+        entry void SetBox(Box3D box);
         entry void Unlink();
         entry void PrepareTopologyChange(size_t brainStep, bool doProgress);
         entry void CommitTopologyChange();

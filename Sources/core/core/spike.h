@@ -79,7 +79,8 @@ private:
     std::vector<std::unique_ptr<Editor>> mEditors;
 };
 
-inline void operator|(PUP::er &p, Spike::Type &spikeType) {
+inline void operator|(PUP::er &p, Spike::Type &spikeType)
+{
     pup_bytes(&p, static_cast<void *>(&spikeType), sizeof(Spike::Type));
 }
 

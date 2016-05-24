@@ -117,6 +117,8 @@ public:
     void SynchronizeOutputSynapse(NeuronId from, const Synapse::Data &data);
     void RemoveOutputSynapse(NeuronId to);
     
+    bool AdaptPosition();
+
     void SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data);
     void EnqueueSpike(Direction direction, const Spike::Data &data);
 
@@ -126,6 +128,8 @@ public:
 
 protected:
     NeuronId mTempIdCounter;
+
+    Point3D mPosition;
 
     NeuronId mParent;
     Children mChildren;

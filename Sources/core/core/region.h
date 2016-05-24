@@ -71,7 +71,7 @@ public:
 
     static Region *CreateRegion(const RegionType &type, RegionBase &base, json &params);
 
-    RegionBase(const RegionType &type, const RegionParams &params);
+    RegionBase(const RegionName &name, const RegionType &type, const Box3D &box, const RegionParams &params);
     explicit RegionBase(CkMigrateMessage *msg);
     ~RegionBase();
 
@@ -123,6 +123,7 @@ public:
     void ReceiveSensoMotoricData(Direction direction, const ConnectorName &connectorName, Spike::BrainSource &data);
     void EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data);
 
+    void SetBox(Box3D &box);
     void Unlink();
     void PrepareTopologyChange(size_t brainStep, bool doProgress);
     void CommitTopologyChange();
@@ -132,6 +133,11 @@ public:
     void NeuronSimulateDone(CkReductionMsg *msg);
 
 private:
+    RegionName mName;
+    bool mBoxChanged;
+    Point3D mPosition;
+    Size3D mSize;
+
     bool mUnlinking;
 
     bool mFullUpdate;
@@ -157,8 +163,7 @@ private:
 
     bool mNeuronSectionFilled;
     CProxySection_NeuronBase mNeuronSection;
-
-    RegionName mName;
+  
     Region *mRegion;
 };
 

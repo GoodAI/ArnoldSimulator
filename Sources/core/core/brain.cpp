@@ -1,3 +1,4 @@
+#include "core.h"
 #include "brain.h"
 
 extern CkGroupID gMulticastGroupId;
@@ -8,12 +9,13 @@ extern CProxy_BrainBase gBrain;
 extern CProxy_RegionBase gRegions;
 extern CProxy_NeuronBase gNeurons;
 
-ViewportUpdate::ViewportUpdate() : sinceBrainStep(0), brainStepCount(0)
+ViewportUpdate::ViewportUpdate() : isFull(false), sinceBrainStep(0), brainStepCount(0)
 {
 }
 
 void ViewportUpdate::pup(PUP::er &p)
 {
+    p | isFull;
     p | sinceBrainStep;
     p | brainStepCount;
     p | addedRegions;
@@ -141,13 +143,12 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
     }
 }
 
-BrainBase::BrainBase(const BrainType &type, const BrainParams &params) : 
-    mDoFullViewportUpdate(false), mViewportUpdateFlushed(false),
-    mDoSimulationProgress(false), mIsSimulationRunning(false),
-    mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
+BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params) :
+    mName(name), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false), 
+    mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
+    mIsSimulationRunning(false), mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
     mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
-    mDeletedNeurons(0), mTriggeredNeurons(0),
-    mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
+    mDeletedNeurons(0), mTriggeredNeurons(0), mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -158,7 +159,14 @@ BrainBase::BrainBase(const BrainType &type, const BrainParams &params) :
     mBrain = BrainBase::CreateBrain(type, *this, p);
 }
 
-BrainBase::BrainBase(CkMigrateMessage *msg)
+BrainBase::BrainBase(CkMigrateMessage *msg) :
+    mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
+    mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
+    mIsSimulationRunning(false), mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
+    mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
+    mDeletedNeurons(0), mTriggeredNeurons(0), mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
+    mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
+    mBody(nullptr), mBrain(nullptr)
 {
     setMigratable(false);
 }
@@ -198,6 +206,28 @@ RegionIndex BrainBase::GetNewRegionIndex()
 {
     if (mNeuronIdxCounter == REGION_INDEX_MAX) CkAbort("Region indices depleted.");
     return mRegionIdxCounter++;
+}
+
+Box3D BrainBase::GetBoxForRegion(RegionIndex regIdx)
+{
+    auto itBox = mRegionBoxes.find(regIdx);
+    if (itBox != mRegionBoxes.end()) {
+        return itBox->second;
+    } else {
+        float xMax = 0.0f;
+        for (auto it = mRegionBoxes.begin(); it != mRegionBoxes.end(); ++it) {
+            float x = std::get<0>(it->second.first);
+            xMax = (x > xMax) ? x : xMax;
+        }
+        xMax += BOX_DEFAULT_MARGIN;
+
+        Box3D box;
+        box.first = Point3D(xMax, 0.0f, 0.0f);
+        box.second = Size3D(BOX_DEFAULT_SIZE_X, BOX_DEFAULT_SIZE_Y, BOX_DEFAULT_SIZE_Z);
+
+        mRegionBoxes.insert(std::make_pair(regIdx, box));
+        return box;
+    }
 }
 
 const BrainBase::Terminals &BrainBase::GetTerminals() const
@@ -240,10 +270,10 @@ void BrainBase::DisconnectTerminal(const ConnectorName &name, const RemoteConnec
     terminal.connections.erase(destination);
 }
 
-RegionIndex BrainBase::RequestRegionAddition(const RegionType &type, const RegionParams &params)
+RegionIndex BrainBase::RequestRegionAddition(const RegionName &name, const RegionType &type, const RegionParams &params)
 {
     RegionIndex regIdx = GetNewRegionIndex();
-    mRegionAdditions.push_back(std::make_tuple(regIdx, type, params));
+    mRegionAdditions.push_back(std::make_tuple(regIdx, name, type, params));
     return regIdx;
 }
 
@@ -321,7 +351,7 @@ void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
 
 void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
 {
-    mDoSimulationProgress = true;
+    mDoSimulationProgressNext = true;
     mBrainStepsToRun = untilStopped ? SIZE_MAX : brainSteps;
     if (!mIsSimulationRunning) {
         thisProxy[thisIndex].Simulate();
@@ -343,19 +373,27 @@ void BrainBase::UpdateRegionOfInterest(Boxes &roiBoxes)
     mRoiBoxes = roiBoxes;
 }
 
+void BrainBase::UpdateRegionBox(RegionIndex regIdx, Box3D &box)
+{
+    mRegionRepositions.push_back(RegionRepositionRequest(regIdx, box));
+}
+
 void BrainBase::RequestViewportUpdate(RequestId requestId, bool full)
 {
     mViewportUpdateRequests.push_back(requestId);
-    mDoFullViewportUpdate = full || mViewportUpdateFlushed;
-    mViewportUpdateFlushed = false;
+    mDoFullViewportUpdateNext = full || mViewportUpdateOverflowed;
+    mViewportUpdateOverflowed = false;
     if (!mIsSimulationRunning) {
-        mDoSimulationProgress = false;
+        mDoSimulationProgressNext = false;
         thisProxy[thisIndex].Simulate();
     }
 }
 
 void BrainBase::Simulate()
 {
+    mDoSimulationProgress = mDoSimulationProgressNext;
+    mDoFullViewportUpdate = mDoFullViewportUpdateNext;
+    mDoFullViewportUpdateNext = false;
     mIsSimulationRunning = true;
     this->SimulateBrainControl();
 }
@@ -377,7 +415,8 @@ void BrainBase::SimulateAddRegions()
         gRegions.beginInserting();
         for (auto it = mRegionAdditions.begin(); it != mRegionAdditions.end(); ++it) {
             mRegionIndices.insert(std::get<0>(*it));
-            gRegions[std::get<0>(*it)].insert(std::get<1>(*it), std::get<2>(*it));
+            gRegions[std::get<0>(*it)].insert(
+                std::get<1>(*it), std::get<2>(*it), GetBoxForRegion(std::get<0>(*it)), std::get<3>(*it));
         }
         gRegions.doneInserting();
     }
@@ -386,6 +425,28 @@ void BrainBase::SimulateAddRegions()
 }
 
 void BrainBase::SimulateAddRegionsDone()
+{
+    this->SimulateRepositionRegions();
+}
+
+void BrainBase::SimulateRepositionRegions()
+{
+    if (!mRegionRepositions.empty()) {
+        gCompletionDetector.start_detection(1, CkCallback(), CkCallback(),
+            CkCallback(CkIndex_BrainBase::SimulateRepositionRegionsDone(), thisProxy[thisIndex]), 0);
+        gCompletionDetector.ckLocalBranch()->produce(mRegionRepositions.size());
+
+        for (auto it = mRegionRepositions.begin(); it != mRegionRepositions.end(); ++it) {
+            gRegions[std::get<0>(*it)].SetBox(std::get<1>(*it));
+        }
+
+        gCompletionDetector.ckLocalBranch()->done();
+    } else {
+        this->SimulateRepositionRegionsDone();
+    }
+}
+
+void BrainBase::SimulateRepositionRegionsDone()
 {
     this->SimulateAddConnectors();
 }
@@ -709,21 +770,172 @@ void BrainBase::SimulateRegionSimulate()
 
 void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
 {
-    // TODO generate upward result
+    ViewportUpdate fullViewportUpdateAccumulator;
 
     if (msg) {
-        CkReduction::setElement *current = 
-            static_cast<CkReduction::setElement *>(msg->getData());
-        while (current != nullptr) {
-            int *result = reinterpret_cast<int *>(&current->data);
+        CkReduction::setElement *regionResult = static_cast<CkReduction::setElement *>(msg->getData());
+        while (regionResult != nullptr) {
+            uint8_t *regionResultPtr = reinterpret_cast<uint8_t *>(&regionResult->data);
 
-            // TODO integrate downward result
+            PUP::fromMem p(static_cast<void *>(regionResultPtr));
 
-            current = current->next();
+            RegionIndex regionIndex; p | regionIndex;
+
+            Spike::BrainSink brainSink; p | brainSink;
+            ReceiveTerminalData(brainSink);
+
+            uint8_t *regionContributionPtr = nullptr;
+            size_t regionContributionSize = 0;
+            p(regionContributionPtr, regionContributionSize);
+            if (mBrain && regionContributionSize > 0) {
+                mBrain->AcceptContributionFromRegion(regionIndex,
+                    regionContributionPtr, regionContributionSize);
+            }
+
+            ViewportUpdate *accum = mDoFullViewportUpdate ?
+                &fullViewportUpdateAccumulator : &mViewportUpdateAccumulator;
+
+            if (mDoFullViewportUpdate) {
+
+                RegionAdditionReports tmpAddedRegions; p | tmpAddedRegions;
+                accum->addedRegions.reserve(accum->addedRegions.size() + tmpAddedRegions.size());
+                accum->addedRegions.insert(accum->addedRegions.begin(),
+                    tmpAddedRegions.begin(), tmpAddedRegions.end());
+
+                ConnectorAdditionReports tmpAddedConnectors; p | tmpAddedConnectors;
+                accum->addedConnectors.reserve(accum->addedConnectors.size() + tmpAddedConnectors.size());
+                accum->addedConnectors.insert(accum->addedConnectors.begin(),
+                    tmpAddedConnectors.begin(), tmpAddedConnectors.end());
+
+                Connections tmpAddedConnections; p | tmpAddedConnections;
+                accum->addedConnections.reserve(accum->addedConnections.size() + tmpAddedConnections.size());
+                accum->addedConnections.insert(accum->addedConnections.begin(),
+                    tmpAddedConnections.begin(), tmpAddedConnections.end());
+
+            } else {
+
+                accum->addedRegions.reserve(accum->addedRegions.size() + mRegionAdditions.size());
+                for (auto it = mRegionAdditions.begin(); it != mRegionAdditions.end(); ++it) {
+                    accum->addedRegions.push_back(RegionAdditionReport(
+                        std::get<0>(*it), std::get<1>(*it), std::get<2>(*it), GetBoxForRegion(std::get<0>(*it))));
+                }
+
+                accum->removedRegions.reserve(accum->removedRegions.size() + mRegionRemovals.size());
+                accum->removedRegions.insert(accum->removedRegions.begin(),
+                    mRegionRemovals.begin(), mRegionRemovals.end());
+
+                accum->addedConnectors.reserve(accum->addedConnectors.size() + mConnectorAdditions.size());
+                for (auto it = mConnectorAdditions.begin(); it != mConnectorAdditions.end(); ++it) {
+                    accum->addedConnectors.push_back(ConnectorAdditionReport(
+                        std::get<0>(*it), std::get<1>(*it), std::get<2>(*it), std::get<5>(*it)));
+                }
+
+                accum->removedConnectors.reserve(accum->removedConnectors.size() + mConnectorRemovals.size());
+                accum->removedConnectors.insert(accum->removedConnectors.begin(),
+                    mConnectorRemovals.begin(), mConnectorRemovals.end());
+
+                accum->addedConnections.reserve(accum->addedConnections.size() + mConnectionAdditions.size());
+                accum->addedConnections.insert(accum->addedConnections.begin(),
+                    mConnectionAdditions.begin(), mConnectionAdditions.end());
+
+                accum->removedConnections.reserve(accum->removedConnections.size() + mConnectionRemovals.size());
+                accum->removedConnections.insert(accum->removedConnections.begin(),
+                    mConnectionRemovals.begin(), mConnectionRemovals.end());
+            }
+
+            RegionAdditionReports tmpRepositionedRegions; p | tmpRepositionedRegions;
+            accum->repositionedRegions.reserve(accum->repositionedRegions.size() + tmpRepositionedRegions.size());
+            accum->repositionedRegions.insert(accum->repositionedRegions.begin(),
+                tmpRepositionedRegions.begin(), tmpRepositionedRegions.end());
+
+            NeuronAdditionReports tmpAddedNeurons; p | tmpAddedNeurons;
+            accum->addedNeurons.reserve(accum->addedNeurons.size() + tmpAddedNeurons.size());
+            accum->addedNeurons.insert(accum->addedNeurons.begin(),
+                tmpAddedNeurons.begin(), tmpAddedNeurons.end());
+
+            NeuronAdditionReports tmpRepositionedNeurons; p | tmpRepositionedNeurons;
+            accum->repositionedNeurons.reserve(accum->repositionedNeurons.size() + tmpRepositionedNeurons.size());
+            accum->repositionedNeurons.insert(accum->repositionedNeurons.begin(),
+                tmpRepositionedNeurons.begin(), tmpRepositionedNeurons.end());
+
+            NeuronRemovals tmpRemovedNeurons; p | tmpRemovedNeurons;
+            accum->removedNeurons.reserve(accum->removedNeurons.size() + tmpRemovedNeurons.size());
+            accum->removedNeurons.insert(accum->removedNeurons.begin(),
+                tmpRemovedNeurons.begin(), tmpRemovedNeurons.end());
+
+            Synapse::Links tmpAddedSynapses; p | tmpAddedSynapses;
+            accum->addedSynapses.reserve(accum->addedSynapses.size() + tmpAddedSynapses.size());
+            accum->addedSynapses.insert(accum->addedSynapses.begin(),
+                tmpAddedSynapses.begin(), tmpAddedSynapses.end());
+
+            Synapse::Links tmpSpikedSynapses; p | tmpSpikedSynapses;
+            accum->spikedSynapses.reserve(accum->spikedSynapses.size() + tmpSpikedSynapses.size());
+            accum->spikedSynapses.insert(accum->spikedSynapses.begin(),
+                tmpSpikedSynapses.begin(), tmpSpikedSynapses.end());
+
+            Synapse::Links tmpRemovedSynapses; p | tmpRemovedSynapses;
+            accum->removedSynapses.reserve(accum->removedSynapses.size() + tmpRemovedSynapses.size());
+            accum->removedSynapses.insert(accum->removedSynapses.begin(),
+                tmpRemovedSynapses.begin(), tmpRemovedSynapses.end());
+
+            ChildLinks tmpAddedChildren; p | tmpAddedChildren;
+            accum->addedChildren.reserve(accum->addedChildren.size() + tmpAddedChildren.size());
+            accum->addedChildren.insert(accum->addedChildren.begin(),
+                tmpAddedChildren.begin(), tmpAddedChildren.end());
+
+            ChildLinks tmpRemovedChildren; p | tmpRemovedChildren;
+            accum->removedChildren.reserve(accum->removedChildren.size() + tmpRemovedChildren.size());
+            accum->removedChildren.insert(accum->removedChildren.begin(),
+                tmpRemovedChildren.begin(), tmpRemovedChildren.end());
+
+            regionResult = regionResult->next();
         }
 
         delete msg;
     }
+
+    if (mDoFullViewportUpdate) {
+        fullViewportUpdateAccumulator.isFull = true;
+        fullViewportUpdateAccumulator.sinceBrainStep = mBrainStep;
+        fullViewportUpdateAccumulator.brainStepCount = 1;
+        mViewportUpdateAccumulator = std::move(fullViewportUpdateAccumulator);
+    } else {
+        if (mDoSimulationProgress) {
+            ++mViewportUpdateAccumulator.brainStepCount;
+        }
+    }
+
+    bool flushViewportAccumulator = false;;
+    bool cannotRespond = mViewportUpdateRequests.empty() || 
+        (!mDoFullViewportUpdate && mDoFullViewportUpdateNext);
+
+    if (cannotRespond) {
+        if (mViewportUpdateAccumulator.brainStepCount > mBrainStepsPerBodyStep) {
+            mViewportUpdateOverflowed = true;
+            flushViewportAccumulator = true;
+        }
+    } else {
+        RequestId requestId = mViewportUpdateRequests.front();
+        mViewportUpdateRequests.pop_front();
+
+        gCore.ckLocal()->SendViewportUpdate(requestId, mViewportUpdateAccumulator);
+        flushViewportAccumulator = true;
+    }
+
+    if (flushViewportAccumulator) {
+        mViewportUpdateAccumulator = ViewportUpdate();
+        mViewportUpdateAccumulator.isFull = false;
+        mViewportUpdateAccumulator.sinceBrainStep = mBrainStep;
+        mViewportUpdateAccumulator.brainStepCount = 0;
+    }
+
+    mRegionAdditions.clear();
+    mRegionRepositions.clear();
+    mRegionRemovals.clear();
+    mConnectorAdditions.clear();
+    mConnectorRemovals.clear();
+    mConnectionAdditions.clear();
+    mConnectionRemovals.clear();
 
     mRegionSimulateDone = true;
     if (mRegionSimulateDone && mAllSpikesDelivered) {

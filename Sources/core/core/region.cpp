@@ -62,8 +62,9 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
     }
 }
 
-RegionBase::RegionBase(const RegionType &type, const RegionParams &params) : 
-    mUnlinking(false), mFullUpdate(false), mDoProgress(false), mBrainStep(0), 
+RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box3D &box, const RegionParams &params) :
+    mName(name), mBoxChanged(false), mPosition(box.first), mSize(box.second),
+    mUnlinking(false), mFullUpdate(false), mDoProgress(false), mBrainStep(0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFilled(false), mRegion(nullptr)
 {
     json p = json::parse(params);
@@ -72,8 +73,8 @@ RegionBase::RegionBase(const RegionType &type, const RegionParams &params) :
 }
 
 RegionBase::RegionBase(CkMigrateMessage *msg) :
-    mUnlinking(false), mFullUpdate(false), mDoProgress(false), mBrainStep(0),
-    mNeuronIdxCounter(0), mNeuronSectionFilled(false), mRegion(nullptr)
+    mBoxChanged(false), mUnlinking(false), mFullUpdate(false), mDoProgress(false), 
+    mBrainStep(0), mNeuronIdxCounter(0), mNeuronSectionFilled(false), mRegion(nullptr)
 {
 }
 
@@ -453,6 +454,15 @@ void RegionBase::ReceiveSensoMotoricData(Direction direction, const ConnectorNam
 void RegionBase::EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data)
 {
     mBrainSink.push_back(std::make_pair(receiver, data));
+    gCompletionDetector.ckLocalBranch()->consume();
+}
+
+void RegionBase::SetBox(Box3D &box)
+{
+    mBoxChanged = true;
+    mPosition = box.first;
+    mSize = box.second;
+    gCompletionDetector.ckLocalBranch()->consume();
 }
 
 void RegionBase::Unlink()
@@ -634,26 +644,242 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
         mNeuronSection = CProxySection_NeuronBase();
     }
 
-    uint8_t *resultPtr = nullptr;
-    size_t resultSize = 0;
+    RegionIndex regionIndex = thisIndex;
 
-    // TODO generate upward result
+    RegionAdditionReports addedRegions;
+    ConnectorAdditionReports addedConnectors;
+    Connections addedConnections;
+
+    if (mFullUpdate) {
+        RegionAdditionReport additionReport(
+            regionIndex, GetName(), GetType(), Box3D(mPosition, mSize));
+        if (!mBoxChanged) {
+            addedRegions.push_back(additionReport);
+        }
+
+        for (auto itConnector = mInputConnectors.begin(); itConnector != mInputConnectors.end(); ++itConnector) {
+            addedConnectors.push_back(ConnectorAdditionReport(regionIndex, Direction::Backward,
+                itConnector->second.name, itConnector->second.neurons.size()));
+            for (auto itConnection = itConnector->second.connections.begin();
+                    itConnection != itConnector->second.connections.end(); ++itConnection) {
+                addedConnections.push_back(Connection(Direction::Forward,
+                    itConnection->first, itConnection->second, regionIndex, itConnector->second.name));
+            }
+        }
+
+        for (auto itConnector = mOutputConnectors.begin(); itConnector != mOutputConnectors.end(); ++itConnector) {
+            addedConnectors.push_back(ConnectorAdditionReport(regionIndex, Direction::Forward,
+                itConnector->second.name, itConnector->second.neurons.size()));
+            for (auto itConnection = itConnector->second.connections.begin();
+                itConnection != itConnector->second.connections.end(); ++itConnection) {
+                addedConnections.push_back(Connection(Direction::Forward,
+                    regionIndex, itConnector->second.name, itConnection->first, itConnection->second));
+            }
+        }
+    }
+
+    RegionAdditionReports repositionedRegions;
+
+    if (mBoxChanged) {
+        mBoxChanged = false;
+        RegionAdditionReport additionReport(
+            regionIndex, GetName(), GetType(), Box3D(mPosition, mSize));
+        repositionedRegions.push_back(additionReport);
+    }
+
+    NeuronAdditionReports addedNeurons;
+    NeuronAdditionReports repositionedNeurons;
+    NeuronRemovals removedNeurons;
+    Synapse::Links addedSynapses;
+    Synapse::Links spikedSynapses;
+    Synapse::Links removedSynapses;
+    ChildLinks addedChildren;
+    ChildLinks removedChildren;
+
+    if (!mNeuronRemovals.empty()) {
+        std::unordered_set<NeuronId> removedNeuronSet(
+            mNeuronRemovals.begin(), mNeuronRemovals.end());
+        removedNeurons.insert(removedNeurons.begin(), mNeuronRemovals.begin(), mNeuronRemovals.end());
+        for (auto it = mSynapseRemovals.begin(); it != mSynapseRemovals.end(); ++it) {
+            bool intersectsRemovedNeuron =
+                (removedNeuronSet.find(std::get<1>(*it)) != removedNeuronSet.end()) ||
+                (removedNeuronSet.find(std::get<2>(*it)) != removedNeuronSet.end());
+            if (intersectsRemovedNeuron) removedSynapses.push_back(Synapse::Link(std::get<1>(*it), std::get<2>(*it)));
+        }
+        for (auto it = mChildRemovals.begin(); it != mChildRemovals.end(); ++it) {
+            bool intersectsRemovedNeuron =
+                (removedNeuronSet.find(std::get<0>(*it)) != removedNeuronSet.end()) ||
+                (removedNeuronSet.find(std::get<1>(*it)) != removedNeuronSet.end());
+            if (intersectsRemovedNeuron) removedChildren.push_back(Synapse::Link(std::get<0>(*it), std::get<1>(*it)));
+        }
+    }
+
+    mNeuronAdditions.clear();
+    mNeuronRemovals.clear();
+    mSynapseAdditions.clear();
+    mSynapseRemovals.clear();
+    mChildAdditions.clear();
+    mChildRemovals.clear();
+
+    mNeuronsTriggered.clear();
 
     if (msg) {
-        CkReduction::setElement *current = static_cast<CkReduction::setElement *>(msg->getData());
-        while (current != nullptr) {
-            int *result = reinterpret_cast<int *>(&current->data);
+        CkReduction::setElement *neuronResult = static_cast<CkReduction::setElement *>(msg->getData());
+        while (neuronResult != nullptr) {
+            uint8_t *neuronResultPtr = reinterpret_cast<uint8_t *>(&neuronResult->data);
 
-            // TODO integrate downward result
+            PUP::fromMem p(static_cast<void *>(neuronResultPtr));
 
-            current = current->next();
+            NeuronId neuronId; p | neuronId;
+
+            size_t triggeredCount; p | triggeredCount;
+            mNeuronsTriggered.reserve(mNeuronsTriggered.size() + triggeredCount);
+            for (size_t i = 0; i < triggeredCount; ++i) {
+                NeuronId triggered; p | triggered;
+                mNeuronsTriggered.insert(triggered);
+            }
+
+            uint8_t *neuronContributionPtr = nullptr;
+            size_t neuronContributionSize = 0;
+            p(neuronContributionPtr, neuronContributionSize);
+            if (mRegion && neuronContributionSize > 0) {
+                mRegion->AcceptContributionFromNeuron(neuronId,
+                    neuronContributionPtr, neuronContributionSize);
+            }
+
+            bool skipDynamicityReport; p | skipDynamicityReport;
+            if (!skipDynamicityReport) {
+                NeuronAdditionRequests tmpNeuronAdditionRequests; p | tmpNeuronAdditionRequests;
+                mNeuronAdditions.reserve(mNeuronAdditions.size() + tmpNeuronAdditionRequests.size());
+                mNeuronAdditions.insert(mNeuronAdditions.begin(), 
+                    tmpNeuronAdditionRequests.begin(), tmpNeuronAdditionRequests.end());
+
+                NeuronRemovals tmpNeuronRemovals; p | tmpNeuronRemovals;
+                mNeuronRemovals.reserve(mNeuronRemovals.size() + tmpNeuronRemovals.size());
+                mNeuronRemovals.insert(mNeuronRemovals.begin(),
+                    tmpNeuronRemovals.begin(), tmpNeuronRemovals.end());
+
+                Synapse::Additions tmpSynapseAdditions; p | tmpSynapseAdditions;
+                mSynapseAdditions.reserve(mSynapseAdditions.size() + tmpSynapseAdditions.size());
+                mSynapseAdditions.insert(mSynapseAdditions.begin(),
+                    tmpSynapseAdditions.begin(), tmpSynapseAdditions.end());
+
+                Synapse::Removals tmpSynapseRemovals; p | tmpSynapseRemovals;
+                mSynapseRemovals.reserve(mSynapseRemovals.size() + tmpSynapseRemovals.size());
+                mSynapseRemovals.insert(mSynapseRemovals.begin(),
+                    tmpSynapseRemovals.begin(), tmpSynapseRemovals.end());
+
+                ChildLinks tmpChildAdditions; p | tmpChildAdditions;
+                mChildAdditions.reserve(mChildAdditions.size() + tmpChildAdditions.size());
+                mChildAdditions.insert(mChildAdditions.begin(),
+                    tmpChildAdditions.begin(), tmpChildAdditions.end());
+
+                ChildLinks tmpChildRemovals; p | tmpChildRemovals;
+                mChildRemovals.reserve(mChildRemovals.size() + tmpChildRemovals.size());
+                mChildRemovals.insert(mChildRemovals.begin(),
+                    tmpChildRemovals.begin(), tmpChildRemovals.end());
+            }
+
+            bool skipTopologyReport; p | skipTopologyReport;
+            if (!skipTopologyReport) {
+                NeuronAdditionReports tmpAddedNeurons; p | tmpAddedNeurons;
+                addedNeurons.reserve(addedNeurons.size() + tmpAddedNeurons.size());
+                addedNeurons.insert(addedNeurons.begin(),
+                    tmpAddedNeurons.begin(), tmpAddedNeurons.end());
+
+                NeuronAdditionReports tmpRepositionedNeurons; p | tmpRepositionedNeurons;
+                repositionedNeurons.reserve(repositionedNeurons.size() + tmpRepositionedNeurons.size());
+                repositionedNeurons.insert(repositionedNeurons.begin(),
+                    tmpRepositionedNeurons.begin(), tmpRepositionedNeurons.end());
+
+                NeuronRemovals tmpRemovedNeurons; p | tmpRemovedNeurons;
+                removedNeurons.reserve(removedNeurons.size() + tmpRemovedNeurons.size());
+                removedNeurons.insert(removedNeurons.begin(),
+                    tmpRemovedNeurons.begin(), tmpRemovedNeurons.end());
+
+                Synapse::Links tmpAddedSynapses; p | tmpAddedSynapses;
+                addedSynapses.reserve(addedSynapses.size() + tmpAddedSynapses.size());
+                addedSynapses.insert(addedSynapses.begin(),
+                    tmpAddedSynapses.begin(), tmpAddedSynapses.end());
+
+                Synapse::Links tmpSpikedSynapses; p | tmpSpikedSynapses;
+                spikedSynapses.reserve(spikedSynapses.size() + tmpSpikedSynapses.size());
+                spikedSynapses.insert(spikedSynapses.begin(),
+                    tmpSpikedSynapses.begin(), tmpSpikedSynapses.end());
+
+                Synapse::Links tmpRemovedSynapses; p | tmpRemovedSynapses;
+                removedSynapses.reserve(removedSynapses.size() + tmpRemovedSynapses.size());
+                removedSynapses.insert(removedSynapses.begin(),
+                    tmpRemovedSynapses.begin(), tmpRemovedSynapses.end());
+
+                ChildLinks tmpAddedChildren; p | tmpAddedChildren;
+                addedChildren.reserve(addedChildren.size() + tmpAddedChildren.size());
+                addedChildren.insert(addedChildren.begin(),
+                    tmpAddedChildren.begin(), tmpAddedChildren.end());
+
+                ChildLinks tmpRemovedChildren; p | tmpRemovedChildren;
+                removedChildren.reserve(removedChildren.size() + tmpRemovedChildren.size());
+                removedChildren.insert(removedChildren.begin(),
+                    tmpRemovedChildren.begin(), tmpRemovedChildren.end());
+            }
+
+            neuronResult = neuronResult->next();
         }
 
         delete msg;
     }
 
+    uint8_t *customContribution = nullptr;
+    size_t customContributionSize = 0;
+
+    if (mDoProgress) {
+        customContributionSize = mRegion->ContributeToBrain(customContribution);
+    }
+
+    uint8_t *resultPtr = nullptr;
+    size_t resultSize = 0;
+
+    for (size_t i = 0; i < 2; ++i) {
+
+        PUP::sizer sizer;
+        PUP::toMem toMem(resultPtr);
+        PUP::er *p = (i == 0) ? static_cast<PUP::er *>(&sizer) : static_cast<PUP::er *>(&toMem);
+
+        *p | regionIndex;
+
+        *p | mBrainSink;
+
+        (*p)(customContribution, customContributionSize);
+
+        if (mFullUpdate) {
+            *p | addedRegions;
+            *p | addedConnectors;
+            *p | addedConnections;
+        }
+
+        *p | repositionedRegions;
+
+        *p | addedNeurons;
+        *p | repositionedNeurons;
+        *p | removedNeurons;
+        *p | addedSynapses;
+        *p | spikedSynapses;
+        *p | removedSynapses;
+        *p | addedChildren;
+        *p | removedChildren;
+
+        if (i == 0) {
+            resultSize = sizer.size();
+            resultPtr = new uint8_t[resultSize];
+        }
+    }
+
     CkCallback cb(CkReductionTarget(BrainBase, SimulateRegionSimulateDone), gBrain[0]);
     contribute(resultSize, resultPtr, CkReduction::set, cb);
+
+    mBrainSink.clear();
+    delete[] resultPtr;
+    if (customContributionSize > 0) delete customContribution;
 }
 
 const char *ThresholdRegion::Type = "ThresholdRegion";

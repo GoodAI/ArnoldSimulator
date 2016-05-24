@@ -44,7 +44,7 @@ public:
 
     typedef std::tuple<Direction, NeuronId, NeuronId, Data> Addition;
     typedef std::tuple<Direction, NeuronId, NeuronId> Removal;
-    typedef std::tuple<NeuronId, NeuronId> Link;
+    typedef std::pair<NeuronId, NeuronId> Link;
 
     typedef std::vector<Addition> Additions;
     typedef std::vector<Removal> Removals;

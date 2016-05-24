@@ -32,15 +32,18 @@ typedef uint64_t RequestId;
 #define NEURON_INDEX_MIN 0
 #define NEURON_INDEX_MAX ((DELETED_NEURON_ID & ~REGION_INDEX_MASK) - 1)
 
-inline NeuronId GetNeuronId(RegionIndex regionIndex, NeuronIndex neuronIndex) {
+inline NeuronId GetNeuronId(RegionIndex regionIndex, NeuronIndex neuronIndex)
+{
     return (regionIndex << REGION_INDEX_OFFSET) & neuronIndex;
 }
 
-inline NeuronIndex GetNeuronIndex(NeuronId neuronId) {
+inline NeuronIndex GetNeuronIndex(NeuronId neuronId)
+{
     return neuronId & ~REGION_INDEX_MASK;
 }
 
-inline RegionIndex GetRegionIndex(NeuronId neuronId) {
+inline RegionIndex GetRegionIndex(NeuronId neuronId)
+{
     return neuronId >> REGION_INDEX_OFFSET;
 }
 
@@ -50,7 +53,8 @@ enum class Direction : uint8_t
     Backward
 };
 
-inline void operator|(PUP::er &p, Direction &direction) {
+inline void operator|(PUP::er &p, Direction &direction)
+{
     pup_bytes(&p, static_cast<void *>(&direction), sizeof(Direction));
 }
 
@@ -73,6 +77,32 @@ typedef std::tuple<float, float, float> Size3D;
 typedef std::pair<Point3D, Size3D> Box3D;
 typedef std::vector<Box3D> Boxes;
 
+#define BOX_DEFAULT_MARGIN 10.0f
+#define BOX_DEFAULT_SIZE_X 20.0f
+#define BOX_DEFAULT_SIZE_Y 20.0f
+#define BOX_DEFAULT_SIZE_Z 50.0f
+
+inline bool IsInsideOfAny(const Point3D &point, const Boxes &boxes)
+{
+    for (auto it = boxes.begin(); it != boxes.end(); ++it) {
+        float xLower = std::get<0>(it->first);
+        float xUpper = std::get<0>(it->first) + std::get<0>(it->second);
+        bool xWithin = (std::get<0>(point) >= xLower) && (std::get<0>(point) <= xUpper);
+
+        float yLower = std::get<1>(it->first);
+        float yUpper = std::get<1>(it->first) + std::get<1>(it->second);
+        bool yWithin = (std::get<1>(point) >= yLower) && (std::get<1>(point) <= yUpper);
+
+        float zLower = std::get<2>(it->first);
+        float zUpper = std::get<2>(it->first) + std::get<2>(it->second);
+        bool zWithin = (std::get<2>(point) >= zLower) && (std::get<2>(point) <= zUpper);
+
+        if (xWithin && yWithin && zWithin) return true;
+    }
+
+    return false;
+}
+
 typedef std::tuple<NeuronId, NeuronType, NeuronParams> NeuronAdditionRequest;
 typedef std::tuple<NeuronId, NeuronType, Point3D> NeuronAdditionReport;
 typedef std::pair<NeuronId, NeuronId> ChildLink;
@@ -86,8 +116,9 @@ typedef std::unordered_set<NeuronId> NeuronsTriggered;
 typedef std::unordered_set<NeuronIndex> NeuronIndices;
 typedef std::unordered_set<RegionIndex> RegionIndices;
 
-typedef std::tuple<RegionIndex, RegionType, RegionParams> RegionAdditionRequest;
+typedef std::tuple<RegionIndex, RegionName, RegionType, RegionParams> RegionAdditionRequest;
 typedef std::tuple<RegionIndex, RegionName, RegionType, Box3D> RegionAdditionReport;
+typedef std::tuple<RegionIndex, Box3D> RegionRepositionRequest;
 typedef std::tuple<RegionIndex, Direction, ConnectorName, NeuronType, NeuronParams, size_t> ConnectorAdditionRequest;
 typedef std::tuple<RegionIndex, Direction, ConnectorName, size_t> ConnectorAdditionReport;
 typedef std::tuple<RegionIndex, Direction, ConnectorName> ConnectorRemoval;
@@ -95,6 +126,7 @@ typedef std::tuple<Direction, RegionIndex, ConnectorName, RegionIndex, Connector
 
 typedef std::vector<RegionAdditionRequest> RegionAdditionRequests;
 typedef std::vector<RegionAdditionReport> RegionAdditionReports;
+typedef std::vector<RegionRepositionRequest> RegionRepositionRequests;
 typedef std::vector<RegionIndex> RegionRemovals;
 typedef std::vector<ConnectorAdditionRequest> ConnectorAdditionRequests;
 typedef std::vector<ConnectorAdditionReport> ConnectorAdditionReports;
@@ -162,7 +194,8 @@ inline void operator|(er &p, std::tuple<A, B, C, D, F> &t)
 }
 
 template<typename T>
-void hash_combine(std::size_t &seed, T const &key) {
+void hash_combine(std::size_t &seed, T const &key)
+{
     std::hash<T> hasher;
     seed ^= hasher(key) + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
 }

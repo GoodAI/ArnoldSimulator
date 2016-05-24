@@ -29,9 +29,6 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
     //if (msg->argc > 2) someParam2 = atoi(msg->argv[2]);
     //if (msg->argc > 3) someParam3 = atoi(msg->argv[3]);
 
-    delete msg;
-    msg = nullptr;
-
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 
     gMulticastGroupId = CProxy_CkMulticastMgr::ckNew();
@@ -57,6 +54,8 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
     // TODO(Premek): remove
     // assume hardcoder blueprint for now
     mState = Network::StateType_Paused;
+
+    delete msg;
 }
 
 Core::Core(CkMigrateMessage *msg) :
@@ -118,6 +117,7 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
         }
 
     } catch (ShutdownRequestedException &exception) {
+        CkPrintf("ShutdownRequestedException: %s\n", exception.what());
         Exit();
     }
 }

@@ -29,6 +29,7 @@ struct ViewportUpdate
 {
     ViewportUpdate();
 
+    bool isFull;
     size_t sinceBrainStep;
     size_t brainStepCount;
     RegionAdditionReports addedRegions;
@@ -119,11 +120,13 @@ public:
     typedef std::unordered_map<ConnectorName, TerminalId> TerminalNameToId;
     typedef google::sparse_hash_map<NeuronId, TerminalId> NeuronToTerminalId;
 
+    typedef std::unordered_map<RegionIndex, Box3D> RegionBoxes;
+
     typedef std::list<RequestId> ViewportUpdateRequests;
 
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
 
-    BrainBase(const BrainType &type, const BrainParams &params);
+    BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params);
     explicit BrainBase(CkMigrateMessage *msg);
     ~BrainBase();
 
@@ -138,12 +141,14 @@ public:
     NeuronIndex GetNewNeuronIndex();
     RegionIndex GetNewRegionIndex();
 
+    Box3D GetBoxForRegion(RegionIndex regIdx);
+
     const Terminals &GetTerminals() const;
     void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount);
     void ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
     void DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
 
-    RegionIndex RequestRegionAddition(const RegionType &type, const RegionParams &params);
+    RegionIndex RequestRegionAddition(const RegionName &name, const RegionType &type, const RegionParams &params);
     void RequestRegionRemoval(RegionIndex regIdx);
     void RequestConnectorAddition(RegionIndex regIdx, Direction direction, const ConnectorName &name, 
         const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
@@ -164,6 +169,7 @@ public:
     void StopSimulation();
     void SetBrainStepsPerBodyStep(size_t brainSteps);
     void UpdateRegionOfInterest(Boxes &roiBoxes);
+    void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
     void RequestViewportUpdate(RequestId requestId, bool full);
 
     void Simulate();
@@ -171,6 +177,8 @@ public:
     void SimulateBrainControlDone();
     void SimulateAddRegions();
     void SimulateAddRegionsDone();
+    void SimulateRepositionRegions();
+    void SimulateRepositionRegionsDone();
     void SimulateAddConnectors();
     void SimulateAddConnectorsDone();
     void SimulateAddRemoveConnections();
@@ -195,8 +203,10 @@ private:
     BrainName mName;
 
     bool mDoFullViewportUpdate;
-    bool mViewportUpdateFlushed;
+    bool mDoFullViewportUpdateNext;
     bool mDoSimulationProgress;
+    bool mDoSimulationProgressNext;
+    bool mViewportUpdateOverflowed;
     bool mIsSimulationRunning;
 
     bool mRegionCommitTopologyChangeDone;
@@ -217,6 +227,7 @@ private:
     RegionIndices mRegionIndices;
 
     Boxes mRoiBoxes;
+    RegionBoxes mRegionBoxes;
     ViewportUpdateRequests mViewportUpdateRequests;
     ViewportUpdate mViewportUpdateAccumulator;
 
@@ -225,6 +236,7 @@ private:
     NeuronToTerminalId mNeuronToTerminalId;
 
     RegionAdditionRequests mRegionAdditions;
+    RegionRepositionRequests mRegionRepositions;
     RegionRemovals mRegionRemovals;
     ConnectorAdditionRequests mConnectorAdditions;
     ConnectorRemovals mConnectorRemovals;

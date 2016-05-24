@@ -11,14 +11,13 @@ module brain
 
     array [1D] BrainBase
     {
-        entry BrainBase(BrainType type, BrainParams params);
-
-        entry void ReceiveTerminalData(Spike::BrainSink &data);
+        entry BrainBase(BrainName name, BrainType type, BrainParams params);
 
         entry void RunSimulation(size_t brainSteps, bool untilStopped);
         entry void StopSimulation();
         entry void SetBrainStepsPerBodyStep(size_t brainSteps);
         entry void UpdateRegionOfInterest(Boxes roiBoxes);
+        entry void UpdateRegionBox(RegionIndex regIdx, Box3D box);
         entry void RequestViewportUpdate(RequestId requestId, bool full);
 
         entry void Simulate();
@@ -26,6 +25,8 @@ module brain
         entry void SimulateBrainControlDone();
         entry void SimulateAddRegions();
         entry void SimulateAddRegionsDone();
+        entry void SimulateRepositionRegions();
+        entry void SimulateRepositionRegionsDone();
         entry void SimulateAddConnectors();
         entry void SimulateAddConnectorsDone();
         entry void SimulateAddRemoveConnections();

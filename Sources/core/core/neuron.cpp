@@ -1,6 +1,7 @@
 #include "neuron.h"
 
 #include "brain.h"
+#include "random.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -77,7 +78,11 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 {
     json p = json::parse(params);
 
+    auto engine = Random::GetThreadEngine();
+    std::uniform_real_distribution<float> randFloat(0.0, 1.0);
+
     mTempIdCounter = GetNeuronId(TEMP_REGION_INDEX, NEURON_INDEX_MIN);
+    mPosition = Point3D(randFloat(engine), randFloat(engine), randFloat(engine));
     mNeuron = CreateNeuron(type, *this, p);
     mParent = DELETED_NEURON_ID;
     mChildren.set_deleted_key(DELETED_NEURON_ID);
@@ -90,7 +95,7 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 }
 
 NeuronBase::NeuronBase(CkMigrateMessage *msg) :
-    mTempIdCounter(0), mParent(0),
+    mTempIdCounter(0), mPosition(0.0f, 0.0f, 0.0f), mParent(0),
     mBackwardSpikesCurrent(nullptr), mBackwardSpikesNext(nullptr),
     mForwardSpikesCurrent(nullptr), mForwardSpikesNext(nullptr),
     mNeuron(nullptr)
@@ -110,6 +115,8 @@ NeuronBase::~NeuronBase()
 void NeuronBase::pup(PUP::er &p)
 {
     p | mTempIdCounter;
+
+    p | mPosition;
 
     p | mParent;
 
@@ -147,9 +154,10 @@ void NeuronBase::pup(PUP::er &p)
         }
 
         size_t triggeredCount; p | triggeredCount;
+        mNeuronsTriggered.reserve(triggeredCount);
         for (size_t i = 0; i < triggeredCount; ++i) {
             NeuronId triggered; p | triggered;
-            mChildren.insert(triggered);
+            mNeuronsTriggered.insert(triggered);
         }
 
         json params;
@@ -391,6 +399,11 @@ void NeuronBase::RemoveOutputSynapse(NeuronId to)
     gCompletionDetector.ckLocalBranch()->consume();
 }
 
+bool NeuronBase::AdaptPosition()
+{
+    return false;
+}
+
 void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
 {
     gCompletionDetector.ckLocalBranch()->produce();
@@ -470,9 +483,85 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     bool fullUpdate = msg->fullUpdate;
     bool doProgress = msg->doProgress;
     size_t brainStep = msg->brainStep;
-    Boxes roiBoxes = msg->roiBoxes; 
+    Boxes roiBoxes = msg->roiBoxes;
+
+    NeuronId neuronId = GetNeuronId(thisIndex.x, thisIndex.y);
+
+    bool changedPosition = false;
+    bool wasInsideOfAny = fullUpdate ? false : IsInsideOfAny(mPosition, roiBoxes);
+    if (wasInsideOfAny) {
+        changedPosition = AdaptPosition();
+    }
+    bool isInsideOfAny = IsInsideOfAny(mPosition, roiBoxes);
+    bool skipTopologyReport = (!wasInsideOfAny && !isInsideOfAny) ||
+        (wasInsideOfAny && isInsideOfAny && !changedPosition);
+
+    NeuronAdditionReports addedNeurons;
+    NeuronAdditionReports repositionedNeurons;
+    NeuronRemovals removedNeurons;
+    Synapse::Links addedSynapses;
+    Synapse::Links spikedSynapses;
+    Synapse::Links removedSynapses;
+    ChildLinks addedChildren;
+    ChildLinks removedChildren;
+
+    if (!skipTopologyReport) {
+        if (!wasInsideOfAny && isInsideOfAny) {
+
+            addedNeurons.push_back(NeuronAdditionReport(neuronId, GetType(), mPosition));
+            addedSynapses.reserve(mInputSynapses.size() + mOutputSynapses.size());
+            for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
+                addedSynapses.push_back(Synapse::Link(it->first, neuronId));
+            }
+            for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
+                addedSynapses.push_back(Synapse::Link(neuronId, it->first));
+            }
+            addedChildren.reserve(1 + mChildren.size());
+            addedChildren.push_back(ChildLink(mParent, neuronId));
+            for (auto it = mChildren.begin(); it != mChildren.end(); ++it) {
+                addedChildren.push_back(ChildLink(neuronId, *it));
+            }
+            spikedSynapses.reserve(mNeuronsTriggered.size());
+            for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
+                spikedSynapses.push_back(Synapse::Link(neuronId, *it));
+            }
+
+        } else if (wasInsideOfAny && !isInsideOfAny) {
+
+            removedNeurons.push_back((neuronId));
+            removedSynapses.reserve(mInputSynapses.size() + mOutputSynapses.size());
+            for (auto it = mInputSynapses.begin(); it != mInputSynapses.end(); ++it) {
+                removedSynapses.push_back(Synapse::Link(it->first, neuronId));
+            }
+            for (auto it = mOutputSynapses.begin(); it != mOutputSynapses.end(); ++it) {
+                removedSynapses.push_back(Synapse::Link(neuronId, it->first));
+            }
+            removedChildren.reserve(1 + mChildren.size());
+            removedChildren.push_back(ChildLink(mParent, neuronId));
+            for (auto it = mChildren.begin(); it != mChildren.end(); ++it) {
+                removedChildren.push_back(ChildLink(neuronId, *it));
+            }
+
+        } else if (changedPosition) {
+
+            repositionedNeurons.push_back(NeuronAdditionReport(neuronId, GetType(), mPosition));
+            spikedSynapses.reserve(mNeuronsTriggered.size());
+            for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
+                spikedSynapses.push_back(Synapse::Link(neuronId, *it));
+            }
+        }
+    }
+
+    bool skipDynamicityReport =
+        mNeuronAdditions.empty() && mNeuronRemovals.empty() && mSynapseAdditions.empty() &&
+        mSynapseRemovals.empty() && mChildAdditions.empty() && mChildRemovals.empty();
+
+    uint8_t *customContributionPtr = nullptr;
+    size_t customContributionSize = 0;
 
     if (doProgress) {
+        bool wasSpiked = !mForwardSpikesCurrent->empty() || mBackwardSpikesCurrent->empty();
+
         for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
             if (mNeuron) Spike::Edit(*it)->Accept(Direction::Forward, *mNeuron, *it);
         }
@@ -484,21 +573,78 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         mForwardSpikesCurrent->clear();
         mBackwardSpikesCurrent->clear();
 
-        if (mNeuron) mNeuron->Control(brainStep);
+        if (mNeuron && wasSpiked) {
+            mNeuron->Control(brainStep);
+            customContributionSize = mNeuron->ContributeToRegion(customContributionPtr);
+        }
     }
 
     gCompletionDetector.ckLocalBranch()->done();
     
     uint8_t *resultPtr = nullptr;
     size_t resultSize = 0;
+    
+    for (size_t i = 0; i < 2; ++i) {
 
-    // TODO generate upward result
+        PUP::sizer sizer;
+        PUP::toMem toMem(resultPtr);
+        PUP::er *p = (i == 0) ? static_cast<PUP::er *>(&sizer) : static_cast<PUP::er *>(&toMem);
+
+        *p | neuronId;
+
+        size_t triggeredCount = mNeuronsTriggered.size(); *p | triggeredCount;
+        for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
+            NeuronId triggered = *it; *p | triggered;
+        }
+
+        (*p)(customContributionPtr, customContributionSize);
+
+        *p | skipDynamicityReport;
+        if (!skipDynamicityReport) {
+            *p | mNeuronAdditions;
+            *p | mNeuronRemovals;
+            *p | mSynapseAdditions;
+            *p | mSynapseRemovals;
+            *p | mChildAdditions;
+            *p | mChildRemovals;
+        }
+        
+        *p | skipTopologyReport;
+        if (!skipTopologyReport) {
+            *p | addedNeurons;
+            *p | repositionedNeurons;
+            *p | removedNeurons;
+            *p | addedSynapses;
+            *p | spikedSynapses;
+            *p | removedSynapses;
+            *p | addedChildren;
+            *p | removedChildren;
+        }
+
+        if (i == 0) {
+            resultSize = sizer.size();
+            resultPtr = new uint8_t[resultSize];
+        }
+    }
 
     CkGetSectionInfo(mSectionInfo, msg);
     CkCallback cb(CkReductionTarget(RegionBase, NeuronSimulateDone), gRegions[thisIndex.x]);
     CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->contribute(
         resultSize, resultPtr, CkReduction::set, mSectionInfo, cb);
 
+    mNeuronsTriggered.clear();
+
+    if (!skipTopologyReport) {
+        mNeuronAdditions.clear();
+        mNeuronRemovals.clear();
+        mSynapseAdditions.clear();
+        mSynapseRemovals.clear();
+        mChildAdditions.clear();
+        mChildRemovals.clear();
+    }
+
+    delete[] resultPtr;
+    if (customContributionSize > 0) delete customContributionPtr;
     delete msg;
 }
 
