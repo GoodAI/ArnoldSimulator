@@ -38,12 +38,50 @@ namespace GoodAI.Arnold.UI.Tests
         private static ComparisonConfig RegionComparisonConfig => new ComparisonConfig
         {
             MaxDifferences = MaxDifferences,
+            SkipInvalidIndexers = true,
             MembersToInclude = new List<string>
             {
                 "Name",
                 "Type",
                 "Position",
                 "Size"
+            }
+        };
+
+        private static ComparisonConfig ConnectorComparisonConfig => new ComparisonConfig
+        {
+            MaxDifferences = MaxDifferences,
+            SkipInvalidIndexers = true,
+            MembersToInclude = new List<string>
+            {
+                "Name",
+                "Direction",
+                "SlotCount"
+            }
+        };
+
+        private static ComparisonConfig ConnectionComparisonConfig => new ComparisonConfig
+        {
+            MaxDifferences = MaxDifferences,
+            SkipInvalidIndexers = true,
+            MembersToInclude = new List<string>
+            {
+                "From",
+                "To",
+                "Direction"
+            }
+        };
+
+        private static ComparisonConfig NeuronComparisonConfig => new ComparisonConfig
+        {
+            MaxDifferences = MaxDifferences,
+            SkipInvalidIndexers = true,
+            MembersToInclude = new List<string>
+            {
+                "Id",
+                "Type",
+                "RegionModel",
+                "Position"
             }
         };
 
@@ -82,8 +120,13 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.Equal(1, region.InputConnectors.Models.Count());
             Assert.Equal(1, region.OutputConnectors.Models.Count());
 
-            Assert.Equal((uint) 4, region.InputConnectors.First().SlotCount);
-            Assert.Equal((uint) 3, region.OutputConnectors.First().SlotCount);
+            ComparisonResult result1 = CompareLogic(ConnectorComparisonConfig)
+                .Compare(addedConnector1, region.InputConnectors.First());
+            ComparisonResult result2 = CompareLogic(ConnectorComparisonConfig)
+                .Compare(addedConnector2, region.OutputConnectors.First());
+
+            Assert.True(result1.AreEqual, result1.DifferencesString);
+            Assert.True(result2.AreEqual, result2.DifferencesString);
         }
 
         [Fact]
@@ -108,6 +151,30 @@ namespace GoodAI.Arnold.UI.Tests
 
             Assert.Equal(region1.OutputConnectors.First().Connection, region2.InputConnectors.First().Connection);
             Assert.Equal(region2.InputConnectors.First().Connection.From, region1.OutputConnectors.First());
+
+            var result = CompareLogic(ConnectionComparisonConfig)
+                .Compare(addedConnection, region1.OutputConnectors.First().Connection);
+
+            Assert.True(result.AreEqual, result.DifferencesString);
+        }
+
+        [Fact]
+        public void AddsNewNeuron()
+        {
+            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+
+            var addedNeuron = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+            //addedRegion.AddExpert(addedNeuron);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<ExpertModel> {addedNeuron});
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            RegionModel region = m_model.Regions.First();
+
+            ComparisonResult result = CompareLogic(NeuronComparisonConfig)
+                .Compare(addedNeuron, region.Experts.First());
+
+            Assert.True(result.AreEqual, result.DifferencesString);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                targetRegionModel.AddExpert(new ExpertModel(neuron.Id, targetRegionModel, neuron.Position.ToVector3()));
+                targetRegionModel.AddExpert(new ExpertModel(neuron.Id, neuron.Type, targetRegionModel, neuron.Position.ToVector3()));
             }
         }
 
@@ -90,22 +90,61 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private static void ApplyAddedConnections(SimulationModel model, ModelResponse diff)
+        private void ApplyAddedConnections(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.AddedConnectionsLength; i++)
             {
                 Connection addedConnection = diff.GetAddedConnections(i);
 
-                OutputConnectorModel fromConnector = FindRegion(model, addedConnection.FromRegion)?
+                RegionModel fromRegion = FindRegion(model, addedConnection.FromRegion);
+                RegionModel toRegion = FindRegion(model, addedConnection.ToRegion);
+
+                if (fromRegion == null)
+                {
+                    LogConnectionNotAdded(addedConnection, "Source region not found");
+                    continue;
+                }
+
+                if (toRegion == null)
+                {
+                    LogConnectionNotAdded(addedConnection, "Target region not found");
+                    continue;
+                }
+
+                OutputConnectorModel fromConnector = fromRegion?
                     .OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
 
-                InputConnectorModel toConnector = FindRegion(model, addedConnection.ToRegion)?
+                InputConnectorModel toConnector = toRegion?
                     .InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
+
+
+                if (fromConnector == null)
+                {
+                    LogConnectionNotAdded(addedConnection, "Source connector not found");
+                    continue;
+                }
+
+                if (toConnector == null)
+                {
+                    LogConnectionNotAdded(addedConnection, "Target connector not found");
+                    continue;
+                }
 
                 var connectionModel = new ConnectionModel(fromConnector, toConnector);
 
                 model.Connections.AddChild(connectionModel);
             }
+        }
+
+        private void LogConnectionNotAdded(Connection addedConnection, string reason)
+        {
+            Log.Warn(
+                "Could not add connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
+                addedConnection.FromRegion,
+                addedConnection.FromConnector,
+                addedConnection.ToRegion,
+                addedConnection.ToConnector,
+                reason);
         }
 
         private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)

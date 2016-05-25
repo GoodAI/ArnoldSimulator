@@ -30,15 +30,18 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public uint Id { get; set; }
 
+        public string Type { get; set; }
+
         public ICamera Camera { get; set; }
 
         public RegionModel RegionModel { get; }
 
         public List<SynapseModel> Outputs { get; } = new List<SynapseModel>();
 
-        public ExpertModel(uint id, RegionModel regionModel, Vector3 position)
+        public ExpertModel(uint id, string type, RegionModel regionModel, Vector3 position)
         {
             Id = id;
+            Type = type;
             RegionModel = regionModel;
             Position = position;
 

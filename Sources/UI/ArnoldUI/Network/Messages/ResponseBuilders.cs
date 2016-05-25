@@ -56,13 +56,15 @@ namespace GoodAI.Arnold.Network.Messages
     public static class ModelResponseBuilder
     {
         public static ResponseMessage Build(IList<RegionModel> addedRegions = null,
-            IList<ConnectorModel> addedConnectors = null, IList<ConnectionModel> addedConnections = null)
+            IList<ConnectorModel> addedConnectors = null, IList<ConnectionModel> addedConnections = null,
+            IList<ExpertModel> addedNeurons = null)
         {
             var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
 
             VectorOffset? addedRegionsVectorOffset = BuildAddedRegions(addedRegions, builder);
             VectorOffset? addedConnectorsVectorOffset = BuildAddedConnectors(addedConnectors, builder);
             VectorOffset? addedConnectionsVectorOffset = BuildAddedConnections(addedConnections, builder);
+            VectorOffset? addedNeuronsVectorOffset = BuildAddedNeurons(addedNeurons, builder);
 
             ModelResponse.StartModelResponse(builder);
             if (addedRegionsVectorOffset.HasValue)
@@ -71,6 +73,8 @@ namespace GoodAI.Arnold.Network.Messages
                 ModelResponse.AddAddedConnectors(builder, addedConnectorsVectorOffset.Value);
             if (addedConnectionsVectorOffset.HasValue)
                 ModelResponse.AddAddedConnections(builder, addedConnectionsVectorOffset.Value);
+            if (addedNeuronsVectorOffset.HasValue)
+                ModelResponse.AddAddedNeurons(builder, addedNeuronsVectorOffset.Value);
 
             Offset<ModelResponse> responseOffset = ModelResponse.EndModelResponse(builder);
 
@@ -100,8 +104,7 @@ namespace GoodAI.Arnold.Network.Messages
                     upperBounds);
             }
 
-            VectorOffset addedRegionsVectorOffset = ModelResponse.CreateAddedRegionsVector(builder, addedRegionsOffsets);
-            return addedRegionsVectorOffset;
+            return ModelResponse.CreateAddedRegionsVector(builder, addedRegionsOffsets);
         }
 
         private static VectorOffset? BuildAddedConnectors(IList<ConnectorModel> addedConnectors,
@@ -125,9 +128,7 @@ namespace GoodAI.Arnold.Network.Messages
                     direction, connector.SlotCount);
             }
 
-            VectorOffset addedConnectorsVectorOffset = ModelResponse.CreateAddedConnectorsVector(builder,
-                addedConnectorsOffsets);
-            return addedConnectorsVectorOffset;
+            return ModelResponse.CreateAddedConnectorsVector(builder, addedConnectorsOffsets);
         }
 
         private static VectorOffset? BuildAddedConnections(IList<ConnectionModel> addedConnections,
@@ -145,16 +146,39 @@ namespace GoodAI.Arnold.Network.Messages
                 var fromConnectorName = builder.CreateString(connection.From.Name);
                 var toConnectorName = builder.CreateString(connection.To.Name);
 
-                Direction direction = connection.From.Direction == ConnectorDirection.Forward ? Direction.Forward : Direction.Backward;
+                Direction direction = connection.From.Direction == ConnectorDirection.Forward
+                    ? Direction.Forward
+                    : Direction.Backward;
 
                 addedConnectionsOffsets[i] = Connection.CreateConnection(builder, connection.From.Region.Index,
                     fromConnectorName, connection.To.Region.Index, toConnectorName,
                     direction);
             }
 
-            VectorOffset addedConnectionsVectorOffset = ModelResponse.CreateAddedConnectionsVector(builder,
+            return ModelResponse.CreateAddedConnectionsVector(builder,
                 addedConnectionsOffsets);
-            return addedConnectionsVectorOffset;
+        }
+
+        private static VectorOffset? BuildAddedNeurons(IList<ExpertModel> addedNeurons,
+            FlatBufferBuilder builder)
+        {
+            if (addedNeurons == null)
+                return null;
+
+            var addedNeuronsOffsets = new Offset<Neuron>[addedNeurons.Count];
+
+            for (int i = 0; i < addedNeurons.Count; i++)
+            {
+                var neuron = addedNeurons[i];
+
+                var type = builder.CreateString(neuron.Type);
+                var position = Position.CreatePosition(builder, 1, 2, 3);
+
+                addedNeuronsOffsets[i] = Neuron.CreateNeuron(builder, neuron.Id, neuron.RegionModel.Index, type,
+                    position);
+            }
+
+            return ModelResponse.CreateAddedNeuronsVector(builder, addedNeuronsOffsets);
         }
     }
 }
