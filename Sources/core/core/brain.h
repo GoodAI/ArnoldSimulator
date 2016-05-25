@@ -125,6 +125,7 @@ public:
 
     typedef std::list<RequestId> ViewportUpdateRequests;
 
+    Body *CreateBody(const std::string &type, const std::string &params);
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
 
     BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params);
@@ -145,7 +146,7 @@ public:
     Box3D GetBoxForRegion(RegionIndex regIdx);
 
     const Terminals &GetTerminals() const;
-    void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount);
+    void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount, bool isSensor);
     void ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
     void DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
 

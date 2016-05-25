@@ -141,6 +141,66 @@ void BrainBase::Terminal::pup(PUP::er &p)
     }
 }
 
+Body *BrainBase::CreateBody(const std::string &type, const std::string &params)
+{
+    json p = json::parse(params);
+
+    if (!p.empty()) {
+        for (auto itParams = p.begin(); itParams != p.end(); ++itParams) {
+
+            if (itParams.key() == "sensors" && itParams->is_array()) {
+
+                for (auto itSensor = itParams.value().begin(); itSensor != itParams.value().end(); ++itSensor) {
+                    if (itSensor->is_object()) {
+
+                        std::string sensorName, spikeType;
+                        size_t sensorSize = 0;
+                        for (auto it = itSensor->begin(); it != itSensor->end(); ++it) {
+                            if (it.key() == "name" && it.value().is_string()) {
+                                sensorName = it.value().get<std::string>();
+                            } else if (it.key() == "spikeType" && it.value().is_string()) {
+                                spikeType = it.value().get<std::string>();
+                            } else if (it.key() == "size" && it.value().is_number_integer()) {
+                                sensorSize = it.value().get<size_t>();
+                            }
+                        }
+
+                        if (!sensorName.empty()) {
+                            CreateTerminal(sensorName, Spike::ParseType(spikeType), sensorSize, true);
+                        }
+                    }
+                }
+
+            } else if (itParams.key() == "actuators" && itParams->is_array()) {
+
+                for (auto itActuator = itParams.value().begin(); itActuator != itParams.value().end(); ++itActuator) {
+                    if (itActuator->is_object()) {
+
+                        std::string actuatorName, spikeType;
+                        size_t actuatorSize = 0;
+                        for (auto it = itActuator->begin(); it != itActuator->end(); ++it) {
+                            if (it.key() == "name" && it.value().is_string()) {
+                                actuatorName = it.value().get<std::string>();
+                            } else if (it.key() == "spikeType" && it.value().is_string()) {
+                                spikeType = it.value().get<std::string>();
+                            } else if (it.key() == "size" && it.value().is_number_integer()) {
+                                actuatorSize = it.value().get<size_t>();
+                            }
+                        }
+
+                        if (!actuatorName.empty()) {
+                            CreateTerminal(actuatorName, Spike::ParseType(spikeType), actuatorSize, false);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    return Body::CreateBody(type, p);
+}
+
 Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &params)
 {
     if (type == ThresholdBrain::Type) {
@@ -164,6 +224,191 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
     mNeuronToTerminalId.set_deleted_key(DELETED_NEURON_ID);
 
     json p = json::parse(params);
+    std::unordered_map<std::string, RegionIndex> regionNameToIndex;
+
+    if (!p.empty()) {
+        for (auto itParams = p.begin(); itParams != p.end(); ++itParams) {
+
+            if (itParams.key() == "body" && itParams->is_object()) {
+
+                json body = itParams.value();
+                std::string bodyType, bodyParams;
+                for (auto it = body.begin(); it != body.end(); ++it) {
+                    if (it.key() == "type" && it.value().is_string()) {
+                        bodyType = it.value().get<std::string>();
+                    } else if (it.key() == "params" && it.value().is_object()) {
+                        bodyParams = it.value().dump();
+                    }
+                }
+
+                if (!bodyType.empty()) {
+                    mBody = CreateBody(bodyType, bodyParams);
+                }
+            
+            } else if (itParams.key() == "regions" && itParams->is_array()) {
+
+                
+                
+                for (auto itRegion = itParams.value().begin(); itRegion != itParams.value().end(); ++itRegion) {
+                    if (itRegion->is_object()) {
+
+                        std::string regionName, regionType, regionParams;
+                        bool haveRegionPosition = false;
+                        Point3D regionPosition;
+                        bool haveRegionSize = false;;
+                        Size3D regionSize;
+                        json inputs, outputs;
+
+                        for (auto it = itRegion->begin(); it != itRegion->end(); ++it) {
+                            if (it.key() == "name" && it.value().is_string()) {
+                                regionName = it.value().get<std::string>();
+                            } else if (it.key() == "type" && it.value().is_string()) {
+                                regionType = it.value().get<std::string>();
+                            } else if (it.key() == "position" && it.value().is_array()) {
+                                if (it.value().size() == 3) {
+                                    haveRegionPosition = it.value().at(0).is_number_float() &&
+                                        it.value().at(1).is_number_float() && 
+                                        it.value().at(2).is_number_float();
+                                    if (haveRegionPosition) {
+                                        regionPosition = Point3D(it.value().at(0).get<float>(), 
+                                            it.value().at(1).get<float>(), it.value().at(2).get<float>());
+                                    }
+                                }
+                            } else if (it.key() == "size" && it.value().is_array()) {
+                                if (it.value().size() == 3) {
+                                    haveRegionSize = it.value().at(0).is_number_float() &&
+                                        it.value().at(1).is_number_float() &&
+                                        it.value().at(2).is_number_float();
+                                    if (haveRegionSize) {
+                                        regionSize = Size3D(it.value().at(0).get<float>(),
+                                            it.value().at(1).get<float>(), it.value().at(2).get<float>());
+                                    }
+                                }
+                            } else if (it.key() == "params" && it.value().is_object()) {
+                                regionParams = it.value().dump();
+                                for (auto itRegParams = it.value().begin(); itRegParams != it.value().end(); ++itRegParams) {
+                                    if (itRegParams.key() == "inputs" && itRegParams.value().is_array()) {
+                                        inputs = itRegParams.value();
+                                    } else if (itRegParams.key() == "outputs" && itRegParams.value().is_array()) {
+                                        outputs = itRegParams.value();
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!regionName.empty() && !regionType.empty()) {
+
+                            RegionIndex regionIndex = RequestRegionAddition(
+                                regionName, regionType, regionParams);
+
+                            regionNameToIndex.insert(std::make_pair(regionName, regionIndex));
+                            if (haveRegionPosition && haveRegionSize) {
+                                Box3D box(regionPosition, regionSize);
+                                mRegionBoxes.insert(std::make_pair(regionIndex, box));
+                            }
+
+                            for (auto itInput = inputs.begin(); itInput != inputs.end(); ++itInput) {
+                                if (itInput->is_object()) {
+
+                                    std::string inputName, neuronType, neuronParams;
+                                    size_t neuronCount = 0;
+                                    for (auto it = itInput->begin(); it != itInput->end(); ++it) {
+                                        if (it.key() == "name" && it.value().is_string()) {
+                                            inputName = it.value().get<std::string>();
+                                        } else if (it.key() == "neuronType" && it.value().is_string()) {
+                                            neuronType = it.value().get<std::string>();
+                                        } else if (it.key() == "neuronParams" && it.value().is_object()) {
+                                            neuronParams = it.value().dump();
+                                        } else if (it.key() == "neuronCount" && it.value().is_number_integer()) {
+                                            neuronCount = it.value().get<size_t>();
+                                        }
+                                    }
+
+                                    if (!inputName.empty()) {
+                                        RequestConnectorAddition(regionIndex, Direction::Backward,
+                                            inputName, neuronType, neuronParams, neuronCount);
+                                    }
+                                }
+                            }
+
+                            for (auto itOutput = outputs.begin(); itOutput != outputs.end(); ++itOutput) {
+                                if (itOutput->is_object()) {
+
+                                    std::string outputName, neuronType, neuronParams;
+                                    size_t neuronCount = 0;
+                                    for (auto it = itOutput->begin(); it != itOutput->end(); ++it) {
+                                        if (it.key() == "name" && it.value().is_string()) {
+                                            outputName = it.value().get<std::string>();
+                                        } else if (it.key() == "neuronType" && it.value().is_string()) {
+                                            neuronType = it.value().get<std::string>();
+                                        } else if (it.key() == "neuronParams" && it.value().is_object()) {
+                                            neuronParams = it.value().dump();
+                                        } else if (it.key() == "neuronCount" && it.value().is_number_integer()) {
+                                            neuronCount = it.value().get<size_t>();
+                                        }
+                                    }
+
+                                    if (!outputName.empty()) {
+                                        RequestConnectorAddition(regionIndex, Direction::Forward,
+                                            outputName, neuronType, neuronParams, neuronCount);
+                                    }
+                                }
+                            }  
+
+                        }
+                    }
+                }
+
+            } else if (itParams.key() == "connections" && itParams->is_array()) {
+
+                for (auto itConnection = itParams.value().begin(); itConnection != itParams.value().end(); ++itConnection) {
+                    if (itConnection->is_object()) {
+
+                        std::string fromRegion, fromConnector, toRegion, toConnector;
+                        for (auto it = itConnection->begin(); it != itConnection->end(); ++it) {
+                            if (it.key() == "fromRegion" && it.value().is_string()) {
+                                fromRegion = it.value().get<std::string>();
+                            } else if (it.key() == "fromConnector" && it.value().is_string()) {
+                                fromConnector = it.value().get<std::string>();
+                            } else if (it.key() == "toRegion" && it.value().is_string()) {
+                                toRegion = it.value().get<std::string>();
+                            } else if (it.key() == "toConnector" && it.value().is_string()) {
+                                toConnector = it.value().get<std::string>();
+                            }
+                        }
+
+                        RegionIndex fromRegIdx = BRAIN_REGION_INDEX;
+                        if (!fromRegion.empty()) {
+                            if (regionNameToIndex.find(fromRegion) != regionNameToIndex.end()) {
+                                fromRegIdx = regionNameToIndex[fromRegion];
+                            } else {
+                                fromRegIdx = TEMP_REGION_INDEX;
+                            }
+                        }
+
+                        RegionIndex toRegIdx = BRAIN_REGION_INDEX;
+                        if (!toRegion.empty()) {
+                            if (regionNameToIndex.find(toRegion) != regionNameToIndex.end()) {
+                                toRegIdx = regionNameToIndex[toRegion];
+                            } else {
+                                toRegIdx = TEMP_REGION_INDEX;
+                            }
+                        }
+
+                        bool valid = (fromRegIdx != TEMP_REGION_INDEX) &&
+                            (toRegIdx != TEMP_REGION_INDEX) &&
+                            !fromConnector.empty() && !toConnector.empty();
+
+                        if (valid) {
+                            RequestConnectionAddition(Direction::Forward,
+                                fromRegIdx, fromConnector, toRegIdx, toConnector);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
 
     mBrain = BrainBase::CreateBrain(type, *this, p);
 }
@@ -370,9 +615,10 @@ const BrainBase::Terminals &BrainBase::GetTerminals() const
     return mTerminals;
 }
 
-void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount)
+void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount, bool isSensor)
 {
     Terminal terminal;
+    terminal.isSensor = isSensor;
     terminal.id = mTerminalIdCounter++;
     terminal.name = name;
     terminal.spikeType = spikeType;

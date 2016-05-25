@@ -65,22 +65,24 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
     }
 
     if (!blueprintContent.str().empty()) {
-        json bp = json::parse(blueprintContent.str());
-        if (!bp.empty()) {
-            if (bp.begin()->is_object() && bp.begin().key() == "brain") {
-                json brain = *bp.begin();
-                std::string name, type, params;
+        json blueprint = json::parse(blueprintContent.str());
+        if (!blueprint.empty()) {
+            if (blueprint.begin().key() == "brain" && blueprint.begin()->is_object()) {
+
+                json brain = blueprint.begin().value();
+                std::string brainName, brainType, brainParams;
                 for (auto it = brain.begin(); it != brain.end(); ++it) {
                     if (it.key() == "name" && it.value().is_string()) {
-                        name = it.value().get<std::string>();
+                        brainName = it.value().get<std::string>();
                     } else if (it.key() == "type" && it.value().is_string()) {
-                        type = it.value().get<std::string>();
+                        brainType = it.value().get<std::string>();
                     } else if (it.key() == "params" && it.value().is_object()) {
-                        params = it.value().dump();
+                        brainParams = it.value().dump();
                     }
                 }
-                if (!type.empty() && !params.empty()) {
-                    gBrain[0].insert(name, type, params);
+
+                if (!brainType.empty()) {
+                    gBrain[0].insert(brainName, brainType, brainParams);
                     gBrain.doneInserting();
                 }
             }
