@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Graphics.Models;
 using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
     public class ConnectionModel : ModelBase
     {
+        public static readonly Color4 ConnectionColor = new Color4(1f, 1f, 1f, 0.7f);
+
         public InputConnectorModel To { get; set; }
         public OutputConnectorModel From { get; set; }
 
@@ -45,8 +48,8 @@ namespace GoodAI.Arnold.Graphics.Models
 
             using (Blender.AveragingBlender())
             {
-                GL.Color4(1f, 0.6f, 0f, 0.7f);
-                GL.LineWidth(3f);
+                GL.Color4(ConnectionColor);
+                GL.LineWidth(2f);
 
                 GL.Begin(PrimitiveType.Lines);
 
