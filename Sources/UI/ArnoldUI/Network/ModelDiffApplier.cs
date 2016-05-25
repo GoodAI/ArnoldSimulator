@@ -84,9 +84,9 @@ namespace GoodAI.Arnold.Network
                 // TODO(HonzaS): A Shortcut for the creation of models?
                 // Replace them with factory + inject logger.
                 if (addedConnector.Direction == Direction.Forward)
-                    targetRegionModel.OutputConnectors.AddChild(new OutputConnectorModel(addedConnector.Name, (int) addedConnector.Size));
+                    targetRegionModel.OutputConnectors.AddChild(new OutputConnectorModel(targetRegionModel, addedConnector.Name, addedConnector.Size));
                 else
-                    targetRegionModel.InputConnectors.AddChild(new InputConnectorModel(addedConnector.Name, (int) addedConnector.Size));
+                    targetRegionModel.InputConnectors.AddChild(new InputConnectorModel(targetRegionModel, addedConnector.Name, addedConnector.Size));
             }
         }
 

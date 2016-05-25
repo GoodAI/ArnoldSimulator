@@ -10,7 +10,7 @@ namespace GoodAI.Arnold.Graphics.Models
     public abstract class ConnectorStripModel<TConnector> : CompositeModelBase<TConnector> where TConnector : ConnectorModel
     {
         protected readonly RegionModel m_region;
-        public int TotalSlots { get; set; }
+        public uint TotalSlots { get; set; }
 
         public ConnectorStripModel(RegionModel region)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
@@ -9,15 +10,25 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
+    public enum ConnectorDirection
+    {
+        Forward,
+        Backward
+    }
+
     public abstract class ConnectorModel : ModelBase
     {
         public const float SizeX = 1f;
         public const float SizeY = 3f;
         public const float MarginZ = 0.5f;
 
+        public RegionModel Region { get; }
+
         public string Name { get; private set; }
 
         public ConnectionModel Connection { get; set; }
+
+        public ConnectorDirection Direction { get; }
 
         public Vector3 Size
         {
@@ -32,10 +43,12 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public Vector3 HalfSize { get; private set; }
 
-        public int SlotCount { get; set; }
+        public uint SlotCount { get; set; }
 
-        public ConnectorModel(string name, int slotCount)
+        public ConnectorModel(RegionModel region, ConnectorDirection direction, string name, uint slotCount)
         {
+            Region = region;
+            Direction = direction;
             SlotCount = slotCount;
             Name = name;
         }
@@ -141,17 +154,16 @@ namespace GoodAI.Arnold.Graphics.Models
 
         protected override Color4 Color { get; } = new Color4(255, 100, 255, 30);
 
-        public InputConnectorModel(string name, int slotCount) : base(name, slotCount)
+        public InputConnectorModel(RegionModel region, string name, uint slotCount) : base(region, ConnectorDirection.Backward, name, slotCount)
         {
         }
     }
 
     public sealed class OutputConnectorModel : ConnectorModel
     {
-
         protected override Color4 Color { get; } = new Color4(0, 255, 50, 30);
 
-        public OutputConnectorModel(string name, int slotCount) : base(name, slotCount)
+        public OutputConnectorModel(RegionModel region, string name, uint slotCount) : base(region, ConnectorDirection.Forward, name, slotCount)
         {
         }
     }

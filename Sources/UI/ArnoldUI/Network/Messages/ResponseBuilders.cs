@@ -15,7 +15,8 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public const int BufferInitialSize = 64;
 
-        public static ResponseMessage Build<TRequest>(FlatBufferBuilder builder, Response responseType, Offset<TRequest> responseOffset)
+        public static ResponseMessage Build<TRequest>(FlatBufferBuilder builder, Response responseType,
+            Offset<TRequest> responseOffset)
             where TRequest : Table
         {
             Offset<ResponseMessage> responseMessageOffset = ResponseMessage.CreateResponseMessage(builder, responseType,
@@ -54,9 +55,32 @@ namespace GoodAI.Arnold.Network.Messages
 
     public static class ModelResponseBuilder
     {
-        public static ResponseMessage Build(IList<RegionModel> addedRegions)
+        public static ResponseMessage Build(IList<RegionModel> addedRegions = null,
+            IList<ConnectorModel> addedConnectors = null, IList<ConnectionModel> addedConnections = null)
         {
             var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
+
+            VectorOffset? addedRegionsVectorOffset = BuildAddedRegions(addedRegions, builder);
+            VectorOffset? addedConnectorsVectorOffset = BuildAddedConnectors(addedConnectors, builder);
+            VectorOffset? addedConnectionsVectorOffset = BuildAddedConnections(addedConnections, builder);
+
+            ModelResponse.StartModelResponse(builder);
+            if (addedRegionsVectorOffset.HasValue)
+                ModelResponse.AddAddedRegions(builder, addedRegionsVectorOffset.Value);
+            if (addedConnectorsVectorOffset.HasValue)
+                ModelResponse.AddAddedConnectors(builder, addedConnectorsVectorOffset.Value);
+            if (addedConnectionsVectorOffset.HasValue)
+                ModelResponse.AddAddedConnections(builder, addedConnectionsVectorOffset.Value);
+
+            Offset<ModelResponse> responseOffset = ModelResponse.EndModelResponse(builder);
+
+            return ResponseMessageBuilder.Build(builder, Response.ModelResponse, responseOffset);
+        }
+
+        private static VectorOffset? BuildAddedRegions(IList<RegionModel> addedRegions, FlatBufferBuilder builder)
+        {
+            if (addedRegions == null)
+                return null;
 
             var addedRegionsOffsets = new Offset<Region>[addedRegions.Count];
 
@@ -69,18 +93,68 @@ namespace GoodAI.Arnold.Network.Messages
                 Vector3 lowerBound = region.Position - region.Size/2;
                 var lowerBounds = Position.CreatePosition(builder, lowerBound.X, lowerBound.Y, lowerBound.Z);
                 Vector3 size = region.Size;
-                var upperBounds = Position.CreatePosition(builder, lowerBound.X + size.X, lowerBound.Y + size.Y, lowerBound.Z + size.Z);
+                var upperBounds = Position.CreatePosition(builder, lowerBound.X + size.X, lowerBound.Y + size.Y,
+                    lowerBound.Z + size.Z);
 
-                addedRegionsOffsets[0] = Region.CreateRegion(builder, 1, regionName, regionType, lowerBounds, upperBounds);
+                addedRegionsOffsets[i] = Region.CreateRegion(builder, region.Index, regionName, regionType, lowerBounds,
+                    upperBounds);
             }
 
-            var addedRegionsVectorOffset = ModelResponse.CreateAddedRegionsVector(builder, addedRegionsOffsets);
+            VectorOffset addedRegionsVectorOffset = ModelResponse.CreateAddedRegionsVector(builder, addedRegionsOffsets);
+            return addedRegionsVectorOffset;
+        }
 
-            ModelResponse.StartModelResponse(builder);
-            ModelResponse.AddAddedRegions(builder, addedRegionsVectorOffset);
-            Offset<ModelResponse> responseOffset = ModelResponse.EndModelResponse(builder);
+        private static VectorOffset? BuildAddedConnectors(IList<ConnectorModel> addedConnectors,
+            FlatBufferBuilder builder)
+        {
+            if (addedConnectors == null)
+                return null;
 
-            return ResponseMessageBuilder.Build(builder, Response.ModelResponse, responseOffset);
+            var addedConnectorsOffsets = new Offset<Connector>[addedConnectors.Count];
+
+            for (int i = 0; i < addedConnectors.Count; i++)
+            {
+                var connector = addedConnectors[i];
+
+                var connectorName = builder.CreateString(connector.Name);
+
+                Direction direction = connector.Direction == ConnectorDirection.Forward
+                    ? Direction.Forward
+                    : Direction.Backward;
+                addedConnectorsOffsets[i] = Connector.CreateConnector(builder, connector.Region.Index, connectorName,
+                    direction, connector.SlotCount);
+            }
+
+            VectorOffset addedConnectorsVectorOffset = ModelResponse.CreateAddedConnectorsVector(builder,
+                addedConnectorsOffsets);
+            return addedConnectorsVectorOffset;
+        }
+
+        private static VectorOffset? BuildAddedConnections(IList<ConnectionModel> addedConnections,
+            FlatBufferBuilder builder)
+        {
+            if (addedConnections == null)
+                return null;
+
+            var addedConnectionsOffsets = new Offset<Connection>[addedConnections.Count];
+
+            for (int i = 0; i < addedConnections.Count; i++)
+            {
+                var connection = addedConnections[i];
+
+                var fromConnectorName = builder.CreateString(connection.From.Name);
+                var toConnectorName = builder.CreateString(connection.To.Name);
+
+                Direction direction = connection.From.Direction == ConnectorDirection.Forward ? Direction.Forward : Direction.Backward;
+
+                addedConnectionsOffsets[i] = Connection.CreateConnection(builder, connection.From.Region.Index,
+                    fromConnectorName, connection.To.Region.Index, toConnectorName,
+                    direction);
+            }
+
+            VectorOffset addedConnectionsVectorOffset = ModelResponse.CreateAddedConnectionsVector(builder,
+                addedConnectionsOffsets);
+            return addedConnectionsVectorOffset;
         }
     }
 }
