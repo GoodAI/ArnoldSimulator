@@ -291,47 +291,49 @@ public sealed class ModelResponse : Table {
   public static ModelResponse GetRootAsModelResponse(ByteBuffer _bb, ModelResponse obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public ModelResponse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
+  public bool IsFull { get { int o = __offset(4); return o != 0 ? 0!=bb.Get(o + bb_pos) : (bool)false; } }
   public Region GetAddedRegions(int j) { return GetAddedRegions(new Region(), j); }
-  public Region GetAddedRegions(Region obj, int j) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int AddedRegionsLength { get { int o = __offset(4); return o != 0 ? __vector_len(o) : 0; } }
+  public Region GetAddedRegions(Region obj, int j) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int AddedRegionsLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
   public Region GetRepositionedRegions(int j) { return GetRepositionedRegions(new Region(), j); }
-  public Region GetRepositionedRegions(Region obj, int j) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int RepositionedRegionsLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
-  public uint GetRemovedRegions(int j) { int o = __offset(8); return o != 0 ? bb.GetUint(__vector(o) + j * 4) : (uint)0; }
-  public int RemovedRegionsLength { get { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; } }
-  public ArraySegment<byte>? GetRemovedRegionsBytes() { return __vector_as_arraysegment(8); }
+  public Region GetRepositionedRegions(Region obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int RepositionedRegionsLength { get { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; } }
+  public uint GetRemovedRegions(int j) { int o = __offset(10); return o != 0 ? bb.GetUint(__vector(o) + j * 4) : (uint)0; }
+  public int RemovedRegionsLength { get { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; } }
+  public ArraySegment<byte>? GetRemovedRegionsBytes() { return __vector_as_arraysegment(10); }
   public Connector GetAddedConnectors(int j) { return GetAddedConnectors(new Connector(), j); }
-  public Connector GetAddedConnectors(Connector obj, int j) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int AddedConnectorsLength { get { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; } }
+  public Connector GetAddedConnectors(Connector obj, int j) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int AddedConnectorsLength { get { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; } }
   public Connector GetRemovedConnectors(int j) { return GetRemovedConnectors(new Connector(), j); }
-  public Connector GetRemovedConnectors(Connector obj, int j) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int RemovedConnectorsLength { get { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; } }
+  public Connector GetRemovedConnectors(Connector obj, int j) { int o = __offset(14); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int RemovedConnectorsLength { get { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; } }
   public Connection GetAddedConnections(int j) { return GetAddedConnections(new Connection(), j); }
-  public Connection GetAddedConnections(Connection obj, int j) { int o = __offset(14); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int AddedConnectionsLength { get { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; } }
+  public Connection GetAddedConnections(Connection obj, int j) { int o = __offset(16); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int AddedConnectionsLength { get { int o = __offset(16); return o != 0 ? __vector_len(o) : 0; } }
   public Connection GetRemovedConnections(int j) { return GetRemovedConnections(new Connection(), j); }
-  public Connection GetRemovedConnections(Connection obj, int j) { int o = __offset(16); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int RemovedConnectionsLength { get { int o = __offset(16); return o != 0 ? __vector_len(o) : 0; } }
+  public Connection GetRemovedConnections(Connection obj, int j) { int o = __offset(18); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int RemovedConnectionsLength { get { int o = __offset(18); return o != 0 ? __vector_len(o) : 0; } }
   public Neuron GetAddedNeurons(int j) { return GetAddedNeurons(new Neuron(), j); }
-  public Neuron GetAddedNeurons(Neuron obj, int j) { int o = __offset(18); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int AddedNeuronsLength { get { int o = __offset(18); return o != 0 ? __vector_len(o) : 0; } }
+  public Neuron GetAddedNeurons(Neuron obj, int j) { int o = __offset(20); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int AddedNeuronsLength { get { int o = __offset(20); return o != 0 ? __vector_len(o) : 0; } }
   public Neuron GetRepositionedNeurons(int j) { return GetRepositionedNeurons(new Neuron(), j); }
-  public Neuron GetRepositionedNeurons(Neuron obj, int j) { int o = __offset(20); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int RepositionedNeuronsLength { get { int o = __offset(20); return o != 0 ? __vector_len(o) : 0; } }
-  public uint GetRemovedNeurons(int j) { int o = __offset(22); return o != 0 ? bb.GetUint(__vector(o) + j * 4) : (uint)0; }
-  public int RemovedNeuronsLength { get { int o = __offset(22); return o != 0 ? __vector_len(o) : 0; } }
-  public ArraySegment<byte>? GetRemovedNeuronsBytes() { return __vector_as_arraysegment(22); }
+  public Neuron GetRepositionedNeurons(Neuron obj, int j) { int o = __offset(22); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int RepositionedNeuronsLength { get { int o = __offset(22); return o != 0 ? __vector_len(o) : 0; } }
+  public uint GetRemovedNeurons(int j) { int o = __offset(24); return o != 0 ? bb.GetUint(__vector(o) + j * 4) : (uint)0; }
+  public int RemovedNeuronsLength { get { int o = __offset(24); return o != 0 ? __vector_len(o) : 0; } }
+  public ArraySegment<byte>? GetRemovedNeuronsBytes() { return __vector_as_arraysegment(24); }
   public Synapse GetAddedSynapses(int j) { return GetAddedSynapses(new Synapse(), j); }
-  public Synapse GetAddedSynapses(Synapse obj, int j) { int o = __offset(24); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int AddedSynapsesLength { get { int o = __offset(24); return o != 0 ? __vector_len(o) : 0; } }
+  public Synapse GetAddedSynapses(Synapse obj, int j) { int o = __offset(26); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int AddedSynapsesLength { get { int o = __offset(26); return o != 0 ? __vector_len(o) : 0; } }
   public Synapse GetSpikedSynapses(int j) { return GetSpikedSynapses(new Synapse(), j); }
-  public Synapse GetSpikedSynapses(Synapse obj, int j) { int o = __offset(26); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int SpikedSynapsesLength { get { int o = __offset(26); return o != 0 ? __vector_len(o) : 0; } }
+  public Synapse GetSpikedSynapses(Synapse obj, int j) { int o = __offset(28); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int SpikedSynapsesLength { get { int o = __offset(28); return o != 0 ? __vector_len(o) : 0; } }
   public Synapse GetRemovedSynapses(int j) { return GetRemovedSynapses(new Synapse(), j); }
-  public Synapse GetRemovedSynapses(Synapse obj, int j) { int o = __offset(28); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int RemovedSynapsesLength { get { int o = __offset(28); return o != 0 ? __vector_len(o) : 0; } }
+  public Synapse GetRemovedSynapses(Synapse obj, int j) { int o = __offset(30); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int RemovedSynapsesLength { get { int o = __offset(30); return o != 0 ? __vector_len(o) : 0; } }
 
   public static Offset<ModelResponse> CreateModelResponse(FlatBufferBuilder builder,
+      bool isFull = false,
       VectorOffset addedRegionsOffset = default(VectorOffset),
       VectorOffset repositionedRegionsOffset = default(VectorOffset),
       VectorOffset removedRegionsOffset = default(VectorOffset),
@@ -345,7 +347,7 @@ public sealed class ModelResponse : Table {
       VectorOffset addedSynapsesOffset = default(VectorOffset),
       VectorOffset spikedSynapsesOffset = default(VectorOffset),
       VectorOffset removedSynapsesOffset = default(VectorOffset)) {
-    builder.StartObject(13);
+    builder.StartObject(14);
     ModelResponse.AddRemovedSynapses(builder, removedSynapsesOffset);
     ModelResponse.AddSpikedSynapses(builder, spikedSynapsesOffset);
     ModelResponse.AddAddedSynapses(builder, addedSynapsesOffset);
@@ -359,47 +361,49 @@ public sealed class ModelResponse : Table {
     ModelResponse.AddRemovedRegions(builder, removedRegionsOffset);
     ModelResponse.AddRepositionedRegions(builder, repositionedRegionsOffset);
     ModelResponse.AddAddedRegions(builder, addedRegionsOffset);
+    ModelResponse.AddIsFull(builder, isFull);
     return ModelResponse.EndModelResponse(builder);
   }
 
-  public static void StartModelResponse(FlatBufferBuilder builder) { builder.StartObject(13); }
-  public static void AddAddedRegions(FlatBufferBuilder builder, VectorOffset addedRegionsOffset) { builder.AddOffset(0, addedRegionsOffset.Value, 0); }
+  public static void StartModelResponse(FlatBufferBuilder builder) { builder.StartObject(14); }
+  public static void AddIsFull(FlatBufferBuilder builder, bool isFull) { builder.AddBool(0, isFull, false); }
+  public static void AddAddedRegions(FlatBufferBuilder builder, VectorOffset addedRegionsOffset) { builder.AddOffset(1, addedRegionsOffset.Value, 0); }
   public static VectorOffset CreateAddedRegionsVector(FlatBufferBuilder builder, Offset<Region>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedRegionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRepositionedRegions(FlatBufferBuilder builder, VectorOffset repositionedRegionsOffset) { builder.AddOffset(1, repositionedRegionsOffset.Value, 0); }
+  public static void AddRepositionedRegions(FlatBufferBuilder builder, VectorOffset repositionedRegionsOffset) { builder.AddOffset(2, repositionedRegionsOffset.Value, 0); }
   public static VectorOffset CreateRepositionedRegionsVector(FlatBufferBuilder builder, Offset<Region>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRepositionedRegionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRemovedRegions(FlatBufferBuilder builder, VectorOffset removedRegionsOffset) { builder.AddOffset(2, removedRegionsOffset.Value, 0); }
+  public static void AddRemovedRegions(FlatBufferBuilder builder, VectorOffset removedRegionsOffset) { builder.AddOffset(3, removedRegionsOffset.Value, 0); }
   public static VectorOffset CreateRemovedRegionsVector(FlatBufferBuilder builder, uint[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddUint(data[i]); return builder.EndVector(); }
   public static void StartRemovedRegionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddAddedConnectors(FlatBufferBuilder builder, VectorOffset addedConnectorsOffset) { builder.AddOffset(3, addedConnectorsOffset.Value, 0); }
+  public static void AddAddedConnectors(FlatBufferBuilder builder, VectorOffset addedConnectorsOffset) { builder.AddOffset(4, addedConnectorsOffset.Value, 0); }
   public static VectorOffset CreateAddedConnectorsVector(FlatBufferBuilder builder, Offset<Connector>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedConnectorsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRemovedConnectors(FlatBufferBuilder builder, VectorOffset removedConnectorsOffset) { builder.AddOffset(4, removedConnectorsOffset.Value, 0); }
+  public static void AddRemovedConnectors(FlatBufferBuilder builder, VectorOffset removedConnectorsOffset) { builder.AddOffset(5, removedConnectorsOffset.Value, 0); }
   public static VectorOffset CreateRemovedConnectorsVector(FlatBufferBuilder builder, Offset<Connector>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRemovedConnectorsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddAddedConnections(FlatBufferBuilder builder, VectorOffset addedConnectionsOffset) { builder.AddOffset(5, addedConnectionsOffset.Value, 0); }
+  public static void AddAddedConnections(FlatBufferBuilder builder, VectorOffset addedConnectionsOffset) { builder.AddOffset(6, addedConnectionsOffset.Value, 0); }
   public static VectorOffset CreateAddedConnectionsVector(FlatBufferBuilder builder, Offset<Connection>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedConnectionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRemovedConnections(FlatBufferBuilder builder, VectorOffset removedConnectionsOffset) { builder.AddOffset(6, removedConnectionsOffset.Value, 0); }
+  public static void AddRemovedConnections(FlatBufferBuilder builder, VectorOffset removedConnectionsOffset) { builder.AddOffset(7, removedConnectionsOffset.Value, 0); }
   public static VectorOffset CreateRemovedConnectionsVector(FlatBufferBuilder builder, Offset<Connection>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRemovedConnectionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddAddedNeurons(FlatBufferBuilder builder, VectorOffset addedNeuronsOffset) { builder.AddOffset(7, addedNeuronsOffset.Value, 0); }
+  public static void AddAddedNeurons(FlatBufferBuilder builder, VectorOffset addedNeuronsOffset) { builder.AddOffset(8, addedNeuronsOffset.Value, 0); }
   public static VectorOffset CreateAddedNeuronsVector(FlatBufferBuilder builder, Offset<Neuron>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedNeuronsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRepositionedNeurons(FlatBufferBuilder builder, VectorOffset repositionedNeuronsOffset) { builder.AddOffset(8, repositionedNeuronsOffset.Value, 0); }
+  public static void AddRepositionedNeurons(FlatBufferBuilder builder, VectorOffset repositionedNeuronsOffset) { builder.AddOffset(9, repositionedNeuronsOffset.Value, 0); }
   public static VectorOffset CreateRepositionedNeuronsVector(FlatBufferBuilder builder, Offset<Neuron>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRepositionedNeuronsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRemovedNeurons(FlatBufferBuilder builder, VectorOffset removedNeuronsOffset) { builder.AddOffset(9, removedNeuronsOffset.Value, 0); }
+  public static void AddRemovedNeurons(FlatBufferBuilder builder, VectorOffset removedNeuronsOffset) { builder.AddOffset(10, removedNeuronsOffset.Value, 0); }
   public static VectorOffset CreateRemovedNeuronsVector(FlatBufferBuilder builder, uint[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddUint(data[i]); return builder.EndVector(); }
   public static void StartRemovedNeuronsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddAddedSynapses(FlatBufferBuilder builder, VectorOffset addedSynapsesOffset) { builder.AddOffset(10, addedSynapsesOffset.Value, 0); }
+  public static void AddAddedSynapses(FlatBufferBuilder builder, VectorOffset addedSynapsesOffset) { builder.AddOffset(11, addedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateAddedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddSpikedSynapses(FlatBufferBuilder builder, VectorOffset spikedSynapsesOffset) { builder.AddOffset(11, spikedSynapsesOffset.Value, 0); }
+  public static void AddSpikedSynapses(FlatBufferBuilder builder, VectorOffset spikedSynapsesOffset) { builder.AddOffset(12, spikedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateSpikedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartSpikedSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddRemovedSynapses(FlatBufferBuilder builder, VectorOffset removedSynapsesOffset) { builder.AddOffset(12, removedSynapsesOffset.Value, 0); }
+  public static void AddRemovedSynapses(FlatBufferBuilder builder, VectorOffset removedSynapsesOffset) { builder.AddOffset(13, removedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateRemovedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRemovedSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static Offset<ModelResponse> EndModelResponse(FlatBufferBuilder builder) {
