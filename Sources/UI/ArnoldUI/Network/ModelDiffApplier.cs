@@ -28,6 +28,8 @@ namespace GoodAI.Arnold.Network
             ApplyAddedConnections(model, diff);
             ApplyAddedNeurons(model, diff);
             ApplyAddedSynapses(model, diff);
+
+            ApplySpikedSynapses(model, diff);
         }
 
         private static void ApplyAddedRegions(SimulationModel model, ModelResponse diff)
@@ -146,7 +148,7 @@ namespace GoodAI.Arnold.Network
                 RegionModel region = FindRegion(model, addedSynapse.RegionIndex);
                 if (region == null)
                 {
-                    LogSynapseNotAdded(addedSynapse, "Region not found");
+                    LogSynapseNotProcessed(addedSynapse, "add", "Region not found");
                     continue;
                 }
 
@@ -155,7 +157,7 @@ namespace GoodAI.Arnold.Network
 
                 if (fromNeuron == null || toNeuron == null)
                 {
-                    LogSynapseNotAdded(addedSynapse, "Source or target neuron not found");
+                    LogSynapseNotProcessed(addedSynapse, "add", "Source or target neuron not found");
                     continue;
                 }
 
@@ -165,16 +167,51 @@ namespace GoodAI.Arnold.Network
             }
         }
 
+        private void ApplySpikedSynapses(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.SpikedSynapsesLength; i++)
+            {
+                Synapse spikedSynapse = diff.GetSpikedSynapses(i);
+
+                RegionModel region = FindRegion(model, spikedSynapse.RegionIndex);
+                if (region == null)
+                {
+                    LogSynapseNotProcessed(spikedSynapse, "spike", "Region not found");
+                    continue;
+                }
+
+                ExpertModel fromNeuron = FindNeuron(region, spikedSynapse.From);
+                ExpertModel toNeuron = FindNeuron(region, spikedSynapse.To);
+
+                if (fromNeuron == null || toNeuron == null)
+                {
+                    LogSynapseNotProcessed(spikedSynapse, "spike", "Source or target neuron not found");
+                    continue;
+                }
+
+                var synapseModel = fromNeuron.Outputs.FirstOrDefault(synapse => synapse.To == toNeuron);
+
+                if (synapseModel == null)
+                {
+                    LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
+                    continue;
+                }
+
+                synapseModel.Spike();
+            }
+        }
+
         private static ExpertModel FindNeuron(RegionModel region, uint id)
         {
             // TODO(HonzaS): Optimize.
             return region.Experts.FirstOrDefault(expert => expert.Id == id);
         }
 
-        private void LogSynapseNotAdded(Synapse addedSynapse, string reason)
+        private void LogSynapseNotProcessed(Synapse addedSynapse, string synapseAction, string reason)
         {
             Log.Warn(
-                "Could not add synapse in region {regionIndex} from neuron {fromNeuron} to neuron {toNeuron}: {reason}",
+                "Could not {synapseAction:l} synapse in region {regionIndex} from neuron {fromNeuron} to neuron {toNeuron}: {reason}",
+                synapseAction,
                 addedSynapse.RegionIndex,
                 addedSynapse.From,
                 addedSynapse.To,

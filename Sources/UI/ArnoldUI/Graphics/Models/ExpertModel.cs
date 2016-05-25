@@ -78,9 +78,6 @@ namespace GoodAI.Arnold.Graphics.Models
             if (m_alpha < MinAlpha)
                 m_alpha = MinAlpha;
 
-            if (m_random.NextDouble() < SpikesPerMs*elapsedMs/1000f)
-                Spike();
-
             if (Picked)
             {
                 m_alpha = 1;
