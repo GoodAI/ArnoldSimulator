@@ -347,7 +347,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     std::vector<flatbuffers::Offset<Network::Neuron>> addedNeuronsOffsets;
 
-    const auto neuronAddInterval = 5;
+    const auto neuronAddInterval = 1;
     const auto maxNeuronCount = 1000;
     static auto addedNeuronCount = 0;
 
@@ -379,8 +379,10 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     std::vector<flatbuffers::Offset<Network::Synapse>> addedSynapsesOffsets;
 
+	static std::vector<std::pair<uint32_t, uint32_t>> addedSynapses;
+
     if (mDummyTimestep % synapseAddInterval == 0) {
-        int fromNeuron = rand() % addedNeuronCount;
+        int fromNeuron = (rand() % addedNeuronCount) + 1;
         int nextLayerStart = ((fromNeuron / layerSize) + 1) * layerSize;
         if (nextLayerStart < addedNeuronCount) {
             int toNeuron = (rand() % (addedNeuronCount - nextLayerStart)) + nextLayerStart;
@@ -388,10 +390,24 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
             auto synapseOffset = Network::CreateSynapse(builder, 1, fromNeuron, toNeuron);
 
             addedSynapsesOffsets.push_back(synapseOffset);
+
+			std::pair<int32_t, int32_t> synapse(fromNeuron, toNeuron);
+			addedSynapses.push_back(synapse);
         }
     }
 
     auto addedSynapsesVector = builder.CreateVector(addedSynapsesOffsets);
+
+    std::vector<flatbuffers::Offset<Network::Synapse>> spikedSynapsesOffsets;
+
+	for (auto synapse : addedSynapses) {
+		if (rand() % 100 == 0) {
+            auto synapseOffset = Network::CreateSynapse(builder, 1, synapse.first, synapse.second);
+			spikedSynapsesOffsets.push_back(synapseOffset);
+		}
+	}
+
+    auto spikedSynapsesVector = builder.CreateVector(spikedSynapsesOffsets);
 
     Network::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVector);
@@ -399,6 +415,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     responseBuilder.add_addedConnections(addedConnectionsVector);
     responseBuilder.add_addedNeurons(addedNeuronsVector);
     responseBuilder.add_addedSynapses(addedSynapsesVector);
+    responseBuilder.add_spikedSynapses(spikedSynapsesVector);
     auto modelResponseOffset = responseBuilder.Finish();
 
     BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
