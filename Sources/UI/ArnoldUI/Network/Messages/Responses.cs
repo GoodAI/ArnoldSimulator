@@ -261,21 +261,25 @@ public sealed class Synapse : Table {
   public static Synapse GetRootAsSynapse(ByteBuffer _bb, Synapse obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public Synapse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public uint From { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public uint To { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint RegionIndex { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint From { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint To { get { int o = __offset(8); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
 
   public static Offset<Synapse> CreateSynapse(FlatBufferBuilder builder,
+      uint regionIndex = 0,
       uint from = 0,
       uint to = 0) {
-    builder.StartObject(2);
+    builder.StartObject(3);
     Synapse.AddTo(builder, to);
     Synapse.AddFrom(builder, from);
+    Synapse.AddRegionIndex(builder, regionIndex);
     return Synapse.EndSynapse(builder);
   }
 
-  public static void StartSynapse(FlatBufferBuilder builder) { builder.StartObject(2); }
-  public static void AddFrom(FlatBufferBuilder builder, uint from) { builder.AddUint(0, from, 0); }
-  public static void AddTo(FlatBufferBuilder builder, uint to) { builder.AddUint(1, to, 0); }
+  public static void StartSynapse(FlatBufferBuilder builder) { builder.StartObject(3); }
+  public static void AddRegionIndex(FlatBufferBuilder builder, uint regionIndex) { builder.AddUint(0, regionIndex, 0); }
+  public static void AddFrom(FlatBufferBuilder builder, uint from) { builder.AddUint(1, from, 0); }
+  public static void AddTo(FlatBufferBuilder builder, uint to) { builder.AddUint(2, to, 0); }
   public static Offset<Synapse> EndSynapse(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Synapse>(o);

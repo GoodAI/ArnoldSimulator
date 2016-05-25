@@ -346,15 +346,16 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     std::vector<flatbuffers::Offset<Network::Neuron>> addedNeuronsOffsets;
 
     const auto neuronAddInterval = 5;
-    const auto maxNeruonCount = 1000;
+    const auto maxNeuronCount = 1000;
     static auto addedNeuronCount = 0;
 
-    if ((mDummyTimestep % neuronAddInterval == 0) && (addedNeuronCount < maxNeruonCount)) {
+    const auto layerSizeX = 10;
+    const auto layerSizeY = 10;
+    const auto layerSize = layerSizeX * layerSizeY;
+
+    if ((mDummyTimestep % neuronAddInterval == 0) && (addedNeuronCount < maxNeuronCount)) {
         auto neuronType = builder.CreateString("neurotype");
         // This is relative to region lower bound in the UI (?)
-
-        const auto layerSizeX = 10;
-        const auto layerSizeY = 10;
 
         auto x = addedNeuronCount / (layerSizeX * layerSizeY);
         auto y = (addedNeuronCount / 10) % layerSizeY;
@@ -364,19 +365,38 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
             5.f * static_cast<float>(x),
             2.f * static_cast<float>(y),
             2.f * static_cast<float>(z));
-        auto neruonOffset = Network::CreateNeuron(builder, 1, 1, neuronType, neuronPosition);
+        auto neuronOffset = Network::CreateNeuron(builder, addedNeuronCount+1, 1, neuronType, neuronPosition);
 
-        addedNeuronsOffsets.push_back(neruonOffset);
+        addedNeuronsOffsets.push_back(neuronOffset);
         addedNeuronCount++;
     }
 
     auto addedNeuronsVector = builder.CreateVector(addedNeuronsOffsets);
+
+    auto synapseAddInterval = 20;
+
+    std::vector<flatbuffers::Offset<Network::Synapse>> addedSynapsesOffsets;
+
+    if (mDummyTimestep % synapseAddInterval == 0) {
+        int fromNeuron = rand() % addedNeuronCount;
+        int nextLayerStart = ((fromNeuron / layerSize) + 1) * layerSize;
+        if (nextLayerStart < addedNeuronCount) {
+            int toNeuron = (rand() % (addedNeuronCount - nextLayerStart)) + nextLayerStart;
+
+            auto synapseOffset = Network::CreateSynapse(builder, 1, fromNeuron, toNeuron);
+
+            addedSynapsesOffsets.push_back(synapseOffset);
+        }
+    }
+
+    auto addedSynapsesVector = builder.CreateVector(addedSynapsesOffsets);
 
     Network::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVector);
     responseBuilder.add_addedConnectors(addedConnectorsVector);
     responseBuilder.add_addedConnections(addedConnectionsVector);
     responseBuilder.add_addedNeurons(addedNeuronsVector);
+    responseBuilder.add_addedSynapses(addedSynapsesVector);
     auto modelResponseOffset = responseBuilder.Finish();
 
     BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);

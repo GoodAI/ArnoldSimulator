@@ -72,6 +72,7 @@ table Neuron {
 }
 
 table Synapse {
+	regionIndex:uint;
 	from:uint;
 	to:uint;
 }
