@@ -20,6 +20,11 @@ using namespace GoodAI::Arnold;
 
 struct ViewportUpdate;
 
+inline void operator|(PUP::er &p, Network::StateType &state)
+{
+    pup_bytes(&p, static_cast<void *>(&state), sizeof(Network::StateType));
+}
+
 class ShutdownRequestedException : public std::runtime_error
 {
 public:

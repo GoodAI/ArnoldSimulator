@@ -109,7 +109,24 @@ Core::~Core()
 
 void Core::pup(PUP::er &p)
 {
-    // TODO(PetrK)
+    p | mState;
+    p | mStartTime;
+    p | mRequestIdCounter;
+
+    if (p.isUnpacking()) {
+        size_t requestsCount; p | requestsCount;
+        for (size_t i = 0; i < requestsCount; ++i) {
+            RequestId requestId; p | requestId;
+            CkCcsRequestMsg *messagePtr = new CkCcsRequestMsg(); messagePtr->pup(p);
+            mRequests.insert(std::make_pair(requestId, messagePtr));
+        }
+    } else {
+        size_t requestsCount = mRequests.size(); p | requestsCount;
+        for (auto it = mRequests.begin(); it != mRequests.end(); ++it) {
+            RequestId requestId = it->first; p | requestId;
+            CkCcsRequestMsg *messagePtr = it->second; messagePtr->pup(p);
+        }
+    }
 }
 
 void Core::Exit()
@@ -317,9 +334,9 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         addedConnectorsOffsets.push_back(connectorOffset6);
         addedConnectorsOffsets.push_back(connectorOffset7);
 
-		auto connectionOffset = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName6);
+        auto connectionOffset = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName6);
 
-		addedConnectionsOffsets.push_back(connectionOffset);
+        addedConnectionsOffsets.push_back(connectionOffset);
     }
 
     auto addedConnectorsVector = builder.CreateVector(addedConnectorsOffsets);
