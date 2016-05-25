@@ -182,6 +182,9 @@ namespace GoodAI.Arnold.Network
         {
             return Task.Factory.StartNew(() =>
             {
+                if (diff.IsFull)
+                    m_currentModel = new SimulationModel();
+
                 m_modelDiffApplier.ApplyModelDiff(m_currentModel, diff);
             });
         }
