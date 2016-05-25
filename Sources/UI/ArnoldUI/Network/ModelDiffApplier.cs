@@ -99,34 +99,24 @@ namespace GoodAI.Arnold.Network
                 RegionModel fromRegion = FindRegion(model, addedConnection.FromRegion);
                 RegionModel toRegion = FindRegion(model, addedConnection.ToRegion);
 
-                if (fromRegion == null)
+                if (fromRegion == null || toRegion == null)
                 {
-                    LogConnectionNotAdded(addedConnection, "Source region not found");
+                    string missingRegion = fromRegion == null ? "Source" : "Target";
+                    LogConnectionNotAdded(addedConnection, $"{missingRegion} region not found");
                     continue;
                 }
 
-                if (toRegion == null)
+                OutputConnectorModel fromConnector =
+                    fromRegion.OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
+
+                InputConnectorModel toConnector =
+                    toRegion.InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
+
+
+                if (fromConnector == null || toConnector == null)
                 {
-                    LogConnectionNotAdded(addedConnection, "Target region not found");
-                    continue;
-                }
-
-                OutputConnectorModel fromConnector = fromRegion?
-                    .OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
-
-                InputConnectorModel toConnector = toRegion?
-                    .InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
-
-
-                if (fromConnector == null)
-                {
-                    LogConnectionNotAdded(addedConnection, "Source connector not found");
-                    continue;
-                }
-
-                if (toConnector == null)
-                {
-                    LogConnectionNotAdded(addedConnection, "Target connector not found");
+                    string missingConnector = fromConnector == null ? "Source" : "Target";
+                    LogConnectionNotAdded(addedConnection, $"{missingConnector} connector not found");
                     continue;
                 }
 

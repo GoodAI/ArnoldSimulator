@@ -357,7 +357,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         auto neuronType = builder.CreateString("neurotype");
         // This is relative to region lower bound in the UI (?)
 
-        auto x = addedNeuronCount / (layerSizeX * layerSizeY);
+        auto x = addedNeuronCount / layerSize;
         auto y = (addedNeuronCount / 10) % layerSizeY;
         auto z = addedNeuronCount % layerSizeX;
 
