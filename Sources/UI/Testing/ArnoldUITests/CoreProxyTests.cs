@@ -15,12 +15,12 @@ using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
 {
-    public class SimulationTests
+    public class CoreProxyTests
     {
         private IModelUpdater m_modelUpdater;
         public const int TimeoutMs = 100;
 
-        public SimulationTests()
+        public CoreProxyTests()
         {
             var modelUpdaterMock = new Mock<IModelUpdater>();
             m_modelUpdater = modelUpdaterMock.Object;
@@ -143,12 +143,12 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var simulation = new CoreProxy(coreLink, coreController, m_modelUpdater);
-            Assert.Equal(CoreState.Empty, simulation.State);
+            var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
+            Assert.Equal(CoreState.Empty, coreProxy.State);
 
-            simulation.StateChangeFailed += (sender, args) => waitEvent.Set();
+            coreProxy.StateChangeFailed += (sender, args) => waitEvent.Set();
 
-            simulation.LoadBlueprint(new AgentBlueprint());
+            coreProxy.LoadBlueprint(new AgentBlueprint());
 
             // The event should be fired via StateChangeFailed.
             Assert.True(waitEvent.WaitOne(timeoutMs), "Timed out");
@@ -166,13 +166,13 @@ namespace GoodAI.Arnold.UI.Tests
             var coreControllerMock = new Mock<ICoreController>();
             var coreController = coreControllerMock.Object;
 
-            var simulation = new CoreProxy(coreLink, coreController, m_modelUpdater);
-            Assert.Equal(CoreState.Empty, simulation.State);
+            var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
+            Assert.Equal(CoreState.Empty, coreProxy.State);
 
-            simulation.StateChanged += (sender, args) => waitEvent.Set();
+            coreProxy.StateChanged += (sender, args) => waitEvent.Set();
 
             waitEvent.WaitOne(timeoutMs);
-            Assert.Equal(CoreState.Empty, simulation.State);
+            Assert.Equal(CoreState.Empty, coreProxy.State);
         }
     }
 }
