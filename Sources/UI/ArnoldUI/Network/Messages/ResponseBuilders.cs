@@ -57,7 +57,7 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public static ResponseMessage Build(IList<RegionModel> addedRegions = null,
             IList<ConnectorModel> addedConnectors = null, IList<ConnectionModel> addedConnections = null,
-            IList<ExpertModel> addedNeurons = null)
+            IList<ExpertModel> addedNeurons = null, IList<SynapseModel> addedSynapses = null)
         {
             var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
 
@@ -65,6 +65,7 @@ namespace GoodAI.Arnold.Network.Messages
             VectorOffset? addedConnectorsVectorOffset = BuildAddedConnectors(addedConnectors, builder);
             VectorOffset? addedConnectionsVectorOffset = BuildAddedConnections(addedConnections, builder);
             VectorOffset? addedNeuronsVectorOffset = BuildAddedNeurons(addedNeurons, builder);
+            VectorOffset? addedSynapsesVectorOffset = BuildAddedSynapses(addedSynapses, builder);
 
             ModelResponse.StartModelResponse(builder);
             if (addedRegionsVectorOffset.HasValue)
@@ -75,6 +76,8 @@ namespace GoodAI.Arnold.Network.Messages
                 ModelResponse.AddAddedConnections(builder, addedConnectionsVectorOffset.Value);
             if (addedNeuronsVectorOffset.HasValue)
                 ModelResponse.AddAddedNeurons(builder, addedNeuronsVectorOffset.Value);
+            if (addedSynapsesVectorOffset.HasValue)
+                ModelResponse.AddAddedSynapses(builder, addedSynapsesVectorOffset.Value);
 
             Offset<ModelResponse> responseOffset = ModelResponse.EndModelResponse(builder);
 
@@ -179,6 +182,25 @@ namespace GoodAI.Arnold.Network.Messages
             }
 
             return ModelResponse.CreateAddedNeuronsVector(builder, addedNeuronsOffsets);
+        }
+
+        private static VectorOffset? BuildAddedSynapses(IList<SynapseModel> addedSynapses,
+            FlatBufferBuilder builder)
+        {
+            if (addedSynapses == null)
+                return null;
+
+            var addedSynapsesOffsets = new Offset<Synapse>[addedSynapses.Count];
+
+            for (int i = 0; i < addedSynapses.Count; i++)
+            {
+                var synapse = addedSynapses[i];
+
+                addedSynapsesOffsets[i] = Synapse.CreateSynapse(builder, synapse.RegionModel.Index, synapse.From.Id,
+                    synapse.To.Id);
+            }
+
+            return ModelResponse.CreateAddedSynapsesVector(builder, addedSynapsesOffsets);
         }
     }
 }

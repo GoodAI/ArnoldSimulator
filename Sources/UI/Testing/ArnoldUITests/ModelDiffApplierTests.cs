@@ -85,6 +85,20 @@ namespace GoodAI.Arnold.UI.Tests
             }
         };
 
+        private static ComparisonConfig SynapseComparisonConfig => new ComparisonConfig
+        {
+            MaxDifferences = MaxDifferences,
+            SkipInvalidIndexers = true,
+            MembersToInclude = new List<string>
+            {
+                "RegionModel",
+                "From",
+                "To",
+                "Position",
+                "Target"
+            }
+        };
+
         private static CompareLogic CompareLogic(ComparisonConfig config)
         {
             return new CompareLogic {Config = config};
@@ -164,7 +178,6 @@ namespace GoodAI.Arnold.UI.Tests
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
 
             var addedNeuron = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
-            //addedRegion.AddExpert(addedNeuron);
 
             ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<ExpertModel> {addedNeuron});
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
@@ -173,6 +186,30 @@ namespace GoodAI.Arnold.UI.Tests
 
             ComparisonResult result = CompareLogic(NeuronComparisonConfig)
                 .Compare(addedNeuron, region.Experts.First());
+
+            Assert.True(result.AreEqual, result.DifferencesString);
+        }
+
+        [Fact]
+        public void AddsNewSynapse()
+        {
+            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+
+            var addedNeuron1 = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron2 = new ExpertModel(2, "neuronType", addedRegion, Vector3.UnitY);
+
+            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedNeuron2);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(
+                addedNeurons: new List<ExpertModel> {addedNeuron1, addedNeuron2},
+                addedSynapses: new List<SynapseModel> {addedSynapse});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            RegionModel region = m_model.Regions.First();
+
+            ComparisonResult result = CompareLogic(SynapseComparisonConfig)
+                .Compare(addedSynapse, region.Synapses.First());
 
             Assert.True(result.AreEqual, result.DifferencesString);
         }
