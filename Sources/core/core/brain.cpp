@@ -159,6 +159,8 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
+    setMigratable(false);
+
     mNeuronToTerminalId.set_deleted_key(DELETED_NEURON_ID);
 
     json p = json::parse(params);
@@ -175,7 +177,7 @@ BrainBase::BrainBase(CkMigrateMessage *msg) :
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
-    setMigratable(false);
+    mNeuronToTerminalId.set_deleted_key(DELETED_NEURON_ID);
 }
 
 BrainBase::~BrainBase()

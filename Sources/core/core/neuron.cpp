@@ -100,6 +100,9 @@ NeuronBase::NeuronBase(CkMigrateMessage *msg) :
     mForwardSpikesCurrent(nullptr), mForwardSpikesNext(nullptr),
     mNeuron(nullptr)
 {
+    mChildren.set_deleted_key(DELETED_NEURON_ID);
+    mInputSynapses.set_deleted_key(DELETED_NEURON_ID);
+    mOutputSynapses.set_deleted_key(DELETED_NEURON_ID);
 }
 
 NeuronBase::~NeuronBase()
