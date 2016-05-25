@@ -1,4 +1,6 @@
 #include <future>
+#include <sstream>
+#include <fstream>
 
 #include "core.h"
 #include "brain.h"
@@ -25,10 +27,6 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
 
-    //if (msg->argc > 1) someParam1 = atoi(msg->argv[1]);
-    //if (msg->argc > 2) someParam2 = atoi(msg->argv[2]);
-    //if (msg->argc > 3) someParam3 = atoi(msg->argv[3]);
-
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 
     gMulticastGroupId = CProxy_CkMulticastMgr::ckNew();
@@ -50,6 +48,44 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
     gBrain = CProxy_BrainBase::ckNew(brainOpts);
     gRegions = CProxy_RegionBase::ckNew(regionOpts);
     gNeurons = CProxy_NeuronBase::ckNew(neuronOpts);
+
+    std::ifstream blueprintFile;
+    std::stringstream blueprintFilePath;
+    if (msg->argc > 1) {
+        blueprintFilePath << msg->argv[1];
+        if (!blueprintFilePath.str().empty()) {
+            blueprintFile.open(blueprintFilePath.str());
+        }
+    }
+
+    std::stringstream blueprintContent;
+    if (blueprintFile.is_open()) {
+        blueprintContent << blueprintFile.rdbuf();
+        blueprintFile.close();
+    }
+
+    if (!blueprintContent.str().empty()) {
+        json bp = json::parse(blueprintContent.str());
+        if (!bp.empty()) {
+            if (bp.begin()->is_object() && bp.begin().key() == "brain") {
+                json brain = *bp.begin();
+                std::string name, type, params;
+                for (auto it = brain.begin(); it != brain.end(); ++it) {
+                    if (it.key() == "name" && it.value().is_string()) {
+                        name = it.value().get<std::string>();
+                    } else if (it.key() == "type" && it.value().is_string()) {
+                        type = it.value().get<std::string>();
+                    } else if (it.key() == "params" && it.value().is_object()) {
+                        params = it.value().dump();
+                    }
+                }
+                if (!type.empty() && !params.empty()) {
+                    gBrain[0].insert(name, type, params);
+                    gBrain.doneInserting();
+                }
+            }
+        }
+    }
 
     // TODO(Premek): remove
     // assume hardcoder blueprint for now
