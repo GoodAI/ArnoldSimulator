@@ -14,8 +14,8 @@ namespace GoodAI.Arnold.Graphics.Models
     {
         public static readonly Color4 ConnectionColor = new Color4(1f, 1f, 1f, 0.7f);
 
-        public InputConnectorModel To { get; set; }
-        public OutputConnectorModel From { get; set; }
+        public InputConnectorModel To { get; }
+        public OutputConnectorModel From { get; }
 
         public ConnectionModel(OutputConnectorModel from, InputConnectorModel to)
         {
