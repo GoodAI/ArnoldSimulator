@@ -40,6 +40,7 @@ namespace GoodAI.Arnold.Network
         private SimulationModel m_previousModel;
 
         private CancellationTokenSource m_cancellation;
+        private bool m_getFullModel;
 
 
         public ModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
@@ -57,6 +58,7 @@ namespace GoodAI.Arnold.Network
             m_modelReadEvent = new AutoResetEvent(false);
 
             m_cancellation = new CancellationTokenSource();
+            m_getFullModel = true;
             Task task = RepeatGetModelAsync(m_cancellation);
 
             m_currentModel = new SimulationModel();
@@ -146,7 +148,8 @@ namespace GoodAI.Arnold.Network
                 {
                     // Request a model diff from the core.
                     // TODO(HonzaS): Unless we lost connection or there was an error, request only incremental model (full: false).
-                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(full: true), TimeoutMs).ConfigureAwait(false);
+                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(m_getFullModel), TimeoutMs).ConfigureAwait(false);
+                    m_getFullModel = false;
 
                     // Wait until the model has been read. This happens before the first request as well.
                     if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
@@ -165,15 +168,21 @@ namespace GoodAI.Arnold.Network
                     // Allow visualization to read current (updated) model.
                     m_isNewModelReady = true;
                 }
-                catch (TaskTimeoutException<ModelResponse> timeoutException)
-                {
-                    // TODO(HonzaS): handle this. Wait for a while and then request a new full model state.
-                    Log.Error(timeoutException, "Model request timed out");
-                }
                 catch (Exception exception)
                 {
-                    // Keep trying for now. TODO(Premek): Do something smarter...
-                    Log.Error(exception, "Model retrieval failed");
+                    var timeoutException = exception as TaskTimeoutException<ModelResponse>;
+                    if (timeoutException != null)
+                    {
+                        // TODO(HonzaS): handle this. Wait for a while and then request a new full model state.
+                        Log.Error(timeoutException, "Model request timed out");
+                    }
+                    else
+                    {
+                        // Keep trying for now. TODO(Premek): Do something smarter...
+                        Log.Error(exception, "Model retrieval failed");
+                    }
+
+                    m_getFullModel = true;
                 }
             }
         }
