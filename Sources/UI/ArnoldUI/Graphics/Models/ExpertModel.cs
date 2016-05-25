@@ -28,14 +28,17 @@ namespace GoodAI.Arnold.Graphics.Models
 
         private float m_alpha = MinAlpha;
 
+        public uint Id { get; set; }
+
         public ICamera Camera { get; set; }
 
         public RegionModel RegionModel { get; }
 
         public List<SynapseModel> Outputs { get; } = new List<SynapseModel>();
 
-        public ExpertModel(RegionModel regionModel, Vector3 position)
+        public ExpertModel(uint id, RegionModel regionModel, Vector3 position)
         {
+            Id = id;
             RegionModel = regionModel;
             Position = position;
 

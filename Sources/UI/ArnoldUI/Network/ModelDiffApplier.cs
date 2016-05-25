@@ -27,6 +27,7 @@ namespace GoodAI.Arnold.Network
             ApplyAddedConnectors(model, diff);
             ApplyAddedConnections(model, diff);
             ApplyAddedNeurons(model, diff);
+            ApplyAddedSynapses(model, diff);
         }
 
         private static void ApplyAddedRegions(SimulationModel model, ModelResponse diff)
@@ -61,7 +62,7 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                targetRegionModel.AddExpert(new ExpertModel(targetRegionModel, neuron.Position.ToVector3()));
+                targetRegionModel.AddExpert(new ExpertModel(neuron.Id, targetRegionModel, neuron.Position.ToVector3()));
             }
         }
 
@@ -109,7 +110,46 @@ namespace GoodAI.Arnold.Network
 
         private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < diff.AddedSynapsesLength; i++)
+            {
+                Synapse addedSynapse = diff.GetAddedSynapses(i);
+
+                RegionModel region = FindRegion(model, addedSynapse.RegionIndex);
+                if (region == null)
+                {
+                    LogSynapseNotAdded(addedSynapse, "Region not found");
+                    continue;
+                }
+
+                ExpertModel fromNeuron = FindNeuron(region, addedSynapse.From);
+                ExpertModel toNeuron = FindNeuron(region, addedSynapse.To);
+
+                if (fromNeuron == null || toNeuron == null)
+                {
+                    LogSynapseNotAdded(addedSynapse, "Source or target neuron not found");
+                    continue;
+                }
+
+                var synapse = new SynapseModel(region, fromNeuron, toNeuron);
+                fromNeuron.Outputs.Add(synapse);
+                region.AddSynapse(synapse);
+            }
+        }
+
+        private static ExpertModel FindNeuron(RegionModel region, uint id)
+        {
+            // TODO(HonzaS): Optimize.
+            return region.Experts.FirstOrDefault(expert => expert.Id == id);
+        }
+
+        private void LogSynapseNotAdded(Synapse addedSynapse, string reason)
+        {
+            Log.Warn(
+                "Could not add synapse in region {regionIndex} from neuron {fromNeuron} to neuron {toNeuron}: {reason}",
+                addedSynapse.RegionIndex,
+                addedSynapse.From,
+                addedSynapse.To,
+                reason);
         }
 
         private static RegionModel FindRegion(SimulationModel model, uint regionIndex)
