@@ -23,6 +23,8 @@ namespace GoodAI.Arnold.Graphics.Models
             To = to;
 
             Connect();
+
+            Translucent = true;
         }
 
         private void Connect()

@@ -16,8 +16,6 @@ namespace GoodAI.Arnold.Graphics.Models
         public const float SpikeAlpha = 0.4f;
         public const float MinAlpha = 0.0f;
 
-        private static readonly Random Random = new Random();
-
         public RegionModel RegionModel { get; }
         public Vector3 Target { get; }
 

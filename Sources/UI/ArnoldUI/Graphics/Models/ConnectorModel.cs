@@ -50,6 +50,8 @@ namespace GoodAI.Arnold.Graphics.Models
             Direction = direction;
             SlotCount = slotCount;
             Name = name;
+
+            Translucent = true;
         }
 
         protected override void UpdateModel(float elapsedMs)

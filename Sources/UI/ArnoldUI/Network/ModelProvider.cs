@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Network
