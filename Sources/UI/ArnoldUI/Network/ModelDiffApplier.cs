@@ -55,8 +55,7 @@ namespace GoodAI.Arnold.Network
             {
                 Neuron neuron = diff.GetAddedNeurons(i);
 
-                // TODO(HonzaS): Add a lookup table instead of this.
-                var targetRegionModel = FindRegion(model, neuron.RegionIndex);
+                RegionModel targetRegionModel = model.Regions[neuron.RegionIndex];
                 if (targetRegionModel == null)
                 {
                     Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id,
@@ -74,7 +73,7 @@ namespace GoodAI.Arnold.Network
             {
                 Connector addedConnector = diff.GetAddedConnectors(i);
 
-                var targetRegionModel = FindRegion(model, addedConnector.RegionIndex);
+                RegionModel targetRegionModel = model.Regions[addedConnector.RegionIndex];
                 if (targetRegionModel == null)
                 {
                     Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
@@ -98,8 +97,8 @@ namespace GoodAI.Arnold.Network
             {
                 Connection addedConnection = diff.GetAddedConnections(i);
 
-                RegionModel fromRegion = FindRegion(model, addedConnection.FromRegion);
-                RegionModel toRegion = FindRegion(model, addedConnection.ToRegion);
+                RegionModel fromRegion = model.Regions[addedConnection.FromRegion];
+                RegionModel toRegion = model.Regions[addedConnection.ToRegion];
 
                 if (fromRegion == null || toRegion == null)
                 {
@@ -145,15 +144,15 @@ namespace GoodAI.Arnold.Network
             {
                 Synapse addedSynapse = diff.GetAddedSynapses(i);
 
-                RegionModel region = FindRegion(model, addedSynapse.RegionIndex);
+                RegionModel region = model.Regions[addedSynapse.RegionIndex];
                 if (region == null)
                 {
                     LogSynapseNotProcessed(addedSynapse, "add", "Region not found");
                     continue;
                 }
 
-                ExpertModel fromNeuron = FindNeuron(region, addedSynapse.From);
-                ExpertModel toNeuron = FindNeuron(region, addedSynapse.To);
+                ExpertModel fromNeuron = region.Experts[addedSynapse.From];
+                ExpertModel toNeuron = region.Experts[addedSynapse.To];
 
                 if (fromNeuron == null || toNeuron == null)
                 {
@@ -173,15 +172,15 @@ namespace GoodAI.Arnold.Network
             {
                 Synapse spikedSynapse = diff.GetSpikedSynapses(i);
 
-                RegionModel region = FindRegion(model, spikedSynapse.RegionIndex);
+                RegionModel region = model.Regions[spikedSynapse.RegionIndex];
                 if (region == null)
                 {
                     LogSynapseNotProcessed(spikedSynapse, "spike", "Region not found");
                     continue;
                 }
 
-                ExpertModel fromNeuron = FindNeuron(region, spikedSynapse.From);
-                ExpertModel toNeuron = FindNeuron(region, spikedSynapse.To);
+                ExpertModel fromNeuron = region.Experts[spikedSynapse.From];
+                ExpertModel toNeuron = region.Experts[spikedSynapse.To];
 
                 if (fromNeuron == null || toNeuron == null)
                 {
@@ -189,7 +188,7 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                var synapseModel = fromNeuron.Outputs.FirstOrDefault(synapse => synapse.To == toNeuron);
+                SynapseModel synapseModel = fromNeuron.Outputs.FirstOrDefault(synapse => synapse.To == toNeuron);
 
                 if (synapseModel == null)
                 {
@@ -201,12 +200,6 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private static ExpertModel FindNeuron(RegionModel region, uint id)
-        {
-            // TODO(HonzaS): Optimize.
-            return region.Experts.FirstOrDefault(expert => expert.Id == id);
-        }
-
         private void LogSynapseNotProcessed(Synapse addedSynapse, string synapseAction, string reason)
         {
             Log.Warn(
@@ -216,12 +209,6 @@ namespace GoodAI.Arnold.Network
                 addedSynapse.From,
                 addedSynapse.To,
                 reason);
-        }
-
-        private static RegionModel FindRegion(SimulationModel model, uint regionIndex)
-        {
-            // TODO(HonzaS): Faster lookup.
-            return model.Regions.FirstOrDefault(region => region.Index == regionIndex);
         }
     }
 }
