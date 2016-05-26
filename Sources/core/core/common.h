@@ -103,6 +103,13 @@ inline bool IsInsideOfAny(const Point3D &point, const Boxes &boxes)
     return false;
 }
 
+inline void TranslateAndScale(Point3D &point, const Box3D &box)
+{
+    std::get<0>(point) = (std::get<0>(point) * std::get<0>(box.second)) + std::get<0>(box.first);
+    std::get<1>(point) = (std::get<1>(point) * std::get<1>(box.second)) + std::get<1>(box.first);
+    std::get<2>(point) = (std::get<2>(point) * std::get<2>(box.second)) + std::get<2>(box.first);
+}
+
 typedef std::tuple<NeuronId, NeuronType, NeuronParams> NeuronAdditionRequest;
 typedef std::tuple<NeuronId, NeuronType, Point3D> NeuronAdditionReport;
 typedef std::pair<NeuronId, NeuronId> ChildLink;

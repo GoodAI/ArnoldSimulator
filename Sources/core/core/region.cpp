@@ -897,13 +897,19 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
             if (!skipTopologyReport) {
                 NeuronAdditionReports tmpAddedNeurons; p | tmpAddedNeurons;
                 addedNeurons.reserve(addedNeurons.size() + tmpAddedNeurons.size());
-                addedNeurons.insert(addedNeurons.begin(),
-                    tmpAddedNeurons.begin(), tmpAddedNeurons.end());
+                for (auto it = tmpAddedNeurons.begin(); it != tmpAddedNeurons.end(); ++it) {
+                    NeuronAdditionReport report = *it;
+                    TranslateAndScale(std::get<2>(report), Box3D(mPosition, mSize));
+                    addedNeurons.push_back(report);
+                }
 
                 NeuronAdditionReports tmpRepositionedNeurons; p | tmpRepositionedNeurons;
                 repositionedNeurons.reserve(repositionedNeurons.size() + tmpRepositionedNeurons.size());
-                repositionedNeurons.insert(repositionedNeurons.begin(),
-                    tmpRepositionedNeurons.begin(), tmpRepositionedNeurons.end());
+                for (auto it = tmpRepositionedNeurons.begin(); it != tmpRepositionedNeurons.end(); ++it) {
+                    NeuronAdditionReport report = *it;
+                    TranslateAndScale(std::get<2>(report), Box3D(mPosition, mSize));
+                    repositionedNeurons.push_back(report);
+                }
 
                 NeuronRemovals tmpRemovedNeurons; p | tmpRemovedNeurons;
                 removedNeurons.reserve(removedNeurons.size() + tmpRemovedNeurons.size());
