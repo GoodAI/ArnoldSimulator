@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Graphics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
@@ -30,7 +29,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public ConnectorStripModel<InputConnectorModel> InputConnectors { get; }
         public ConnectorStripModel<OutputConnectorModel> OutputConnectors { get; }
-        public CompositeModel<ExpertModel> Experts { get; } = new CompositeModel<ExpertModel>();
+        public CompositeLookupModel<uint, ExpertModel> Experts { get; } = new CompositeLookupModel<uint, ExpertModel>();
         public CompositeModel<SynapseModel> Synapses { get; } = new CompositeModel<SynapseModel>();
 
         public Vector3 HalfSize { get; private set; }
@@ -55,7 +54,7 @@ namespace GoodAI.Arnold.Graphics.Models
             AddChild(Synapses);
         }
 
-        public void AddExpert(ExpertModel expert) => Experts.AddChild(expert);
+        public void AddExpert(ExpertModel expert) => Experts[expert.Id] = expert;
 
         public void AddSynapse(SynapseModel synapse) => Synapses.AddChild(synapse);
 

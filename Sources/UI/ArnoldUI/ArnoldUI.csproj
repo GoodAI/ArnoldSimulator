@@ -105,6 +105,7 @@
     </Compile>
     <Compile Include="Graphics\Blender.cs" />
     <Compile Include="Graphics\Camera.cs" />
+    <Compile Include="Graphics\CompositeLookupModel.cs" />
     <Compile Include="Graphics\Models\ConnectionModel.cs" />
     <Compile Include="Graphics\Models\ConnectorModel.cs" />
     <Compile Include="Graphics\Models\ConnectorStripModel.cs" />
@@ -169,7 +170,7 @@
     <Compile Include="Network\CoreController.cs" />
     <Compile Include="Core\CoreStateEvents.cs" />
     <Compile Include="Composition\CoreProxyFactory.cs" />
-    <Compile Include="Core\SimulationModel.cs" />
+    <Compile Include="Graphics\Models\SimulationModel.cs" />
     <Compile Include="Core\CoreProxy.cs" />
     <Compile Include="Graphics\Visualization.cs" />
     <Compile Include="UIMain.cs" />
