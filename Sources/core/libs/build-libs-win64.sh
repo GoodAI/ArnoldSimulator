@@ -134,6 +134,36 @@ build_flatbuffers()
     cd ..
 }
 
+build_catch()
+{
+    echo "Getting Catch"
+    CATCH_VERSION=1.5.4
+    CATCH_LINK="https://github.com/philsquared/Catch/archive/v${CATCH_VERSION}.zip"
+
+    local TARGET_DIR="catch"
+    local ARCHIVE_NAME="${TARGET_DIR}-${CATCH_VERSION}.zip"
+
+    echo "...cleaning"
+    rm -r -f "$TARGET_DIR"
+
+    redownload_package "$CATCH_LINK" "$ARCHIVE_NAME"
+
+    echo "...unpacking"
+    unzip -q -n "$ARCHIVE_NAME"
+    mv Catch-${CATCH_VERSION} "$TARGET_DIR"
+}
+
+redownload_package()
+{
+    local PACKAGE_LINK="$1"
+    local ARCHIVE_NAME="$2"
+
+    if [ ! -f "$ARCHIVE_NAME" ]
+    then
+        wget --no-check-certificate --output-document="${ARCHIVE_NAME}" "$PACKAGE_LINK"
+    fi
+}
+
 for option
 do
     case $option in
@@ -152,12 +182,16 @@ do
         flatbuffers)
             build_flatbuffers
         ;;
+        catch)
+            build_catch
+        ;;
         all)
             build_charm
             build_tbb
             build_sparsehash
             build_json
             build_flatbuffers
+            build_catch
         ;;
     esac
 done
