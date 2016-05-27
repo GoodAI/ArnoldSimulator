@@ -18,7 +18,7 @@
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="584.0" width="603.0" x="313.5" y="113.0"/>
-          <y:Fill color="#5F747F" transparent="false"/>
+          <y:Fill color="#556872" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="22" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="30.9521484375" modelName="internal" modelPosition="t" textColor="#FFFFFF" visible="true" width="60.2353515625" x="271.38232421875" y="4.0">Brain</y:NodeLabel>
           <y:Shape type="rectangle"/>
@@ -1203,8 +1203,8 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
+          <y:LineStyle color="#C1DBF2" type="dashed" width="2.0"/>
+          <y:Arrows source="none" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -1212,9 +1212,11 @@
     <edge id="e1" source="n12" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="398.5204019333006" y="310.43826535604524"/>
+          </y:Path>
+          <y:LineStyle color="#C1DBF2" type="dashed" width="2.0"/>
+          <y:Arrows source="none" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -1223,8 +1225,8 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
+          <y:LineStyle color="#C1DBF2" type="dashed" width="2.0"/>
+          <y:Arrows source="none" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -1243,8 +1245,8 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
+          <y:LineStyle color="#C1DBF2" type="dashed" width="2.0"/>
+          <y:Arrows source="none" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -1253,8 +1255,8 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
+          <y:LineStyle color="#C1DBF2" type="dashed" width="2.0"/>
+          <y:Arrows source="none" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -1263,8 +1265,8 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
+          <y:LineStyle color="#C1DBF2" type="dashed" width="2.0"/>
+          <y:Arrows source="none" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
