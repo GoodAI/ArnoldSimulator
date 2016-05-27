@@ -723,7 +723,7 @@ void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
         size_t spikeByteCount = Spike::Edit(it->second)->AllBytes(it->second);
         size_t spikeOffset = (it->first - terminal.firstNeuron) * spikeByteCount;
         size_t requiredSize = spikeOffset + spikeByteCount;
-        if (terminal.data.size() < requiredSize) terminal.data.resize(requiredSize);
+        if (terminal.data.size() < requiredSize) terminal.data.resize(requiredSize, 0);
         Spike::Edit(it->second)->ExportAll(it->second,
             terminal.data.data() + spikeOffset, spikeByteCount);
     }
