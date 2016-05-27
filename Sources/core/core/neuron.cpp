@@ -318,17 +318,35 @@ void NeuronBase::RequestNeuronRemoval(NeuronId neuronId)
 
 void NeuronBase::RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data)
 {
-    mSynapseAdditions.push_back(std::make_tuple(direction, from, to, data));
+    RegionIndex fromRegIdx = GetRegionIndex(from);
+    RegionIndex toRegIdx = GetRegionIndex(to);
+    bool fromValid = (fromRegIdx == TEMP_REGION_INDEX) || (fromRegIdx == thisIndex.x);
+    bool toValid = (toRegIdx == TEMP_REGION_INDEX) || (toRegIdx == thisIndex.x);
+    if (fromValid && toValid) {
+        mSynapseAdditions.push_back(std::make_tuple(direction, from, to, data));
+    }
 }
 
 void NeuronBase::RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to)
 {
-    mSynapseRemovals.push_back(std::make_tuple(direction, from, to));
+    RegionIndex fromRegIdx = GetRegionIndex(from);
+    RegionIndex toRegIdx = GetRegionIndex(to);
+    bool fromValid = (fromRegIdx == TEMP_REGION_INDEX) || (fromRegIdx == thisIndex.x);
+    bool toValid = (toRegIdx == TEMP_REGION_INDEX) || (toRegIdx == thisIndex.x);
+    if (fromValid && toValid) {
+        mSynapseRemovals.push_back(std::make_tuple(direction, from, to));
+    }
 }
 
 void NeuronBase::RequestChildAddition(NeuronId parent, NeuronId child)
 {
-    mChildAdditions.push_back(std::make_pair(parent, child));
+    RegionIndex parentRegIdx = GetRegionIndex(parent);
+    RegionIndex childRegIdx = GetRegionIndex(child);
+    bool parentValid = (parentRegIdx == TEMP_REGION_INDEX) || (parentRegIdx == thisIndex.x);
+    bool childValid = (childRegIdx == TEMP_REGION_INDEX) || (childRegIdx == thisIndex.x);
+    if (parentValid && childValid) {
+        mChildAdditions.push_back(std::make_pair(parent, child));
+    }
 }
 
 void NeuronBase::RequestChildRemoval(NeuronId parent, NeuronId child)

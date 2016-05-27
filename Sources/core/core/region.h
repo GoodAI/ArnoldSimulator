@@ -111,14 +111,14 @@ public:
     void ConnectInput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
     void DisconnectInput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
     void ConnectInputNeurons(const ConnectorName &name, NeuronId destFirstNeuron);
-    void DisconnectInputNeurons(const ConnectorName& name, NeuronId destFirstNeuron);
+    void DisconnectInputNeurons(const ConnectorName &name, NeuronId destFirstNeuron);
 
     void CreateOutput(const ConnectorName &name, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
     void DeleteOutput(const ConnectorName &name);
     void ConnectOutput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
     void DisconnectOutput(const ConnectorName &name, const RemoteConnector &destination, bool syncSynapses);
     void ConnectOutputNeurons(const ConnectorName &name, NeuronId destFirstNeuron);
-    void DisconnectOutputNeurons(const ConnectorName& name, NeuronId destFirstNeuron);
+    void DisconnectOutputNeurons(const ConnectorName &name, NeuronId destFirstNeuron);
 
     void ReceiveSensoMotoricData(Direction direction, const ConnectorName &connectorName, Spike::BrainSource &data);
     void EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data);

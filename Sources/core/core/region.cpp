@@ -851,8 +851,18 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
                 NeuronRemovals tmpNeuronRemovals; p | tmpNeuronRemovals;
                 mNeuronRemovals.reserve(mNeuronRemovals.size() + tmpNeuronRemovals.size());
-                mNeuronRemovals.insert(mNeuronRemovals.begin(),
-                    tmpNeuronRemovals.begin(), tmpNeuronRemovals.end());
+                for (auto it = tmpNeuronRemovals.begin(); it != tmpNeuronRemovals.end(); ++it) {
+                    bool validRequest = true;
+                    for (auto itConn = mInputConnectors.begin(); itConn != mInputConnectors.end(); ++itConn) {
+                        size_t connectorSize = itConn->second.neurons.size();
+                        if (connectorSize > 0) {
+                            NeuronId firstNeuronId = itConn->second.neurons.at(0);
+                            bool isWithinConnector = ((*it >= firstNeuronId) && (*it < firstNeuronId + connectorSize));
+                            validRequest = validRequest && !isWithinConnector;
+                        }
+                    }
+                    if (validRequest) tmpNeuronRemovals.push_back(*it);
+                }
 
                 Synapse::Additions tmpSynapseAdditions; p | tmpSynapseAdditions;
                 mSynapseAdditions.reserve(mSynapseAdditions.size() + tmpSynapseAdditions.size());
