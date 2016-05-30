@@ -323,8 +323,8 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         auto connectorOffset4 = Network::CreateConnector(builder, 1, connectorName4, Network::Direction_Backward, 8);
         auto connectorOffset5 = Network::CreateConnector(builder, 1, connectorName5, Network::Direction_Backward, 2);
 
-        auto connectorOffset6 = Network::CreateConnector(builder, 2, connectorName6, Network::Direction_Backward, 2);
-        auto connectorOffset7 = Network::CreateConnector(builder, 2, connectorName7, Network::Direction_Backward, 2);
+        auto connectorOffset6 = Network::CreateConnector(builder, 2, connectorName6, Network::Direction_Backward, 5);
+        auto connectorOffset7 = Network::CreateConnector(builder, 2, connectorName7, Network::Direction_Backward, 5);
 
         addedConnectorsOffsets.push_back(connectorOffset1);
         addedConnectorsOffsets.push_back(connectorOffset2);
@@ -336,9 +336,11 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         addedConnectorsOffsets.push_back(connectorOffset6);
         addedConnectorsOffsets.push_back(connectorOffset7);
 
-        auto connectionOffset = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName6);
+        auto connectionOffset1 = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName6);
+        auto connectionOffset2 = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName7);
 
-        addedConnectionsOffsets.push_back(connectionOffset);
+        addedConnectionsOffsets.push_back(connectionOffset1);
+        addedConnectionsOffsets.push_back(connectionOffset2);
     }
 
     auto addedConnectorsVector = builder.CreateVector(addedConnectorsOffsets);
