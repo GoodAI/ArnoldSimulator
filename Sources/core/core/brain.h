@@ -162,8 +162,8 @@ public:
         RegionIndex srcRegIdx, const ConnectorName &srcConnectorName,
         RegionIndex destRegIdx, const ConnectorName &destConnectorName);
 
-    void PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
-    void PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data);
+    void PushSensoMotoricData(const std::string &terminalName, std::vector<uint8_t> &data);
+    void PullSensoMotoricData(const std::string &terminalName, std::vector<uint8_t> &data);
 
     void ReceiveTerminalData(Spike::BrainSink &data);
 

@@ -692,24 +692,35 @@ void BrainBase::RequestConnectionRemoval(Direction direction,
         direction, srcRegIdx, srcConnectorName, destRegIdx, destConnectorName));
 }
 
-void BrainBase::PushSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data)
+void BrainBase::PushSensoMotoricData(const std::string &terminalName, std::vector<uint8_t> &data)
 {
     auto itTerm = mTerminalNameToId.find(terminalName);
     if (itTerm == mTerminalNameToId.end()) return;
 
+    Spike::Data dummySpike;
     Terminal &terminal = mTerminals.find(itTerm->second)->second;
+    Spike::Initialize(terminal.spikeType, 0, dummySpike);
+    size_t spikeSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
+
     terminal.data.clear();
     std::swap(data, terminal.data);
+    terminal.data.resize(terminal.neuronCount * spikeSize, 0);
 }
 
-void BrainBase::PullSensoMotoricData(std::string &terminalName, std::vector<uint8_t> &data)
+void BrainBase::PullSensoMotoricData(const std::string &terminalName, std::vector<uint8_t> &data)
 {
     auto itTerm = mTerminalNameToId.find(terminalName);
     if (itTerm == mTerminalNameToId.end()) return;
 
+    Spike::Data dummySpike;
     Terminal &terminal = mTerminals.find(itTerm->second)->second;
+    Spike::Initialize(terminal.spikeType, 0, dummySpike);
+    size_t spikeSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
+    
+    terminal.data.resize(terminal.neuronCount * spikeSize, 0);
     std::swap(data, terminal.data);
     terminal.data.clear();
+    terminal.data.reserve(terminal.neuronCount * spikeSize);
 }
 
 void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
