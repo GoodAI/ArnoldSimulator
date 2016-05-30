@@ -672,8 +672,15 @@ void NeuronBase::Simulate(SimulateMsg *msg)
 
 ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
-    // TODO extract mThreshold value from json params (can be empty)
     mThreshold = 0;
+
+    if (!params.empty()) {
+        for (auto itParams = params.begin(); itParams != params.end(); ++itParams) {
+            if (itParams.key() == "threshold" && itParams->is_number_float()) {
+                mThreshold = itParams.value().get<double>();
+            }
+        }
+    } 
 }
 
 ThresholdNeuron::~ThresholdNeuron()
