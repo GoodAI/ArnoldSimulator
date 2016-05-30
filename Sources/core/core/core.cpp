@@ -379,7 +379,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     std::vector<flatbuffers::Offset<Network::Synapse>> addedSynapsesOffsets;
 
-	static std::vector<std::pair<uint32_t, uint32_t>> addedSynapses;
+    static std::vector<std::pair<uint32_t, uint32_t>> addedSynapses;
 
     if (mDummyTimestep % synapseAddInterval == 0) {
         int fromNeuron = (rand() % addedNeuronCount) + 1;
@@ -391,8 +391,8 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
             addedSynapsesOffsets.push_back(synapseOffset);
 
-			std::pair<int32_t, int32_t> synapse(fromNeuron, toNeuron);
-			addedSynapses.push_back(synapse);
+            std::pair<int32_t, int32_t> synapse(fromNeuron, toNeuron);
+            addedSynapses.push_back(synapse);
         }
     }
 
@@ -400,12 +400,12 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     std::vector<flatbuffers::Offset<Network::Synapse>> spikedSynapsesOffsets;
 
-	for (auto synapse : addedSynapses) {
-		if (rand() % 100 == 0) {
+    for (auto synapse : addedSynapses) {
+        if (rand() % 100 == 0) {
             auto synapseOffset = Network::CreateSynapse(builder, 1, synapse.first, synapse.second);
-			spikedSynapsesOffsets.push_back(synapseOffset);
-		}
-	}
+            spikedSynapsesOffsets.push_back(synapseOffset);
+        }
+    }
 
     auto spikedSynapsesVector = builder.CreateVector(spikedSynapsesOffsets);
 
