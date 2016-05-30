@@ -29,14 +29,14 @@ namespace GoodAI.Arnold.Graphics.Models
 
         private void Connect()
         {
-            From.Connection = this;
-            To.Connection = this;
+            From.Connections.Add(this);
+            To.Connections.Add(this);
         }
 
         public void Disconnect()
         {
-            From.Connection = null;
-            To.Connection = null;
+            From.Connections.Remove(this);
+            To.Connections.Remove(this);
         }
 
         protected override void UpdateModel(float elapsedMs)

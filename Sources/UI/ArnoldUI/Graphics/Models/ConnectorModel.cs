@@ -25,7 +25,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public string Name { get; private set; }
 
-        public ConnectionModel Connection { get; set; }
+        public ISet<ConnectionModel> Connections { get; set; } = new HashSet<ConnectionModel>();
 
         public ConnectorDirection Direction { get; }
 

@@ -163,11 +163,11 @@ namespace GoodAI.Arnold.UI.Tests
             RegionModel region1 = m_model.Regions.First();
             RegionModel region2 = m_model.Regions.Skip(1).First();
 
-            Assert.Equal(region1.OutputConnectors.First().Connection, region2.InputConnectors.First().Connection);
-            Assert.Equal(region2.InputConnectors.First().Connection.From, region1.OutputConnectors.First());
+            Assert.Equal(region1.OutputConnectors.First().Connections.First(), region2.InputConnectors.First().Connections.First());
+            Assert.Equal(region2.InputConnectors.First().Connections.First().From, region1.OutputConnectors.First());
 
             var result = CompareLogic(ConnectionComparisonConfig)
-                .Compare(addedConnection, region1.OutputConnectors.First().Connection);
+                .Compare(addedConnection, region1.OutputConnectors.First().Connections.First());
 
             Assert.True(result.AreEqual, result.DifferencesString);
         }
