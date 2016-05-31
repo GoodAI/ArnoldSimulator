@@ -18,34 +18,15 @@
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="84.01600000000002" width="172.43840000000012" x="607.5144506666677" y="281.08554700000275"/>
-          <y:Fill color="#EAEAEA3F" transparent="false"/>
-          <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="84.21920000000011" y="40.00800000000004">
-            <y:LabelModel>
-              <y:SmartNodeLabelModel distance="4.0"/>
-            </y:LabelModel>
-            <y:ModelParameter>
-              <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
-            </y:ModelParameter>
-          </y:NodeLabel>
-          <y:Shape type="rectangle"/>
-        </y:ShapeNode>
-      </data>
-    </node>
-    <node id="n1">
-      <data key="d5"/>
-      <data key="d6">
-        <y:ShapeNode>
           <y:Geometry height="45.87199999999996" width="45.87199999999996" x="667.9393906666667" y="310.0146470000025"/>
           <y:Fill hasColor="false" transparent="false"/>
-          <y:BorderStyle color="#000000" type="dotted" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="23.6015625" modelName="sides" modelPosition="n" textColor="#000000" visible="true" width="139.140625" x="-46.63431250000008" y="-27.6015625">Converse (TCP/IP)</y:NodeLabel>
+          <y:BorderStyle color="#E5E5E5" type="dotted" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="23.6015625" modelName="sides" modelPosition="n" textColor="#E5E5E5" visible="true" width="139.140625" x="-46.63431250000008" y="-27.6015625">Converse (TCP/IP)</y:NodeLabel>
           <y:Shape type="ellipse"/>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n2">
+    <node id="n1">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -57,7 +38,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n3">
+    <node id="n2">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -69,7 +50,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n4">
+    <node id="n3">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -81,7 +62,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n5">
+    <node id="n4">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -93,7 +74,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n6">
+    <node id="n5">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -105,13 +86,13 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n7">
+    <node id="n6">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="675.5430199999988" y="318.2264350000015"/>
           <y:Fill color="#92D2FD" transparent="false"/>
-          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:BorderStyle color="#E5E5E5" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="13.0" y="13.0">
             <y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
@@ -124,7 +105,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n8">
+    <node id="n7">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -136,7 +117,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n9">
+    <node id="n8">
       <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
@@ -148,7 +129,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n10">
+    <node id="n9">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="97.0" width="160.9216" x="268.63385599999987" y="235.60640000000006"/>
@@ -160,7 +141,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n11">
+    <node id="n10">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="97.0" width="160.9216" x="251.15251199999972" y="250.4416000000001"/>
@@ -172,7 +153,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n12">
+    <node id="n11">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="97.0" width="160.9216" x="230.42982399999948" y="265.23360000000025"/>
@@ -184,7 +165,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n13">
+    <node id="n12">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="16.56000000000006" width="16.56000000000006" x="255.79360000000003" y="296.1455999999999"/>
@@ -202,7 +183,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n14">
+    <node id="n13">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="16.56000000000006" width="16.56000000000006" x="266.528" y="325.3023999999999"/>
@@ -220,7 +201,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n15">
+    <node id="n14">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="16.56000000000006" width="16.56000000000006" x="297.7424000000001" y="303.0783999999998"/>
@@ -238,7 +219,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n16">
+    <node id="n15">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="16.56000000000006" width="16.56000000000006" x="350.8368000000001" y="305.87839999999983"/>
@@ -256,7 +237,7 @@
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n17">
+    <node id="n16">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="16.56000000000006" width="16.56000000000006" x="332.2195200000001" y="334.0787199999997"/>
@@ -274,29 +255,29 @@
         </y:ShapeNode>
       </data>
     </node>
-    <edge id="e0" source="n7" target="n2">
+    <edge id="e0" source="n6" target="n1">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:LineStyle color="#E5E5E5" type="line" width="1.0"/>
           <y:Arrows source="none" target="none"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e1" source="n1" target="n4">
+    <edge id="e1" source="n0" target="n3">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:LineStyle color="#E5E5E5" type="line" width="1.0"/>
           <y:Arrows source="none" target="none"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e2" source="n13" target="n15">
+    <edge id="e2" source="n12" target="n14">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
@@ -307,7 +288,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e3" source="n14" target="n15">
+    <edge id="e3" source="n13" target="n14">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
@@ -318,7 +299,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n15" target="n16">
+    <edge id="e4" source="n14" target="n15">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
@@ -329,7 +310,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e5" source="n15" target="n17">
+    <edge id="e5" source="n14" target="n16">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
@@ -340,7 +321,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e6" source="n17" target="n16">
+    <edge id="e6" source="n16" target="n15">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
