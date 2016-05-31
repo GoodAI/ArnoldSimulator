@@ -38,35 +38,38 @@ namespace GoodAI.Arnold.Graphics.Models
 
     public class SynapseModel : SynapseModelBase
     {
-        public RegionModel RegionModel { get; }
+        public RegionModel FromRegion { get; }
+        public RegionModel ToRegion { get; }
+
         public Vector3 Target { get; }
 
-        public SynapseModel(RegionModel regionModel, ExpertModel from, ExpertModel to)
+        public SynapseModel(RegionModel fromRegion, ExpertModel fromNeuron, RegionModel toRegion, ExpertModel toNeuron)
         {
-            RegionModel = regionModel;
-            From = from;
-            To = to;
-            Position = from.Position;
-            Target = to.Position;
+            FromRegion = fromRegion;
+            ToRegion = toRegion;
+            FromNeuron = fromNeuron;
+            ToNeuron = toNeuron;
+            Position = fromNeuron.Position;
+            Target = toNeuron.Position;
 
             Translucent = true;
         }
 
-        public ExpertModel From { get; private set; }
-        public ExpertModel To { get; private set; }
+        public ExpertModel FromNeuron { get; private set; }
+        public ExpertModel ToNeuron { get; private set; }
 
         protected override Matrix4 TranslationMatrix
         {
             // The experts are indexed from 0 now (not centered within the region).
-            // Therefore we need to translate them to the region's corner of origin.
+            // Therefore we need to translate them ToNeuron the region's corner of origin.
             get
             {
                 var baseMatrix = base.TranslationMatrix;
                 return baseMatrix*
                        Matrix4.CreateTranslation(
-                           -RegionModel.HalfSize.X + RegionModel.RegionMargin,
-                           -RegionModel.HalfSize.Y + RegionModel.RegionMargin,
-                           -RegionModel.HalfSize.Z + RegionModel.RegionMargin);
+                           -FromRegion.HalfSize.X + RegionModel.RegionMargin,
+                           -FromRegion.HalfSize.Y + RegionModel.RegionMargin,
+                           -FromRegion.HalfSize.Z + RegionModel.RegionMargin);
             }
         }
 

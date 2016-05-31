@@ -172,7 +172,7 @@ namespace GoodAI.Arnold.Network.Messages
             FlatBufferBuilder builder)
         {
             Offset<Synapse>[] addedSynapsesOffsets = BuildOffsets(addedSynapses, builder,
-                synapse => Synapse.CreateSynapse(builder, synapse.RegionModel.Index, synapse.From.Id, synapse.To.Id));
+                synapse => Synapse.CreateSynapse(builder, synapse.FromRegion.Index, synapse.FromNeuron.Id, synapse.ToRegion.Index, synapse.ToNeuron.Id));
 
             if (addedSynapsesOffsets == null)
                 return null;

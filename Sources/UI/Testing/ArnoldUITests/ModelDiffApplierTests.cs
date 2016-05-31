@@ -91,9 +91,10 @@ namespace GoodAI.Arnold.UI.Tests
             SkipInvalidIndexers = true,
             MembersToInclude = new List<string>
             {
-                "RegionModel",
-                "From",
-                "To",
+                "FromRegion",
+                "ToRegion",
+                "FromNeuron",
+                "ToNeuron",
                 "Position",
                 "Target"
             }
@@ -198,7 +199,7 @@ namespace GoodAI.Arnold.UI.Tests
             var addedNeuron1 = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
             var addedNeuron2 = new ExpertModel(2, "neuronType", addedRegion, Vector3.UnitY);
 
-            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedNeuron2);
+            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
 
             ResponseMessage diff = ModelResponseBuilder.Build(
                 addedNeurons: new List<ExpertModel> {addedNeuron1, addedNeuron2},

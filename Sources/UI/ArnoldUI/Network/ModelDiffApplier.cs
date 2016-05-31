@@ -143,26 +143,12 @@ namespace GoodAI.Arnold.Network
             for (int i = 0; i < diff.AddedSynapsesLength; i++)
             {
                 Synapse addedSynapse = diff.GetAddedSynapses(i);
-
-                RegionModel region = model.Regions[addedSynapse.RegionIndex];
-                if (region == null)
+                ProcessSynapse(model, addedSynapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
                 {
-                    LogSynapseNotProcessed(addedSynapse, "add", "Region not found");
-                    continue;
-                }
-
-                ExpertModel fromNeuron = region.Experts[addedSynapse.From];
-                ExpertModel toNeuron = region.Experts[addedSynapse.To];
-
-                if (fromNeuron == null || toNeuron == null)
-                {
-                    LogSynapseNotProcessed(addedSynapse, "add", "Source or target neuron not found");
-                    continue;
-                }
-
-                var synapse = new SynapseModel(region, fromNeuron, toNeuron);
-                fromNeuron.Outputs[synapse.To.Id] = synapse;
-                region.AddSynapse(synapse);
+                    var synapseModel = new SynapseModel(fromRegion, fromNeuron, toRegion, toNeuron);
+                    fromNeuron.Outputs[synapseModel.ToNeuron.Id] = synapseModel;
+                    fromRegion.AddSynapse(synapseModel);
+                });
             }
         }
 
@@ -171,43 +157,84 @@ namespace GoodAI.Arnold.Network
             for (int i = 0; i < diff.SpikedSynapsesLength; i++)
             {
                 Synapse spikedSynapse = diff.GetSpikedSynapses(i);
-
-                RegionModel region = model.Regions[spikedSynapse.RegionIndex];
-                if (region == null)
+                ProcessSynapse(model, spikedSynapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
                 {
-                    LogSynapseNotProcessed(spikedSynapse, "spike", "Region not found");
-                    continue;
-                }
+                    SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Id];
 
-                ExpertModel fromNeuron = region.Experts[spikedSynapse.From];
-                ExpertModel toNeuron = region.Experts[spikedSynapse.To];
+                    if (synapseModel == null)
+                    {
+                        LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
+                        return;
+                    }
 
-                if (fromNeuron == null || toNeuron == null)
-                {
-                    LogSynapseNotProcessed(spikedSynapse, "spike", "Source or target neuron not found");
-                    continue;
-                }
-
-                SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Id];
-
-                if (synapseModel == null)
-                {
-                    LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
-                    continue;
-                }
-
-                synapseModel.Spike();
+                    synapseModel.Spike();
+                });
             }
+        }
+
+        private void ProcessSynapse(SimulationModel model, Synapse synapse, Action<RegionModel, ExpertModel, RegionModel, ExpertModel> action)
+        {
+            if (!CheckSameRegion(synapse))
+                return;
+
+            RegionModel fromRegion;
+            RegionModel toRegion;
+            if (!TryGetRegions(model, synapse, out fromRegion, out toRegion))
+                return;
+
+            ExpertModel fromNeuron;
+            ExpertModel toNeuron;
+            if (!TryGetNeurons(fromRegion, synapse, toRegion, out fromNeuron, out toNeuron))
+                return;
+
+            action(fromRegion, fromNeuron, toRegion, toNeuron);
+        }
+
+        private bool TryGetNeurons(RegionModel fromRegion, Synapse synapse, RegionModel toRegion,
+            out ExpertModel fromNeuron, out ExpertModel toNeuron)
+        {
+            fromNeuron = fromRegion.Experts[synapse.FromNeuron];
+            toNeuron = toRegion.Experts[synapse.ToNeuron];
+
+            if (fromNeuron != null && toNeuron != null)
+                return true;
+
+            string missingNeuron = fromNeuron == null ? "Source" : "Target";
+            LogSynapseNotProcessed(synapse, "add", $"{missingNeuron} neuron not found");
+            return false;
+        }
+
+        private bool TryGetRegions(SimulationModel model, Synapse synapse, out RegionModel fromRegion,
+            out RegionModel toRegion)
+        {
+            fromRegion = model.Regions[synapse.FromRegion];
+            toRegion = model.Regions[synapse.FromRegion];
+            if (fromRegion != null && toRegion != null)
+                return true;
+
+            string missingRegion = fromRegion == null ? "Source" : "Target";
+            LogSynapseNotProcessed(synapse, "add", $"{missingRegion} region not found");
+            return false;
+        }
+
+        private bool CheckSameRegion(Synapse synapse)
+        {
+            if (synapse.FromRegion == synapse.ToRegion)
+                return true;
+
+            Log.Debug("Synapses crossing regions are not supported by visualization yet");
+            return false;
         }
 
         private void LogSynapseNotProcessed(Synapse addedSynapse, string synapseAction, string reason)
         {
             Log.Warn(
-                "Could not {synapseAction:l} synapse in region {regionIndex} from neuron {fromNeuron} to neuron {toNeuron}: {reason}",
+                "Could not {synapseAction:l} synapse from source region {fromRegion}, neuron {fromNeuron} to target region {toRegion}, neuron {toNeuron}: {reason}",
                 synapseAction,
-                addedSynapse.RegionIndex,
-                addedSynapse.From,
-                addedSynapse.To,
+                addedSynapse.FromRegion,
+                addedSynapse.FromNeuron,
+                addedSynapse.ToRegion,
+                addedSynapse.ToNeuron,
                 reason);
         }
     }

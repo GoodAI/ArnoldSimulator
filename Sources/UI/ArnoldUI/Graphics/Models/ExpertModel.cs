@@ -36,6 +36,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public RegionModel RegionModel { get; }
 
+        // The key is the remote neuron's index.
         public IDictionary<uint, SynapseModel> Outputs { get; } = new Dictionary<uint, SynapseModel>();
 
         public ExpertModel(uint id, string type, RegionModel regionModel, Vector3 position)
