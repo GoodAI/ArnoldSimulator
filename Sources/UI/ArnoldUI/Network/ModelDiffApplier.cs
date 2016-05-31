@@ -161,7 +161,7 @@ namespace GoodAI.Arnold.Network
                 }
 
                 var synapse = new SynapseModel(region, fromNeuron, toNeuron);
-                fromNeuron.Outputs.Add(synapse);
+                fromNeuron.Outputs[synapse.To.Id] = synapse;
                 region.AddSynapse(synapse);
             }
         }
@@ -188,7 +188,7 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                SynapseModel synapseModel = fromNeuron.Outputs.FirstOrDefault(synapse => synapse.To == toNeuron);
+                SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Id];
 
                 if (synapseModel == null)
                 {

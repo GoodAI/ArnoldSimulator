@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,12 +11,15 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class ConnectionModel : ModelBase
+    public class ConnectionModel : SynapseModelBase
     {
         public static readonly Color4 ConnectionColor = new Color4(1f, 1f, 1f, 0.7f);
+        public static readonly float ConnectorMarginFactor = 0.1f;
 
         public InputConnectorModel To { get; }
         public OutputConnectorModel From { get; }
+
+        private uint SlotCount => From.SlotCount;
 
         public ConnectionModel(OutputConnectorModel from, InputConnectorModel to)
         {
@@ -51,6 +55,7 @@ namespace GoodAI.Arnold.Graphics.Models
             using (Blender.AveragingBlender())
             {
                 GL.Color4(ConnectionColor);
+                GL.Color4(Color.FromArgb(Math.Max((int) (255 * Alpha), 50), 255, 255, 255));
                 GL.LineWidth(2f);
 
                 GL.Begin(PrimitiveType.Lines);

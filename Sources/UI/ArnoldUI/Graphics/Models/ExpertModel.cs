@@ -36,7 +36,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public RegionModel RegionModel { get; }
 
-        public List<SynapseModel> Outputs { get; } = new List<SynapseModel>();
+        public IDictionary<uint, SynapseModel> Outputs { get; } = new Dictionary<uint, SynapseModel>();
 
         public ExpertModel(uint id, string type, RegionModel regionModel, Vector3 position)
         {
@@ -93,7 +93,7 @@ namespace GoodAI.Arnold.Graphics.Models
         {
             m_alpha = SpikeAlpha;
 
-            foreach (var synapse in Outputs)
+            foreach (var synapse in Outputs.Values)
                 synapse.Spike();
         }
 
