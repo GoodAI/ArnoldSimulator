@@ -1,3 +1,4 @@
+#include "random.h"
 #include "region.h"
 
 #include "brain.h"
@@ -69,6 +70,117 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
     mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFilled(false), mRegion(nullptr)
 {
     json p = json::parse(params);
+
+    auto engine = Random::GetThreadEngine();
+    std::unordered_map<std::string, std::vector<NeuronId>> clusters;
+
+    if (!p.empty()) {
+        for (auto itParams = p.begin(); itParams != p.end(); ++itParams) {
+
+            if (itParams.key() == "clusters" && itParams->is_array()) {
+
+                for (auto itCluster = itParams.value().begin(); itCluster != itParams.value().end(); ++itCluster) {
+                    if (itCluster->is_object()) {
+
+                        std::string clusterName, neuronType, neuronParams, synapseType;
+                        size_t neuronCount = 0;
+                        size_t synapseCount = 0;
+                        for (auto it = itCluster->begin(); it != itCluster->end(); ++it) {
+                            if (it.key() == "name" && it.value().is_string()) {
+                                clusterName = it.value().get<std::string>();
+                            } else if (it.key() == "neuronType" && it.value().is_string()) {
+                                neuronType = it.value().get<std::string>();
+                            } else if (it.key() == "neuronParams" && it.value().is_object()) {
+                                neuronParams = it.value().dump();
+                            } else if (it.key() == "neuronCount" && it.value().is_number_integer()) {
+                                neuronCount = it.value().get<size_t>();
+                            } else if (it.key() == "synapseType" && it.value().is_string()) {
+                                synapseType = it.value().get<std::string>();
+                            } else if (it.key() == "synapseCount" && it.value().is_number_integer()) {
+                                synapseCount = it.value().get<size_t>();
+                            }
+                        }
+
+                        if (!clusterName.empty() && neuronCount > 0) {
+                            std::vector<NeuronId> cluster;
+                            cluster.reserve(neuronCount);
+                            std::uniform_int_distribution<size_t> randClusterIdx(0, neuronCount - 1);
+                            for (size_t i = 0; i < neuronCount; ++i) {
+                                cluster.push_back(RequestNeuronAddition(neuronType, neuronParams));
+                            }
+                            for (size_t i = 0; i < synapseCount; ++i) {
+                                Synapse::Data synapse;
+                                Synapse::Initialize(Synapse::ParseType(synapseType), synapse);
+                                NeuronId from = cluster.at(randClusterIdx(engine));
+                                NeuronId to = cluster.at(randClusterIdx(engine));
+                                RequestSynapseAddition(Direction::Forward, from, to, synapse);
+                            }
+                        }
+                    }
+                }
+
+            } else if (itParams.key() == "webs" && itParams->is_array()) {
+
+                for (auto itActuator = itParams.value().begin(); itActuator != itParams.value().end(); ++itActuator) {
+                    if (itActuator->is_object()) {
+
+                        std::string fromCluster, toCluster, synapseType;
+                        size_t synapseCount = 0;
+                        for (auto it = itActuator->begin(); it != itActuator->end(); ++it) {
+                            if (it.key() == "from" && it.value().is_string()) {
+                                fromCluster = it.value().get<std::string>();
+                            } else if (it.key() == "to" && it.value().is_string()) {
+                                toCluster = it.value().get<std::string>();
+                            } else if (it.key() == "synapseType" && it.value().is_string()) {
+                                synapseType = it.value().get<std::string>();
+                            } else if (it.key() == "synapseCount" && it.value().is_number_integer()) {
+                                synapseCount = it.value().get<size_t>();
+                            }
+                        }
+
+                        if (!fromCluster.empty() && !toCluster.empty()) {
+                            
+                            Direction srcDirection = Direction::Forward;
+                            Direction dstDirection = Direction::Forward;
+                            std::vector<NeuronId> *srcCluster = nullptr;
+                            std::vector<NeuronId> *dstCluster = nullptr;
+
+                            if (clusters.find(fromCluster) != clusters.end()) {
+                                srcCluster = &clusters[fromCluster];
+                            } else if (mInputConnectors.find(fromCluster) != mInputConnectors.end()) {
+                                srcCluster = &mInputConnectors[fromCluster].neurons;
+                            } else if (mOutputConnectors.find(fromCluster) != mOutputConnectors.end()) {
+                                srcDirection = Direction::Backward;
+                                srcCluster = &mOutputConnectors[fromCluster].neurons;
+                            }
+                            
+                            if (clusters.find(toCluster) != clusters.end()) {
+                                dstCluster = &clusters[toCluster];
+                            } else if (mInputConnectors.find(toCluster) != mInputConnectors.end()) {
+                                dstDirection = Direction::Backward;
+                                dstCluster = &mInputConnectors[toCluster].neurons;
+                            } else if (mOutputConnectors.find(toCluster) != mOutputConnectors.end()) {
+                                dstCluster = &mOutputConnectors[toCluster].neurons;
+                            }
+
+                            if (srcCluster && dstCluster && srcDirection == dstDirection) {
+                                std::uniform_int_distribution<size_t> randSrcClusterIdx(0, srcCluster->size() - 1);
+                                std::uniform_int_distribution<size_t> randDstClusterIdx(0, dstCluster->size() - 1);
+                                for (size_t i = 0; i < synapseCount; ++i) {
+                                    Synapse::Data synapse;
+                                    Synapse::Initialize(Synapse::ParseType(synapseType), synapse);
+                                    NeuronId from = srcCluster->at(randSrcClusterIdx(engine));
+                                    NeuronId to = dstCluster->at(randDstClusterIdx(engine));
+                                    RequestSynapseAddition(srcDirection, from, to, synapse);
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
 
     mRegion = RegionBase::CreateRegion(type, *this, p);
 }
