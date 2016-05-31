@@ -72,9 +72,10 @@ table Neuron {
 }
 
 table Synapse {
-	regionIndex:uint;
-	from:uint;
-	to:uint;
+	fromRegion:uint;
+	fromNeuron:uint;
+	toRegion:uint;
+	toNeuron:uint;
 }
 
 table ModelResponse {

@@ -389,7 +389,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         if (nextLayerStart < addedNeuronCount) {
             int toNeuron = (rand() % (addedNeuronCount - nextLayerStart)) + nextLayerStart;
 
-            auto synapseOffset = Network::CreateSynapse(builder, 1, fromNeuron, toNeuron);
+            auto synapseOffset = Network::CreateSynapse(builder, 1, fromNeuron, 1, toNeuron);
 
             addedSynapsesOffsets.push_back(synapseOffset);
 
@@ -404,7 +404,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     for (auto synapse : addedSynapses) {
         if (rand() % 100 == 0) {
-            auto synapseOffset = Network::CreateSynapse(builder, 1, synapse.first, synapse.second);
+            auto synapseOffset = Network::CreateSynapse(builder, 1, synapse.first, 1, synapse.second);
             spikedSynapsesOffsets.push_back(synapseOffset);
         }
     }
