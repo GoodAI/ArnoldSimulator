@@ -99,6 +99,10 @@ public:
     const ChildLinks &GetChildAdditions() const;
     const ChildLinks &GetChildRemovals() const;
 
+    const NeuronsTriggered &GetTriggeredNeurons() const;
+    void TriggerNeurons(const NeuronsTriggered &neurons);
+    void UntriggerNeurons(const NeuronsTriggered &neurons);
+
     NeuronId RequestNeuronAddition(const NeuronType &type, const NeuronParams &params);
     void RequestNeuronRemoval(NeuronId neuronId);
     void RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data);

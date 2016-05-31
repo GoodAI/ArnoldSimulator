@@ -359,6 +359,23 @@ const ChildLinks &RegionBase::GetChildRemovals() const
     return mChildRemovals;
 }
 
+const NeuronsTriggered &RegionBase::GetTriggeredNeurons() const
+{
+    return mNeuronsTriggered;
+}
+
+void RegionBase::TriggerNeurons(const NeuronsTriggered &neurons)
+{
+    mNeuronsTriggered.insert(neurons.begin(), neurons.end());
+}
+
+void RegionBase::UntriggerNeurons(const NeuronsTriggered &neurons)
+{
+    for (auto it = neurons.begin(); it != neurons.end(); ++it) {
+        mNeuronsTriggered.erase(*it);
+    }
+}
+
 NeuronId RegionBase::RequestNeuronAddition(const NeuronType &type, const NeuronParams &params)
 {
     NeuronId neuronId = GetNeuronId(thisIndex, GetNewNeuronIndex());
