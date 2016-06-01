@@ -38,6 +38,11 @@ namespace GoodAI.Arnold.Logging
             if (logEvent == null)
                 throw new ArgumentNullException(nameof(logEvent));
 
+            // TODO(HonzaS): Remove/change this when Conductor.Dispose() is blocking and waits for the shutdown command to finish.
+            // Right now the shutdown command tries to log a successful completion but this crashes.
+            if (m_textBox.IsDisposed)
+                return;
+
             if (m_textBox.InvokeRequired)
                 m_textBox.BeginInvoke((MethodInvoker)(() => Log(logEvent)));
             else
