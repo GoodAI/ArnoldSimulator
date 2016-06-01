@@ -300,7 +300,22 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         addedRegionsOffsets.push_back(regionOffset2);
     }
 
+    std::vector<uint32_t> removedRegions;
+
+	if (mDummyTimestep % 2 == 0) {
+        auto regionName3 = builder.CreateString("testname 3");
+        auto regionType3 = builder.CreateString("testtype 3");
+        auto lowerBound3 = Network::CreatePosition(builder, 210.0f, 00.0f, 10.0f);
+        auto upperBound3 = Network::CreatePosition(builder, 252.0f, 22.0f, 32.0f);
+        auto regionOffset3 = Network::CreateRegion(builder, 3, regionName3, regionType3, lowerBound3, upperBound3);
+
+        addedRegionsOffsets.push_back(regionOffset3);
+	} else {
+		removedRegions.push_back(3);
+	}
+
     auto addedRegionsVector = builder.CreateVector(addedRegionsOffsets);
+	auto removedRegionsVector = builder.CreateVector(removedRegions);
 
     std::vector<flatbuffers::Offset<Network::Connector>> addedConnectorsOffsets;
     std::vector<flatbuffers::Offset<Network::Connection>> addedConnectionsOffsets;
@@ -369,7 +384,8 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
             5.f * static_cast<float>(x),
             2.f * static_cast<float>(y),
             2.f * static_cast<float>(z));
-        auto neuronOffset = Network::CreateNeuron(builder, addedNeuronCount+1, 1, neuronType, neuronPosition);
+		auto neuronId = Network::CreateNeuronId(builder, addedNeuronCount + 1, 1);
+        auto neuronOffset = Network::CreateNeuron(builder, neuronId, neuronType, neuronPosition);
 
         addedNeuronsOffsets.push_back(neuronOffset);
         addedNeuronCount++;
@@ -389,7 +405,9 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         if (nextLayerStart < addedNeuronCount) {
             int toNeuron = (rand() % (addedNeuronCount - nextLayerStart)) + nextLayerStart;
 
-            auto synapseOffset = Network::CreateSynapse(builder, 1, fromNeuron, 1, toNeuron);
+			auto fromNeuronId = Network::CreateNeuronId(builder, fromNeuron, 1);
+			auto toNeuronId = Network::CreateNeuronId(builder, toNeuron, 1);
+            auto synapseOffset = Network::CreateSynapse(builder, fromNeuronId, toNeuronId);
 
             addedSynapsesOffsets.push_back(synapseOffset);
 
@@ -404,7 +422,10 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     for (auto synapse : addedSynapses) {
         if (rand() % 100 == 0) {
-            auto synapseOffset = Network::CreateSynapse(builder, 1, synapse.first, 1, synapse.second);
+			auto fromNeuronId = Network::CreateNeuronId(builder, synapse.first, 1);
+			auto toNeuronId = Network::CreateNeuronId(builder, synapse.second, 1);
+
+            auto synapseOffset = Network::CreateSynapse(builder, fromNeuronId, toNeuronId);
             spikedSynapsesOffsets.push_back(synapseOffset);
         }
     }
@@ -412,12 +433,17 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     auto spikedSynapsesVector = builder.CreateVector(spikedSynapsesOffsets);
 
     Network::ModelResponseBuilder responseBuilder(builder);
+	// Added items.
     responseBuilder.add_addedRegions(addedRegionsVector);
     responseBuilder.add_addedConnectors(addedConnectorsVector);
     responseBuilder.add_addedConnections(addedConnectionsVector);
     responseBuilder.add_addedNeurons(addedNeuronsVector);
     responseBuilder.add_addedSynapses(addedSynapsesVector);
     responseBuilder.add_spikedSynapses(spikedSynapsesVector);
+
+	// Removed items.
+    responseBuilder.add_removedRegions(removedRegionsVector);
+
     auto modelResponseOffset = responseBuilder.Finish();
 
     BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);

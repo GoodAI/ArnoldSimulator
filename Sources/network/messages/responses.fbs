@@ -64,18 +64,20 @@ table Connection {
 	direction:Direction;
 }
 
+table NeuronId {
+	neuron:uint;
+	region:uint;
+}
+
 table Neuron {
-	id:uint;
-	regionIndex:uint;
+	id:NeuronId;
 	type:string;
 	position:Position;
 }
 
 table Synapse {
-	fromRegion:uint;
-	fromNeuron:uint;
-	toRegion:uint;
-	toNeuron:uint;
+	from:NeuronId;
+	to:NeuronId;
 }
 
 table ModelResponse {
@@ -95,7 +97,7 @@ table ModelResponse {
 	// Neuron and below - the core sends everything according to a predefined filter.
 	addedNeurons:[Neuron];
 	repositionedNeurons:[Neuron];
-	removedNeurons:[uint];
+	removedNeurons:[NeuronId];
 	
 	addedSynapses:[Synapse];
 	spikedSynapses:[Synapse];
