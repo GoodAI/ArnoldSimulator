@@ -29,6 +29,9 @@ namespace GoodAI.Arnold.Network
             ApplyAddedNeurons(model, diff);
             ApplyAddedSynapses(model, diff);
 
+            ApplyRemovedRegions(model, diff);
+            ApplyRemovedNeurons(model, diff);
+
             ApplySpikedSynapses(model, diff);
         }
 
@@ -55,15 +58,15 @@ namespace GoodAI.Arnold.Network
             {
                 Neuron neuron = diff.GetAddedNeurons(i);
 
-                RegionModel targetRegionModel = model.Regions[neuron.RegionIndex];
+                RegionModel targetRegionModel = model.Regions[neuron.Id.Region];
                 if (targetRegionModel == null)
                 {
-                    Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id,
-                        neuron.RegionIndex);
+                    Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id.Neuron,
+                        neuron.Id.Region);
                     continue;
                 }
 
-                targetRegionModel.AddExpert(new ExpertModel(neuron.Id, neuron.Type, targetRegionModel, neuron.Position.ToVector3()));
+                targetRegionModel.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, targetRegionModel, neuron.Position.ToVector3()));
             }
         }
 
@@ -172,6 +175,53 @@ namespace GoodAI.Arnold.Network
             }
         }
 
+        private void ApplyRemovedRegions(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RemovedRegionsLength; i++)
+            {
+                uint regionIndex = diff.GetRemovedRegions(i);
+
+
+                if (!model.Regions.ContainsKey(regionIndex))
+                {
+                    Log.Warn("Cannot remove region with index {regionIndex}, region not found", regionIndex);
+                    continue;
+                }
+
+                model.Regions.Remove(regionIndex);
+            }
+        }
+
+        private void ApplyRemovedNeurons(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RemovedNeuronsLength; i++)
+            {
+                NeuronId id = diff.GetRemovedNeurons(i);
+
+                RegionModel region;
+                if (!model.Regions.TryGetModel(id.Region, out region))
+                {
+                    LogRegionNeuronNotFound("region", id);
+                    continue;
+                }
+
+                if (!region.Experts.ContainsKey(id.Neuron))
+                {
+                    LogRegionNeuronNotFound("neuron", id);
+                    continue;
+                }
+
+                region.Experts.Remove(id.Neuron);
+            }
+        }
+
+        private void LogRegionNeuronNotFound(string itemNotFound, NeuronId id)
+        {
+            Log.Warn(
+                "Cannot remove neuron with id {neuronIndex} in region {regionIndex}, " + itemNotFound + " not found",
+                id.Region);
+        }
+
         private void ProcessSynapse(SimulationModel model, Synapse synapse, Action<RegionModel, ExpertModel, RegionModel, ExpertModel> action)
         {
             if (!CheckSameRegion(synapse))
@@ -193,8 +243,8 @@ namespace GoodAI.Arnold.Network
         private bool TryGetNeurons(RegionModel fromRegion, Synapse synapse, RegionModel toRegion,
             out ExpertModel fromNeuron, out ExpertModel toNeuron)
         {
-            fromNeuron = fromRegion.Experts[synapse.FromNeuron];
-            toNeuron = toRegion.Experts[synapse.ToNeuron];
+            fromNeuron = fromRegion.Experts[synapse.From.Neuron];
+            toNeuron = toRegion.Experts[synapse.To.Neuron];
 
             if (fromNeuron != null && toNeuron != null)
                 return true;
@@ -207,8 +257,9 @@ namespace GoodAI.Arnold.Network
         private bool TryGetRegions(SimulationModel model, Synapse synapse, out RegionModel fromRegion,
             out RegionModel toRegion)
         {
-            fromRegion = model.Regions[synapse.FromRegion];
-            toRegion = model.Regions[synapse.FromRegion];
+            fromRegion = model.Regions[synapse.From.Region];
+            toRegion = model.Regions[synapse.From.Region];
+
             if (fromRegion != null && toRegion != null)
                 return true;
 
@@ -219,7 +270,7 @@ namespace GoodAI.Arnold.Network
 
         private bool CheckSameRegion(Synapse synapse)
         {
-            if (synapse.FromRegion == synapse.ToRegion)
+            if (synapse.From.Region == synapse.To.Region)
                 return true;
 
             Log.Debug("Synapses crossing regions are not supported by visualization yet");
@@ -231,10 +282,10 @@ namespace GoodAI.Arnold.Network
             Log.Warn(
                 "Could not {synapseAction:l} synapse from source region {fromRegion}, neuron {fromNeuron} to target region {toRegion}, neuron {toNeuron}: {reason}",
                 synapseAction,
-                addedSynapse.FromRegion,
-                addedSynapse.FromNeuron,
-                addedSynapse.ToRegion,
-                addedSynapse.ToNeuron,
+                addedSynapse.From.Region,
+                addedSynapse.From.Neuron,
+                addedSynapse.To.Region,
+                addedSynapse.To.Neuron,
                 reason);
         }
     }

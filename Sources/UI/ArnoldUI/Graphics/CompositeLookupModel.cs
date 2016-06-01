@@ -33,9 +33,15 @@ namespace GoodAI.Arnold.Graphics
             }
         }
 
+        public bool ContainsKey(TKey key) => Children.ContainsKey(key);
+
+        public bool TryGetModel(TKey key, out TModel model) => Children.TryGetValue(key, out model);
+
         public bool Remove(TKey key)
         {
-            Children[key].Owner = null;
+            var child = Children[key];
+            // TODO(HonzaS): Make the child disposable and take care of this there.
+            child.Owner = null;
             return Children.Remove(key);
         }
 

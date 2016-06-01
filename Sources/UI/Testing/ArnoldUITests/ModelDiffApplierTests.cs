@@ -214,5 +214,34 @@ namespace GoodAI.Arnold.UI.Tests
 
             Assert.True(result.AreEqual, result.DifferencesString);
         }
+
+        [Fact]
+        public void RemovesRegion()
+        {
+            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(removedRegions: new List<RegionModel> {addedRegion});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            Assert.Empty(m_model.Regions);
+        }
+
+        [Fact]
+        public void RemovesNeuron()
+        {
+            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            var addedNeuron = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<ExpertModel> {addedNeuron});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            diff = ModelResponseBuilder.Build(removedNeurons: new List<ExpertModel> {addedNeuron});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            Assert.Empty(m_model.Regions[addedRegion.Index].Experts);
+        }
     }
 }

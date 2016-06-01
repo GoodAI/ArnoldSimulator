@@ -57,7 +57,8 @@ namespace GoodAI.Arnold.Network.Messages
     {
         public static ResponseMessage Build(IList<RegionModel> addedRegions = null,
             IList<ConnectorModel> addedConnectors = null, IList<ConnectionModel> addedConnections = null,
-            IList<ExpertModel> addedNeurons = null, IList<SynapseModel> addedSynapses = null)
+            IList<ExpertModel> addedNeurons = null, IList<SynapseModel> addedSynapses = null,
+            IList<RegionModel> removedRegions = null, IList<ExpertModel> removedNeurons = null)
         {
             var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
 
@@ -67,7 +68,12 @@ namespace GoodAI.Arnold.Network.Messages
             VectorOffset? addedNeuronsVectorOffset = BuildAddedNeurons(addedNeurons, builder);
             VectorOffset? addedSynapsesVectorOffset = BuildAddedSynapses(addedSynapses, builder);
 
+            VectorOffset? removedRegionsVectorOffset = BuildRemovedRegions(removedRegions, builder);
+            VectorOffset? removedNeuronsVectorOffset = BuildRemovedNeurons(removedNeurons, builder);
+
             ModelResponse.StartModelResponse(builder);
+
+            // Added items.
             if (addedRegionsVectorOffset.HasValue)
                 ModelResponse.AddAddedRegions(builder, addedRegionsVectorOffset.Value);
             if (addedConnectorsVectorOffset.HasValue)
@@ -79,9 +85,13 @@ namespace GoodAI.Arnold.Network.Messages
             if (addedSynapsesVectorOffset.HasValue)
                 ModelResponse.AddAddedSynapses(builder, addedSynapsesVectorOffset.Value);
 
-            Offset<ModelResponse> responseOffset = ModelResponse.EndModelResponse(builder);
+            // Removed items.
+            if (removedRegionsVectorOffset.HasValue)
+                ModelResponse.AddRemovedRegions(builder, removedRegionsVectorOffset.Value);
+            if (removedNeuronsVectorOffset.HasValue)
+                ModelResponse.AddRemovedNeurons(builder, removedNeuronsVectorOffset.Value);
 
-            return ResponseMessageBuilder.Build(builder, Response.ModelResponse, responseOffset);
+            return ResponseMessageBuilder.Build(builder, Response.ModelResponse, ModelResponse.EndModelResponse(builder));
         }
 
         private static VectorOffset? BuildAddedRegions(IList<RegionModel> addedRegions, FlatBufferBuilder builder)
@@ -158,8 +168,9 @@ namespace GoodAI.Arnold.Network.Messages
                 StringOffset type = builder.CreateString(neuron.Type);
                 Offset<Position> position = Position.CreatePosition(builder, 1, 2, 3);
 
-                return Neuron.CreateNeuron(builder, neuron.Id, neuron.RegionModel.Index, type,
-                    position);
+                var neuronId = NeuronId.CreateNeuronId(builder, neuron.Id, neuron.RegionModel.Index);
+
+                return Neuron.CreateNeuron(builder, neuronId, type, position);
             });
 
             if (addedNeuronsOffsets == null)
@@ -172,12 +183,37 @@ namespace GoodAI.Arnold.Network.Messages
             FlatBufferBuilder builder)
         {
             Offset<Synapse>[] addedSynapsesOffsets = BuildOffsets(addedSynapses, builder,
-                synapse => Synapse.CreateSynapse(builder, synapse.FromRegion.Index, synapse.FromNeuron.Id, synapse.ToRegion.Index, synapse.ToNeuron.Id));
+                synapse =>
+                {
+                    var fromNeuronId = NeuronId.CreateNeuronId(builder, synapse.FromNeuron.Id, synapse.FromRegion.Index);
+                    var toNeuronId = NeuronId.CreateNeuronId(builder, synapse.ToNeuron.Id, synapse.ToRegion.Index);
+
+                    return Synapse.CreateSynapse(builder, fromNeuronId, toNeuronId);
+                });
 
             if (addedSynapsesOffsets == null)
                 return null;
 
             return ModelResponse.CreateAddedSynapsesVector(builder, addedSynapsesOffsets);
+        }
+
+        private static VectorOffset? BuildRemovedRegions(IList<RegionModel> removedRegions, FlatBufferBuilder builder)
+        {
+            if (removedRegions == null)
+                return null;
+
+            return ModelResponse.CreateRemovedRegionsVector(builder, removedRegions.Select(region => region.Index).ToArray());
+        }
+
+        private static VectorOffset? BuildRemovedNeurons(IList<ExpertModel> removedNeurons, FlatBufferBuilder builder)
+        {
+            if (removedNeurons == null)
+                return null;
+
+            var removedNeuronsOffsets = BuildOffsets(removedNeurons, builder,
+                neuron => NeuronId.CreateNeuronId(builder, neuron.Id, neuron.RegionModel.Index));
+
+            return ModelResponse.CreateRemovedNeuronsVector(builder, removedNeuronsOffsets);
         }
 
         private static Offset<TMessageEntity>[] BuildOffsets<TModel, TMessageEntity>(IList<TModel> addedModels,
