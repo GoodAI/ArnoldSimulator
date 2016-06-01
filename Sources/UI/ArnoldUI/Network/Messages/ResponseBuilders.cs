@@ -63,6 +63,7 @@ namespace GoodAI.Arnold.Network.Messages
             IList<SynapseModel> addedSynapses = null,
             IList<RegionModel> removedRegions = null,
             IList<ConnectorModel> removedConnectors = null,
+            IList<ConnectionModel> removedConnections = null,
             IList<ExpertModel> removedNeurons = null,
             IList<SynapseModel> removedSynapses = null)
         {
@@ -76,6 +77,7 @@ namespace GoodAI.Arnold.Network.Messages
 
             VectorOffset? removedRegionsVectorOffset = BuildRemovedRegions(removedRegions, builder);
             VectorOffset? removedConnectorsVectorOffset = BuildRemovedConnectors(removedConnectors, builder);
+            VectorOffset? removedConnectionsVectorOffset = BuildRemovedConnections(removedConnections, builder);
             VectorOffset? removedNeuronsVectorOffset = BuildRemovedNeurons(removedNeurons, builder);
             VectorOffset? removedSynapsesVectorOffset = BuildRemovedSynapses(removedSynapses, builder);
 
@@ -96,6 +98,10 @@ namespace GoodAI.Arnold.Network.Messages
             // Removed items.
             if (removedRegionsVectorOffset.HasValue)
                 ModelResponse.AddRemovedRegions(builder, removedRegionsVectorOffset.Value);
+            if (removedConnectorsVectorOffset.HasValue)
+                ModelResponse.AddRemovedConnectors(builder, removedConnectorsVectorOffset.Value);
+            if (removedConnectionsVectorOffset.HasValue)
+                ModelResponse.AddRemovedConnections(builder, removedConnectionsVectorOffset.Value);
             if (removedNeuronsVectorOffset.HasValue)
                 ModelResponse.AddRemovedNeurons(builder, removedNeuronsVectorOffset.Value);
             if (removedSynapsesVectorOffset.HasValue)
@@ -222,6 +228,26 @@ namespace GoodAI.Arnold.Network.Messages
                 });
 
             return ModelResponse.CreateRemovedConnectorsVector(builder, removedConnectorsOffsets);
+        }
+
+        private static VectorOffset? BuildRemovedConnections(IList<ConnectionModel> removedConnections,
+            FlatBufferBuilder builder)
+        {
+            Offset<Connection>[] removedConnectionsOffsets = BuildOffsets(removedConnections, builder, connection =>
+            {
+                StringOffset fromConnectorName = builder.CreateString(connection.From.Name);
+                StringOffset toConnectorName = builder.CreateString(connection.To.Name);
+
+                return Connection.CreateConnection(builder, connection.From.Region.Index,
+                    fromConnectorName, connection.To.Region.Index, toConnectorName,
+                    connection.From.Direction);
+            });
+
+            if (removedConnectionsOffsets == null)
+                return null;
+
+            return ModelResponse.CreateRemovedConnectionsVector(builder,
+                removedConnectionsOffsets);
         }
 
         private static VectorOffset? BuildRemovedNeurons(IList<ExpertModel> removedNeurons, FlatBufferBuilder builder)

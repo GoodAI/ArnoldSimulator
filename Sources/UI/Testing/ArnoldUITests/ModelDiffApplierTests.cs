@@ -278,7 +278,6 @@ namespace GoodAI.Arnold.UI.Tests
 
             ResponseMessage diff =
                 ModelResponseBuilder.Build(addedConnectors: new List<ConnectorModel> {addedConnector});
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
 
@@ -288,6 +287,36 @@ namespace GoodAI.Arnold.UI.Tests
 
             var region = m_model.Regions.First();
             Assert.Empty(region.InputConnectors);
+        }
+
+        [Fact]
+        public void RemovesConnection()
+        {
+            RegionModel addedRegion1 = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion2 = AddRegion(m_applier, m_model, 2);
+
+            var addedConnector1 = new OutputConnectorModel(addedRegion1, "output", 3);
+            var addedConnector2 = new InputConnectorModel(addedRegion2, "input", 4);
+
+            var addedConnection = new ConnectionModel(addedConnector1, addedConnector2);
+
+            ResponseMessage diff =
+                ModelResponseBuilder.Build(
+                    addedConnectors: new List<ConnectorModel> {addedConnector1, addedConnector2},
+                    addedConnections: new List<ConnectionModel> {addedConnection});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            diff = ModelResponseBuilder.Build(removedConnections: new List<ConnectionModel> {addedConnection});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            var region1 = m_model.Regions.First();
+            var region2 = m_model.Regions.Skip(1).First();
+
+            Assert.Empty(region1.OutputConnectors.First().Connections);
+            Assert.Empty(region2.InputConnectors.First().Connections);
+            Assert.Empty(m_model.Connections);
         }
     }
 }

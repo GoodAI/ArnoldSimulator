@@ -31,6 +31,7 @@ namespace GoodAI.Arnold.Network
 
             ApplyRemovedRegions(model, diff);
             ApplyRemovedConnectors(model, diff);
+            ApplyRemovedConnections(model, diff);
             ApplyRemovedNeurons(model, diff);
             ApplyRemovedSynapses(model, diff);
 
@@ -108,7 +109,7 @@ namespace GoodAI.Arnold.Network
                 if (fromRegion == null || toRegion == null)
                 {
                     string missingRegion = fromRegion == null ? "Source" : "Target";
-                    LogConnectionNotAdded(addedConnection, $"{missingRegion} region not found");
+                    LogConnectionNotProcessed(addedConnection, "add", $"{missingRegion} region not found");
                     continue;
                 }
 
@@ -122,7 +123,7 @@ namespace GoodAI.Arnold.Network
                 if (fromConnector == null || toConnector == null)
                 {
                     string missingConnector = fromConnector == null ? "Source" : "Target";
-                    LogConnectionNotAdded(addedConnection, $"{missingConnector} connector not found");
+                    LogConnectionNotProcessed(addedConnection, "add", $"{missingConnector} connector not found");
                     continue;
                 }
 
@@ -132,10 +133,11 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private void LogConnectionNotAdded(Connection addedConnection, string reason)
+        private void LogConnectionNotProcessed(Connection addedConnection, string action, string reason)
         {
             Log.Warn(
-                "Could not add connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
+                "Could not " + action +
+                " add connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
                 addedConnection.FromRegion,
                 addedConnection.FromConnector,
                 addedConnection.ToRegion,
@@ -219,6 +221,46 @@ namespace GoodAI.Arnold.Network
             }
         }
 
+        private void ApplyRemovedConnections(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RemovedConnectionsLength; i++)
+            {
+                Connection removedConnection = diff.GetRemovedConnections(i);
+
+                RegionModel fromRegion = model.Regions[removedConnection.FromRegion];
+                RegionModel toRegion = model.Regions[removedConnection.ToRegion];
+
+                if (fromRegion == null || toRegion == null)
+                {
+                    string missingRegion = fromRegion == null ? "Source" : "Target";
+                    LogConnectionNotProcessed(removedConnection, "remove", $"{missingRegion} region not found");
+                    continue;
+                }
+
+                OutputConnectorModel fromConnector =
+                    fromRegion.OutputConnectors.FirstOrDefault(connector => connector.Name == removedConnection.FromConnector);
+
+                InputConnectorModel toConnector =
+                    toRegion.InputConnectors.FirstOrDefault(connector => connector.Name == removedConnection.ToConnector);
+
+
+                if (fromConnector == null || toConnector == null)
+                {
+                    string missingConnector = fromConnector == null ? "Source" : "Target";
+                    LogConnectionNotProcessed(removedConnection, "remove", $"{missingConnector} connector not found");
+                    continue;
+                }
+
+                // TODO(HonzaS): Optimize lookup.
+                var connectionModel =
+                    model.Connections.FirstOrDefault(
+                        connection => connection.From == fromConnector && connection.To == toConnector);
+
+                model.Connections.Remove(connectionModel);
+                fromConnector.Connections.Remove(connectionModel);
+                toConnector.Connections.Remove(connectionModel);
+            }
+        }
 
         private void ApplyRemovedNeurons(SimulationModel model, ModelResponse diff)
         {
