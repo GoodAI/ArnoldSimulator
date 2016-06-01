@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         private float m_alpha = MinAlpha;
 
-        public uint Id { get; set; }
+        public uint Index { get; set; }
 
         public string Type { get; set; }
 
@@ -39,9 +39,9 @@ namespace GoodAI.Arnold.Graphics.Models
         // The key is the remote neuron's index.
         public IDictionary<uint, SynapseModel> Outputs { get; } = new Dictionary<uint, SynapseModel>();
 
-        public ExpertModel(uint id, string type, RegionModel regionModel, Vector3 position)
+        public ExpertModel(uint index, string type, RegionModel regionModel, Vector3 position)
         {
-            Id = id;
+            Index = index;
             Type = type;
             RegionModel = regionModel;
             Position = position;

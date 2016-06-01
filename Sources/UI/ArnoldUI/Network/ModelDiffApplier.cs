@@ -31,6 +31,7 @@ namespace GoodAI.Arnold.Network
 
             ApplyRemovedRegions(model, diff);
             ApplyRemovedNeurons(model, diff);
+            ApplyRemovedSynapses(model, diff);
 
             ApplySpikedSynapses(model, diff);
         }
@@ -149,7 +150,7 @@ namespace GoodAI.Arnold.Network
                 ProcessSynapse(model, addedSynapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
                 {
                     var synapseModel = new SynapseModel(fromRegion, fromNeuron, toRegion, toNeuron);
-                    fromNeuron.Outputs[synapseModel.ToNeuron.Id] = synapseModel;
+                    fromNeuron.Outputs[synapseModel.ToNeuron.Index] = synapseModel;
                     fromRegion.AddSynapse(synapseModel);
                 });
             }
@@ -162,7 +163,7 @@ namespace GoodAI.Arnold.Network
                 Synapse spikedSynapse = diff.GetSpikedSynapses(i);
                 ProcessSynapse(model, spikedSynapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
                 {
-                    SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Id];
+                    SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Index];
 
                     if (synapseModel == null)
                     {
@@ -212,6 +213,21 @@ namespace GoodAI.Arnold.Network
                 }
 
                 region.Experts.Remove(id.Neuron);
+            }
+        }
+
+        private void ApplyRemovedSynapses(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RemovedSynapsesLength; i++)
+            {
+                var synapse = diff.GetRemovedSynapses(i);
+
+                ProcessSynapse(model, synapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
+                {
+                    var synapseModel = fromNeuron.Outputs[toNeuron.Index];
+                    fromNeuron.Outputs.Remove(toNeuron.Index);
+                    fromRegion.Synapses.Remove(synapseModel);
+                });
             }
         }
 

@@ -54,7 +54,7 @@ namespace GoodAI.Arnold.Graphics.Models
             AddChild(Synapses);
         }
 
-        public void AddExpert(ExpertModel expert) => Experts[expert.Id] = expert;
+        public void AddExpert(ExpertModel expert) => Experts[expert.Index] = expert;
 
         public void AddSynapse(SynapseModel synapse) => Synapses.AddChild(synapse);
 

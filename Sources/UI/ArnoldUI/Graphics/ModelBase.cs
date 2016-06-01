@@ -156,6 +156,11 @@ namespace GoodAI.Arnold.Graphics
             Children.Add(child);
         }
 
+        public bool Remove(T child)
+        {
+            return Children.Remove(child);
+        }
+
         public override void Update(float elapsedMs)
         {
             base.Update(elapsedMs);
