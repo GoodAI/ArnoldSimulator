@@ -162,7 +162,7 @@ namespace GoodAI.Arnold
             if (showVisualizationButton.Checked)
                 StartVisualization();
             else
-                VisualizationForm.Close();
+                VisualizationForm?.Close();
         }
     }
 }
