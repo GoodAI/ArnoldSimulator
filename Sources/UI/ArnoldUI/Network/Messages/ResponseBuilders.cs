@@ -55,10 +55,15 @@ namespace GoodAI.Arnold.Network.Messages
 
     public static class ModelResponseBuilder
     {
-        public static ResponseMessage Build(IList<RegionModel> addedRegions = null,
-            IList<ConnectorModel> addedConnectors = null, IList<ConnectionModel> addedConnections = null,
-            IList<ExpertModel> addedNeurons = null, IList<SynapseModel> addedSynapses = null,
-            IList<RegionModel> removedRegions = null, IList<ExpertModel> removedNeurons = null,
+        public static ResponseMessage Build(
+            IList<RegionModel> addedRegions = null,
+            IList<ConnectorModel> addedConnectors = null,
+            IList<ConnectionModel> addedConnections = null,
+            IList<ExpertModel> addedNeurons = null,
+            IList<SynapseModel> addedSynapses = null,
+            IList<RegionModel> removedRegions = null,
+            IList<ConnectorModel> removedConnectors = null,
+            IList<ExpertModel> removedNeurons = null,
             IList<SynapseModel> removedSynapses = null)
         {
             var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
@@ -70,6 +75,7 @@ namespace GoodAI.Arnold.Network.Messages
             VectorOffset? addedSynapsesVectorOffset = BuildAddedSynapses(addedSynapses, builder);
 
             VectorOffset? removedRegionsVectorOffset = BuildRemovedRegions(removedRegions, builder);
+            VectorOffset? removedConnectorsVectorOffset = BuildRemovedConnectors(removedConnectors, builder);
             VectorOffset? removedNeuronsVectorOffset = BuildRemovedNeurons(removedNeurons, builder);
             VectorOffset? removedSynapsesVectorOffset = BuildRemovedSynapses(removedSynapses, builder);
 
@@ -127,11 +133,8 @@ namespace GoodAI.Arnold.Network.Messages
             {
                 StringOffset connectorName = builder.CreateString(connector.Name);
 
-                Direction direction = connector.Direction == ConnectorDirection.Forward
-                    ? Direction.Forward
-                    : Direction.Backward;
                 return Connector.CreateConnector(builder, connector.Region.Index, connectorName,
-                    direction, connector.SlotCount);
+                    connector.Direction, connector.SlotCount);
             });
 
             if (addedConnectorsOffsets == null)
@@ -148,13 +151,9 @@ namespace GoodAI.Arnold.Network.Messages
                 StringOffset fromConnectorName = builder.CreateString(connection.From.Name);
                 StringOffset toConnectorName = builder.CreateString(connection.To.Name);
 
-                Direction direction = connection.From.Direction == ConnectorDirection.Forward
-                    ? Direction.Forward
-                    : Direction.Backward;
-
                 return Connection.CreateConnection(builder, connection.From.Region.Index,
                     fromConnectorName, connection.To.Region.Index, toConnectorName,
-                    direction);
+                    connection.From.Direction);
             });
 
             if (addedConnectionsOffsets == null)
@@ -207,6 +206,22 @@ namespace GoodAI.Arnold.Network.Messages
                 return null;
 
             return ModelResponse.CreateRemovedRegionsVector(builder, removedRegions.Select(region => region.Index).ToArray());
+        }
+
+        private static VectorOffset? BuildRemovedConnectors(IList<ConnectorModel> removedConnectors, FlatBufferBuilder builder)
+        {
+            if (removedConnectors == null)
+                return null;
+
+            var removedConnectorsOffsets = BuildOffsets(removedConnectors, builder,
+                connector =>
+                {
+                    var name = builder.CreateString(connector.Name);
+                    return Connector.CreateConnector(builder, connector.Region.Index, name, connector.Direction,
+                        connector.SlotCount);
+                });
+
+            return ModelResponse.CreateRemovedConnectorsVector(builder, removedConnectorsOffsets);
         }
 
         private static VectorOffset? BuildRemovedNeurons(IList<ExpertModel> removedNeurons, FlatBufferBuilder builder)

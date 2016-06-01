@@ -3,18 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GoodAI.Arnold.Network;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public enum ConnectorDirection
-    {
-        Forward,
-        Backward
-    }
-
     public abstract class ConnectorModel : ModelBase
     {
         public const float SizeX = 1f;
@@ -27,7 +22,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public ISet<ConnectionModel> Connections { get; set; } = new HashSet<ConnectionModel>();
 
-        public ConnectorDirection Direction { get; }
+        public Direction Direction { get; }
 
         public Vector3 Size
         {
@@ -44,7 +39,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public uint SlotCount { get; set; }
 
-        public ConnectorModel(RegionModel region, ConnectorDirection direction, string name, uint slotCount)
+        public ConnectorModel(RegionModel region, Direction direction, string name, uint slotCount)
         {
             Region = region;
             Direction = direction;
@@ -155,7 +150,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         protected override Color4 Color { get; } = new Color4(255, 100, 255, 30);
 
-        public InputConnectorModel(RegionModel region, string name, uint slotCount) : base(region, ConnectorDirection.Backward, name, slotCount)
+        public InputConnectorModel(RegionModel region, string name, uint slotCount) : base(region, Direction.Backward, name, slotCount)
         {
         }
     }
@@ -164,7 +159,7 @@ namespace GoodAI.Arnold.Graphics.Models
     {
         protected override Color4 Color { get; } = new Color4(0, 255, 50, 30);
 
-        public OutputConnectorModel(RegionModel region, string name, uint slotCount) : base(region, ConnectorDirection.Forward, name, slotCount)
+        public OutputConnectorModel(RegionModel region, string name, uint slotCount) : base(region, Direction.Forward, name, slotCount)
         {
         }
     }

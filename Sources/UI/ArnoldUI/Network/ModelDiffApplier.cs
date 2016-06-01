@@ -30,6 +30,7 @@ namespace GoodAI.Arnold.Network
             ApplyAddedSynapses(model, diff);
 
             ApplyRemovedRegions(model, diff);
+            ApplyRemovedConnectors(model, diff);
             ApplyRemovedNeurons(model, diff);
             ApplyRemovedSynapses(model, diff);
 
@@ -192,6 +193,32 @@ namespace GoodAI.Arnold.Network
                 model.Regions.Remove(regionIndex);
             }
         }
+
+        private void ApplyRemovedConnectors(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RemovedConnectorsLength; i++)
+            {
+                Connector removedConnector = diff.GetRemovedConnectors(i);
+
+                RegionModel targetRegionModel = model.Regions[removedConnector.RegionIndex];
+                if (targetRegionModel == null)
+                {
+                    Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
+                        removedConnector.Name,
+                        removedConnector.RegionIndex);
+                    continue;
+                }
+
+                var deleted = removedConnector.Direction == Direction.Backward
+                    ? targetRegionModel.InputConnectors.Remove(removedConnector.Name)
+                    : targetRegionModel.OutputConnectors.Remove(removedConnector.Name);
+
+                if (!deleted)
+                    Log.Warn("Cannot remove connector {connector} from region {region}, connector not found",
+                        removedConnector.Name, targetRegionModel.Index);
+            }
+        }
+
 
         private void ApplyRemovedNeurons(SimulationModel model, ModelResponse diff)
         {

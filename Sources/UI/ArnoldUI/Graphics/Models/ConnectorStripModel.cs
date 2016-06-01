@@ -17,6 +17,15 @@ namespace GoodAI.Arnold.Graphics.Models
             m_region = region;
         }
 
+        public bool Remove(string name)
+        {
+            var connector = Children.FirstOrDefault(c => c.Name == name);
+            if (connector == null)
+                return false;
+
+            return Remove(connector);
+        }
+
         protected abstract Vector3 AdjustedPosition { get; }
 
         protected override void UpdateModel(float elapsedMs)

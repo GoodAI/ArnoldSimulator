@@ -268,5 +268,26 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.Empty(region.Synapses);
             Assert.Empty(region.Experts[addedNeuron1.Index].Outputs);
         }
+
+        [Fact]
+        public void RemovesConnector()
+        {
+            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+
+            ConnectorModel addedConnector = new InputConnectorModel(addedRegion, "input", 4);
+
+            ResponseMessage diff =
+                ModelResponseBuilder.Build(addedConnectors: new List<ConnectorModel> {addedConnector});
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            diff = ModelResponseBuilder.Build(removedConnectors: new List<ConnectorModel> {addedConnector});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            var region = m_model.Regions.First();
+            Assert.Empty(region.InputConnectors);
+        }
     }
 }
