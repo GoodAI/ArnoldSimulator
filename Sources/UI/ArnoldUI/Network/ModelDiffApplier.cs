@@ -8,6 +8,7 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Logging;
 using OpenTK;
+using OpenTK.Graphics.ES11;
 
 namespace GoodAI.Arnold.Network
 {
@@ -77,21 +78,15 @@ namespace GoodAI.Arnold.Network
             {
                 Connector addedConnector = diff.GetAddedConnectors(i);
 
-                RegionModel targetRegionModel = model.Regions[addedConnector.RegionIndex];
-                if (targetRegionModel == null)
+                ProcessConnector(model, addedConnector, "add", regionModel =>
                 {
-                    Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
-                        addedConnector.Name,
-                        addedConnector.RegionIndex);
-                    continue;
-                }
-
-                // TODO(HonzaS): A Shortcut for the creation of models?
-                // Replace them with factory + inject logger.
-                if (addedConnector.Direction == Direction.Forward)
-                    targetRegionModel.OutputConnectors.AddChild(new OutputConnectorModel(targetRegionModel, addedConnector.Name, addedConnector.Size));
-                else
-                    targetRegionModel.InputConnectors.AddChild(new InputConnectorModel(targetRegionModel, addedConnector.Name, addedConnector.Size));
+                    // TODO(HonzaS): A Shortcut for the creation of models?
+                    // Replace them with factory + inject logger.
+                    if (addedConnector.Direction == Direction.Forward)
+                        regionModel.OutputConnectors.AddChild(new OutputConnectorModel(regionModel, addedConnector.Name, addedConnector.Size));
+                    else
+                        regionModel.InputConnectors.AddChild(new InputConnectorModel(regionModel, addedConnector.Name, addedConnector.Size));
+                });
             }
         }
 
@@ -101,23 +96,32 @@ namespace GoodAI.Arnold.Network
             {
                 Connector removedConnector = diff.GetRemovedConnectors(i);
 
-                RegionModel targetRegionModel = model.Regions[removedConnector.RegionIndex];
-                if (targetRegionModel == null)
+                ProcessConnector(model, removedConnector, "remove", regionModel =>
                 {
-                    Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
-                        removedConnector.Name,
-                        removedConnector.RegionIndex);
-                    continue;
-                }
+                    var deleted = removedConnector.Direction == Direction.Backward
+                        ? regionModel.InputConnectors.Remove(removedConnector.Name)
+                        : regionModel.OutputConnectors.Remove(removedConnector.Name);
 
-                var deleted = removedConnector.Direction == Direction.Backward
-                    ? targetRegionModel.InputConnectors.Remove(removedConnector.Name)
-                    : targetRegionModel.OutputConnectors.Remove(removedConnector.Name);
-
-                if (!deleted)
-                    Log.Warn("Cannot remove connector {connector} from region {region}, connector not found",
-                        removedConnector.Name, targetRegionModel.Index);
+                    if (!deleted)
+                        Log.Warn("Cannot remove connector {connector} from region {region}, connector not found",
+                            removedConnector.Name, regionModel.Index);
+                });
             }
+        }
+
+        private void ProcessConnector(SimulationModel model, Connector connector, string actionName, Action<RegionModel> action)
+        {
+            RegionModel targetRegionModel = model.Regions[connector.RegionIndex];
+            if (targetRegionModel == null)
+            {
+                Log.Warn(
+                    "Cannot " + actionName + " connector {connectorName}, region with index {regionIndex} was not found",
+                    connector.Name,
+                    connector.RegionIndex);
+                return;
+            }
+
+            action(targetRegionModel);
         }
 
         private void ApplyAddedConnections(SimulationModel model, ModelResponse diff)
@@ -126,33 +130,12 @@ namespace GoodAI.Arnold.Network
             {
                 Connection addedConnection = diff.GetAddedConnections(i);
 
-                RegionModel fromRegion = model.Regions[addedConnection.FromRegion];
-                RegionModel toRegion = model.Regions[addedConnection.ToRegion];
-
-                if (fromRegion == null || toRegion == null)
+                ProcessConnection(model, addedConnection, "add", (fromConnector, toConnector) =>
                 {
-                    string missingRegion = fromRegion == null ? "Source" : "Target";
-                    LogConnectionNotProcessed(addedConnection, "add", $"{missingRegion} region not found");
-                    continue;
-                }
+                    var connectionModel = new ConnectionModel(fromConnector, toConnector);
 
-                OutputConnectorModel fromConnector =
-                    fromRegion.OutputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.FromConnector);
-
-                InputConnectorModel toConnector =
-                    toRegion.InputConnectors.FirstOrDefault(connector => connector.Name == addedConnection.ToConnector);
-
-
-                if (fromConnector == null || toConnector == null)
-                {
-                    string missingConnector = fromConnector == null ? "Source" : "Target";
-                    LogConnectionNotProcessed(addedConnection, "add", $"{missingConnector} connector not found");
-                    continue;
-                }
-
-                var connectionModel = new ConnectionModel(fromConnector, toConnector);
-
-                model.Connections.AddChild(connectionModel);
+                    model.Connections.AddChild(connectionModel);
+                });
             }
         }
 
@@ -162,50 +145,62 @@ namespace GoodAI.Arnold.Network
             {
                 Connection removedConnection = diff.GetRemovedConnections(i);
 
-                RegionModel fromRegion = model.Regions[removedConnection.FromRegion];
-                RegionModel toRegion = model.Regions[removedConnection.ToRegion];
-
-                if (fromRegion == null || toRegion == null)
+                ProcessConnection(model, removedConnection, "remove", (fromConnector, toConnector) =>
                 {
-                    string missingRegion = fromRegion == null ? "Source" : "Target";
-                    LogConnectionNotProcessed(removedConnection, "remove", $"{missingRegion} region not found");
-                    continue;
-                }
+                    // TODO(HonzaS): Optimize lookup.
+                    var connectionModel =
+                        model.Connections.FirstOrDefault(
+                            connection => connection.From == fromConnector && connection.To == toConnector);
 
-                OutputConnectorModel fromConnector =
-                    fromRegion.OutputConnectors.FirstOrDefault(connector => connector.Name == removedConnection.FromConnector);
+                    if (connectionModel == null)
+                    {
+                        LogConnectionNotProcessed(removedConnection, "remove", "Connection not found");
+                    }
 
-                InputConnectorModel toConnector =
-                    toRegion.InputConnectors.FirstOrDefault(connector => connector.Name == removedConnection.ToConnector);
-
-
-                if (fromConnector == null || toConnector == null)
-                {
-                    string missingConnector = fromConnector == null ? "Source" : "Target";
-                    LogConnectionNotProcessed(removedConnection, "remove", $"{missingConnector} connector not found");
-                    continue;
-                }
-
-                // TODO(HonzaS): Optimize lookup.
-                var connectionModel =
-                    model.Connections.FirstOrDefault(
-                        connection => connection.From == fromConnector && connection.To == toConnector);
-
-                model.Connections.Remove(connectionModel);
-                fromConnector.Connections.Remove(connectionModel);
-                toConnector.Connections.Remove(connectionModel);
+                    model.Connections.Remove(connectionModel);
+                    fromConnector.Connections.Remove(connectionModel);
+                    toConnector.Connections.Remove(connectionModel);
+                });
             }
         }
 
-        private void LogConnectionNotProcessed(Connection addedConnection, string action, string reason)
+        private void ProcessConnection(SimulationModel model, Connection connection, string actionName, Action<OutputConnectorModel, InputConnectorModel> action)
+        {
+            RegionModel fromRegion = model.Regions[connection.FromRegion];
+            RegionModel toRegion = model.Regions[connection.ToRegion];
+
+            if (fromRegion == null || toRegion == null)
+            {
+                string missingRegion = fromRegion == null ? "Source" : "Target";
+                LogConnectionNotProcessed(connection, actionName, $"{missingRegion} region not found");
+                return;
+            }
+
+            OutputConnectorModel fromConnector =
+                fromRegion.OutputConnectors.FirstOrDefault(connector => connector.Name == connection.FromConnector);
+
+            InputConnectorModel toConnector =
+                toRegion.InputConnectors.FirstOrDefault(connector => connector.Name == connection.ToConnector);
+
+            if (fromConnector == null || toConnector == null)
+            {
+                string missingConnector = fromConnector == null ? "Source" : "Target";
+                LogConnectionNotProcessed(connection, actionName, $"{missingConnector} connector not found");
+                return;
+            }
+
+            action(fromConnector, toConnector);
+        }
+
+        private void LogConnectionNotProcessed(Connection connection, string action, string reason)
         {
             Log.Warn(
                 "Could not " + action +
-                " add connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
-                addedConnection.FromRegion,
-                addedConnection.FromConnector,
-                addedConnection.ToRegion,
-                addedConnection.ToConnector,
+                " connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
+                connection.FromRegion,
+                connection.FromConnector,
+                connection.ToRegion,
+                connection.ToConnector,
                 reason);
         }
 
@@ -214,16 +209,16 @@ namespace GoodAI.Arnold.Network
             for (int i = 0; i < diff.AddedNeuronsLength; i++)
             {
                 Neuron neuron = diff.GetAddedNeurons(i);
+                var neuronId = neuron.Id;
 
-                RegionModel targetRegionModel = model.Regions[neuron.Id.Region];
-                if (targetRegionModel == null)
+                RegionModel region;
+                if (!model.Regions.TryGetModel(neuronId.Region, out region))
                 {
-                    Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id.Neuron,
-                        neuron.Id.Region);
+                    LogNeuronNotProcessed(neuronId, "add", "Region not found");
                     continue;
                 }
 
-                targetRegionModel.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, targetRegionModel, neuron.Position.ToVector3()));
+                region.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, region, neuron.Position.ToVector3()));
             }
         }
 
@@ -231,23 +226,30 @@ namespace GoodAI.Arnold.Network
         {
             for (int i = 0; i < diff.RemovedNeuronsLength; i++)
             {
-                NeuronId id = diff.GetRemovedNeurons(i);
+                NeuronId neuronId = diff.GetRemovedNeurons(i);
 
                 RegionModel region;
-                if (!model.Regions.TryGetModel(id.Region, out region))
+                if (!model.Regions.TryGetModel(neuronId.Region, out region))
                 {
-                    LogNeuronNotRemoved("region", id);
+                    LogNeuronNotProcessed(neuronId, "remove", "Region not found");
                     continue;
                 }
 
-                if (!region.Experts.ContainsKey(id.Neuron))
+                if (!region.Experts.ContainsKey(neuronId.Neuron))
                 {
-                    LogNeuronNotRemoved("neuron", id);
+                    LogNeuronNotProcessed(neuronId, "remove", "Neuron not found");
                     continue;
                 }
 
-                region.Experts.Remove(id.Neuron);
+                region.Experts.Remove(neuronId.Neuron);
             }
+        }
+
+        private void LogNeuronNotProcessed(NeuronId neuronId, string action, string reason)
+        {
+            Log.Warn(
+                "Cannot " + action + " neuron with id {neuronIndex} in region {regionIndex}: {reason}",
+                neuronId.Neuron, neuronId.Region, reason);
         }
 
         private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)
@@ -297,13 +299,6 @@ namespace GoodAI.Arnold.Network
                     synapseModel.Spike();
                 });
             }
-        }
-
-        private void LogNeuronNotRemoved(string itemNotFound, NeuronId id)
-        {
-            Log.Warn(
-                "Cannot remove neuron with id {neuronIndex} in region {regionIndex}, " + itemNotFound + " not found",
-                id.Region);
         }
 
         private void ProcessSynapse(SimulationModel model, Synapse synapse, string actionName, Action<RegionModel, ExpertModel, RegionModel, ExpertModel> action)
