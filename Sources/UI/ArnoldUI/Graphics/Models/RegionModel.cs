@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.Graphics.Models
         public Vector3 Size
         {
             get { return m_size; }
-            private set
+            set
             {
                 m_size = value;
                 HalfSize = Size/2;

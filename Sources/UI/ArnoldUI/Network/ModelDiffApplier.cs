@@ -24,18 +24,22 @@ namespace GoodAI.Arnold.Network
         public void ApplyModelDiff(SimulationModel model, ModelResponse diff)
         {
             ApplyAddedRegions(model, diff);
-            ApplyAddedConnectors(model, diff);
-            ApplyAddedConnections(model, diff);
-            ApplyAddedNeurons(model, diff);
-            ApplyAddedSynapses(model, diff);
-
+            ApplyRepositionedRegions(model, diff);
             ApplyRemovedRegions(model, diff);
-            ApplyRemovedConnectors(model, diff);
-            ApplyRemovedConnections(model, diff);
-            ApplyRemovedNeurons(model, diff);
-            ApplyRemovedSynapses(model, diff);
 
+            ApplyAddedConnectors(model, diff);
+            ApplyRemovedConnectors(model, diff);
+
+            ApplyAddedConnections(model, diff);
+            ApplyRemovedConnections(model, diff);
+
+            ApplyAddedNeurons(model, diff);
+            ApplyRepositionedNeurons(model, diff);
+            ApplyRemovedNeurons(model, diff);
+
+            ApplyAddedSynapses(model, diff);
             ApplySpikedSynapses(model, diff);
+            ApplyRemovedSynapses(model, diff);
         }
 
         private static void ApplyAddedRegions(SimulationModel model, ModelResponse diff)
@@ -52,6 +56,31 @@ namespace GoodAI.Arnold.Network
                 Vector3 position = lowerBound.ToVector3() + size/2;
 
                 model.Regions[addedRegion.Index] = new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type, position, size);
+            }
+        }
+
+        private void ApplyRepositionedRegions(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RepositionedRegionsLength; i++)
+            {
+                Region repositionedRegion = diff.GetRepositionedRegions(i);
+
+                Position lowerBound = repositionedRegion.LowerBound;
+                Position upperBound = repositionedRegion.UpperBound;
+
+                var size = new Vector3(upperBound.X - lowerBound.X, upperBound.Y - lowerBound.Y, upperBound.Z - lowerBound.Z);
+
+                Vector3 position = lowerBound.ToVector3() + size/2;
+
+                RegionModel regionModel;
+                if (!model.Regions.TryGetModel(repositionedRegion.Index, out regionModel))
+                {
+                    Log.Warn("Could not reposition region {region}, not found", repositionedRegion.Index);
+                    continue;
+                }
+
+                regionModel.Position = position;
+                regionModel.Size = size;
             }
         }
 
@@ -88,7 +117,7 @@ namespace GoodAI.Arnold.Network
                 });
             }
         }
-
+        
         private void ApplyRemovedConnectors(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.RemovedConnectorsLength; i++)
@@ -219,6 +248,10 @@ namespace GoodAI.Arnold.Network
 
                 region.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, region, neuron.Position.ToVector3()));
             }
+        }
+
+        private void ApplyRepositionedNeurons(SimulationModel model, ModelResponse diff)
+        {
         }
 
         private void ApplyRemovedNeurons(SimulationModel model, ModelResponse diff)
