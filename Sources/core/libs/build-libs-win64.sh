@@ -17,19 +17,11 @@ build_charm()
 {
     echo "Building Charm++"
     CHARM_VERSION=6.7.1
-    CHARM_LINK=http://charm.cs.illinois.edu/distrib/charm-6.7.1.tar.gz
+    CHARM_LINK="http://charm.cs.illinois.edu/distrib/charm-${CHARM_VERSION}.tar.gz"
 
-    echo "...cleaning"
-    rm -r -f charm
+    # NOTE: a previous version had UNPACKED_DIR (the 4th param) in the form "charm-$CHARM_VERSION"
+    download_and_unpack "$CHARM_LINK" "charm" "$CHARM_VERSION" "charm"
 
-    if [ ! -f "charm-${CHARM_VERSION}.tar.gz" ]
-    then
-        wget --no-check-certificate --output-document="charm-${CHARM_VERSION}.tar.gz" $CHARM_LINK
-    fi
-
-    echo "...unpacking"
-    tar --extract --gzip --file="charm-${CHARM_VERSION}.tar.gz"
-    mv charm-$CHARM_VERSION charm
     cd charm
 
     echo "...fixing scripts"
@@ -53,7 +45,7 @@ build_tbb()
     local TBB_VERSION=44_20160526
     local TBB_LINK="https://www.threadingbuildingblocks.org/sites/default/files/software_releases/windows/tbb${TBB_VERSION}oss_win.zip"
 
-    download_and_unzip "$TBB_LINK" "tbb" "$TBB_VERSION" "tbb${TBB_VERSION}oss"
+    download_and_unpack "$TBB_LINK" "tbb" "$TBB_VERSION" "tbb${TBB_VERSION}oss"
 
     cp -f -r tbb/bin/intel64/vc14/* tbb/bin
     cp -f -r tbb/lib/intel64/vc14/* tbb/lib
@@ -65,7 +57,7 @@ build_sparsehash()
     local SPARSEHASH_VERSION=2.0.3
     local SPARSEHASH_LINK="https://github.com/sparsehash/sparsehash/archive/sparsehash-${SPARSEHASH_VERSION}.zip"
 
-    download_and_unzip "$SPARSEHASH_LINK" "sparsehash" "$SPARSEHASH_VERSION" "sparsehash-sparsehash-${SPARSEHASH_VERSION}"
+    download_and_unpack "$SPARSEHASH_LINK" "sparsehash" "$SPARSEHASH_VERSION" "sparsehash-sparsehash-${SPARSEHASH_VERSION}"
 
     echo "...fixing scripts"
 
@@ -86,7 +78,7 @@ build_json()
     local JSON_VERSION=1.1.0
     local JSON_LINK="https://github.com/nlohmann/json/archive/v${JSON_VERSION}.zip"
 
-    download_and_unzip "$JSON_LINK" "json" "$JSON_VERSION"
+    download_and_unpack "$JSON_LINK" "json" "$JSON_VERSION"
 }
 
 build_flatbuffers()
@@ -95,7 +87,7 @@ build_flatbuffers()
     local FLATBUFFERS_VERSION=1.3.0
     local FLATBUFFERS_LINK="https://github.com/google/flatbuffers/archive/v${FLATBUFFERS_VERSION}.zip"
     
-    download_and_unzip "$FLATBUFFERS_LINK" "flatbuffers" "$FLATBUFFERS_VERSION"
+    download_and_unpack "$FLATBUFFERS_LINK" "flatbuffers" "$FLATBUFFERS_VERSION"
 
     echo "...more cleaning"
     rm -r -f bin
@@ -103,7 +95,6 @@ build_flatbuffers()
     cd flatbuffers
     
     echo "...building"
-    
     devenv.exe /Upgrade build/VS2010/FlatBuffers.sln
     msbuild.exe build/VS2010/FlatBuffers.sln /property:Configuration=Release /property:Platform=x64
     
@@ -119,10 +110,10 @@ build_catch()
     local CATCH_VERSION=1.5.4
     local CATCH_LINK="https://github.com/philsquared/Catch/archive/v${CATCH_VERSION}.zip"
 
-    download_and_unzip "$CATCH_LINK" "catch" "$CATCH_VERSION" "Catch-${CATCH_VERSION}"
+    download_and_unpack "$CATCH_LINK" "catch" "$CATCH_VERSION" "Catch-${CATCH_VERSION}"
 }
 
-download_and_unzip()
+download_and_unpack()
 {
     local LINK="$1"
     local TARGET_DIR="$2"
@@ -132,6 +123,8 @@ download_and_unzip()
     [ -n "$UNPACKED_DIR" ] || UNPACKED_DIR="${TARGET_DIR}-${VERSION}"
 
     local ARCHIVE_NAME=$( get_archive_file_name "$LINK" "$TARGET_DIR" "$VERSION" )
+    local ARCHIVE_TYPE=$( get_archive_extension "$ARCHIVE_NAME" )
+    [ -n "$ARCHIVE_TYPE" ] || die "Unknown archive type '${ARCHIVE_TYPE}' or wrong archive name '${ARCHIVE_NAME}'"
 
     echo "...cleaning"
     rm -r -f "$TARGET_DIR"
@@ -139,8 +132,22 @@ download_and_unzip()
     redownload_package "$LINK" "$ARCHIVE_NAME"
 
     echo "...unpacking"
-    unzip -q -n "$ARCHIVE_NAME"  || die
-    mv "$UNPACKED_DIR" "$TARGET_DIR" || die
+    if [ "$ARCHIVE_TYPE" == 'zip' ]
+    then
+        unzip -q -n "$ARCHIVE_NAME"  || die
+    elif [ "$ARCHIVE_TYPE" == 'tar.gz' ]
+    then
+        tar --extract --gzip --file="$ARCHIVE_NAME"
+    else
+        die "Unexpected archive type: ${ARCHIVE_TYPE}."
+    fi
+    
+    if [ "$UNPACKED_DIR" != "$TARGET_DIR" ]
+    then
+        mv "$UNPACKED_DIR" "$TARGET_DIR" || die
+    fi
+
+    [ -d "$TARGET_DIR" ] || die "We did not produce the target directory ${TARGET_DIR}!"
 }
 
 redownload_package()
@@ -170,21 +177,53 @@ get_archive_file_name()
     fi
 }
 
+get_archive_extension()
+{
+    local FILE="$1"
+
+    local DOUBLE_EXT=$( echo "$FILE" | rev | cut -d \. -f -2 | rev )
+
+    if [ "$DOUBLE_EXT" == 'tar.gz' ]
+    then
+        echo "$DOUBLE_EXT"
+        return
+    fi
+
+    local EXT=$( echo "$DOUBLE_EXT" | cut -d \. -f 2 )
+
+    if [ "$EXT" == 'zip' ]
+    then
+        echo "$EXT"
+    fi
+}
+
 run_tests()
 {
+    # test get_archive_file_name
     local ARCHIVE_NAME
 
     ARCHIVE_NAME=$( get_archive_file_name "http://charm.cs.illinois.edu/distrib/charm-6.7.1.tar.gz" "foo" "0.1" )
-    [ ${ARCHIVE_NAME} == 'charm-6.7.1.tar.gz' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
+    [ "$ARCHIVE_NAME" == 'charm-6.7.1.tar.gz' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
 
     ARCHIVE_NAME=$( get_archive_file_name "https://www.threadingbuildingblocks.org/sites/default/bla_bla_bla/tbb44_20160526oss_win.zip" "foo" "0.1" )
-    [ ${ARCHIVE_NAME} == 'tbb44_20160526oss_win.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
+    [ "$ARCHIVE_NAME" == 'tbb44_20160526oss_win.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
 
     ARCHIVE_NAME=$( get_archive_file_name "https://github.com/philsquared/Catch/archive/v1.5.3.zip" "catch" "1.5.3" )
-    [ ${ARCHIVE_NAME} == 'catch-1.5.3.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"    
+    [ "$ARCHIVE_NAME" == 'catch-1.5.3.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
 
     ARCHIVE_NAME=$( get_archive_file_name  "https://github.com/sparsehash/sparsehash/archive/sparsehash-2.0.3.zip" "sparsehash" "2.0.3" )
-    [ ${ARCHIVE_NAME} == 'sparsehash-2.0.3.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"    
+    [ "$ARCHIVE_NAME" == 'sparsehash-2.0.3.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
+
+    # test get_archive_extension
+    local EXT
+    EXT=$( get_archive_extension 'charm-6.7.1.tar.gz' )
+    [ "$EXT" == 'tar.gz' ] || die "Test failed, wrong EXT: ${EXT}"
+
+    EXT=$( get_archive_extension 'catch-1.5.3.zip' )
+    [ "$EXT" == 'zip' ] || die "Test failed, wrong EXT: ${EXT}"
+
+    EXT=$( get_archive_extension 'foo-1.5.3.bar' )
+    [ "$EXT" == '' ] || die "Test failed, EXT should be empty: ${EXT}"
 }
 
 run_tests
