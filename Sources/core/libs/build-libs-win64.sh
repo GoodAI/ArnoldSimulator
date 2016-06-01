@@ -2,7 +2,14 @@
 
 die()
 {
-    echo "Fatal error. Aborting."
+    if [ -n "$1" ]
+    then
+        echo "Fatal error: $1"
+        echo "Aborting."
+    else
+        echo "Fatal error. Aborting."
+    fi
+
     exit 1
 }
 
@@ -124,7 +131,7 @@ download_and_unzip()
 
     [ -n "$UNPACKED_DIR" ] || UNPACKED_DIR="${TARGET_DIR}-${VERSION}"
 
-    local ARCHIVE_NAME="${TARGET_DIR}-${VERSION}.zip"
+    local ARCHIVE_NAME=$( get_archive_file_name "$LINK" "$TARGET_DIR" "$VERSION" )
 
     echo "...cleaning"
     rm -r -f "$TARGET_DIR"
@@ -146,6 +153,41 @@ redownload_package()
         wget --no-check-certificate --output-document="${ARCHIVE_NAME}" "$PACKAGE_LINK" || die
     fi
 }
+
+get_archive_file_name()
+{
+    local LINK="$1"
+    local TARGET_DIR="$2"
+    local VERSION="$3"
+
+    local SITE=$( echo ${LINK} | cut -d / -f 3 )
+
+    if [ ${SITE} = 'github.com' ]
+    then
+        echo "${TARGET_DIR}-${VERSION}.zip"
+    else
+        echo ${LINK} | sed -e 's|^http.*/\([^/]*\)$|\1|'
+    fi
+}
+
+run_tests()
+{
+    local ARCHIVE_NAME
+
+    ARCHIVE_NAME=$( get_archive_file_name "http://charm.cs.illinois.edu/distrib/charm-6.7.1.tar.gz" "foo" "0.1" )
+    [ ${ARCHIVE_NAME} == 'charm-6.7.1.tar.gz' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
+
+    ARCHIVE_NAME=$( get_archive_file_name "https://www.threadingbuildingblocks.org/sites/default/bla_bla_bla/tbb44_20160526oss_win.zip" "foo" "0.1" )
+    [ ${ARCHIVE_NAME} == 'tbb44_20160526oss_win.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"
+
+    ARCHIVE_NAME=$( get_archive_file_name "https://github.com/philsquared/Catch/archive/v1.5.3.zip" "catch" "1.5.3" )
+    [ ${ARCHIVE_NAME} == 'catch-1.5.3.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"    
+
+    ARCHIVE_NAME=$( get_archive_file_name  "https://github.com/sparsehash/sparsehash/archive/sparsehash-2.0.3.zip" "sparsehash" "2.0.3" )
+    [ ${ARCHIVE_NAME} == 'sparsehash-2.0.3.zip' ] || die "Test failed, wrong ARCHIVE_NAME: ${ARCHIVE_NAME}"    
+}
+
+run_tests
 
 if [ -z "$1" ]
 then
