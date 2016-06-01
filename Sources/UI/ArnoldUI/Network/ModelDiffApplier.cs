@@ -55,21 +55,19 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private void ApplyAddedNeurons(SimulationModel model, ModelResponse diff)
+        private void ApplyRemovedRegions(SimulationModel model, ModelResponse diff)
         {
-            for (int i = 0; i < diff.AddedNeuronsLength; i++)
+            for (int i = 0; i < diff.RemovedRegionsLength; i++)
             {
-                Neuron neuron = diff.GetAddedNeurons(i);
+                uint regionIndex = diff.GetRemovedRegions(i);
 
-                RegionModel targetRegionModel = model.Regions[neuron.Id.Region];
-                if (targetRegionModel == null)
+                if (!model.Regions.ContainsKey(regionIndex))
                 {
-                    Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id.Neuron,
-                        neuron.Id.Region);
+                    Log.Warn("Cannot remove region with index {regionIndex}, region not found", regionIndex);
                     continue;
                 }
 
-                targetRegionModel.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, targetRegionModel, neuron.Position.ToVector3()));
+                model.Regions.Remove(regionIndex);
             }
         }
 
@@ -94,6 +92,31 @@ namespace GoodAI.Arnold.Network
                     targetRegionModel.OutputConnectors.AddChild(new OutputConnectorModel(targetRegionModel, addedConnector.Name, addedConnector.Size));
                 else
                     targetRegionModel.InputConnectors.AddChild(new InputConnectorModel(targetRegionModel, addedConnector.Name, addedConnector.Size));
+            }
+        }
+
+        private void ApplyRemovedConnectors(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.RemovedConnectorsLength; i++)
+            {
+                Connector removedConnector = diff.GetRemovedConnectors(i);
+
+                RegionModel targetRegionModel = model.Regions[removedConnector.RegionIndex];
+                if (targetRegionModel == null)
+                {
+                    Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
+                        removedConnector.Name,
+                        removedConnector.RegionIndex);
+                    continue;
+                }
+
+                var deleted = removedConnector.Direction == Direction.Backward
+                    ? targetRegionModel.InputConnectors.Remove(removedConnector.Name)
+                    : targetRegionModel.OutputConnectors.Remove(removedConnector.Name);
+
+                if (!deleted)
+                    Log.Warn("Cannot remove connector {connector} from region {region}, connector not found",
+                        removedConnector.Name, targetRegionModel.Index);
             }
         }
 
@@ -130,94 +153,6 @@ namespace GoodAI.Arnold.Network
                 var connectionModel = new ConnectionModel(fromConnector, toConnector);
 
                 model.Connections.AddChild(connectionModel);
-            }
-        }
-
-        private void LogConnectionNotProcessed(Connection addedConnection, string action, string reason)
-        {
-            Log.Warn(
-                "Could not " + action +
-                " add connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
-                addedConnection.FromRegion,
-                addedConnection.FromConnector,
-                addedConnection.ToRegion,
-                addedConnection.ToConnector,
-                reason);
-        }
-
-        private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)
-        {
-            for (int i = 0; i < diff.AddedSynapsesLength; i++)
-            {
-                Synapse addedSynapse = diff.GetAddedSynapses(i);
-                ProcessSynapse(model, addedSynapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
-                {
-                    var synapseModel = new SynapseModel(fromRegion, fromNeuron, toRegion, toNeuron);
-                    fromNeuron.Outputs[synapseModel.ToNeuron.Index] = synapseModel;
-                    fromRegion.AddSynapse(synapseModel);
-                });
-            }
-        }
-
-        private void ApplySpikedSynapses(SimulationModel model, ModelResponse diff)
-        {
-            for (int i = 0; i < diff.SpikedSynapsesLength; i++)
-            {
-                Synapse spikedSynapse = diff.GetSpikedSynapses(i);
-                ProcessSynapse(model, spikedSynapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
-                {
-                    SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Index];
-
-                    if (synapseModel == null)
-                    {
-                        LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
-                        return;
-                    }
-
-                    synapseModel.Spike();
-                });
-            }
-        }
-
-        private void ApplyRemovedRegions(SimulationModel model, ModelResponse diff)
-        {
-            for (int i = 0; i < diff.RemovedRegionsLength; i++)
-            {
-                uint regionIndex = diff.GetRemovedRegions(i);
-
-
-                if (!model.Regions.ContainsKey(regionIndex))
-                {
-                    Log.Warn("Cannot remove region with index {regionIndex}, region not found", regionIndex);
-                    continue;
-                }
-
-                model.Regions.Remove(regionIndex);
-            }
-        }
-
-        private void ApplyRemovedConnectors(SimulationModel model, ModelResponse diff)
-        {
-            for (int i = 0; i < diff.RemovedConnectorsLength; i++)
-            {
-                Connector removedConnector = diff.GetRemovedConnectors(i);
-
-                RegionModel targetRegionModel = model.Regions[removedConnector.RegionIndex];
-                if (targetRegionModel == null)
-                {
-                    Log.Warn("Cannot add connector {connectorName}, region with index {regionIndex} was not found",
-                        removedConnector.Name,
-                        removedConnector.RegionIndex);
-                    continue;
-                }
-
-                var deleted = removedConnector.Direction == Direction.Backward
-                    ? targetRegionModel.InputConnectors.Remove(removedConnector.Name)
-                    : targetRegionModel.OutputConnectors.Remove(removedConnector.Name);
-
-                if (!deleted)
-                    Log.Warn("Cannot remove connector {connector} from region {region}, connector not found",
-                        removedConnector.Name, targetRegionModel.Index);
             }
         }
 
@@ -262,6 +197,36 @@ namespace GoodAI.Arnold.Network
             }
         }
 
+        private void LogConnectionNotProcessed(Connection addedConnection, string action, string reason)
+        {
+            Log.Warn(
+                "Could not " + action +
+                " add connection from region {fromRegion}, connector {fromConnector} to region {toRegion}, connector {toConnector}: {reason}",
+                addedConnection.FromRegion,
+                addedConnection.FromConnector,
+                addedConnection.ToRegion,
+                addedConnection.ToConnector,
+                reason);
+        }
+
+        private void ApplyAddedNeurons(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.AddedNeuronsLength; i++)
+            {
+                Neuron neuron = diff.GetAddedNeurons(i);
+
+                RegionModel targetRegionModel = model.Regions[neuron.Id.Region];
+                if (targetRegionModel == null)
+                {
+                    Log.Warn("Cannot add neuron {neuronId}, region with index {regionIndex} was not found", neuron.Id.Neuron,
+                        neuron.Id.Region);
+                    continue;
+                }
+
+                targetRegionModel.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, targetRegionModel, neuron.Position.ToVector3()));
+            }
+        }
+
         private void ApplyRemovedNeurons(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.RemovedNeuronsLength; i++)
@@ -271,17 +236,31 @@ namespace GoodAI.Arnold.Network
                 RegionModel region;
                 if (!model.Regions.TryGetModel(id.Region, out region))
                 {
-                    LogRegionNeuronNotFound("region", id);
+                    LogNeuronNotRemoved("region", id);
                     continue;
                 }
 
                 if (!region.Experts.ContainsKey(id.Neuron))
                 {
-                    LogRegionNeuronNotFound("neuron", id);
+                    LogNeuronNotRemoved("neuron", id);
                     continue;
                 }
 
                 region.Experts.Remove(id.Neuron);
+            }
+        }
+
+        private void ApplyAddedSynapses(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.AddedSynapsesLength; i++)
+            {
+                Synapse addedSynapse = diff.GetAddedSynapses(i);
+                ProcessSynapse(model, addedSynapse, "add", (fromRegion, fromNeuron, toRegion, toNeuron) =>
+                {
+                    var synapseModel = new SynapseModel(fromRegion, fromNeuron, toRegion, toNeuron);
+                    fromNeuron.Outputs[synapseModel.ToNeuron.Index] = synapseModel;
+                    fromRegion.AddSynapse(synapseModel);
+                });
             }
         }
 
@@ -291,7 +270,7 @@ namespace GoodAI.Arnold.Network
             {
                 var synapse = diff.GetRemovedSynapses(i);
 
-                ProcessSynapse(model, synapse, (fromRegion, fromNeuron, toRegion, toNeuron) =>
+                ProcessSynapse(model, synapse, "remove", (fromRegion, fromNeuron, toRegion, toNeuron) =>
                 {
                     var synapseModel = fromNeuron.Outputs[toNeuron.Index];
                     fromNeuron.Outputs.Remove(toNeuron.Index);
@@ -300,57 +279,59 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private void LogRegionNeuronNotFound(string itemNotFound, NeuronId id)
+        private void ApplySpikedSynapses(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.SpikedSynapsesLength; i++)
+            {
+                Synapse spikedSynapse = diff.GetSpikedSynapses(i);
+                ProcessSynapse(model, spikedSynapse, "spike", (fromRegion, fromNeuron, toRegion, toNeuron) =>
+                {
+                    SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Index];
+
+                    if (synapseModel == null)
+                    {
+                        LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
+                        return;
+                    }
+
+                    synapseModel.Spike();
+                });
+            }
+        }
+
+        private void LogNeuronNotRemoved(string itemNotFound, NeuronId id)
         {
             Log.Warn(
                 "Cannot remove neuron with id {neuronIndex} in region {regionIndex}, " + itemNotFound + " not found",
                 id.Region);
         }
 
-        private void ProcessSynapse(SimulationModel model, Synapse synapse, Action<RegionModel, ExpertModel, RegionModel, ExpertModel> action)
+        private void ProcessSynapse(SimulationModel model, Synapse synapse, string actionName, Action<RegionModel, ExpertModel, RegionModel, ExpertModel> action)
         {
             if (!CheckSameRegion(synapse))
                 return;
 
-            RegionModel fromRegion;
-            RegionModel toRegion;
-            if (!TryGetRegions(model, synapse, out fromRegion, out toRegion))
-                return;
+            var fromRegion = model.Regions[synapse.From.Region];
+            var toRegion = model.Regions[synapse.From.Region];
 
-            ExpertModel fromNeuron;
-            ExpertModel toNeuron;
-            if (!TryGetNeurons(fromRegion, synapse, toRegion, out fromNeuron, out toNeuron))
+            if (fromRegion == null || toRegion == null)
+            {
+                string missingRegion = fromRegion == null ? "Source" : "Target";
+                LogSynapseNotProcessed(synapse, actionName, $"{missingRegion} region not found");
                 return;
+            }
+
+            var fromNeuron = fromRegion.Experts[synapse.From.Neuron];
+            var toNeuron = toRegion.Experts[synapse.To.Neuron];
+
+            if (fromNeuron == null || toNeuron == null)
+            {
+                string missingNeuron = fromNeuron == null ? "Source" : "Target";
+                LogSynapseNotProcessed(synapse, actionName, $"{missingNeuron} neuron not found");
+                return;
+            }
 
             action(fromRegion, fromNeuron, toRegion, toNeuron);
-        }
-
-        private bool TryGetNeurons(RegionModel fromRegion, Synapse synapse, RegionModel toRegion,
-            out ExpertModel fromNeuron, out ExpertModel toNeuron)
-        {
-            fromNeuron = fromRegion.Experts[synapse.From.Neuron];
-            toNeuron = toRegion.Experts[synapse.To.Neuron];
-
-            if (fromNeuron != null && toNeuron != null)
-                return true;
-
-            string missingNeuron = fromNeuron == null ? "Source" : "Target";
-            LogSynapseNotProcessed(synapse, "add", $"{missingNeuron} neuron not found");
-            return false;
-        }
-
-        private bool TryGetRegions(SimulationModel model, Synapse synapse, out RegionModel fromRegion,
-            out RegionModel toRegion)
-        {
-            fromRegion = model.Regions[synapse.From.Region];
-            toRegion = model.Regions[synapse.From.Region];
-
-            if (fromRegion != null && toRegion != null)
-                return true;
-
-            string missingRegion = fromRegion == null ? "Source" : "Target";
-            LogSynapseNotProcessed(synapse, "add", $"{missingRegion} region not found");
-            return false;
         }
 
         private bool CheckSameRegion(Synapse synapse)
