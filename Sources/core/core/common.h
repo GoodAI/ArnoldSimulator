@@ -84,14 +84,19 @@ typedef std::vector<Box3D> Boxes;
 #define BOX_DEFAULT_SIZE_Y 20.0f
 #define BOX_DEFAULT_SIZE_Z 50.0f
 
+inline bool IsAlmostEqualFloat(float a, float b)
+{
+    return std::fabs(a - b) < FLT_EPSILON * (std::max)(std::fabs(a), std::fabs(b));
+}
+
 inline bool AreAlmostEqual(const Box3D &a, const Box3D &b)
 {
-    return (std::fabs(std::get<0>(a.first) - std::get<0>(b.first)) < FLT_EPSILON) &&
-        (std::fabs(std::get<1>(a.first) - std::get<1>(b.first)) < FLT_EPSILON) &&
-        (std::fabs(std::get<2>(a.first) - std::get<2>(b.first)) < FLT_EPSILON) &&
-        (std::fabs(std::get<0>(a.second) - std::get<0>(b.second)) < FLT_EPSILON) &&
-        (std::fabs(std::get<1>(a.second) - std::get<1>(b.second)) < FLT_EPSILON) &&
-        (std::fabs(std::get<2>(a.second) - std::get<2>(b.second)) < FLT_EPSILON);
+    return IsAlmostEqualFloat(std::get<0>(a.first), std::get<0>(b.first)) &&
+        IsAlmostEqualFloat(std::get<1>(a.first), std::get<1>(b.first)) &&
+        IsAlmostEqualFloat(std::get<2>(a.first), std::get<2>(b.first)) &&
+        IsAlmostEqualFloat(std::get<0>(a.second), std::get<0>(b.second)) &&
+        IsAlmostEqualFloat(std::get<1>(a.second), std::get<1>(b.second)) &&
+        IsAlmostEqualFloat(std::get<2>(a.second), std::get<2>(b.second));
 }
 
 inline bool IsInsideOfAny(const Point3D &point, const Boxes &boxes)
