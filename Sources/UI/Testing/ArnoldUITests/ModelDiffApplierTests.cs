@@ -308,6 +308,9 @@ namespace GoodAI.Arnold.UI.Tests
                 .Compare(addedSynapse, region.Synapses.First());
 
             Assert.True(result.AreEqual, result.DifferencesString);
+
+            Assert.Equal(region.Synapses.First(), region.Neurons.First().Outputs.Values.First());
+            Assert.Equal(region.Synapses.First(), region.Neurons.Last().Inputs.Values.First());
         }
 
         [Fact]
@@ -341,6 +344,34 @@ namespace GoodAI.Arnold.UI.Tests
             var region = m_model.Regions[addedRegion.Index];
             Assert.Empty(region.Synapses);
             Assert.Empty(region.Neurons[1].Outputs);
+            Assert.Empty(region.Neurons[2].Inputs);
+        }
+
+        // Check that synapses are repositioned when one of their neuron is.
+        [Fact]
+        public void RepositionsSynapse()
+        {
+            RegionModel addedRegion;
+            SynapseModel addedSynapse;
+
+            SetupRegionWithSynapse(out addedRegion, out addedSynapse);
+
+            NeuronModel neuron1 = m_model.Regions.First().Neurons.First();
+            NeuronModel neuron2 = m_model.Regions.First().Neurons.Last();
+
+            SynapseModel synapse = m_model.Regions.First().Synapses.First();
+
+            neuron1.Position *= 2;
+            ResponseMessage diff = ModelResponseBuilder.Build(repositionedNeurons: new List<NeuronModel> {neuron1});
+            ApplyModelDiff(diff);
+
+            Assert.Equal(neuron1.Position, synapse.Position);
+
+            neuron2.Position *= 3;
+            diff = ModelResponseBuilder.Build(repositionedNeurons: new List<NeuronModel> {neuron2});
+            ApplyModelDiff(diff);
+
+            Assert.Equal(neuron2.Position, neuron1.Position + synapse.TargetPosition);
         }
 
         private void SetupRegionWithSynapse(out RegionModel addedRegion, out SynapseModel addedSynapse)

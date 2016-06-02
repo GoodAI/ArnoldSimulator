@@ -272,6 +272,10 @@ namespace GoodAI.Arnold.Network
                 }
 
                 neuronModel.Position = neuron.Position.ToVector3();
+                foreach (SynapseModel synapse in neuronModel.Outputs.Values)
+                    synapse.UpdatePosition();
+                foreach (SynapseModel synapse in neuronModel.Inputs.Values)
+                    synapse.UpdatePosition();
             }
         }
 
@@ -315,6 +319,7 @@ namespace GoodAI.Arnold.Network
                     var synapseModel = new SynapseModel(fromRegion, fromNeuron, toRegion, toNeuron);
                     fromNeuron.Outputs[synapseModel.ToNeuron.Index] = synapseModel;
                     fromRegion.AddSynapse(synapseModel);
+                    toNeuron.Inputs[synapseModel.FromNeuron.Index] = synapseModel;
                 });
             }
         }
@@ -330,6 +335,7 @@ namespace GoodAI.Arnold.Network
                     var synapseModel = fromNeuron.Outputs[toNeuron.Index];
                     fromNeuron.Outputs.Remove(toNeuron.Index);
                     fromRegion.Synapses.Remove(synapseModel);
+                    toNeuron.Inputs.Remove(fromNeuron.Index);
                 });
             }
         }

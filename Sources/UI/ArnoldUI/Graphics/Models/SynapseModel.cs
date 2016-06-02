@@ -45,7 +45,7 @@ namespace GoodAI.Arnold.Graphics.Models
         public RegionModel FromRegion { get; }
         public RegionModel ToRegion { get; }
 
-        public Vector3 Target { get; }
+        public Vector3 TargetPosition { get; set; }
 
         public SynapseModel(RegionModel fromRegion, NeuronModel fromNeuron, RegionModel toRegion, NeuronModel toNeuron)
         {
@@ -53,8 +53,8 @@ namespace GoodAI.Arnold.Graphics.Models
             ToRegion = toRegion;
             FromNeuron = fromNeuron;
             ToNeuron = toNeuron;
-            Position = fromNeuron.Position;
-            Target = toNeuron.Position;
+
+            UpdatePosition();
 
             Translucent = true;
         }
@@ -87,7 +87,7 @@ namespace GoodAI.Arnold.Graphics.Models
                 GL.Color4(Color.FromArgb((int)(255 * Alpha), 150, 220, 255));
                 GL.Vertex3(Vector3.Zero);
                 GL.Color4(Color.FromArgb((int)(255 * Alpha), 255, 255, 255));
-                GL.Vertex3(Target - Position);
+                GL.Vertex3(TargetPosition);
 
                 GL.End();
 
@@ -98,10 +98,16 @@ namespace GoodAI.Arnold.Graphics.Models
                 GL.Color4(Color.FromArgb((int)(255 * Alpha/3), 150, 220, 255));
                 GL.Vertex3(Vector3.Zero);
                 GL.Color4(Color.FromArgb((int)(255 * Alpha/3), 255, 255, 255));
-                GL.Vertex3(Target - Position);
+                GL.Vertex3(TargetPosition);
 
                 GL.End();
             }
+        }
+
+        public void UpdatePosition()
+        {
+            Position = FromNeuron.Position;
+            TargetPosition = ToNeuron.Position - Position;
         }
     }
 }

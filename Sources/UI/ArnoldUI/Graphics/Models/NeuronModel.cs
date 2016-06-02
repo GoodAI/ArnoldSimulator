@@ -36,6 +36,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         // The key is the remote neuron's index.
         public IDictionary<uint, SynapseModel> Outputs { get; } = new Dictionary<uint, SynapseModel>();
+        public IDictionary<uint, SynapseModel> Inputs { get; } = new Dictionary<uint, SynapseModel>();
 
         public NeuronModel(uint index, string type, RegionModel regionModel, Vector3 position)
         {
@@ -92,7 +93,7 @@ namespace GoodAI.Arnold.Graphics.Models
         {
             m_alpha = SpikeAlpha;
 
-            foreach (var synapse in Outputs.Values)
+            foreach (SynapseModel synapse in Outputs.Values)
                 synapse.Spike();
         }
 

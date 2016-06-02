@@ -14,7 +14,6 @@ namespace GoodAI.Arnold.Graphics.Models
     public class ConnectionModel : SynapseModelBase
     {
         public static readonly Color4 ConnectionColor = new Color4(1f, 1f, 1f, 0.7f);
-        public static readonly float ConnectorMarginFactor = 0.1f;
 
         public InputConnectorModel To { get; }
         public OutputConnectorModel From { get; }
