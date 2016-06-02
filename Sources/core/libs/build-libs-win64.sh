@@ -13,7 +13,7 @@ die()
     exit 1
 }
 
-build_charm()
+obtain_charm()
 {
     echo "Building Charm++"
     CHARM_VERSION=6.7.1
@@ -39,7 +39,7 @@ build_charm()
     cd ..
 }
 
-build_tbb()
+obtain_tbb()
 {
     echo "Building TBB"
     local TBB_VERSION=44_20160526
@@ -51,7 +51,7 @@ build_tbb()
     cp -f -r tbb/lib/intel64/vc14/* tbb/lib
 }
 
-build_sparsehash()
+obtain_sparsehash()
 {
     echo "Building sparsehash"
     local SPARSEHASH_VERSION=2.0.3
@@ -72,7 +72,7 @@ build_sparsehash()
     cp -f -r sparsehash/src/windows/* sparsehash/src
 }
 
-build_json()
+obtain_json()
 {
     echo "Building json"
     local JSON_VERSION=1.1.0
@@ -81,7 +81,7 @@ build_json()
     download_and_unpack "$JSON_LINK" "json" "$JSON_VERSION"
 }
 
-build_flatbuffers()
+obtain_flatbuffers()
 {
     echo "Building FlatBuffers"
     local FLATBUFFERS_VERSION=1.3.0
@@ -104,7 +104,7 @@ build_flatbuffers()
     cd ..
 }
 
-build_catch()
+obtain_catch()
 {
     echo "Getting Catch"
     local CATCH_VERSION=1.5.4
@@ -242,30 +242,30 @@ for option
 do
     case $option in
         charm)
-            build_charm
+            obtain_charm
         ;;
         tbb)
-            build_tbb
+            obtain_tbb
         ;;
         sparsehash)
-            build_sparsehash
+            obtain_sparsehash
         ;;
         json)
-            build_json
+            obtain_json
         ;;
         flatbuffers)
-            build_flatbuffers
+            obtain_flatbuffers
         ;;
         catch)
-            build_catch
+            obtain_catch
         ;;
         all)
-            build_charm
-            build_tbb
-            build_sparsehash
-            build_json
-            build_flatbuffers
-            build_catch
+            obtain_charm
+            obtain_tbb
+            obtain_sparsehash
+            obtain_json
+            obtain_flatbuffers
+            obtain_catch
         ;;
         *)
             echo "Unknown option '${option}'"
@@ -275,4 +275,4 @@ do
 done
 
 echo
-echo "Dependencies have been built successfully"
+echo "Dependencies have been built successfully."
