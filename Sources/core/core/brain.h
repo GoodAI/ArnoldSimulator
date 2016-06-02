@@ -132,6 +132,8 @@ public:
     BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params);
     explicit BrainBase(CkMigrateMessage *msg);
     ~BrainBase();
+    void Unload();
+    void Unloaded();
 
     BrainBase(const BrainBase &other) = delete;
     BrainBase &operator=(const BrainBase &other) = delete;
@@ -213,6 +215,7 @@ private:
     bool mDoSimulationProgressNext;
     bool mViewportUpdateOverflowed;
     bool mIsSimulationRunning;
+    bool mUnloadRequested;
 
     bool mRegionCommitTopologyChangeDone;
     bool mRegionSimulateDone;

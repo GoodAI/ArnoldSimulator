@@ -12,6 +12,8 @@ module brain
     array [1D] BrainBase
     {
         entry BrainBase(BrainName name, BrainType type, BrainParams params);
+        entry void Unload();
+        entry [reductiontarget] void Unloaded();
 
         entry void RunSimulation(size_t brainSteps, bool untilStopped);
         entry void StopSimulation();

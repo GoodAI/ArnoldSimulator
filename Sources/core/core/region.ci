@@ -11,6 +11,7 @@ module region
     array [1D] RegionBase
     {
         entry RegionBase(RegionName name, RegionType type, Box3D box, RegionParams params);
+        entry void Unload();
 
         entry void CreateInput(ConnectorName name, NeuronType neuronType, NeuronParams neuronParams, size_t neuronCount);
         entry void DeleteInput(ConnectorName name);

@@ -49,6 +49,11 @@ public:
     void Exit();
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
+
+    void LoadBrain(const BrainName &name, const BrainType &type, const BrainParams &params);
+    bool IsBrainLoaded();
+    void UnloadBrain();
+    void BrainUnloaded();
     
     void SendSimulationState(RequestId requestId, bool isSimulationRunning, 
         size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep);
@@ -67,10 +72,14 @@ protected:
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const;
+
 private:
     Network::StateType mState;
 
     double mStartTime;
+
+    bool mBrainLoaded;
+    bool mBrainIsUnloading;
 
     RequestId mRequestIdCounter;
     std::unordered_map<RequestId, CkCcsRequestMsg *> mRequests;

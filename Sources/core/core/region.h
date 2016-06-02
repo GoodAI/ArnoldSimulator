@@ -74,6 +74,7 @@ public:
     RegionBase(const RegionName &name, const RegionType &type, const Box3D &box, const RegionParams &params);
     explicit RegionBase(CkMigrateMessage *msg);
     ~RegionBase();
+    void Unload();
 
     RegionBase(const RegionBase &other) = delete;
     RegionBase &operator=(const RegionBase &other) = delete;

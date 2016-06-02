@@ -196,6 +196,16 @@ RegionBase::~RegionBase()
     if (mRegion) delete mRegion;
 }
 
+void RegionBase::Unload()
+{
+    for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
+        gNeurons(thisIndex, *it).ckDestroy();
+    }
+
+    CkCallback cb(CkReductionTarget(BrainBase, Unloaded), gBrain[0]);
+    contribute(cb);
+}
+
 void RegionBase::pup(PUP::er &p)
 {
     p | mName;

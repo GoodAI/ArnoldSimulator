@@ -228,8 +228,8 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params) :
     mName(name), mDoViewportUpdate(true), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
-    mIsSimulationRunning(false), mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
-    mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
+    mIsSimulationRunning(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
+    mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
     mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
     mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
@@ -432,8 +432,8 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
 BrainBase::BrainBase(CkMigrateMessage *msg) :
     mDoViewportUpdate(true), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
-    mIsSimulationRunning(false), mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
-    mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
+    mIsSimulationRunning(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
+    mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
     mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
     mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
@@ -448,6 +448,24 @@ BrainBase::~BrainBase()
     if (mBody) delete mBody;
 }
 
+void BrainBase::Unload()
+{
+    mUnloadRequested = true;
+    if (!mIsSimulationRunning) {
+        gRegions.Unload();
+    } else {
+        StopSimulation();
+    }
+}
+
+void BrainBase::Unloaded()
+{
+    for (auto it = mRegionIndices.begin(); it != mRegionIndices.end(); ++it) {
+        gRegions[*it].ckDestroy();
+    }
+    gCore.ckLocal()->BrainUnloaded();
+}
+
 void BrainBase::pup(PUP::er &p)
 {
     p | mName;
@@ -459,6 +477,7 @@ void BrainBase::pup(PUP::er &p)
     p | mDoSimulationProgressNext;
     p | mViewportUpdateOverflowed;
     p | mIsSimulationRunning;
+    p | mUnloadRequested;
 
     p | mRegionCommitTopologyChangeDone;
     p | mRegionSimulateDone;
@@ -1404,6 +1423,10 @@ void BrainBase::SimulateDone()
         mSimulationStateRequests.pop_front();
         gCore.ckLocal()->SendSimulationState(requestId, mIsSimulationRunning, 
             mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
+    }
+
+    if (mUnloadRequested) {
+        gRegions.Unload();
     }
 }
 

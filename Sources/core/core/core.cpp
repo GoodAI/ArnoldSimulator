@@ -22,7 +22,9 @@ void CoreProcInit()
     TurnManualLBOn();
 }
 
-Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(0)
+Core::Core(CkArgMsg *msg) : 
+    mState(Network::StateType_Empty), mStartTime(0.0),
+    mBrainLoaded(false), mBrainIsUnloading(false), mRequestIdCounter(0)
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -82,8 +84,7 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
                 }
 
                 if (!brainType.empty()) {
-                    gBrain[0].insert(brainName, brainType, brainParams);
-                    gBrain.doneInserting();
+                    LoadBrain(brainName, brainType, brainParams);
                 }
             }
         }
@@ -97,7 +98,8 @@ Core::Core(CkArgMsg *msg) : mState(Network::StateType_Empty), mRequestIdCounter(
 }
 
 Core::Core(CkMigrateMessage *msg) :
-    mState(Network::StateType::StateType_Empty), mStartTime(0.0), mRequestIdCounter(0)
+    mState(Network::StateType::StateType_Empty), mStartTime(0.0), 
+    mBrainLoaded(false), mBrainIsUnloading(false), mRequestIdCounter(0)
 {
 }
 
@@ -113,6 +115,8 @@ void Core::pup(PUP::er &p)
 {
     p | mState;
     p | mStartTime;
+    p | mBrainLoaded;
+    p | mBrainIsUnloading;
     p | mRequestIdCounter;
 
     if (p.isUnpacking()) {
@@ -174,6 +178,37 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
     } catch (ShutdownRequestedException &exception) {
         CkPrintf("ShutdownRequestedException: %s\n", exception.what());
         Exit();
+    }
+}
+
+void Core::LoadBrain(const BrainName &name, const BrainType &type, const BrainParams &params)
+{
+    if (!mBrainLoaded) {
+        gBrain[0].insert(name, type, params);
+        gBrain.doneInserting();
+        mBrainLoaded = true;
+    }
+}
+
+bool Core::IsBrainLoaded()
+{
+    return (mBrainLoaded && !mBrainIsUnloading);
+}
+
+void Core::UnloadBrain()
+{
+    if (mBrainLoaded && !mBrainIsUnloading) {
+        mBrainIsUnloading = true;
+        gBrain[0].Unload();
+    }
+}
+
+void Core::BrainUnloaded()
+{
+    if (mBrainIsUnloading) {
+        gBrain[0].ckDestroy();
+        mBrainLoaded = false;
+        mBrainIsUnloading = false;
     }
 }
 
