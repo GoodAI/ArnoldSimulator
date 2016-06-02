@@ -148,7 +148,7 @@ private:
     bool mDoFullUpdate;
     bool mDoProgress;
     size_t mBrainStep;
-    Boxes mRoiBoxes;
+    Boxes mRoiTransformedBoxes;
 
     NeuronIndex mNeuronIdxCounter;
     NeuronIndices mNeuronIndices;

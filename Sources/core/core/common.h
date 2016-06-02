@@ -5,6 +5,8 @@
 #include <tuple>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <limits>
 #include <unordered_set>
 
 #include <tbb/tbbmalloc_proxy.h>
@@ -82,6 +84,16 @@ typedef std::vector<Box3D> Boxes;
 #define BOX_DEFAULT_SIZE_Y 20.0f
 #define BOX_DEFAULT_SIZE_Z 50.0f
 
+inline bool AreAlmostEqual(const Box3D &a, const Box3D &b)
+{
+    return (std::fabs(std::get<0>(a.first) - std::get<0>(b.first)) < FLT_EPSILON) &&
+        (std::fabs(std::get<1>(a.first) - std::get<1>(b.first)) < FLT_EPSILON) &&
+        (std::fabs(std::get<2>(a.first) - std::get<2>(b.first)) < FLT_EPSILON) &&
+        (std::fabs(std::get<0>(a.second) - std::get<0>(b.second)) < FLT_EPSILON) &&
+        (std::fabs(std::get<1>(a.second) - std::get<1>(b.second)) < FLT_EPSILON) &&
+        (std::fabs(std::get<2>(a.second) - std::get<2>(b.second)) < FLT_EPSILON);
+}
+
 inline bool IsInsideOfAny(const Point3D &point, const Boxes &boxes)
 {
     for (auto it = boxes.begin(); it != boxes.end(); ++it) {
@@ -103,11 +115,60 @@ inline bool IsInsideOfAny(const Point3D &point, const Boxes &boxes)
     return false;
 }
 
-inline void TranslateAndScale(Point3D &point, const Box3D &box)
+inline void TranslateAndScaleFromUnit(Point3D &point, Size3D &size, const Box3D &box)
 {
     std::get<0>(point) = (std::get<0>(point) * std::get<0>(box.second)) + std::get<0>(box.first);
     std::get<1>(point) = (std::get<1>(point) * std::get<1>(box.second)) + std::get<1>(box.first);
     std::get<2>(point) = (std::get<2>(point) * std::get<2>(box.second)) + std::get<2>(box.first);
+    std::get<0>(size) = (std::get<0>(size) * std::get<0>(box.second));
+    std::get<1>(size) = (std::get<1>(size) * std::get<1>(box.second));
+    std::get<2>(size) = (std::get<2>(size) * std::get<2>(box.second));
+}
+
+inline void TranslateAndScaleToUnit(Point3D &point, Size3D &size, const Box3D &box)
+{
+    std::get<0>(point) = (std::get<0>(point) - std::get<0>(box.first)) / std::get<0>(box.second);
+    std::get<1>(point) = (std::get<1>(point) - std::get<1>(box.first)) / std::get<1>(box.second);
+    std::get<2>(point) = (std::get<2>(point) - std::get<2>(box.first)) / std::get<2>(box.second);
+    std::get<0>(size) = (std::get<0>(size) / std::get<0>(box.second));
+    std::get<1>(size) = (std::get<1>(size) / std::get<1>(box.second));
+    std::get<2>(size) = (std::get<2>(size) / std::get<2>(box.second));
+}
+
+inline bool GetIntersection(const Box3D &a, const Box3D &b, Box3D &res)
+{
+    float xLower = (std::max)(std::get<0>(a.first), std::get<0>(b.first));
+    float xUpper = (std::min)(
+        std::get<0>(a.first) + std::get<0>(a.second), 
+        std::get<0>(b.first) + std::get<0>(b.second));
+    float xSize = xUpper - xLower;
+    bool xIntersects = xLower < xUpper;
+
+    float yLower = (std::max)(std::get<1>(a.first), std::get<1>(b.first));
+    float yUpper = (std::min)(
+        std::get<1>(a.first) + std::get<1>(a.second),
+        std::get<1>(b.first) + std::get<1>(b.second));
+    float ySize = yUpper - yLower;
+    bool yIntersects = yLower < yUpper;
+
+    float zLower = (std::max)(std::get<2>(a.first), std::get<2>(b.first));
+    float zUpper = (std::min)(
+        std::get<2>(a.first) + std::get<2>(a.second),
+        std::get<2>(b.first) + std::get<2>(b.second));
+    float zSize = zUpper - zLower;
+    bool zIntersects = zLower < zUpper;
+
+    if (xIntersects && yIntersects && zIntersects) {
+        std::get<0>(res.first) = xLower;
+        std::get<1>(res.first) = yLower;
+        std::get<2>(res.first) = zLower;
+        std::get<0>(res.second) = xSize;
+        std::get<1>(res.second) = ySize;
+        std::get<2>(res.second) = zSize;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 typedef std::tuple<NeuronId, NeuronType, NeuronParams> NeuronAdditionRequest;

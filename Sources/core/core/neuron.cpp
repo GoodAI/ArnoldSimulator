@@ -81,6 +81,7 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
     auto engine = Random::GetThreadEngine();
     std::uniform_real_distribution<float> randFloat(0.0, 1.0);
 
+    mNeverSimulated = true;
     mTempIdCounter = GetNeuronId(TEMP_REGION_INDEX, NEURON_INDEX_MIN);
     mPosition = Point3D(randFloat(engine), randFloat(engine), randFloat(engine));
     mNeuron = CreateNeuron(type, *this, p);
@@ -95,7 +96,7 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 }
 
 NeuronBase::NeuronBase(CkMigrateMessage *msg) :
-    mTempIdCounter(0), mPosition(0.0f, 0.0f, 0.0f), mParent(0),
+    mNeverSimulated(true), mTempIdCounter(0), mPosition(0.0f, 0.0f, 0.0f), mParent(0),
     mBackwardSpikesCurrent(nullptr), mBackwardSpikesNext(nullptr),
     mForwardSpikesCurrent(nullptr), mForwardSpikesNext(nullptr),
     mNeuron(nullptr)
@@ -117,6 +118,7 @@ NeuronBase::~NeuronBase()
 
 void NeuronBase::pup(PUP::er &p)
 {
+    p | mNeverSimulated;
     p | mTempIdCounter;
 
     p | mPosition;
@@ -510,7 +512,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     NeuronId neuronId = GetNeuronId(thisIndex.x, thisIndex.y);
 
     bool changedPosition = false;
-    bool wasInsideOfAny = doFullUpdate ? false : IsInsideOfAny(mPosition, roiBoxes);
+    bool wasInsideOfAny = (doFullUpdate || mNeverSimulated) ? false : IsInsideOfAny(mPosition, roiBoxes);
     if (wasInsideOfAny) {
         changedPosition = AdaptPosition();
     }
@@ -664,6 +666,8 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         mChildAdditions.clear();
         mChildRemovals.clear();
     }
+
+    mNeverSimulated = false;
 
     delete[] resultPtr;
     if (customContributionSize > 0) delete customContributionPtr;

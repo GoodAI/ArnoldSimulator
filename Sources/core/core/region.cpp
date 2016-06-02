@@ -209,7 +209,7 @@ void RegionBase::pup(PUP::er &p)
     p | mDoFullUpdate;
     p | mDoProgress;
     p | mBrainStep;
-    p | mRoiBoxes;
+    p | mRoiTransformedBoxes;
 
     p | mNeuronIdxCounter;
 
@@ -790,7 +790,29 @@ void RegionBase::Simulate(SimulateMsg *msg)
     mDoFullUpdate = msg->doFullUpdate;
     mDoProgress = msg->doProgress;
     mBrainStep = msg->brainStep;
-    mRoiBoxes = msg->roiBoxes;
+
+    Boxes intersection;
+    Box3D commonBox;
+    Box3D regionBox(mPosition, mSize);    
+    for (auto it = msg->roiBoxes.begin(); it != msg->roiBoxes.end(); ++it) {
+        if (GetIntersection(regionBox, *it, commonBox)) {
+            TranslateAndScaleToUnit(commonBox.first, commonBox.second, regionBox);
+            intersection.push_back(commonBox);
+        }
+    }
+
+    bool almostSameIntersection = false;
+    if (mRoiTransformedBoxes.size() == intersection.size()) {
+        almostSameIntersection = true;
+        for (size_t i = 0; i < mRoiTransformedBoxes.size(); ++i) {
+            if (!AreAlmostEqual(mRoiTransformedBoxes[i], intersection[i])) {
+                almostSameIntersection = false;
+                break;
+            }
+        }
+    }
+
+    mRoiTransformedBoxes = intersection;
     
     if (!mNeuronRemovals.empty()) {
         std::unordered_set<NeuronId> deletedNeurons;
@@ -802,12 +824,11 @@ void RegionBase::Simulate(SimulateMsg *msg)
     }
 
     CkVec<CkArrayIndex2D> sectionNeuronIndices;
-    if (mDoFullUpdate && !mNeuronIndices.empty()) {
+    if ((mDoFullUpdate || !almostSameIntersection) && !mNeuronIndices.empty()) {
         for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
             CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
             sectionNeuronIndices.push_back(index);
         }
-
     } else if (mDoProgress && !mNeuronsTriggered.empty()) {
         for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
             CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
@@ -841,7 +862,7 @@ void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
         simulateMsg->doFullUpdate = mDoFullUpdate;
         simulateMsg->doProgress = mDoProgress;
         simulateMsg->brainStep = mBrainStep;
-        simulateMsg->roiBoxes = mRoiBoxes;
+        simulateMsg->roiBoxes = mRoiTransformedBoxes;
 
         mNeuronSection.Simulate(simulateMsg);
 
@@ -1036,19 +1057,13 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
             if (!skipTopologyReport) {
                 NeuronAdditionReports tmpAddedNeurons; p | tmpAddedNeurons;
                 addedNeurons.reserve(addedNeurons.size() + tmpAddedNeurons.size());
-                for (auto it = tmpAddedNeurons.begin(); it != tmpAddedNeurons.end(); ++it) {
-                    NeuronAdditionReport report = *it;
-                    TranslateAndScale(std::get<2>(report), Box3D(mPosition, mSize));
-                    addedNeurons.push_back(report);
-                }
+                addedNeurons.insert(addedNeurons.begin(),
+                    tmpAddedNeurons.begin(), tmpAddedNeurons.end());
 
                 NeuronAdditionReports tmpRepositionedNeurons; p | tmpRepositionedNeurons;
                 repositionedNeurons.reserve(repositionedNeurons.size() + tmpRepositionedNeurons.size());
-                for (auto it = tmpRepositionedNeurons.begin(); it != tmpRepositionedNeurons.end(); ++it) {
-                    NeuronAdditionReport report = *it;
-                    TranslateAndScale(std::get<2>(report), Box3D(mPosition, mSize));
-                    repositionedNeurons.push_back(report);
-                }
+                repositionedNeurons.insert(repositionedNeurons.begin(),
+                    tmpRepositionedNeurons.begin(), tmpRepositionedNeurons.end());
 
                 NeuronRemovals tmpRemovedNeurons; p | tmpRemovedNeurons;
                 removedNeurons.reserve(removedNeurons.size() + tmpRemovedNeurons.size());

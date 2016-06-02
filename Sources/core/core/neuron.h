@@ -127,6 +127,7 @@ public:
     void Simulate(SimulateMsg *msg);
 
 protected:
+    bool mNeverSimulated;
     NeuronId mTempIdCounter;
 
     Point3D mPosition;
