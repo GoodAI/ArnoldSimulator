@@ -63,6 +63,7 @@ public:
     bool doProgress;
     size_t brainStep;
     Boxes roiBoxes;
+    Boxes roiBoxesLast;
 
     static void *pack(SimulateMsg *msg);
     static SimulateMsg *unpack(void *buf);

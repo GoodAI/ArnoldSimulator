@@ -508,11 +508,12 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     bool doProgress = msg->doProgress;
     size_t brainStep = msg->brainStep;
     Boxes roiBoxes = msg->roiBoxes;
+    Boxes roiBoxesLast = msg->roiBoxesLast;
 
     NeuronId neuronId = GetNeuronId(thisIndex.x, thisIndex.y);
 
     bool changedPosition = false;
-    bool wasInsideOfAny = (doFullUpdate || mNeverSimulated) ? false : IsInsideOfAny(mPosition, roiBoxes);
+    bool wasInsideOfAny = (doFullUpdate || mNeverSimulated) ? false : IsInsideOfAny(mPosition, roiBoxesLast);
     if (wasInsideOfAny) {
         changedPosition = AdaptPosition();
     }

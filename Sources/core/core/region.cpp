@@ -210,6 +210,7 @@ void RegionBase::pup(PUP::er &p)
     p | mDoProgress;
     p | mBrainStep;
     p | mRoiTransformedBoxes;
+    p | mRoiTransformedBoxesLast;
 
     p | mNeuronIdxCounter;
 
@@ -715,6 +716,7 @@ void RegionBase::CommitTopologyChange()
         gNeurons.beginInserting();
         for (auto it = mNeuronAdditions.begin(); it != mNeuronAdditions.end(); ++it) {
             mNeuronIndices.insert(std::get<0>(*it));
+            mNeuronsTriggered.insert(std::get<0>(*it));
             gNeurons(thisIndex, std::get<0>(*it)).insert(std::get<1>(*it), std::get<2>(*it));
         }
         gNeurons.doneInserting();
@@ -812,6 +814,7 @@ void RegionBase::Simulate(SimulateMsg *msg)
         }
     }
 
+    mRoiTransformedBoxesLast = mRoiTransformedBoxes;
     mRoiTransformedBoxes = intersection;
     
     if (!mNeuronRemovals.empty()) {
@@ -863,6 +866,7 @@ void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
         simulateMsg->doProgress = mDoProgress;
         simulateMsg->brainStep = mBrainStep;
         simulateMsg->roiBoxes = mRoiTransformedBoxes;
+        simulateMsg->roiBoxesLast = mRoiTransformedBoxesLast;
 
         mNeuronSection.Simulate(simulateMsg);
 

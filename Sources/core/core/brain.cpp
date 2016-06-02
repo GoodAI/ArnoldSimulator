@@ -38,7 +38,8 @@ void ViewportUpdate::pup(PUP::er &p)
 void *SimulateMsg::pack(SimulateMsg *msg)
 {
     size_t boxCnt = msg->roiBoxes.size();
-    size_t size = (sizeof(bool) * 3) + (sizeof(size_t) * 2) + (sizeof(Box3D) * boxCnt);
+    size_t boxLastCnt = msg->roiBoxesLast.size();
+    size_t size = (sizeof(bool) * 3) + (sizeof(size_t) * 2) + (sizeof(Box3D) * (boxCnt + boxLastCnt));
     char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
 
@@ -58,7 +59,13 @@ void *SimulateMsg::pack(SimulateMsg *msg)
     cur += sizeof(size_t);
 
     std::memcpy(cur, msg->roiBoxes.data(), sizeof(Box3D) * boxCnt);
-    //cur += sizeof(Box3D) * boxCnt;
+    cur += sizeof(Box3D) * boxCnt;
+
+    std::memcpy(cur, &boxLastCnt, sizeof(size_t));
+    cur += sizeof(size_t);
+
+    std::memcpy(cur, msg->roiBoxesLast.data(), sizeof(Box3D) * boxLastCnt);
+    //cur += sizeof(Box3D) * boxLastCnt;
 
     delete msg;
     return static_cast<void *>(buf);
@@ -92,7 +99,15 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
 
     msg->roiBoxes.reserve(boxCnt);
     std::memcpy(msg->roiBoxes.data(), cur, sizeof(Box3D) * boxCnt);
-    //cur += sizeof(Box3D) * boxCnt;
+    cur += sizeof(Box3D) * boxCnt;
+
+    size_t boxLastCnt = 0;
+    std::memcpy(&boxLastCnt, cur, sizeof(size_t));
+    cur += sizeof(size_t);
+
+    msg->roiBoxesLast.reserve(boxLastCnt);
+    std::memcpy(msg->roiBoxesLast.data(), cur, sizeof(Box3D) * boxLastCnt);
+    //cur += sizeof(Box3D) * boxLastCnt;
 
     CkFreeMsg(buf);
     return msg;
