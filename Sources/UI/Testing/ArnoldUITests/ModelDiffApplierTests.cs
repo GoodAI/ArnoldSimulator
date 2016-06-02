@@ -326,6 +326,30 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
+        public void SpikesSynapse()
+        {
+            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+
+            var addedNeuron1 = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron2 = new ExpertModel(2, "neuronType", addedRegion, Vector3.UnitY);
+
+            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(
+                addedNeurons: new List<ExpertModel> {addedNeuron1, addedNeuron2},
+                addedSynapses: new List<SynapseModel> {addedSynapse});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            diff = ModelResponseBuilder.Build(spikedSynapses: new List<SynapseModel> {addedSynapse});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            var region = m_model.Regions[addedRegion.Index];
+            Assert.True(region.Synapses.First().IsSpiked);
+        }
+
+        [Fact]
         public void RemovesSynapse()
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);

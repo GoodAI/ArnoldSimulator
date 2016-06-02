@@ -157,7 +157,7 @@ namespace GoodAI.Arnold.Network.Messages
 
         private static Offset<Region>[] BuildRegionsOffsets(IList<RegionModel> regions, FlatBufferBuilder builder)
         {
-            Offset<Region>[] regionsOffsets = BuildOffsets(regions, builder, region =>
+            Offset<Region>[] regionsOffsets = BuildOffsets(regions, region =>
             {
                 StringOffset regionName = builder.CreateString(region.Name);
                 StringOffset regionType = builder.CreateString(region.Type);
@@ -176,7 +176,7 @@ namespace GoodAI.Arnold.Network.Messages
         private static VectorOffset? BuildAddedConnectors(IList<ConnectorModel> addedConnectors,
             FlatBufferBuilder builder)
         {
-            Offset<Connector>[] addedConnectorsOffsets = BuildOffsets(addedConnectors, builder, connector =>
+            Offset<Connector>[] addedConnectorsOffsets = BuildOffsets(addedConnectors, connector =>
             {
                 StringOffset connectorName = builder.CreateString(connector.Name);
 
@@ -195,7 +195,7 @@ namespace GoodAI.Arnold.Network.Messages
             if (removedConnectors == null)
                 return null;
 
-            var removedConnectorsOffsets = BuildOffsets(removedConnectors, builder,
+            var removedConnectorsOffsets = BuildOffsets(removedConnectors,
                 connector =>
                 {
                     var name = builder.CreateString(connector.Name);
@@ -209,15 +209,7 @@ namespace GoodAI.Arnold.Network.Messages
         private static VectorOffset? BuildAddedConnections(IList<ConnectionModel> addedConnections,
             FlatBufferBuilder builder)
         {
-            Offset<Connection>[] addedConnectionsOffsets = BuildOffsets(addedConnections, builder, connection =>
-            {
-                StringOffset fromConnectorName = builder.CreateString(connection.From.Name);
-                StringOffset toConnectorName = builder.CreateString(connection.To.Name);
-
-                return Connection.CreateConnection(builder, connection.From.Region.Index,
-                    fromConnectorName, connection.To.Region.Index, toConnectorName,
-                    connection.From.Direction);
-            });
+            Offset<Connection>[] addedConnectionsOffsets = BuildConnectionOffsets(addedConnections, builder);
 
             if (addedConnectionsOffsets == null)
                 return null;
@@ -229,15 +221,7 @@ namespace GoodAI.Arnold.Network.Messages
         private static VectorOffset? BuildRemovedConnections(IList<ConnectionModel> removedConnections,
             FlatBufferBuilder builder)
         {
-            Offset<Connection>[] removedConnectionsOffsets = BuildOffsets(removedConnections, builder, connection =>
-            {
-                StringOffset fromConnectorName = builder.CreateString(connection.From.Name);
-                StringOffset toConnectorName = builder.CreateString(connection.To.Name);
-
-                return Connection.CreateConnection(builder, connection.From.Region.Index,
-                    fromConnectorName, connection.To.Region.Index, toConnectorName,
-                    connection.From.Direction);
-            });
+            Offset<Connection>[] removedConnectionsOffsets = BuildConnectionOffsets(removedConnections, builder);
 
             if (removedConnectionsOffsets == null)
                 return null;
@@ -246,18 +230,24 @@ namespace GoodAI.Arnold.Network.Messages
                 removedConnectionsOffsets);
         }
 
+        private static Offset<Connection>[] BuildConnectionOffsets(IList<ConnectionModel> connections, FlatBufferBuilder builder)
+        {
+            Offset<Connection>[] addedConnectionsOffsets = BuildOffsets(connections, connection =>
+            {
+                StringOffset fromConnectorName = builder.CreateString(connection.From.Name);
+                StringOffset toConnectorName = builder.CreateString(connection.To.Name);
+
+                return Connection.CreateConnection(builder, connection.From.Region.Index,
+                    fromConnectorName, connection.To.Region.Index, toConnectorName,
+                    connection.From.Direction);
+            });
+            return addedConnectionsOffsets;
+        }
+
         private static VectorOffset? BuildAddedNeurons(IList<ExpertModel> addedNeurons,
             FlatBufferBuilder builder)
         {
-            Offset<Neuron>[] addedNeuronsOffsets = BuildOffsets(addedNeurons, builder, neuron =>
-            {
-                StringOffset type = builder.CreateString(neuron.Type);
-                Offset<Position> position = Position.CreatePosition(builder, 1, 2, 3);
-
-                var neuronId = NeuronId.CreateNeuronId(builder, neuron.Index, neuron.RegionModel.Index);
-
-                return Neuron.CreateNeuron(builder, neuronId, type, position);
-            });
+            Offset<Neuron>[] addedNeuronsOffsets = BuildNeuronOffsets(addedNeurons, builder);
 
             if (addedNeuronsOffsets == null)
                 return null;
@@ -268,31 +258,44 @@ namespace GoodAI.Arnold.Network.Messages
         private static VectorOffset? BuildRepositionedNeurons(IList<ExpertModel> repositionedNeurons,
             FlatBufferBuilder builder)
         {
-            return null;
+            Offset<Neuron>[] repositionedNeuronsOffsets = BuildNeuronOffsets(repositionedNeurons, builder);
+
+            if (repositionedNeuronsOffsets == null)
+                return null;
+
+            return ModelResponse.CreateRepositionedNeuronsVector(builder, repositionedNeuronsOffsets);
         }
 
         private static VectorOffset? BuildRemovedNeurons(IList<ExpertModel> removedNeurons, FlatBufferBuilder builder)
         {
-            if (removedNeurons == null)
-                return null;
-
-            Offset<NeuronId>[] removedNeuronsOffsets = BuildOffsets(removedNeurons, builder,
+            Offset<NeuronId>[] removedNeuronsOffsets = BuildOffsets(removedNeurons,
                 neuron => NeuronId.CreateNeuronId(builder, neuron.Index, neuron.RegionModel.Index));
 
+            if (removedNeuronsOffsets == null)
+                return null;
+
             return ModelResponse.CreateRemovedNeuronsVector(builder, removedNeuronsOffsets);
+        }
+
+        private static Offset<Neuron>[] BuildNeuronOffsets(IList<ExpertModel> neurons, FlatBufferBuilder builder)
+        {
+            Offset<Neuron>[] addedNeuronsOffsets = BuildOffsets(neurons, neuron =>
+            {
+                StringOffset type = builder.CreateString(neuron.Type);
+                Offset<Position> position = Position.CreatePosition(builder, neuron.Position.X, neuron.Position.Y,
+                    neuron.Position.Z);
+
+                var neuronId = NeuronId.CreateNeuronId(builder, neuron.Index, neuron.RegionModel.Index);
+
+                return Neuron.CreateNeuron(builder, neuronId, type, position);
+            });
+            return addedNeuronsOffsets;
         }
 
         private static VectorOffset? BuildAddedSynapses(IList<SynapseModel> addedSynapses,
             FlatBufferBuilder builder)
         {
-            Offset<Synapse>[] addedSynapsesOffsets = BuildOffsets(addedSynapses, builder,
-                synapse =>
-                {
-                    var fromNeuronId = NeuronId.CreateNeuronId(builder, synapse.FromNeuron.Index, synapse.FromRegion.Index);
-                    var toNeuronId = NeuronId.CreateNeuronId(builder, synapse.ToNeuron.Index, synapse.ToRegion.Index);
-
-                    return Synapse.CreateSynapse(builder, fromNeuronId, toNeuronId);
-                });
+            Offset<Synapse>[] addedSynapsesOffsets = BuildSynapseOffsets(addedSynapses, builder);
 
             if (addedSynapsesOffsets == null)
                 return null;
@@ -303,15 +306,27 @@ namespace GoodAI.Arnold.Network.Messages
         private static VectorOffset? BuildSpikedSynapses(IList<SynapseModel> spikedSynapses,
             FlatBufferBuilder builder)
         {
-            return null;
+            Offset<Synapse>[] spikedSynapsesOffsets = BuildSynapseOffsets(spikedSynapses, builder);
+
+            if (spikedSynapsesOffsets == null)
+                return null;
+
+            return ModelResponse.CreateSpikedSynapsesVector(builder, spikedSynapsesOffsets);
         }
 
         private static VectorOffset? BuildRemovedSynapses(IList<SynapseModel> removedSynapses, FlatBufferBuilder builder)
         {
-            if (removedSynapses == null)
+            Offset<Synapse>[] removedSynapsesOffsets = BuildSynapseOffsets(removedSynapses, builder);
+
+            if (removedSynapsesOffsets == null)
                 return null;
 
-            Offset<Synapse>[] removedSynapsesOffsets = BuildOffsets(removedSynapses, builder,
+            return ModelResponse.CreateRemovedSynapsesVector(builder, removedSynapsesOffsets);
+        }
+
+        private static Offset<Synapse>[] BuildSynapseOffsets(IList<SynapseModel> synapses, FlatBufferBuilder builder)
+        {
+            Offset<Synapse>[] addedSynapsesOffsets = BuildOffsets(synapses,
                 synapse =>
                 {
                     var fromNeuronId = NeuronId.CreateNeuronId(builder, synapse.FromNeuron.Index, synapse.FromRegion.Index);
@@ -319,22 +334,21 @@ namespace GoodAI.Arnold.Network.Messages
 
                     return Synapse.CreateSynapse(builder, fromNeuronId, toNeuronId);
                 });
-
-            return ModelResponse.CreateRemovedSynapsesVector(builder, removedSynapsesOffsets);
+            return addedSynapsesOffsets;
         }
 
-        private static Offset<TMessageEntity>[] BuildOffsets<TModel, TMessageEntity>(IList<TModel> addedModels,
-            FlatBufferBuilder builder, Func<TModel, Offset<TMessageEntity>> createEntity)
+        private static Offset<TMessageEntity>[] BuildOffsets<TModel, TMessageEntity>(IList<TModel> models,
+            Func<TModel, Offset<TMessageEntity>> createEntity)
             where TMessageEntity : Table
         {
-            if (addedModels == null)
+            if (models == null)
                 return null;
 
-            var addedOffsets = new Offset<TMessageEntity>[addedModels.Count];
+            var addedOffsets = new Offset<TMessageEntity>[models.Count];
 
-            for (int i = 0; i < addedModels.Count; i++)
+            for (int i = 0; i < models.Count; i++)
             {
-                TModel model = addedModels[i];
+                TModel model = models[i];
                 Offset<TMessageEntity> entity = createEntity(model);
 
                 addedOffsets[i] = entity;

@@ -23,6 +23,10 @@ namespace GoodAI.Arnold.Graphics.Models
             Alpha = SpikeAlpha;
         }
 
+        // TODO(HonzaS): Remove this, it's only used in a test.
+        // Once there is an interface and this is decoupled from diff applier, use mocks instead .
+        internal bool IsSpiked => Math.Abs(Alpha - SpikeAlpha) < 1e-10f;
+
         protected override void UpdateModel(float elapsedMs)
         {
             if (Alpha > MinAlpha)

@@ -252,6 +252,27 @@ namespace GoodAI.Arnold.Network
 
         private void ApplyRepositionedNeurons(SimulationModel model, ModelResponse diff)
         {
+            for (int i = 0; i < diff.RepositionedNeuronsLength; i++)
+            {
+                Neuron neuron = diff.GetRepositionedNeurons(i);
+                var neuronId = neuron.Id;
+
+                RegionModel region;
+                if (!model.Regions.TryGetModel(neuronId.Region, out region))
+                {
+                    LogNeuronNotProcessed(neuronId, "reposition", "Region not found");
+                    continue;
+                }
+
+                ExpertModel neuronModel;
+                if (!region.Experts.TryGetModel(neuronId.Neuron, out neuronModel))
+                {
+                    LogNeuronNotProcessed(neuronId, "reposition", "Neuron not found");
+                    continue;
+                }
+
+                neuronModel.Position = neuron.Position.ToVector3();
+            }
         }
 
         private void ApplyRemovedNeurons(SimulationModel model, ModelResponse diff)
