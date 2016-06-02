@@ -8,7 +8,6 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Graphics.Models;
 using GoodAI.Logging;
 using OpenTK;
-using OpenTK.Graphics.ES11;
 
 namespace GoodAI.Arnold.Network
 {
