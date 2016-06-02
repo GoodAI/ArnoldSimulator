@@ -26,7 +26,7 @@ namespace GoodAI.Arnold.UI.Tests
             m_applier = new ModelDiffApplier();
         }
 
-        private static RegionModel AddRegion(ModelDiffApplier applier, SimulationModel model, uint id)
+        private static RegionModel SetupRegion(ModelDiffApplier applier, SimulationModel model, uint id)
         {
             var sourceRegion = new RegionModel(id, "foo", "bar", new Vector3(1, 2, 3), new Vector3(6, 5, 4));
 
@@ -41,6 +41,7 @@ namespace GoodAI.Arnold.UI.Tests
             SkipInvalidIndexers = true,
             MembersToInclude = new List<string>
             {
+                "Index",
                 "Name",
                 "Type",
                 "Position",
@@ -78,7 +79,7 @@ namespace GoodAI.Arnold.UI.Tests
             SkipInvalidIndexers = true,
             MembersToInclude = new List<string>
             {
-                "Id",
+                "Index",
                 "Type",
                 "RegionModel",
                 "Position"
@@ -108,7 +109,7 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void AddsNewRegion()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion = SetupRegion(m_applier, m_model, 1);
 
             Assert.Equal(1, m_model.Regions.Count());
             RegionModel generatedRegion = m_model.Regions.First();
@@ -121,11 +122,11 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RemovesRegion()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion = SetupRegion(m_applier, m_model, 1);
 
             ResponseMessage diff = ModelResponseBuilder.Build(removedRegions: new List<RegionModel> {addedRegion});
 
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             Assert.Empty(m_model.Regions);
         }
@@ -133,12 +134,12 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RepositionsRegion()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion = SetupRegion(m_applier, m_model, 1);
 
             addedRegion.Position = Vector3.UnitZ;
             ResponseMessage diff = ModelResponseBuilder.Build(repositionedRegions: new List<RegionModel> {addedRegion});
 
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             Assert.Equal(Vector3.UnitZ, m_model.Regions.First().Position);
         }
@@ -146,14 +147,14 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void AddsNewConnector()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion = SetupRegion(m_applier, m_model, 1);
 
             ConnectorModel addedConnector1 = new InputConnectorModel(addedRegion, "input", 4);
             ConnectorModel addedConnector2 = new OutputConnectorModel(addedRegion, "output", 3);
 
             ResponseMessage diff =
                 ModelResponseBuilder.Build(addedConnectors: new List<ConnectorModel> {addedConnector1, addedConnector2});
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             RegionModel region = m_model.Regions.First();
 
@@ -172,18 +173,17 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RemovesConnector()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion = SetupRegion(m_applier, m_model, 1);
 
             ConnectorModel addedConnector = new InputConnectorModel(addedRegion, "input", 4);
 
             ResponseMessage diff =
                 ModelResponseBuilder.Build(addedConnectors: new List<ConnectorModel> {addedConnector});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             diff = ModelResponseBuilder.Build(removedConnectors: new List<ConnectorModel> {addedConnector});
 
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             var region = m_model.Regions.First();
             Assert.Empty(region.InputConnectors);
@@ -192,19 +192,7 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void AddsNewConnection()
         {
-            RegionModel addedRegion1 = AddRegion(m_applier, m_model, 1);
-            RegionModel addedRegion2 = AddRegion(m_applier, m_model, 2);
-
-            var addedConnector1 = new OutputConnectorModel(addedRegion1, "output", 3);
-            var addedConnector2 = new InputConnectorModel(addedRegion2, "input", 4);
-
-            var addedConnection = new ConnectionModel(addedConnector1, addedConnector2);
-
-            ResponseMessage diff =
-                ModelResponseBuilder.Build(
-                    addedConnectors: new List<ConnectorModel> {addedConnector1, addedConnector2},
-                    addedConnections: new List<ConnectionModel> {addedConnection});
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ConnectionModel addedConnection = SetupRegionsWithConnectors();
 
             RegionModel region1 = m_model.Regions.First();
             RegionModel region2 = m_model.Regions.Skip(1).First();
@@ -221,8 +209,24 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RemovesConnection()
         {
-            RegionModel addedRegion1 = AddRegion(m_applier, m_model, 1);
-            RegionModel addedRegion2 = AddRegion(m_applier, m_model, 2);
+            ConnectionModel addedConnection = SetupRegionsWithConnectors();
+
+            ResponseMessage diff = ModelResponseBuilder.Build(removedConnections: new List<ConnectionModel> {addedConnection});
+
+            ApplyModelDiff(diff);
+
+            RegionModel region1 = m_model.Regions.First();
+            RegionModel region2 = m_model.Regions.Skip(1).First();
+
+            Assert.Empty(region1.OutputConnectors.First().Connections);
+            Assert.Empty(region2.InputConnectors.First().Connections);
+            Assert.Empty(m_model.Connections);
+        }
+
+        private ConnectionModel SetupRegionsWithConnectors()
+        {
+            RegionModel addedRegion1 = SetupRegion(m_applier, m_model, 1);
+            RegionModel addedRegion2 = SetupRegion(m_applier, m_model, 2);
 
             var addedConnector1 = new OutputConnectorModel(addedRegion1, "output", 3);
             var addedConnector2 = new InputConnectorModel(addedRegion2, "input", 4);
@@ -234,29 +238,16 @@ namespace GoodAI.Arnold.UI.Tests
                     addedConnectors: new List<ConnectorModel> {addedConnector1, addedConnector2},
                     addedConnections: new List<ConnectionModel> {addedConnection});
 
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            diff = ModelResponseBuilder.Build(removedConnections: new List<ConnectionModel> {addedConnection});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            var region1 = m_model.Regions.First();
-            var region2 = m_model.Regions.Skip(1).First();
-
-            Assert.Empty(region1.OutputConnectors.First().Connections);
-            Assert.Empty(region2.InputConnectors.First().Connections);
-            Assert.Empty(m_model.Connections);
+            ApplyModelDiff(diff);
+            return addedConnection;
         }
 
         [Fact]
         public void AddsNewNeuron()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
-
-            var addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
-
-            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            RegionModel addedRegion;
+            NeuronModel addedNeuron;
+            SetupRegionWithNeuron(out addedRegion, out addedNeuron);
 
             RegionModel region = m_model.Regions.First();
 
@@ -269,17 +260,14 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RepositionsNeuron()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
-            var addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
-
-            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            RegionModel addedRegion;
+            NeuronModel addedNeuron;
+            SetupRegionWithNeuron(out addedRegion, out addedNeuron);
 
             addedNeuron.Position = Vector3.UnitZ;
-            diff = ModelResponseBuilder.Build(repositionedNeurons: new List<NeuronModel> {addedNeuron});
+            ResponseMessage diff = ModelResponseBuilder.Build(repositionedNeurons: new List<NeuronModel> {addedNeuron});
 
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             Assert.Equal(Vector3.UnitZ, m_model.Regions[addedRegion.Index].Neurons[addedNeuron.Index].Position);
         }
@@ -287,35 +275,32 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RemovesNeuron()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
-            var addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
+            RegionModel addedRegion;
+            NeuronModel addedNeuron;
+            SetupRegionWithNeuron(out addedRegion, out addedNeuron);
 
-            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
+            ResponseMessage diff = ModelResponseBuilder.Build(removedNeurons: new List<NeuronModel> {addedNeuron});
 
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            diff = ModelResponseBuilder.Build(removedNeurons: new List<NeuronModel> {addedNeuron});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             Assert.Empty(m_model.Regions[addedRegion.Index].Neurons);
+        }
+
+        private void SetupRegionWithNeuron(out RegionModel addedRegion, out NeuronModel addedNeuron)
+        {
+            addedRegion = SetupRegion(m_applier, m_model, 1);
+            addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
+            ApplyModelDiff(diff);
         }
 
         [Fact]
         public void AddsNewSynapse()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
-
-            var addedNeuron1 = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
-            var addedNeuron2 = new NeuronModel(2, "neuronType", addedRegion, Vector3.UnitY);
-
-            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
-
-            ResponseMessage diff = ModelResponseBuilder.Build(
-                addedNeurons: new List<NeuronModel> {addedNeuron1, addedNeuron2},
-                addedSynapses: new List<SynapseModel> {addedSynapse});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            RegionModel addedRegion;
+            SynapseModel addedSynapse;
+            SetupRegionWithSynapse(out addedRegion, out addedSynapse);
 
             RegionModel region = m_model.Regions.First();
 
@@ -328,22 +313,14 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void SpikesSynapse()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion;
+            SynapseModel addedSynapse;
 
-            var addedNeuron1 = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
-            var addedNeuron2 = new NeuronModel(2, "neuronType", addedRegion, Vector3.UnitY);
+            SetupRegionWithSynapse(out addedRegion, out addedSynapse);
 
-            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
+            ResponseMessage diff = ModelResponseBuilder.Build(spikedSynapses: new List<SynapseModel> {addedSynapse});
 
-            ResponseMessage diff = ModelResponseBuilder.Build(
-                addedNeurons: new List<NeuronModel> {addedNeuron1, addedNeuron2},
-                addedSynapses: new List<SynapseModel> {addedSynapse});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            diff = ModelResponseBuilder.Build(spikedSynapses: new List<SynapseModel> {addedSynapse});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+            ApplyModelDiff(diff);
 
             var region = m_model.Regions[addedRegion.Index];
             Assert.True(region.Synapses.First().IsSpiked);
@@ -352,26 +329,39 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RemovesSynapse()
         {
-            RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
+            RegionModel addedRegion;
+            SynapseModel addedSynapse;
+
+            SetupRegionWithSynapse(out addedRegion, out addedSynapse);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(removedSynapses: new List<SynapseModel> {addedSynapse});
+
+            ApplyModelDiff(diff);
+
+            var region = m_model.Regions[addedRegion.Index];
+            Assert.Empty(region.Synapses);
+            Assert.Empty(region.Neurons[1].Outputs);
+        }
+
+        private void SetupRegionWithSynapse(out RegionModel addedRegion, out SynapseModel addedSynapse)
+        {
+            addedRegion = SetupRegion(m_applier, m_model, 1);
 
             var addedNeuron1 = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
             var addedNeuron2 = new NeuronModel(2, "neuronType", addedRegion, Vector3.UnitY);
 
-            var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
+            addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
 
             ResponseMessage diff = ModelResponseBuilder.Build(
                 addedNeurons: new List<NeuronModel> {addedNeuron1, addedNeuron2},
                 addedSynapses: new List<SynapseModel> {addedSynapse});
 
+            ApplyModelDiff(diff);
+        }
+
+        private void ApplyModelDiff(ResponseMessage diff)
+        {
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            diff = ModelResponseBuilder.Build(removedSynapses: new List<SynapseModel> {addedSynapse});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            var region = m_model.Regions[addedRegion.Index];
-            Assert.Empty(region.Synapses);
-            Assert.Empty(region.Neurons[addedNeuron1.Index].Outputs);
         }
     }
 }
