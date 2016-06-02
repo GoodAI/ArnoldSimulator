@@ -150,13 +150,6 @@ namespace GoodAI.Arnold
             m_uiMain.PerformBrainStep();
         }
 
-        private async void testButton_Click(object sender, EventArgs e)
-        {
-            ModelResponse response =
-                await m_uiMain.Conductor.CoreLink.Request(new GetModelConversation(full: true), 60000)
-                    .ConfigureAwait(false);
-        }
-
         private void showVisualizationButton_CheckedChanged(object sender, EventArgs e)
         {
             if (showVisualizationButton.Checked)

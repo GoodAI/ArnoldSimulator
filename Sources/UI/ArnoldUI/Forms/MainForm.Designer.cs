@@ -265,7 +265,6 @@
             this.testButton.Name = "testButton";
             this.testButton.Size = new System.Drawing.Size(23, 22);
             this.testButton.Text = "toolStripButton1";
-            this.testButton.Click += new System.EventHandler(this.testButton_Click);
             // 
             // MainForm
             // 

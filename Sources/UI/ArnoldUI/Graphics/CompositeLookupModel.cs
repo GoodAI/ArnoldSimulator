@@ -39,9 +39,6 @@ namespace GoodAI.Arnold.Graphics
 
         public bool Remove(TKey key)
         {
-            var child = Children[key];
-            // TODO(HonzaS): Make the child disposable and take care of this there.
-            child.Owner = null;
             return Children.Remove(key);
         }
 

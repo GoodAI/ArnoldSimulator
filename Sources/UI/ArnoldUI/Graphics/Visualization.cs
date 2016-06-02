@@ -178,7 +178,6 @@ namespace GoodAI.Arnold.Graphics
             Vector4 view = Vector4.Transform(world, m_camera.CurrentFrameViewMatrix);
             Vector4 clip = Vector4.Transform(view, ProjectionMatrix);
 
-            // TODO: Change this to something less hacky.
             isBehindCamera = clip.Z < 0;
 
             // Transform to screen space.

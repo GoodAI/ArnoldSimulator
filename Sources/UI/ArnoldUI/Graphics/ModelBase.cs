@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics
 {
-    public interface IModel
+    public interface IModel : IDisposable
     {
         /// <summary>
         /// The owner of this model. If it's null, the world is the owner.
@@ -127,6 +127,8 @@ namespace GoodAI.Arnold.Graphics
         /// </summary>
         /// <param name="elapsedMs">Milliseconds elapsed since the last frame. Useful for animations.</param>
         protected abstract void RenderModel(float elapsedMs);
+
+        public void Dispose() => Owner = null;
     }
 
     /// <summary>
