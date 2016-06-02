@@ -246,7 +246,7 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                region.AddExpert(new ExpertModel(neuron.Id.Neuron, neuron.Type, region, neuron.Position.ToVector3()));
+                region.AddNeuron(new NeuronModel(neuron.Id.Neuron, neuron.Type, region, neuron.Position.ToVector3()));
             }
         }
 
@@ -264,8 +264,8 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                ExpertModel neuronModel;
-                if (!region.Experts.TryGetModel(neuronId.Neuron, out neuronModel))
+                NeuronModel neuronModel;
+                if (!region.Neurons.TryGetModel(neuronId.Neuron, out neuronModel))
                 {
                     LogNeuronNotProcessed(neuronId, "reposition", "Neuron not found");
                     continue;
@@ -288,13 +288,13 @@ namespace GoodAI.Arnold.Network
                     continue;
                 }
 
-                if (!region.Experts.ContainsKey(neuronId.Neuron))
+                if (!region.Neurons.ContainsKey(neuronId.Neuron))
                 {
                     LogNeuronNotProcessed(neuronId, "remove", "Neuron not found");
                     continue;
                 }
 
-                region.Experts.Remove(neuronId.Neuron);
+                region.Neurons.Remove(neuronId.Neuron);
             }
         }
 
@@ -354,7 +354,7 @@ namespace GoodAI.Arnold.Network
             }
         }
 
-        private void ProcessSynapse(SimulationModel model, Synapse synapse, string actionName, Action<RegionModel, ExpertModel, RegionModel, ExpertModel> action)
+        private void ProcessSynapse(SimulationModel model, Synapse synapse, string actionName, Action<RegionModel, NeuronModel, RegionModel, NeuronModel> action)
         {
             if (!CheckSameRegion(synapse))
                 return;
@@ -369,8 +369,8 @@ namespace GoodAI.Arnold.Network
                 return;
             }
 
-            var fromNeuron = fromRegion.Experts[synapse.From.Neuron];
-            var toNeuron = toRegion.Experts[synapse.To.Neuron];
+            var fromNeuron = fromRegion.Neurons[synapse.From.Neuron];
+            var toNeuron = toRegion.Neurons[synapse.To.Neuron];
 
             if (fromNeuron == null || toNeuron == null)
             {

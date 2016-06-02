@@ -253,15 +253,15 @@ namespace GoodAI.Arnold.UI.Tests
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
 
-            var addedNeuron = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
 
-            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<ExpertModel> {addedNeuron});
+            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
 
             RegionModel region = m_model.Regions.First();
 
             ComparisonResult result = CompareLogic(NeuronComparisonConfig)
-                .Compare(addedNeuron, region.Experts.First());
+                .Compare(addedNeuron, region.Neurons.First());
 
             Assert.True(result.AreEqual, result.DifferencesString);
         }
@@ -270,35 +270,35 @@ namespace GoodAI.Arnold.UI.Tests
         public void RepositionsNeuron()
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
-            var addedNeuron = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
 
-            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<ExpertModel> {addedNeuron});
+            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
 
             addedNeuron.Position = Vector3.UnitZ;
-            diff = ModelResponseBuilder.Build(repositionedNeurons: new List<ExpertModel> {addedNeuron});
+            diff = ModelResponseBuilder.Build(repositionedNeurons: new List<NeuronModel> {addedNeuron});
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
 
-            Assert.Equal(Vector3.UnitZ, m_model.Regions[addedRegion.Index].Experts[addedNeuron.Index].Position);
+            Assert.Equal(Vector3.UnitZ, m_model.Regions[addedRegion.Index].Neurons[addedNeuron.Index].Position);
         }
 
         [Fact]
         public void RemovesNeuron()
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
-            var addedNeuron = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
 
-            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<ExpertModel> {addedNeuron});
-
-            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
-
-            diff = ModelResponseBuilder.Build(removedNeurons: new List<ExpertModel> {addedNeuron});
+            ResponseMessage diff = ModelResponseBuilder.Build(addedNeurons: new List<NeuronModel> {addedNeuron});
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
 
-            Assert.Empty(m_model.Regions[addedRegion.Index].Experts);
+            diff = ModelResponseBuilder.Build(removedNeurons: new List<NeuronModel> {addedNeuron});
+
+            m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
+
+            Assert.Empty(m_model.Regions[addedRegion.Index].Neurons);
         }
 
         [Fact]
@@ -306,13 +306,13 @@ namespace GoodAI.Arnold.UI.Tests
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
 
-            var addedNeuron1 = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
-            var addedNeuron2 = new ExpertModel(2, "neuronType", addedRegion, Vector3.UnitY);
+            var addedNeuron1 = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron2 = new NeuronModel(2, "neuronType", addedRegion, Vector3.UnitY);
 
             var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
 
             ResponseMessage diff = ModelResponseBuilder.Build(
-                addedNeurons: new List<ExpertModel> {addedNeuron1, addedNeuron2},
+                addedNeurons: new List<NeuronModel> {addedNeuron1, addedNeuron2},
                 addedSynapses: new List<SynapseModel> {addedSynapse});
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
@@ -330,13 +330,13 @@ namespace GoodAI.Arnold.UI.Tests
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
 
-            var addedNeuron1 = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
-            var addedNeuron2 = new ExpertModel(2, "neuronType", addedRegion, Vector3.UnitY);
+            var addedNeuron1 = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron2 = new NeuronModel(2, "neuronType", addedRegion, Vector3.UnitY);
 
             var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
 
             ResponseMessage diff = ModelResponseBuilder.Build(
-                addedNeurons: new List<ExpertModel> {addedNeuron1, addedNeuron2},
+                addedNeurons: new List<NeuronModel> {addedNeuron1, addedNeuron2},
                 addedSynapses: new List<SynapseModel> {addedSynapse});
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
@@ -354,13 +354,13 @@ namespace GoodAI.Arnold.UI.Tests
         {
             RegionModel addedRegion = AddRegion(m_applier, m_model, 1);
 
-            var addedNeuron1 = new ExpertModel(1, "neuronType", addedRegion, Vector3.One);
-            var addedNeuron2 = new ExpertModel(2, "neuronType", addedRegion, Vector3.UnitY);
+            var addedNeuron1 = new NeuronModel(1, "neuronType", addedRegion, Vector3.One);
+            var addedNeuron2 = new NeuronModel(2, "neuronType", addedRegion, Vector3.UnitY);
 
             var addedSynapse = new SynapseModel(addedRegion, addedNeuron1, addedRegion, addedNeuron2);
 
             ResponseMessage diff = ModelResponseBuilder.Build(
-                addedNeurons: new List<ExpertModel> {addedNeuron1, addedNeuron2},
+                addedNeurons: new List<NeuronModel> {addedNeuron1, addedNeuron2},
                 addedSynapses: new List<SynapseModel> {addedSynapse});
 
             m_applier.ApplyModelDiff(m_model, diff.GetResponse(new ModelResponse()));
@@ -371,7 +371,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var region = m_model.Regions[addedRegion.Index];
             Assert.Empty(region.Synapses);
-            Assert.Empty(region.Experts[addedNeuron1.Index].Outputs);
+            Assert.Empty(region.Neurons[addedNeuron1.Index].Outputs);
         }
     }
 }

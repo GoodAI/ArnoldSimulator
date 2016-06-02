@@ -47,7 +47,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public Vector3 Target { get; }
 
-        public SynapseModel(RegionModel fromRegion, ExpertModel fromNeuron, RegionModel toRegion, ExpertModel toNeuron)
+        public SynapseModel(RegionModel fromRegion, NeuronModel fromNeuron, RegionModel toRegion, NeuronModel toNeuron)
         {
             FromRegion = fromRegion;
             ToRegion = toRegion;
@@ -59,12 +59,12 @@ namespace GoodAI.Arnold.Graphics.Models
             Translucent = true;
         }
 
-        public ExpertModel FromNeuron { get; private set; }
-        public ExpertModel ToNeuron { get; private set; }
+        public NeuronModel FromNeuron { get; private set; }
+        public NeuronModel ToNeuron { get; private set; }
 
         protected override Matrix4 TranslationMatrix
         {
-            // The experts are indexed from 0 now (not centered within the region).
+            // The neurons are indexed from 0 now (not centered within the region).
             // Therefore we need to translate them ToNeuron the region's corner of origin.
             get
             {

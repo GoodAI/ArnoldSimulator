@@ -12,7 +12,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Graphics.Models
 {
-    public class ExpertModel : ModelBase, IPickable
+    public class NeuronModel : ModelBase, IPickable
     {
         private static readonly Random m_random = new Random();
 
@@ -22,8 +22,6 @@ namespace GoodAI.Arnold.Graphics.Models
         public const float SpikeAlpha = 1f;
         public const float AlphaReductionPerMs = 1/1000f;
 
-        public const float SpikesPerMs = 0.1f;
-        public const float CellSize = 2f;
         public const float SpriteSize = 1f;
 
         private float m_alpha = MinAlpha;
@@ -39,7 +37,7 @@ namespace GoodAI.Arnold.Graphics.Models
         // The key is the remote neuron's index.
         public IDictionary<uint, SynapseModel> Outputs { get; } = new Dictionary<uint, SynapseModel>();
 
-        public ExpertModel(uint index, string type, RegionModel regionModel, Vector3 position)
+        public NeuronModel(uint index, string type, RegionModel regionModel, Vector3 position)
         {
             Index = index;
             Type = type;
@@ -49,7 +47,7 @@ namespace GoodAI.Arnold.Graphics.Models
             Translucent = true;
         }
 
-        // The experts are indexed from 0 (not centered within the region).
+        // The neurons are indexed from 0 (not centered within the region).
         // Therefore we need to translate them to the region's corner of origin.
         protected override Matrix4 TranslationMatrix
         {
@@ -64,7 +62,7 @@ namespace GoodAI.Arnold.Graphics.Models
             }
         }
 
-        // Experts are rendered as billboards - they turn towards the camera.
+        // Neurons are rendered as billboards - they turn towards the camera.
         // Their world space rotation is equal to the camera's inverse rotation.
         protected override Matrix4 RotationMatrix
             => Camera.CurrentFrameViewMatrix.ClearScale().ClearTranslation().Inverted();

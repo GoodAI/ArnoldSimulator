@@ -43,7 +43,7 @@ namespace GoodAI.Arnold.Graphics
         private int m_modelsDisplayed;
         private float m_fps;
 
-        private readonly ISet<ExpertModel> m_pickedExperts = new HashSet<ExpertModel>();
+        private readonly ISet<NeuronModel> m_pickedNeurons = new HashSet<NeuronModel>();
         private readonly IConductor m_conductor;
 
         private SimulationModel m_simulationModel;
@@ -67,10 +67,10 @@ namespace GoodAI.Arnold.Graphics
         private void InjectCamera()
         {
             // TODO: Nasty! Change!
-            // If (when) experts are drawn via shaders, they might not actually need the camera position? (no sprites)
+            // If (when) neurons are drawn via shaders, they might not actually need the camera position? (no sprites)
             foreach (var region in m_simulationModel.Regions)
-                foreach (ExpertModel expert in region.Experts)
-                    expert.Camera = m_camera;
+                foreach (NeuronModel neurons in region.Neurons)
+                    neurons.Camera = m_camera;
         }
 
         public void Init()
@@ -98,8 +98,8 @@ namespace GoodAI.Arnold.Graphics
 
         private void LoadSprites()
         {
-            GL.GenTextures(1, out ExpertModel.NeuronTexture);
-            GL.BindTexture(TextureTarget.Texture2D, ExpertModel.NeuronTexture);
+            GL.GenTextures(1, out NeuronModel.NeuronTexture);
+            GL.BindTexture(TextureTarget.Texture2D, NeuronModel.NeuronTexture);
 
             Bitmap bitmap = Resources.BasicNeuron;
 
@@ -123,40 +123,40 @@ namespace GoodAI.Arnold.Graphics
 
             m_pickRay = PickRay.Pick(x, y, m_camera, m_control.Size, ProjectionMatrix);
 
-            ExpertModel expert = FindFirstExpert(m_pickRay, m_simulationModel.Regions);
-            if (expert != null)
-                ToggleExpert(expert);
+            NeuronModel neuron = FindFirstNeuron(m_pickRay, m_simulationModel.Regions);
+            if (neuron != null)
+                ToggleNeuron(neuron);
         }
 
-        private ExpertModel FindFirstExpert(PickRay pickRay, IEnumerable<RegionModel> regions)
+        private NeuronModel FindFirstNeuron(PickRay pickRay, IEnumerable<RegionModel> regions)
         {
             float closestDistance = float.MaxValue;
-            ExpertModel closestExpert = null;
+            NeuronModel closestNeuron = null;
             foreach (RegionModel region in regions)
             {
-                foreach (ExpertModel expert in region.Experts)
+                foreach (NeuronModel neuron in region.Neurons)
                 {
-                    float distance = expert.DistanceToRayOrigin(pickRay);
+                    float distance = neuron.DistanceToRayOrigin(pickRay);
                     if (distance < closestDistance)
                     {
-                        closestExpert = expert;
+                        closestNeuron = neuron;
                         closestDistance = distance;
                     }
                 }
             }
 
-            return closestExpert;
+            return closestNeuron;
         }
 
-        private void ToggleExpert(ExpertModel expert)
+        private void ToggleNeuron(NeuronModel neuron)
         {
-            expert.Picked = !expert.Picked;
+            neuron.Picked = !neuron.Picked;
 
-            // The expert is recorded in a hashset for future drawing of it's properties.
-            if (expert.Picked)
-                m_pickedExperts.Add(expert);
+            // The neuron is recorded in a hashset for future drawing of it's properties.
+            if (neuron.Picked)
+                m_pickedNeurons.Add(neuron);
             else
-                m_pickedExperts.Remove(expert);
+                m_pickedNeurons.Remove(neuron);
         }
 
         private Vector3 ModelToScreenCoordinates(IModel model, out bool isBehindCamera)
@@ -193,7 +193,7 @@ namespace GoodAI.Arnold.Graphics
         {
             m_simulationModel = m_conductor.ModelProvider.GetNewModel() ?? m_simulationModel;
 
-            // TODO(HonzaS): When we have incremental updates, optimize this to not go through all experts.
+            // TODO(HonzaS): When we have incremental updates, optimize this to not go through all neurons.
             if (m_simulationModel != null)
                 InjectCamera();
 
@@ -281,19 +281,19 @@ namespace GoodAI.Arnold.Graphics
 
         private void RenderPickedInfo()
         {
-            foreach (ExpertModel expert in m_pickedExperts)
+            foreach (NeuronModel neuron in m_pickedNeurons)
             {
                 bool isBehindCamera;
-                Vector3 screenPosition = ModelToScreenCoordinates(expert, out isBehindCamera);
+                Vector3 screenPosition = ModelToScreenCoordinates(neuron, out isBehindCamera);
 
                 if (isBehindCamera)
                     continue;
 
-                RenderExpertInfo(expert, screenPosition);
+                RenderNeuronInfo(neuron, screenPosition);
             }
         }
 
-        private void RenderExpertInfo(ExpertModel expert, Vector3 screenPosition)
+        private void RenderNeuronInfo(NeuronModel neuron, Vector3 screenPosition)
         {
             screenPosition.X += 10;
             screenPosition.Y += 10;
@@ -318,7 +318,7 @@ namespace GoodAI.Arnold.Graphics
                 GL.Translate(10, 0, 0);
                 GL.Translate(screenPosition);
 
-                m_font.Print($"{expert.Position}", QFontAlignment.Left);
+                m_font.Print($"{neuron.Position}", QFontAlignment.Left);
 
                 QFont.End();
             }

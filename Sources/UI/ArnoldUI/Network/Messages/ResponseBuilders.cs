@@ -63,9 +63,9 @@ namespace GoodAI.Arnold.Network.Messages
             IList<ConnectorModel> removedConnectors = null,
             IList<ConnectionModel> addedConnections = null,
             IList<ConnectionModel> removedConnections = null,
-            IList<ExpertModel> addedNeurons = null,
-            IList<ExpertModel> repositionedNeurons = null,
-            IList<ExpertModel> removedNeurons = null,
+            IList<NeuronModel> addedNeurons = null,
+            IList<NeuronModel> repositionedNeurons = null,
+            IList<NeuronModel> removedNeurons = null,
             IList<SynapseModel> addedSynapses = null,
             IList<SynapseModel> spikedSynapses = null,
             IList<SynapseModel> removedSynapses = null)
@@ -244,7 +244,7 @@ namespace GoodAI.Arnold.Network.Messages
             return addedConnectionsOffsets;
         }
 
-        private static VectorOffset? BuildAddedNeurons(IList<ExpertModel> addedNeurons,
+        private static VectorOffset? BuildAddedNeurons(IList<NeuronModel> addedNeurons,
             FlatBufferBuilder builder)
         {
             Offset<Neuron>[] addedNeuronsOffsets = BuildNeuronOffsets(addedNeurons, builder);
@@ -255,7 +255,7 @@ namespace GoodAI.Arnold.Network.Messages
             return ModelResponse.CreateAddedNeuronsVector(builder, addedNeuronsOffsets);
         }
 
-        private static VectorOffset? BuildRepositionedNeurons(IList<ExpertModel> repositionedNeurons,
+        private static VectorOffset? BuildRepositionedNeurons(IList<NeuronModel> repositionedNeurons,
             FlatBufferBuilder builder)
         {
             Offset<Neuron>[] repositionedNeuronsOffsets = BuildNeuronOffsets(repositionedNeurons, builder);
@@ -266,7 +266,7 @@ namespace GoodAI.Arnold.Network.Messages
             return ModelResponse.CreateRepositionedNeuronsVector(builder, repositionedNeuronsOffsets);
         }
 
-        private static VectorOffset? BuildRemovedNeurons(IList<ExpertModel> removedNeurons, FlatBufferBuilder builder)
+        private static VectorOffset? BuildRemovedNeurons(IList<NeuronModel> removedNeurons, FlatBufferBuilder builder)
         {
             Offset<NeuronId>[] removedNeuronsOffsets = BuildOffsets(removedNeurons,
                 neuron => NeuronId.CreateNeuronId(builder, neuron.Index, neuron.RegionModel.Index));
@@ -277,7 +277,7 @@ namespace GoodAI.Arnold.Network.Messages
             return ModelResponse.CreateRemovedNeuronsVector(builder, removedNeuronsOffsets);
         }
 
-        private static Offset<Neuron>[] BuildNeuronOffsets(IList<ExpertModel> neurons, FlatBufferBuilder builder)
+        private static Offset<Neuron>[] BuildNeuronOffsets(IList<NeuronModel> neurons, FlatBufferBuilder builder)
         {
             Offset<Neuron>[] addedNeuronsOffsets = BuildOffsets(neurons, neuron =>
             {

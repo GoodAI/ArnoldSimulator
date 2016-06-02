@@ -29,7 +29,7 @@ namespace GoodAI.Arnold.Graphics.Models
 
         public ConnectorStripModel<InputConnectorModel> InputConnectors { get; }
         public ConnectorStripModel<OutputConnectorModel> OutputConnectors { get; }
-        public CompositeLookupModel<uint, ExpertModel> Experts { get; } = new CompositeLookupModel<uint, ExpertModel>();
+        public CompositeLookupModel<uint, NeuronModel> Neurons { get; } = new CompositeLookupModel<uint, NeuronModel>();
         public CompositeModel<SynapseModel> Synapses { get; } = new CompositeModel<SynapseModel>();
 
         public Vector3 HalfSize { get; private set; }
@@ -50,11 +50,11 @@ namespace GoodAI.Arnold.Graphics.Models
 
             AddChild(InputConnectors);
             AddChild(OutputConnectors);
-            AddChild(Experts);
+            AddChild(Neurons);
             AddChild(Synapses);
         }
 
-        public void AddExpert(ExpertModel expert) => Experts[expert.Index] = expert;
+        public void AddNeuron(NeuronModel neuron) => Neurons[neuron.Index] = neuron;
 
         public void AddSynapse(SynapseModel synapse) => Synapses.AddChild(synapse);
 
@@ -63,22 +63,22 @@ namespace GoodAI.Arnold.Graphics.Models
             float minX = 0;
             float maxX = 0;
 
-            // The experts spread into both Y and Z.
+            // The neurons spread into both Y and Z.
             float minY = 0;
             float maxY = 0;
 
             float minZ = 0;
             float maxZ = 0;
 
-            foreach (ExpertModel expert in Experts)
+            foreach (NeuronModel neuron in Neurons)
             {
-                maxX = Math.Max(expert.Position.X, maxX);
-                maxY = Math.Max(expert.Position.Y, maxY);
-                maxZ = Math.Max(expert.Position.Z, maxZ);
+                maxX = Math.Max(neuron.Position.X, maxX);
+                maxY = Math.Max(neuron.Position.Y, maxY);
+                maxZ = Math.Max(neuron.Position.Z, maxZ);
 
-                minX = Math.Min(expert.Position.Z, minX);
-                minY = Math.Min(expert.Position.Y, minY);
-                minZ = Math.Min(expert.Position.Z, minZ);
+                minX = Math.Min(neuron.Position.Z, minX);
+                minY = Math.Min(neuron.Position.Y, minY);
+                minZ = Math.Min(neuron.Position.Z, minZ);
             }
 
             Size = new Vector3
