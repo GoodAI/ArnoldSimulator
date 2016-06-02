@@ -18,6 +18,7 @@ module brain
         entry void SetBrainStepsPerBodyStep(size_t brainSteps);
         entry void UpdateRegionOfInterest(Boxes roiBoxes);
         entry void UpdateRegionBox(RegionIndex regIdx, Box3D box);
+        entry void RequestSimulationState(RequestId requestId);
         entry void RequestViewportUpdate(RequestId requestId, bool full);
 
         entry void Simulate();

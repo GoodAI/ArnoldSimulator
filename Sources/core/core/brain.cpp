@@ -230,7 +230,8 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
     mIsSimulationRunning(false), mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
     mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
-    mDeletedNeurons(0), mTriggeredNeurons(0), mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
+    mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
+    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -433,7 +434,8 @@ BrainBase::BrainBase(CkMigrateMessage *msg) :
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
     mIsSimulationRunning(false), mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false),
     mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
-    mDeletedNeurons(0), mTriggeredNeurons(0), mBrainStep(0), mBrainStepsToRun(0), mBrainStepsPerBodyStep(10),
+    mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
+    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -466,6 +468,7 @@ void BrainBase::pup(PUP::er &p)
     p | mDeletedNeurons;
     p | mTriggeredNeurons;
 
+    p | mBodyStep;
     p | mBrainStep;
     p | mBrainStepsToRun;
     p | mBrainStepsPerBodyStep;
@@ -785,6 +788,16 @@ void BrainBase::UpdateRegionBox(RegionIndex regIdx, Box3D &box)
     mRegionRepositions.push_back(RegionRepositionRequest(regIdx, box));
 }
 
+void BrainBase::RequestSimulationState(RequestId requestId)
+{
+    if (mIsSimulationRunning) {
+        mSimulationStateRequests.push_back(requestId);  
+    } else {
+        gCore.ckLocal()->SendSimulationState(requestId, mIsSimulationRunning,
+            mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
+    }
+}
+
 void BrainBase::RequestViewportUpdate(RequestId requestId, bool full)
 {
     mViewportUpdateRequests.push_back(requestId);
@@ -1083,6 +1096,7 @@ void BrainBase::SimulateBodySimulate()
 {
     if (mBrainStep % mBrainStepsPerBodyStep == 0 && mDoSimulationProgress) {
 
+        ++mBodyStep;
         mBody->Simulate(
             std::bind(&BrainBase::PushSensoMotoricData, this, std::placeholders::_1, std::placeholders::_2),
             std::bind(&BrainBase::PullSensoMotoricData, this, std::placeholders::_1, std::placeholders::_2)
@@ -1383,6 +1397,13 @@ void BrainBase::SimulateDone()
         }
     } else {
         mIsSimulationRunning = false;
+    }
+
+    if (!mSimulationStateRequests.empty()) {
+        RequestId requestId = mSimulationStateRequests.front();
+        mSimulationStateRequests.pop_front();
+        gCore.ckLocal()->SendSimulationState(requestId, mIsSimulationRunning, 
+            mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
     }
 }
 

@@ -124,7 +124,7 @@ public:
 
     typedef std::unordered_map<RegionIndex, Box3D> RegionBoxes;
 
-    typedef std::list<RequestId> ViewportUpdateRequests;
+    typedef std::list<RequestId> Requests;
 
     Body *CreateBody(const std::string &type, const std::string &params);
     static Brain *CreateBrain(const BrainType &type, BrainBase &base, json &params);
@@ -173,6 +173,7 @@ public:
     void SetBrainStepsPerBodyStep(size_t brainSteps);
     void UpdateRegionOfInterest(Boxes &roiBoxes);
     void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
+    void RequestSimulationState(RequestId requestId);
     void RequestViewportUpdate(RequestId requestId, bool full);
 
     void Simulate();
@@ -221,6 +222,7 @@ private:
     size_t mDeletedNeurons;
     size_t mTriggeredNeurons;
 
+    size_t mBodyStep;
     size_t mBrainStep;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
@@ -232,7 +234,8 @@ private:
 
     Boxes mRoiBoxes;
     RegionBoxes mRegionBoxes;
-    ViewportUpdateRequests mViewportUpdateRequests;
+    Requests mSimulationStateRequests;
+    Requests mViewportUpdateRequests;
     ViewportUpdate mViewportUpdateAccumulator;
 
     Terminals mTerminals;

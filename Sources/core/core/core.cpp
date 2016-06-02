@@ -177,6 +177,15 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
     }
 }
 
+void Core::SendSimulationState(RequestId requestId, bool isSimulationRunning, 
+    size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep)
+{
+    flatbuffers::FlatBufferBuilder builder;
+    BuildSimulationStateResponse(isSimulationRunning,
+        atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
+    SendResponseToClient(requestId, builder);
+}
+
 void Core::SendViewportUpdate(RequestId requestId, const ViewportUpdate &update)
 {
     flatbuffers::FlatBufferBuilder builder;
@@ -461,6 +470,12 @@ void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferB
 flatbuffers::Offset<Network::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
 {
     return Network::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
+}
+
+void Core::BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+    size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const
+{
+    // TODO(HonzaS): Build the actual message here.
 }
 
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const

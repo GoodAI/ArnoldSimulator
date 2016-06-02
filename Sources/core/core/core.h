@@ -50,6 +50,8 @@ public:
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
     
+    void SendSimulationState(RequestId requestId, bool isSimulationRunning, 
+        size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep);
     void SendViewportUpdate(RequestId requestId, const ViewportUpdate &update);
 
 protected:
@@ -61,6 +63,8 @@ protected:
 
     static flatbuffers::Offset<Network::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
 
+    void BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+        size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const;
 private:

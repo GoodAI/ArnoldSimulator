@@ -16,6 +16,8 @@
 
 //#define REPRODUCIBLE_EXECUTION
 
+#define DEFAULT_BRAIN_STEPS_PER_BODY_STEP 10
+
 typedef uint32_t RegionIndex;
 typedef uint32_t NeuronIndex;
 typedef uint32_t NeuronId;
