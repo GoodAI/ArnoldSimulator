@@ -341,19 +341,13 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
+
+    SendStubModel(requestId);
+}
+
+void Core::SendStubModel(RequestId requestId)
+{
     flatbuffers::FlatBufferBuilder builder;
-
-    /*RegionIndex regionIndex = 1;
-    RegionName regionName("FooRegion");
-    RegionName regionType("BasicRegion");
-    Point3D origin(10.f, 20.f, 30.f);
-    Size3D size(40.f, 10.f, 20.f);
-    Box3D regionBounds(origin, size);
-
-    ViewportUpdate update;
-    update.addedRegions.push_back(RegionAdditionReport(regionIndex, regionName, regionType, regionBounds));
-
-    SendViewportUpdate(requestId, update);*/
 
     std::vector<flatbuffers::Offset<Communication::Region>> addedRegionsOffsets;
 

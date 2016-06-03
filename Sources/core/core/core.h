@@ -86,4 +86,7 @@ private:
 
     RequestId mRequestIdCounter;
     std::unordered_map<RequestId, CkCcsRequestMsg *> mRequests;
+
+    // TODO(HonzaS): Remove this stub once it's not needed.
+    void SendStubModel(RequestId requestId);
 };
