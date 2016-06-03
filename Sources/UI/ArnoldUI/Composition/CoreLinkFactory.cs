@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
 using GoodAI.Net.ConverseSharp;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 using SimpleInjector;

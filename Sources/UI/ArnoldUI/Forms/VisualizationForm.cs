@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Graphics;
+using GoodAI.Arnold.Visualization;
 using GoodAI.Arnold.Properties;
 using OpenTK;
 using OpenTK.Input;
@@ -22,13 +22,13 @@ namespace GoodAI.Arnold.Forms
         private bool m_mouseCaptured;
         private Vector2 m_lastMousePosition;
 
-        private readonly Visualization m_visualization;
+        private readonly Scene m_visualization;
 
         public VisualizationForm(IConductor conductor)
         {
             InitializeComponent();
 
-            m_visualization = new Visualization(glControl, conductor);
+            m_visualization = new Scene(glControl, conductor);
         }
 
         // Resize the glControl

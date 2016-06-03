@@ -6,12 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using FlatBuffers;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Graphics.Models;
-using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Network.Messages;
+using GoodAI.Arnold.Visualization.Models;
+using GoodAI.Arnold.Communication;
 using Moq;
 using OpenTK;
-using OpenTK.Graphics.OpenGL;
 using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests

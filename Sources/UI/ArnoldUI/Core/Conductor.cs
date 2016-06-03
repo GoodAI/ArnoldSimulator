@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Project;
 using GoodAI.Logging;
 

@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Graphics;
+using GoodAI.Arnold.Visualization;
 using Moq;
 using OpenTK;
 using Xunit;

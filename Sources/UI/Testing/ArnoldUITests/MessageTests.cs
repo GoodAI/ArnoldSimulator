@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using FlatBuffers;
-using GoodAI.Arnold.Graphics.Models;
-using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Network.Messages;
+using GoodAI.Arnold.Visualization.Models;
+using GoodAI.Arnold.Communication;
 using OpenTK;
 using Xunit;
 

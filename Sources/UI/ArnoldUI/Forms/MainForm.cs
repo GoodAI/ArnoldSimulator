@@ -12,7 +12,7 @@ using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Forms;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
 using GoodAI.Logging;
 using WeifenLuo.WinFormsUI.Docking;
 

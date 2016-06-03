@@ -1,5 +1,5 @@
 ﻿using System;
-using GoodAI.Arnold.Graphics;
+using GoodAI.Arnold.Visualization;
 using Moq;
 using OpenTK;
 using Xunit;

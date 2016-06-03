@@ -8,7 +8,7 @@ using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Logging;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
 using GoodAI.Logging;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 using GoodAI.TypeMapping;

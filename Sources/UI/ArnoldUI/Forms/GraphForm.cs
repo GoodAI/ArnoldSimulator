@@ -6,12 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using GoodAI.Arnold.GraphViews;
 using GoodAI.Arnold.Project;
 using Graph;
 using Graph.Compatibility;
 using WeifenLuo.WinFormsUI.Docking;
-using Node = GoodAI.Arnold.Project.Node;
 
 namespace GoodAI.Arnold.Forms
 {

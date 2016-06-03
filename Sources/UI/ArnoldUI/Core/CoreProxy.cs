@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Project;
 using GoodAI.Logging;

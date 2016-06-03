@@ -6,11 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Network;
-using GoodAI.Arnold.Extensions;
-using GoodAI.Arnold.Network.Messages;
+using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Project;
-using GoodAI.Net.ConverseSharpFlatBuffers;
 using Moq;
 using Xunit;
 

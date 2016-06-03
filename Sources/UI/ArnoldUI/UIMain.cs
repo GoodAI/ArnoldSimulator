@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Project;
 using Region = GoodAI.Arnold.Project.Region;
 

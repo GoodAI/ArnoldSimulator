@@ -4,7 +4,8 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Network;
+using GoodAI.Arnold.Communication;
+using GoodAI.Arnold.Core;
 using SimpleInjector;
 
 namespace GoodAI.Arnold
