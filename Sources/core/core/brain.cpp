@@ -454,7 +454,7 @@ void BrainBase::Unload()
     if (!mIsSimulationRunning) {
         gRegions.Unload();
     } else {
-        StopSimulation();
+        PauseSimulation();
     }
 }
 
@@ -787,7 +787,7 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
     }
 }
 
-void BrainBase::StopSimulation()
+void BrainBase::PauseSimulation()
 {
     mBrainStepsToRun = 0;
 }

@@ -16,7 +16,7 @@ module brain
         entry [reductiontarget] void Unloaded();
 
         entry void RunSimulation(size_t brainSteps, bool untilStopped);
-        entry void StopSimulation();
+        entry void PauseSimulation();
         entry void SetBrainStepsPerBodyStep(size_t brainSteps);
         entry void UpdateRegionOfInterest(Boxes roiBoxes);
         entry void UpdateRegionBox(RegionIndex regIdx, Box3D box);

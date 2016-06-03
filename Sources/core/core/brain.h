@@ -171,7 +171,7 @@ public:
     void ReceiveTerminalData(Spike::BrainSink &data);
 
     void RunSimulation(size_t brainSteps, bool untilStopped);
-    void StopSimulation();
+    void PauseSimulation();
     void SetBrainStepsPerBodyStep(size_t brainSteps);
     void UpdateRegionOfInterest(Boxes &roiBoxes);
     void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
