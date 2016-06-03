@@ -59,9 +59,7 @@
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.testButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.showVisualizationButton = new System.Windows.Forms.ToolStripButton();
-            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -251,11 +249,6 @@
             this.statusStrip.Size = new System.Drawing.Size(963, 22);
             this.statusStrip.TabIndex = 3;
             this.statusStrip.Text = "statusStrip1";
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
             // testButton
             // 
