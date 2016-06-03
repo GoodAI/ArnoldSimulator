@@ -106,9 +106,6 @@ Core::Core(CkArgMsg *msg) :
         }
     }
 
-    // Assume hardcoder blueprint for now. TODO(Premek): Remove the hack.
-    mState = Communication::StateType_Paused;
-
     delete msg;
 }
 
@@ -152,7 +149,8 @@ void Core::pup(PUP::er &p)
 
 void Core::Exit()
 {
-    CkPrintf("Exiting after %lf...\n", CmiWallTimer() - mStartTime);
+    // TODO(HonzaS): Handle graceful exit later (saving of the snapshot etc).
+    CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStartTime);
     CkExit();
 }
 
@@ -319,7 +317,6 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
 void Core::ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId)
 {
-    // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
     BuildStateResponse(mState, builder);
     SendResponseToClient(requestId, builder);

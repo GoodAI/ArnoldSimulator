@@ -107,19 +107,11 @@ table ModelResponse {
 // End of model response.
 
 
-// Ack response.
-
-table AckResponse {}
-
-// End of Ack response.
-
-
 // All the responses must be here, including error.
 union Response {
 	ErrorResponse,
 	StateResponse,
-	ModelResponse,
-	AckResponse
+	ModelResponse
 }
 
 table ResponseMessage {

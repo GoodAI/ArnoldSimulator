@@ -12,7 +12,8 @@ namespace GoodAI.Arnold.Communication
         public const string Handler = "request";
     }
 
-    public abstract class Conversation<TRequest, TResponse> : Conversation, IConversation<TRequest, TResponse> where TRequest : Table, new()
+    public abstract class Conversation<TRequest, TResponse> : Conversation, IConversation<TRequest, TResponse>
+        where TRequest : Table, new()
     {
         public TRequest RequestData => RequestMessage.GetRequest(new TRequest());
         protected RequestMessage RequestMessage { private get; set; }
