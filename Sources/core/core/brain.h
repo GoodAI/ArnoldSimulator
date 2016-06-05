@@ -175,8 +175,8 @@ public:
     void SetBrainStepsPerBodyStep(size_t brainSteps);
     void UpdateRegionOfInterest(Boxes &roiBoxes);
     void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
-    void RequestSimulationState(RequestId requestId);
-    void RequestViewportUpdate(RequestId requestId, bool full);
+    void RequestSimulationState(RequestId requestId, bool immediately, bool flushRequests);
+    void RequestViewportUpdate(RequestId requestId, bool full, bool flushRequests);
 
     void Simulate();
     void SimulateBrainControl();

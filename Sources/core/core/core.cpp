@@ -212,6 +212,12 @@ void Core::BrainUnloaded()
     }
 }
 
+void Core::SendEmptyMessage(RequestId requestId)
+{
+    flatbuffers::FlatBufferBuilder builder;
+    SendResponseToClient(requestId, builder);
+}
+
 void Core::SendSimulationState(RequestId requestId, bool isSimulationRunning, 
     size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep)
 {
@@ -235,6 +241,8 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
     if (builder.GetSize() > 0) {
         CcsSendDelayedReply(requestMessage->reply, 
             builder.GetSize(), builder.GetBufferPointer());
+    } else {
+        CcsSendDelayedReply(requestMessage->reply, 0, nullptr);
     }
 
     mRequests.erase(requestId);
@@ -294,6 +302,7 @@ void Core::ProcessGetStateRequest(const Network::GetStateRequest *getStateReques
     SendResponseToClient(requestId, builder);
 }
 
+// TODO(HonzaS): Remove this.
 bool chance()
 {
     return rand() % 60;

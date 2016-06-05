@@ -55,6 +55,7 @@ public:
     void UnloadBrain();
     void BrainUnloaded();
     
+    void SendEmptyMessage(RequestId requestId);
     void SendSimulationState(RequestId requestId, bool isSimulationRunning, 
         size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep);
     void SendViewportUpdate(RequestId requestId, const ViewportUpdate &update);

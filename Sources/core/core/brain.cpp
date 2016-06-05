@@ -807,9 +807,16 @@ void BrainBase::UpdateRegionBox(RegionIndex regIdx, Box3D &box)
     mRegionRepositions.push_back(RegionRepositionRequest(regIdx, box));
 }
 
-void BrainBase::RequestSimulationState(RequestId requestId)
+void BrainBase::RequestSimulationState(RequestId requestId, bool immediately, bool flushRequests)
 {
-    if (mIsSimulationRunning) {
+    if (flushRequests) {
+        for (auto it = mSimulationStateRequests.begin(); it != mSimulationStateRequests.end(); ++it) {
+            gCore.ckLocal()->SendEmptyMessage(*it);
+        }
+        mSimulationStateRequests.clear();
+    }
+
+    if (mIsSimulationRunning && !immediately) {
         mSimulationStateRequests.push_back(requestId);  
     } else {
         gCore.ckLocal()->SendSimulationState(requestId, mIsSimulationRunning,
@@ -817,8 +824,15 @@ void BrainBase::RequestSimulationState(RequestId requestId)
     }
 }
 
-void BrainBase::RequestViewportUpdate(RequestId requestId, bool full)
+void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flushRequests)
 {
+    if (flushRequests) {
+        for (auto it = mViewportUpdateRequests.begin(); it != mViewportUpdateRequests.end(); ++it) {
+            gCore.ckLocal()->SendEmptyMessage(*it);
+        }
+        mViewportUpdateRequests.clear();
+    }
+
     mViewportUpdateRequests.push_back(requestId);
     mDoFullViewportUpdateNext = full || mViewportUpdateOverflowed;
     mViewportUpdateOverflowed = false;
