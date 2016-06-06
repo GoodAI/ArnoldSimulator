@@ -99,6 +99,11 @@ protected:
         const NeuronAdditionReports &regions,
         std::vector<flatbuffers::Offset<Communication::Neuron>> &regionOffsets) const;
 
+    void Core::BuildSynapseOffsets(
+        flatbuffers::FlatBufferBuilder &builder,
+        const Synapse::Links &synapses,
+        std::vector<flatbuffers::Offset<Communication::Synapse>> &synapseOffsets) const;
+
     void BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;

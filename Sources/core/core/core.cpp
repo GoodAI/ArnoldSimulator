@@ -655,6 +655,29 @@ void Core::BuildNeuronOffsets(
     }
 }
 
+void Core::BuildSynapseOffsets(
+    flatbuffers::FlatBufferBuilder &builder,
+    const Synapse::Links &synapses,
+    std::vector<flatbuffers::Offset<Communication::Synapse>> &synapseOffsets) const
+{
+    for (auto synapse : synapses) {
+        auto fromNeuronId = std::get<0>(synapse);
+        auto toNeuronId = std::get<1>(synapse);
+
+        auto fromRegionIndex = GetRegionIndex(fromNeuronId);
+        auto fromNeuronIndex = GetNeuronIndex(fromNeuronId);
+
+        auto toRegionIndex = GetRegionIndex(toNeuronId);
+        auto toNeuronIndex = GetNeuronIndex(toNeuronId);
+
+        auto fromIdOffset = Communication::CreateNeuronId(builder, fromNeuronIndex, fromRegionIndex);
+        auto toIdOffset = Communication::CreateNeuronId(builder, toNeuronIndex, toRegionIndex);
+
+        auto synapseOffset = Communication::CreateSynapse(builder, fromIdOffset, toIdOffset);
+
+        synapseOffsets.push_back(synapseOffset);
+    }
+}
 
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
 {
@@ -709,6 +732,19 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     }
     auto removedNeuronsVectorOffset = builder.CreateVector(removedNeurons);
 
+    // Synapses.
+    std::vector<flatbuffers::Offset<Communication::Synapse>> addedSynapseOffsets;
+    BuildSynapseOffsets(builder, update.addedSynapses, addedSynapseOffsets);
+    auto addedSynapsesVectorOffset = builder.CreateVector(addedSynapseOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::Synapse>> spikedSynapseOffsets;
+    BuildSynapseOffsets(builder, update.spikedSynapses, spikedSynapseOffsets);
+    auto spikedSynapsesVectorOffset = builder.CreateVector(spikedSynapseOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::Synapse>> removedSynapseOffsets;
+    BuildSynapseOffsets(builder, update.removedSynapses, removedSynapseOffsets);
+    auto removedSynapsesVectorOffset = builder.CreateVector(removedSynapseOffsets);
+
     Communication::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVectorOffset);
     responseBuilder.add_repositionedRegions(repositionedRegionsVectorOffset);
@@ -723,6 +759,10 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     responseBuilder.add_addedNeurons(addedNeuronsVectorOffset);
     responseBuilder.add_repositionedNeurons(repositionedNeuronsVectorOffset);
     responseBuilder.add_removedNeurons(removedNeuronsVectorOffset);
+
+    responseBuilder.add_addedSynapses(addedSynapsesVectorOffset);
+    responseBuilder.add_spikedSynapses(spikedSynapsesVectorOffset);
+    responseBuilder.add_removedSynapses(removedSynapsesVectorOffset);
 
     auto modelResponseOffset = responseBuilder.Finish();
 
