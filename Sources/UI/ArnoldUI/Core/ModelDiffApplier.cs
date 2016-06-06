@@ -48,14 +48,8 @@ namespace GoodAI.Arnold.Core
             {
                 Region addedRegion = diff.GetAddedRegions(i);
 
-                Position lowerBound = addedRegion.LowerBound;
-                Position upperBound = addedRegion.UpperBound;
-
-                var size = new Vector3(upperBound.X - lowerBound.X, upperBound.Y - lowerBound.Y, upperBound.Z - lowerBound.Z);
-
-                Vector3 position = lowerBound.ToVector3() + size/2;
-
-                model.Regions[addedRegion.Index] = new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type, position, size);
+                model.Regions[addedRegion.Index] = new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type,
+                    addedRegion.Position.ToVector3(), addedRegion.Size.ToVector3());
             }
         }
 
@@ -65,13 +59,6 @@ namespace GoodAI.Arnold.Core
             {
                 Region repositionedRegion = diff.GetRepositionedRegions(i);
 
-                Position lowerBound = repositionedRegion.LowerBound;
-                Position upperBound = repositionedRegion.UpperBound;
-
-                var size = new Vector3(upperBound.X - lowerBound.X, upperBound.Y - lowerBound.Y, upperBound.Z - lowerBound.Z);
-
-                Vector3 position = lowerBound.ToVector3() + size/2;
-
                 RegionModel regionModel;
                 if (!model.Regions.TryGetModel(repositionedRegion.Index, out regionModel))
                 {
@@ -79,8 +66,8 @@ namespace GoodAI.Arnold.Core
                     continue;
                 }
 
-                regionModel.Position = position;
-                regionModel.Size = size;
+                regionModel.Position = repositionedRegion.Position.ToVector3();
+                regionModel.Size = repositionedRegion.Size.ToVector3();
             }
         }
 
@@ -106,7 +93,7 @@ namespace GoodAI.Arnold.Core
             {
                 Connector addedConnector = diff.GetAddedConnectors(i);
 
-                ProcessConnector(model, addedConnector, "add", regionModel =>
+                ProcessConnector(model, addedConnector.RegionIndex, addedConnector.Name, "add", regionModel =>
                 {
                     // TODO(HonzaS): A Shortcut for the creation of models?
                     // Replace them with factory + inject logger.
@@ -122,9 +109,9 @@ namespace GoodAI.Arnold.Core
         {
             for (int i = 0; i < diff.RemovedConnectorsLength; i++)
             {
-                Connector removedConnector = diff.GetRemovedConnectors(i);
+                ConnectorRemoval removedConnector = diff.GetRemovedConnectors(i);
 
-                ProcessConnector(model, removedConnector, "remove", regionModel =>
+                ProcessConnector(model, removedConnector.RegionIndex, removedConnector.Name, "remove", regionModel =>
                 {
                     var deleted = removedConnector.Direction == Direction.Backward
                         ? regionModel.InputConnectors.Remove(removedConnector.Name)
@@ -137,15 +124,15 @@ namespace GoodAI.Arnold.Core
             }
         }
 
-        private void ProcessConnector(SimulationModel model, Connector connector, string actionName, Action<RegionModel> action)
+        private void ProcessConnector(SimulationModel model, uint regionIndex, string connectorName, string actionName, Action<RegionModel> action)
         {
-            RegionModel targetRegionModel = model.Regions[connector.RegionIndex];
+            RegionModel targetRegionModel = model.Regions[regionIndex];
             if (targetRegionModel == null)
             {
                 Log.Warn(
                     "Cannot " + actionName + " connector {connectorName}, region with index {regionIndex} was not found",
-                    connector.Name,
-                    connector.RegionIndex);
+                    connectorName,
+                    regionIndex);
                 return;
             }
 

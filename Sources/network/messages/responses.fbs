@@ -43,8 +43,8 @@ table Region {
 	index:uint;
 	name:string;
 	type:string;
-	lowerBound:Position;
-	upperBound:Position;
+	position:Position;
+	size:Position;
 }
 
 enum Direction:byte {
@@ -57,6 +57,12 @@ table Connector {
 	name:string;
 	direction:Direction;
 	size:uint;
+}
+
+table ConnectorRemoval {
+	regionIndex:uint;
+	name:string;
+	direction:Direction;
 }
 
 table Connection {
@@ -92,7 +98,7 @@ table ModelResponse {
 	removedRegions:[uint];
 	
 	addedConnectors:[Connector];
-	removedConnectors:[Connector];
+	removedConnectors:[ConnectorRemoval];
 	
 	addedConnections:[Connection];
 	removedConnections:[Connection];

@@ -125,20 +125,20 @@ public sealed class Region : Table {
   public ArraySegment<byte>? GetNameBytes() { return __vector_as_arraysegment(6); }
   public string Type { get { int o = __offset(8); return o != 0 ? __string(o + bb_pos) : null; } }
   public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(8); }
-  public Position LowerBound { get { return GetLowerBound(new Position()); } }
-  public Position GetLowerBound(Position obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
-  public Position UpperBound { get { return GetUpperBound(new Position()); } }
-  public Position GetUpperBound(Position obj) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public Position Position { get { return GetPosition(new Position()); } }
+  public Position GetPosition(Position obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public Position Size { get { return GetSize(new Position()); } }
+  public Position GetSize(Position obj) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<Region> CreateRegion(FlatBufferBuilder builder,
       uint index = 0,
       StringOffset nameOffset = default(StringOffset),
       StringOffset typeOffset = default(StringOffset),
-      Offset<Position> lowerBoundOffset = default(Offset<Position>),
-      Offset<Position> upperBoundOffset = default(Offset<Position>)) {
+      Offset<Position> positionOffset = default(Offset<Position>),
+      Offset<Position> sizeOffset = default(Offset<Position>)) {
     builder.StartObject(5);
-    Region.AddUpperBound(builder, upperBoundOffset);
-    Region.AddLowerBound(builder, lowerBoundOffset);
+    Region.AddSize(builder, sizeOffset);
+    Region.AddPosition(builder, positionOffset);
     Region.AddType(builder, typeOffset);
     Region.AddName(builder, nameOffset);
     Region.AddIndex(builder, index);
@@ -149,8 +149,8 @@ public sealed class Region : Table {
   public static void AddIndex(FlatBufferBuilder builder, uint index) { builder.AddUint(0, index, 0); }
   public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset.Value, 0); }
   public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(2, typeOffset.Value, 0); }
-  public static void AddLowerBound(FlatBufferBuilder builder, Offset<Position> lowerBoundOffset) { builder.AddOffset(3, lowerBoundOffset.Value, 0); }
-  public static void AddUpperBound(FlatBufferBuilder builder, Offset<Position> upperBoundOffset) { builder.AddOffset(4, upperBoundOffset.Value, 0); }
+  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(3, positionOffset.Value, 0); }
+  public static void AddSize(FlatBufferBuilder builder, Offset<Position> sizeOffset) { builder.AddOffset(4, sizeOffset.Value, 0); }
   public static Offset<Region> EndRegion(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Region>(o);
@@ -189,6 +189,37 @@ public sealed class Connector : Table {
   public static Offset<Connector> EndConnector(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Connector>(o);
+  }
+};
+
+public sealed class ConnectorRemoval : Table {
+  public static ConnectorRemoval GetRootAsConnectorRemoval(ByteBuffer _bb) { return GetRootAsConnectorRemoval(_bb, new ConnectorRemoval()); }
+  public static ConnectorRemoval GetRootAsConnectorRemoval(ByteBuffer _bb, ConnectorRemoval obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public ConnectorRemoval __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+  public uint RegionIndex { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public string Name { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetNameBytes() { return __vector_as_arraysegment(6); }
+  public Direction Direction { get { int o = __offset(8); return o != 0 ? (Direction)bb.GetSbyte(o + bb_pos) : Direction.Forward; } }
+
+  public static Offset<ConnectorRemoval> CreateConnectorRemoval(FlatBufferBuilder builder,
+      uint regionIndex = 0,
+      StringOffset nameOffset = default(StringOffset),
+      Direction direction = Direction.Forward) {
+    builder.StartObject(3);
+    ConnectorRemoval.AddName(builder, nameOffset);
+    ConnectorRemoval.AddRegionIndex(builder, regionIndex);
+    ConnectorRemoval.AddDirection(builder, direction);
+    return ConnectorRemoval.EndConnectorRemoval(builder);
+  }
+
+  public static void StartConnectorRemoval(FlatBufferBuilder builder) { builder.StartObject(3); }
+  public static void AddRegionIndex(FlatBufferBuilder builder, uint regionIndex) { builder.AddUint(0, regionIndex, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset.Value, 0); }
+  public static void AddDirection(FlatBufferBuilder builder, Direction direction) { builder.AddSbyte(2, (sbyte)direction, 0); }
+  public static Offset<ConnectorRemoval> EndConnectorRemoval(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<ConnectorRemoval>(o);
   }
 };
 
@@ -337,8 +368,8 @@ public sealed class ModelResponse : Table {
   public Connector GetAddedConnectors(int j) { return GetAddedConnectors(new Connector(), j); }
   public Connector GetAddedConnectors(Connector obj, int j) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int AddedConnectorsLength { get { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; } }
-  public Connector GetRemovedConnectors(int j) { return GetRemovedConnectors(new Connector(), j); }
-  public Connector GetRemovedConnectors(Connector obj, int j) { int o = __offset(14); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public ConnectorRemoval GetRemovedConnectors(int j) { return GetRemovedConnectors(new ConnectorRemoval(), j); }
+  public ConnectorRemoval GetRemovedConnectors(ConnectorRemoval obj, int j) { int o = __offset(14); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int RemovedConnectorsLength { get { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; } }
   public Connection GetAddedConnections(int j) { return GetAddedConnections(new Connection(), j); }
   public Connection GetAddedConnections(Connection obj, int j) { int o = __offset(16); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
@@ -413,7 +444,7 @@ public sealed class ModelResponse : Table {
   public static VectorOffset CreateAddedConnectorsVector(FlatBufferBuilder builder, Offset<Connector>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartAddedConnectorsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddRemovedConnectors(FlatBufferBuilder builder, VectorOffset removedConnectorsOffset) { builder.AddOffset(5, removedConnectorsOffset.Value, 0); }
-  public static VectorOffset CreateRemovedConnectorsVector(FlatBufferBuilder builder, Offset<Connector>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
+  public static VectorOffset CreateRemovedConnectorsVector(FlatBufferBuilder builder, Offset<ConnectorRemoval>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRemovedConnectorsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddAddedConnections(FlatBufferBuilder builder, VectorOffset addedConnectionsOffset) { builder.AddOffset(6, addedConnectionsOffset.Value, 0); }
   public static VectorOffset CreateAddedConnectionsVector(FlatBufferBuilder builder, Offset<Connection>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }

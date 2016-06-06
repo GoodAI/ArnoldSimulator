@@ -336,9 +336,11 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
-    // TODO(HonzaS): Add actual logic here.
+    if (IsBrainLoaded())
+        gBrain[0].RequestViewportUpdate(requestId, getModelRequest->full(), true);
 
-    SendStubModel(requestId);
+    // TODO(HonzaS): Remove.
+    //SendStubModel(requestId);
 }
 
 void Core::SendStubModel(RequestId requestId)
@@ -547,37 +549,100 @@ void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep,
     BuildStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
 }
 
-void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
+template <typename TRegionReports>
+void Core::BuildRegionOffsets(
+    flatbuffers::FlatBufferBuilder &builder,
+    const TRegionReports &regions,
+    std::vector<flatbuffers::Offset<Communication::Region>> &regionOffsets) const
 {
-    std::vector<flatbuffers::Offset<Communication::Region>> addedRegionOffsets;
+    for (auto region : regions) {
+        RegionIndex index = std::get<0>(region);
 
-    for (auto addedRegion : update.addedRegions) {
-        RegionIndex index = std::get<0>(addedRegion);
+        auto regionName = builder.CreateString(std::get<1>(region));
+        auto regionType = builder.CreateString(std::get<2>(region));
 
-        auto regionName = builder.CreateString(std::get<1>(addedRegion));
-        auto regionType = builder.CreateString(std::get<2>(addedRegion));
-
-        Box3D box3d = std::get<3>(addedRegion);
+        Box3D box3d = std::get<3>(region);
 
         auto lowerBound = Communication::CreatePosition(builder, std::get<0>(box3d.first), std::get<1>(box3d.first), std::get<2>(box3d.first));
         auto upperBound = Communication::CreatePosition(builder, std::get<0>(box3d.second), std::get<1>(box3d.second), std::get<2>(box3d.second));
 
         auto regionOffset = Communication::CreateRegion(builder, index, regionName, regionType, lowerBound, upperBound);
 
-        addedRegionOffsets.push_back(regionOffset);
+        regionOffsets.push_back(regionOffset);
     }
+}
 
-    auto regionName = builder.CreateString("testname");
-    auto regionType = builder.CreateString("testtype");
-    auto lowerBound = Communication::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
-    auto upperBound = Communication::CreatePosition(builder, 40.0f, 20.0f, 15.0f);
-    auto regionOffset = Communication::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
-    addedRegionOffsets.push_back(regionOffset);
+void Core::BuildConnectorOffsets(
+    flatbuffers::FlatBufferBuilder &builder,
+    const ConnectorAdditionReports &connectors,
+    std::vector<flatbuffers::Offset<Communication::Connector>> &connectorOffsets) const
+{
+    for (auto connector : connectors) {
+        RegionIndex regionIndex = std::get<0>(connector);
 
-    auto addedRegionsOffset = builder.CreateVector(addedRegionOffsets);
+        auto direction = std::get<1>(connector) == Direction::Forward
+            ? Communication::Direction::Direction_Forward
+            : Communication::Direction::Direction_Backward;
+        auto connectorName = builder.CreateString(std::get<2>(connector));
+        auto size = std::get<3>(connector);
+
+        auto connectorOffset = Communication::CreateConnector(builder, regionIndex, connectorName, direction, size);
+
+        connectorOffsets.push_back(connectorOffset);
+    }
+}
+
+void Core::BuildConnectorRemovalOffsets(
+    flatbuffers::FlatBufferBuilder &builder,
+    const ConnectorRemovals &connectors,
+    std::vector<flatbuffers::Offset<Communication::ConnectorRemoval>> &connectorOffsets) const
+{
+    for (auto connector : connectors) {
+        RegionIndex regionIndex = std::get<0>(connector);
+
+        auto direction = std::get<1>(connector) == Direction::Forward
+            ? Communication::Direction::Direction_Forward
+            : Communication::Direction::Direction_Backward;
+        auto connectorName = builder.CreateString(std::get<2>(connector));
+
+        auto connectorOffset = Communication::CreateConnectorRemoval(builder, regionIndex, connectorName, direction);
+
+        connectorOffsets.push_back(connectorOffset);
+    }
+}
+
+void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
+{
+    // Regions.
+    std::vector<flatbuffers::Offset<Communication::Region>> addedRegionOffsets;
+    BuildRegionOffsets(builder, update.addedRegions, addedRegionOffsets);
+    auto addedRegionsVectorOffset = builder.CreateVector(addedRegionOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::Region>> repositionedRegionOffsets;
+    BuildRegionOffsets(builder, update.repositionedRegions, repositionedRegionOffsets);
+    auto repositionedRegionsVectorOffset = builder.CreateVector(repositionedRegionOffsets);
+
+    std::vector<uint32_t> removedRegions;
+    for (auto regionIndex : update.removedRegions)
+        removedRegions.push_back(regionIndex);
+    auto removedRegionsVectorOffset = builder.CreateVector(removedRegions);
+
+    // Connectors.
+    std::vector<flatbuffers::Offset<Communication::Connector>> addedConnectorOffsets;
+    BuildConnectorOffsets(builder, update.addedConnectors, addedConnectorOffsets);
+    auto addedConnectorsVectorOffset = builder.CreateVector(addedConnectorOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::ConnectorRemoval>> removedConnectorOffsets;
+    BuildConnectorRemovalOffsets(builder, update.removedConnectors, removedConnectorOffsets);
+    auto removedConnectorsVectorOffset = builder.CreateVector(removedConnectorOffsets);
 
     Communication::ModelResponseBuilder responseBuilder(builder);
-    responseBuilder.add_addedRegions(addedRegionsOffset);
+    responseBuilder.add_addedRegions(addedRegionsVectorOffset);
+    responseBuilder.add_repositionedRegions(repositionedRegionsVectorOffset);
+    responseBuilder.add_removedRegions(removedRegionsVectorOffset);
+
+    responseBuilder.add_addedConnectors(addedConnectorsVectorOffset);
+    responseBuilder.add_removedConnectors(removedConnectorsVectorOffset);
     auto modelResponseOffset = responseBuilder.Finish();
 
     BuildResponseMessage(builder, Communication::Response_ModelResponse, modelResponseOffset);

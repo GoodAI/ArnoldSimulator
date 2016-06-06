@@ -162,13 +162,12 @@ namespace GoodAI.Arnold.Communication
                 StringOffset regionName = builder.CreateString(region.Name);
                 StringOffset regionType = builder.CreateString(region.Type);
 
-                Vector3 lowerBound = region.Position - region.Size/2;
-                Offset<Position> lowerBounds = Position.CreatePosition(builder, lowerBound.X, lowerBound.Y, lowerBound.Z);
+                Vector3 position = region.Position;
+                Offset<Position> positionOffset = Position.CreatePosition(builder, position.X, position.Y, position.Z);
                 Vector3 size = region.Size;
-                Offset<Position> upperBounds = Position.CreatePosition(builder, lowerBound.X + size.X, lowerBound.Y + size.Y,
-                    lowerBound.Z + size.Z);
+                Offset<Position> sizeOffset = Position.CreatePosition(builder, size.X, size.Y, size.Z);
 
-                return Region.CreateRegion(builder, region.Index, regionName, regionType, lowerBounds, upperBounds);
+                return Region.CreateRegion(builder, region.Index, regionName, regionType, positionOffset, sizeOffset);
             });
             return regionsOffsets;
         }
@@ -199,8 +198,7 @@ namespace GoodAI.Arnold.Communication
                 connector =>
                 {
                     var name = builder.CreateString(connector.Name);
-                    return Connector.CreateConnector(builder, connector.Region.Index, name, connector.Direction,
-                        connector.SlotCount);
+                    return ConnectorRemoval.CreateConnectorRemoval(builder, connector.Region.Index, name, connector.Direction);
                 });
 
             return ModelResponse.CreateRemovedConnectorsVector(builder, removedConnectorsOffsets);

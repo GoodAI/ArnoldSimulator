@@ -73,6 +73,23 @@ protected:
 
     void BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
+
+    template <typename TRegionReports>
+    void BuildRegionOffsets(
+        flatbuffers::FlatBufferBuilder &builder,
+        const TRegionReports &regions,
+        std::vector<flatbuffers::Offset<Communication::Region>> &regionOffsets) const;
+
+    void Core::BuildConnectorOffsets(
+        flatbuffers::FlatBufferBuilder &builder,
+        const ConnectorAdditionReports &connectors,
+        std::vector<flatbuffers::Offset<Communication::Connector>> &connectorOffsets) const;
+
+    void Core::BuildConnectorRemovalOffsets(
+        flatbuffers::FlatBufferBuilder &builder,
+        const ConnectorRemovals &connectors,
+        std::vector<flatbuffers::Offset<Communication::ConnectorRemoval>> &connectorOffsets) const;
+
     void BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
