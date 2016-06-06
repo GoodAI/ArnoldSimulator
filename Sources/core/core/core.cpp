@@ -549,10 +549,9 @@ void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep,
     BuildStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
 }
 
-template <typename TRegionReports>
 void Core::BuildRegionOffsets(
     flatbuffers::FlatBufferBuilder &builder,
-    const TRegionReports &regions,
+    const RegionAdditionReports &regions,
     std::vector<flatbuffers::Offset<Communication::Region>> &regionOffsets) const
 {
     for (auto region : regions) {
@@ -633,6 +632,30 @@ void Core::BuildConnectionOffsets(
     }
 }
 
+void Core::BuildNeuronOffsets(
+    flatbuffers::FlatBufferBuilder &builder,
+    const NeuronAdditionReports &neurons,
+    std::vector<flatbuffers::Offset<Communication::Neuron>> &neuronOffsets) const
+{
+    for (auto neuron : neurons) {
+        NeuronId id = std::get<0>(neuron);
+
+        auto neuronIndex = GetNeuronIndex(id);
+        auto regionIndex = GetRegionIndex(id);
+
+        auto idOffset = Communication::CreateNeuronId(builder, neuronIndex, regionIndex);
+        auto typeOffset = builder.CreateString(std::get<1>(neuron));
+
+        auto position = std::get<2>(neuron);
+        auto positionOffset = Communication::CreatePosition(builder, std::get<0>(position), std::get<1>(position), std::get<2>(position));
+
+        auto neuronOffset = Communication::CreateNeuron(builder, idOffset, typeOffset, positionOffset);
+
+        neuronOffsets.push_back(neuronOffset);
+    }
+}
+
+
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
 {
     // Regions.
@@ -667,6 +690,25 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     BuildConnectionOffsets(builder, update.removedConnections, removedConnectionOffsets);
     auto removedConnectionsVectorOffset = builder.CreateVector(removedConnectionOffsets);
 
+    // Neurons.
+    std::vector<flatbuffers::Offset<Communication::Neuron>> addedNeuronOffsets;
+    BuildNeuronOffsets(builder, update.addedNeurons, addedNeuronOffsets);
+    auto addedNeuronsVectorOffset = builder.CreateVector(addedNeuronOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::Neuron>> repositionedNeuronOffsets;
+    BuildNeuronOffsets(builder, update.repositionedNeurons, repositionedNeuronOffsets);
+    auto repositionedNeuronsVectorOffset = builder.CreateVector(repositionedNeuronOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::NeuronId>> removedNeurons;
+    for (auto neuronId : update.removedNeurons) {
+        auto neuronIndex = GetNeuronIndex(neuronId);
+        auto regionIndex = GetRegionIndex(neuronId);
+
+        auto idOffset = Communication::CreateNeuronId(builder, neuronIndex, regionIndex);
+        removedNeurons.push_back(idOffset);
+    }
+    auto removedNeuronsVectorOffset = builder.CreateVector(removedNeurons);
+
     Communication::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVectorOffset);
     responseBuilder.add_repositionedRegions(repositionedRegionsVectorOffset);
@@ -678,6 +720,9 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     responseBuilder.add_addedConnections(addedConnectionsVectorOffset);
     responseBuilder.add_removedConnections(removedConnectionsVectorOffset);
 
+    responseBuilder.add_addedNeurons(addedNeuronsVectorOffset);
+    responseBuilder.add_repositionedNeurons(repositionedNeuronsVectorOffset);
+    responseBuilder.add_removedNeurons(removedNeuronsVectorOffset);
 
     auto modelResponseOffset = responseBuilder.Finish();
 

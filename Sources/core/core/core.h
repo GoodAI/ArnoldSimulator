@@ -74,10 +74,9 @@ protected:
     void BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
 
-    template <typename TRegionReports>
     void BuildRegionOffsets(
         flatbuffers::FlatBufferBuilder &builder,
-        const TRegionReports &regions,
+        const RegionAdditionReports &regions,
         std::vector<flatbuffers::Offset<Communication::Region>> &regionOffsets) const;
 
     void Core::BuildConnectorOffsets(
@@ -94,6 +93,11 @@ protected:
         flatbuffers::FlatBufferBuilder &builder,
         const Connections &connections,
         std::vector<flatbuffers::Offset<Communication::Connection>> &connectionOffsets) const;
+    
+    void BuildNeuronOffsets(
+        flatbuffers::FlatBufferBuilder &builder,
+        const NeuronAdditionReports &regions,
+        std::vector<flatbuffers::Offset<Communication::Neuron>> &regionOffsets) const;
 
     void BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
