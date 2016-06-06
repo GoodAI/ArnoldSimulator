@@ -1,6 +1,6 @@
 // Definitions for the Request messages
 
-namespace GoodAI.Arnold.Network;
+namespace GoodAI.Arnold.Communication;
 
 enum CommandType:byte {
 	Load,

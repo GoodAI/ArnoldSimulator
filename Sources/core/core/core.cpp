@@ -23,7 +23,7 @@ void CoreProcInit()
 }
 
 Core::Core(CkArgMsg *msg) : 
-    mState(Network::StateType_Empty), mStartTime(0.0),
+    mState(Communication::StateType_Empty), mStartTime(0.0),
     mBrainLoaded(false), mBrainIsUnloading(false), mRequestIdCounter(0)
 {
     mStartTime = CmiWallTimer();
@@ -92,13 +92,13 @@ Core::Core(CkArgMsg *msg) :
 
     // TODO(Premek): remove
     // assume hardcoder blueprint for now
-    mState = Network::StateType_Paused;
+    mState = Communication::StateType_Paused;
 
     delete msg;
 }
 
 Core::Core(CkMigrateMessage *msg) :
-    mState(Network::StateType::StateType_Empty), mStartTime(0.0), 
+    mState(Communication::StateType::StateType_Empty), mStartTime(0.0), 
     mBrainLoaded(false), mBrainIsUnloading(false), mRequestIdCounter(0)
 {
 }
@@ -146,26 +146,26 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
     RequestId requestId = mRequestIdCounter++;
     mRequests.insert(std::make_pair(requestId, msg));
 
-    const Network::RequestMessage *requestMessage = Network::GetRequestMessage(msg->data);
-    Network::Request requestType = requestMessage->request_type();
+    const Communication::RequestMessage *requestMessage = Communication::GetRequestMessage(msg->data);
+    Communication::Request requestType = requestMessage->request_type();
 
     try {
         switch (requestType) {
-            case Network::Request_CommandRequest:
+            case Communication::Request_CommandRequest:
             {
-                auto commandRequest = static_cast<const Network::CommandRequest*>(requestMessage->request());
+                auto commandRequest = static_cast<const Communication::CommandRequest*>(requestMessage->request());
                 ProcessCommandRequest(commandRequest, requestId);
                 break;
             }
-            case Network::Request_GetStateRequest:
+            case Communication::Request_GetStateRequest:
             {
-                auto getStateRequest = static_cast<const Network::GetStateRequest*>(requestMessage->request());
+                auto getStateRequest = static_cast<const Communication::GetStateRequest*>(requestMessage->request());
                 ProcessGetStateRequest(getStateRequest, requestId);
                 break;
             }
-            case Network::Request_GetModelRequest:
+            case Communication::Request_GetModelRequest:
             {
-                auto getModelRequest = static_cast<const Network::GetModelRequest*>(requestMessage->request());
+                auto getModelRequest = static_cast<const Communication::GetModelRequest*>(requestMessage->request());
                 ProcessGetModelRequest(getModelRequest, requestId);
                 break;
             }
@@ -187,6 +187,8 @@ void Core::LoadBrain(const BrainName &name, const BrainType &type, const BrainPa
         gBrain[0].insert(name, type, params);
         gBrain.doneInserting();
         mBrainLoaded = true;
+
+        mState = Communication::StateType_Paused;
     }
 }
 
@@ -249,52 +251,47 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
     delete requestMessage;
 }
 
-void Core::ProcessCommandRequest(const Network::CommandRequest *commandRequest, RequestId requestId)
+void Core::ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId)
 {
     flatbuffers::FlatBufferBuilder builder;
-    Network::CommandType commandType = commandRequest->command();
+    Communication::CommandType commandType = commandRequest->command();
 
-    if (commandType == Network::CommandType_Shutdown) {
-
-        BuildStateResponse(Network::StateType_ShuttingDown, builder);
+    if (commandType == Communication::CommandType_Shutdown) {
+        BuildStateResponse(Communication::StateType_ShuttingDown, builder);
         SendResponseToClient(requestId, builder);
         throw ShutdownRequestedException("Shutdown requested by the client");
     }
 
-    if (commandType == Network::CommandType_Run) {
-        if (mState != Network::StateType_Paused) {
+    if (commandType == Communication::CommandType_Run) {
+        if (mState != Communication::StateType_Paused) {
             // TODO(Premek): return error response
             CkPrintf("Run command failed: invalid state\n");
+        } else {
+            uint32_t runSteps = commandRequest->stepsToRun();
+            gBrain.RunSimulation(runSteps, runSteps == 0);
+            // TODO(HonzaS): Consider waiting for the SendSimulationState method to be called.
+            // Now, we assume that the simulation really starts running when requested.
+            // Add error handling later.
+            mState = Communication::StateType_Running;
         }
-
-        mState = Network::StateType_Running;  // TODO(): Add actual logic here.
-
-        uint32_t runSteps = commandRequest->stepsToRun();
-        if (runSteps != 0)
-        {
-            // TODO(HonzaS): Handle the exact number of brain steps here.
-            // For now, we'll just schedule a delayed state change.
-            std::thread{ [this]()
-            {
-                std::this_thread::sleep_for(std::chrono::seconds{ 1 });
-                mState = Network::StateType_Paused;
-            } }.detach();
-        }
-
-    } else if (commandType == Network::CommandType_Pause) {
-        if (mState != Network::StateType_Running) {
+    } else if (commandType == Communication::CommandType_Pause) {
+        if (mState != Communication::StateType_Running) {
             // TODO(Premek): return error response
             CkPrintf("Pause command failed: invalid state\n");
+        } else {
+            gBrain.PauseSimulation();
+            // TODO(HonzaS): Consider waiting for the SendSimulationState method to be called.
+            mState = Communication::StateType_Paused;  // TODO(): Add actual logic here.
         }
 
-        mState = Network::StateType_Paused;  // TODO(): Add actual logic here.
+        mState = Communication::StateType_Paused;  // TODO(): Add actual logic here.
     }
 
     BuildStateResponse(mState, builder);
     SendResponseToClient(requestId, builder);
 }
 
-void Core::ProcessGetStateRequest(const Network::GetStateRequest *getStateRequest, RequestId requestId)
+void Core::ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
@@ -309,13 +306,13 @@ bool chance()
 }
 
 template <typename TResponse>
-void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Network::Response responseType, flatbuffers::Offset<TResponse> &responseOffset)
+void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication::Response responseType, flatbuffers::Offset<TResponse> &responseOffset)
 {
-    auto responseMessage = Network::CreateResponseMessage(builder, responseType, responseOffset.Union());
+    auto responseMessage = Communication::CreateResponseMessage(builder, responseType, responseOffset.Union());
     builder.Finish(responseMessage);
 }
 
-void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId)
+void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
     // TODO(HonzaS): Add actual logic here.
     flatbuffers::FlatBufferBuilder builder;
@@ -332,22 +329,22 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     SendViewportUpdate(requestId, update);*/
 
-    std::vector<flatbuffers::Offset<Network::Region>> addedRegionsOffsets;
+    std::vector<flatbuffers::Offset<Communication::Region>> addedRegionsOffsets;
 
     static size_t mDummyTimestep = 0;
 
     if (mDummyTimestep == 0) {
         auto regionName = builder.CreateString("testname");
         auto regionType = builder.CreateString("testtype");
-        auto lowerBound = Network::CreatePosition(builder, 30.0f, 00.0f, 10.0f);
-        auto upperBound = Network::CreatePosition(builder, 82.0f, 22.0f, 32.0f);
-        auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
+        auto lowerBound = Communication::CreatePosition(builder, 30.0f, 00.0f, 10.0f);
+        auto upperBound = Communication::CreatePosition(builder, 82.0f, 22.0f, 32.0f);
+        auto regionOffset = Communication::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
 
         auto regionName2 = builder.CreateString("testname 2");
         auto regionType2 = builder.CreateString("testtype 2");
-        auto lowerBound2 = Network::CreatePosition(builder, 110.0f, 00.0f, 10.0f);
-        auto upperBound2 = Network::CreatePosition(builder, 162.0f, 22.0f, 32.0f);
-        auto regionOffset2 = Network::CreateRegion(builder, 2, regionName2, regionType2, lowerBound2, upperBound2);
+        auto lowerBound2 = Communication::CreatePosition(builder, 110.0f, 00.0f, 10.0f);
+        auto upperBound2 = Communication::CreatePosition(builder, 162.0f, 22.0f, 32.0f);
+        auto regionOffset2 = Communication::CreateRegion(builder, 2, regionName2, regionType2, lowerBound2, upperBound2);
 
         addedRegionsOffsets.push_back(regionOffset);
         addedRegionsOffsets.push_back(regionOffset2);
@@ -358,9 +355,9 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     if (mDummyTimestep % 2 == 0) {
         auto regionName3 = builder.CreateString("testname 3");
         auto regionType3 = builder.CreateString("testtype 3");
-        auto lowerBound3 = Network::CreatePosition(builder, 210.0f, 00.0f, 10.0f);
-        auto upperBound3 = Network::CreatePosition(builder, 252.0f, 22.0f, 32.0f);
-        auto regionOffset3 = Network::CreateRegion(builder, 3, regionName3, regionType3, lowerBound3, upperBound3);
+        auto lowerBound3 = Communication::CreatePosition(builder, 210.0f, 00.0f, 10.0f);
+        auto upperBound3 = Communication::CreatePosition(builder, 252.0f, 22.0f, 32.0f);
+        auto regionOffset3 = Communication::CreateRegion(builder, 3, regionName3, regionType3, lowerBound3, upperBound3);
 
         addedRegionsOffsets.push_back(regionOffset3);
     } else {
@@ -370,8 +367,8 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
     auto addedRegionsVector = builder.CreateVector(addedRegionsOffsets);
     auto removedRegionsVector = builder.CreateVector(removedRegions);
 
-    std::vector<flatbuffers::Offset<Network::Connector>> addedConnectorsOffsets;
-    std::vector<flatbuffers::Offset<Network::Connection>> addedConnectionsOffsets;
+    std::vector<flatbuffers::Offset<Communication::Connector>> addedConnectorsOffsets;
+    std::vector<flatbuffers::Offset<Communication::Connection>> addedConnectionsOffsets;
 
     if (mDummyTimestep == 0) {
         auto connectorName1 = builder.CreateString("connector 1");
@@ -384,15 +381,15 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         auto connectorName6 = builder.CreateString("connector 6");
         auto connectorName7 = builder.CreateString("connector 7");
 
-        auto connectorOffset1 = Network::CreateConnector(builder, 1, connectorName1, Network::Direction_Forward, 5);
-        auto connectorOffset2 = Network::CreateConnector(builder, 1, connectorName2, Network::Direction_Forward, 15);
+        auto connectorOffset1 = Communication::CreateConnector(builder, 1, connectorName1, Communication::Direction_Forward, 5);
+        auto connectorOffset2 = Communication::CreateConnector(builder, 1, connectorName2, Communication::Direction_Forward, 15);
 
-        auto connectorOffset3 = Network::CreateConnector(builder, 1, connectorName3, Network::Direction_Backward, 5);
-        auto connectorOffset4 = Network::CreateConnector(builder, 1, connectorName4, Network::Direction_Backward, 8);
-        auto connectorOffset5 = Network::CreateConnector(builder, 1, connectorName5, Network::Direction_Backward, 2);
+        auto connectorOffset3 = Communication::CreateConnector(builder, 1, connectorName3, Communication::Direction_Backward, 5);
+        auto connectorOffset4 = Communication::CreateConnector(builder, 1, connectorName4, Communication::Direction_Backward, 8);
+        auto connectorOffset5 = Communication::CreateConnector(builder, 1, connectorName5, Communication::Direction_Backward, 2);
 
-        auto connectorOffset6 = Network::CreateConnector(builder, 2, connectorName6, Network::Direction_Backward, 5);
-        auto connectorOffset7 = Network::CreateConnector(builder, 2, connectorName7, Network::Direction_Backward, 5);
+        auto connectorOffset6 = Communication::CreateConnector(builder, 2, connectorName6, Communication::Direction_Backward, 5);
+        auto connectorOffset7 = Communication::CreateConnector(builder, 2, connectorName7, Communication::Direction_Backward, 5);
 
         addedConnectorsOffsets.push_back(connectorOffset1);
         addedConnectorsOffsets.push_back(connectorOffset2);
@@ -404,8 +401,8 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         addedConnectorsOffsets.push_back(connectorOffset6);
         addedConnectorsOffsets.push_back(connectorOffset7);
 
-        auto connectionOffset1 = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName6);
-        auto connectionOffset2 = Network::CreateConnection(builder, 1, connectorName1, 2, connectorName7);
+        auto connectionOffset1 = Communication::CreateConnection(builder, 1, connectorName1, 2, connectorName6);
+        auto connectionOffset2 = Communication::CreateConnection(builder, 1, connectorName1, 2, connectorName7);
 
         addedConnectionsOffsets.push_back(connectionOffset1);
         addedConnectionsOffsets.push_back(connectionOffset2);
@@ -415,7 +412,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     auto addedConnectionsVector = builder.CreateVector(addedConnectionsOffsets);
 
-    std::vector<flatbuffers::Offset<Network::Neuron>> addedNeuronsOffsets;
+    std::vector<flatbuffers::Offset<Communication::Neuron>> addedNeuronsOffsets;
 
     const auto neuronAddInterval = 1;
     const auto maxNeuronCount = 1000;
@@ -433,12 +430,12 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         auto y = (addedNeuronCount / 10) % layerSizeY;
         auto z = addedNeuronCount % layerSizeX;
 
-        auto neuronPosition = Network::CreatePosition(builder,
+        auto neuronPosition = Communication::CreatePosition(builder,
             5.f * static_cast<float>(x),
             2.f * static_cast<float>(y),
             2.f * static_cast<float>(z));
-        auto neuronId = Network::CreateNeuronId(builder, addedNeuronCount + 1, 1);
-        auto neuronOffset = Network::CreateNeuron(builder, neuronId, neuronType, neuronPosition);
+        auto neuronId = Communication::CreateNeuronId(builder, addedNeuronCount + 1, 1);
+        auto neuronOffset = Communication::CreateNeuron(builder, neuronId, neuronType, neuronPosition);
 
         addedNeuronsOffsets.push_back(neuronOffset);
         addedNeuronCount++;
@@ -448,7 +445,7 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     auto synapseAddInterval = 20;
 
-    std::vector<flatbuffers::Offset<Network::Synapse>> addedSynapsesOffsets;
+    std::vector<flatbuffers::Offset<Communication::Synapse>> addedSynapsesOffsets;
 
     static std::vector<std::pair<uint32_t, uint32_t>> addedSynapses;
 
@@ -458,9 +455,9 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
         if (nextLayerStart < addedNeuronCount) {
             int toNeuron = (rand() % (addedNeuronCount - nextLayerStart)) + nextLayerStart;
 
-            auto fromNeuronId = Network::CreateNeuronId(builder, fromNeuron, 1);
-            auto toNeuronId = Network::CreateNeuronId(builder, toNeuron, 1);
-            auto synapseOffset = Network::CreateSynapse(builder, fromNeuronId, toNeuronId);
+            auto fromNeuronId = Communication::CreateNeuronId(builder, fromNeuron, 1);
+            auto toNeuronId = Communication::CreateNeuronId(builder, toNeuron, 1);
+            auto synapseOffset = Communication::CreateSynapse(builder, fromNeuronId, toNeuronId);
 
             addedSynapsesOffsets.push_back(synapseOffset);
 
@@ -471,21 +468,21 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     auto addedSynapsesVector = builder.CreateVector(addedSynapsesOffsets);
 
-    std::vector<flatbuffers::Offset<Network::Synapse>> spikedSynapsesOffsets;
+    std::vector<flatbuffers::Offset<Communication::Synapse>> spikedSynapsesOffsets;
 
     for (auto synapse : addedSynapses) {
         if (rand() % 100 == 0) {
-            auto fromNeuronId = Network::CreateNeuronId(builder, synapse.first, 1);
-            auto toNeuronId = Network::CreateNeuronId(builder, synapse.second, 1);
+            auto fromNeuronId = Communication::CreateNeuronId(builder, synapse.first, 1);
+            auto toNeuronId = Communication::CreateNeuronId(builder, synapse.second, 1);
 
-            auto synapseOffset = Network::CreateSynapse(builder, fromNeuronId, toNeuronId);
+            auto synapseOffset = Communication::CreateSynapse(builder, fromNeuronId, toNeuronId);
             spikedSynapsesOffsets.push_back(synapseOffset);
         }
     }
 
     auto spikedSynapsesVector = builder.CreateVector(spikedSynapsesOffsets);
 
-    Network::ModelResponseBuilder responseBuilder(builder);
+    Communication::ModelResponseBuilder responseBuilder(builder);
     // Added items.
     responseBuilder.add_addedRegions(addedRegionsVector);
     responseBuilder.add_addedConnectors(addedConnectorsVector);
@@ -499,21 +496,21 @@ void Core::ProcessGetModelRequest(const Network::GetModelRequest *getModelReques
 
     auto modelResponseOffset = responseBuilder.Finish();
 
-    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
+    BuildResponseMessage(builder, Communication::Response_ModelResponse, modelResponseOffset);
     SendResponseToClient(requestId, builder);
 
     mDummyTimestep++;
 }
 
-void Core::BuildStateResponse(Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const
+void Core::BuildStateResponse(Communication::StateType state, flatbuffers::FlatBufferBuilder &builder) const
 {
-    flatbuffers::Offset<Network::StateResponse> stateResponseOffset = Network::CreateStateResponse(builder, state);
-    BuildResponseMessage(builder, Network::Response_StateResponse, stateResponseOffset);
+    flatbuffers::Offset<Communication::StateResponse> stateResponseOffset = Communication::CreateStateResponse(builder, state);
+    BuildResponseMessage(builder, Communication::Response_StateResponse, stateResponseOffset);
 }
 
-flatbuffers::Offset<Network::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
+flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
 {
-    return Network::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
+    return Communication::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
 }
 
 void Core::BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrainStep, 
@@ -524,7 +521,7 @@ void Core::BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrain
 
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
 {
-    std::vector<flatbuffers::Offset<Network::Region>> addedRegionOffsets;
+    std::vector<flatbuffers::Offset<Communication::Region>> addedRegionOffsets;
 
     for (auto addedRegion : update.addedRegions) {
         RegionIndex index = std::get<0>(addedRegion);
@@ -534,28 +531,28 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
 
         Box3D box3d = std::get<3>(addedRegion);
 
-        auto lowerBound = Network::CreatePosition(builder, std::get<0>(box3d.first), std::get<1>(box3d.first), std::get<2>(box3d.first));
-        auto upperBound = Network::CreatePosition(builder, std::get<0>(box3d.second), std::get<1>(box3d.second), std::get<2>(box3d.second));
+        auto lowerBound = Communication::CreatePosition(builder, std::get<0>(box3d.first), std::get<1>(box3d.first), std::get<2>(box3d.first));
+        auto upperBound = Communication::CreatePosition(builder, std::get<0>(box3d.second), std::get<1>(box3d.second), std::get<2>(box3d.second));
 
-        auto regionOffset = Network::CreateRegion(builder, index, regionName, regionType, lowerBound, upperBound);
+        auto regionOffset = Communication::CreateRegion(builder, index, regionName, regionType, lowerBound, upperBound);
 
         addedRegionOffsets.push_back(regionOffset);
     }
 
     auto regionName = builder.CreateString("testname");
     auto regionType = builder.CreateString("testtype");
-    auto lowerBound = Network::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
-    auto upperBound = Network::CreatePosition(builder, 40.0f, 20.0f, 15.0f);
-    auto regionOffset = Network::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
+    auto lowerBound = Communication::CreatePosition(builder, 10.0f, 20.0f, 30.0f);
+    auto upperBound = Communication::CreatePosition(builder, 40.0f, 20.0f, 15.0f);
+    auto regionOffset = Communication::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
     addedRegionOffsets.push_back(regionOffset);
 
     auto addedRegionsOffset = builder.CreateVector(addedRegionOffsets);
 
-    Network::ModelResponseBuilder responseBuilder(builder);
+    Communication::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsOffset);
     auto modelResponseOffset = responseBuilder.Finish();
 
-    BuildResponseMessage(builder, Network::Response_ModelResponse, modelResponseOffset);
+    BuildResponseMessage(builder, Communication::Response_ModelResponse, modelResponseOffset);
 }
 
 #include "core.def.h"

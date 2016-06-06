@@ -20,9 +20,9 @@ using namespace GoodAI::Arnold;
 
 struct ViewportUpdate;
 
-inline void operator|(PUP::er &p, Network::StateType &state)
+inline void operator|(PUP::er &p, Communication::StateType &state)
 {
-    pup_bytes(&p, static_cast<void *>(&state), sizeof(Network::StateType));
+    pup_bytes(&p, static_cast<void *>(&state), sizeof(Communication::StateType));
 }
 
 class ShutdownRequestedException : public std::runtime_error
@@ -63,19 +63,19 @@ public:
 protected:
     void SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuilder &builder);
 
-    void ProcessCommandRequest(const Network::CommandRequest *commandRequest, RequestId requestId);
-    void ProcessGetStateRequest(const Network::GetStateRequest *getStateRequest, RequestId requestId);
-    void ProcessGetModelRequest(const Network::GetModelRequest *getModelRequest, RequestId requestId);
+    void ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId);
+    void ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId);
+    void ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId);
 
-    static flatbuffers::Offset<Network::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
+    static flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
 
     void BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
-    void BuildStateResponse(const Network::StateType state, flatbuffers::FlatBufferBuilder &builder) const;
+    void BuildStateResponse(const Communication::StateType state, flatbuffers::FlatBufferBuilder &builder) const;
 
 private:
-    Network::StateType mState;
+    Communication::StateType mState;
 
     double mStartTime;
 

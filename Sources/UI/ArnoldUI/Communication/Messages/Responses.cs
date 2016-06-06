@@ -26,6 +26,7 @@ public enum Response : byte
  ErrorResponse = 1,
  StateResponse = 2,
  ModelResponse = 3,
+ AckResponse = 4,
 };
 
 public sealed class ErrorResponse : Table {
@@ -430,6 +431,19 @@ public sealed class ModelResponse : Table {
   public static Offset<ModelResponse> EndModelResponse(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<ModelResponse>(o);
+  }
+};
+
+public sealed class AckResponse : Table {
+  public static AckResponse GetRootAsAckResponse(ByteBuffer _bb) { return GetRootAsAckResponse(_bb, new AckResponse()); }
+  public static AckResponse GetRootAsAckResponse(ByteBuffer _bb, AckResponse obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public AckResponse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+
+  public static void StartAckResponse(FlatBufferBuilder builder) { builder.StartObject(0); }
+  public static Offset<AckResponse> EndAckResponse(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<AckResponse>(o);
   }
 };
 

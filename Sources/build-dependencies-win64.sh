@@ -63,11 +63,11 @@ build_messages()
     
     cd network
     
-    flatbuffers/bin/flatc.exe --csharp --gen-onefile -o ../UI/ArnoldUI/Network/Messages/ messages/requests.fbs
-    mv ../UI/ArnoldUI/Network/Messages/requests.cs ../UI/ArnoldUI/Network/Messages/Requests.cs
+    flatbuffers/bin/flatc.exe --csharp --gen-onefile -o ../UI/ArnoldUI/Communication/Messages/ messages/requests.fbs
+    mv ../UI/ArnoldUI/Communication/Messages/requests.cs ../UI/ArnoldUI/Communication/Messages/Requests.cs
     
-    flatbuffers/bin/flatc.exe --csharp --gen-onefile -o ../UI/ArnoldUI/Network/Messages/ messages/responses.fbs
-    mv ../UI/ArnoldUI/Network/Messages/responses.cs ../UI/ArnoldUI/Network/Messages/Responses.cs
+    flatbuffers/bin/flatc.exe --csharp --gen-onefile -o ../UI/ArnoldUI/Communication/Messages/ messages/responses.fbs
+    mv ../UI/ArnoldUI/Communication/Messages/responses.cs ../UI/ArnoldUI/Communication/Messages/Responses.cs
     
     cd ..
 }
