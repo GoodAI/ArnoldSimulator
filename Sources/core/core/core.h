@@ -53,7 +53,7 @@ public:
     void RunTests();
 
     void LoadBrain(const BrainName &name, const BrainType &type, const BrainParams &params);
-    bool IsBrainLoaded();
+    bool IsBrainLoaded() const;
     void UnloadBrain();
     void BrainUnloaded();
     
@@ -71,18 +71,19 @@ protected:
 
     static flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
 
-    void BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+    void BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+        size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
+    void BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
-    void BuildStateResponse(const Communication::StateType state, flatbuffers::FlatBufferBuilder &builder) const;
 
 private:
-    Communication::StateType mState;
-
     double mStartTime;
 
     bool mBrainLoaded;
     bool mBrainIsUnloading;
+
+    bool mIsShuttingDown;
 
     RequestId mRequestIdCounter;
     std::unordered_map<RequestId, CkCcsRequestMsg *> mRequests;

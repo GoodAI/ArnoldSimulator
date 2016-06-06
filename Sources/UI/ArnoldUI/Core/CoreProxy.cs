@@ -96,7 +96,7 @@ namespace GoodAI.Arnold.Core
         public CoreState State
         {
             get { return m_state; }
-            private set
+            internal set
             {
                 if (value == m_state)  // Pass only changes, not updates keeping the state unchanged.
                     return;
@@ -106,7 +106,7 @@ namespace GoodAI.Arnold.Core
                 StateChanged?.Invoke(this, new StateChangedEventArgs(oldState, m_state));
             }
         }
-        private CoreState m_state = CoreState.Empty;
+        private CoreState m_state = CoreState.Disconnected;
 
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_controller;

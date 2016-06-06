@@ -23,6 +23,9 @@ enum StateType:byte {
 
 table StateResponse {
 	state:StateType;
+	brainStep:uint;
+	bodyStep:uint;
+	brainStepsPerBodyStep:uint;
 }
 
 // End of state response.

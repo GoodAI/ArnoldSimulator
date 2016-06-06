@@ -97,7 +97,10 @@ namespace GoodAI.Arnold.UI.Tests
             var waitEvent = new AutoResetEvent(false);
 
             var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
-            Assert.Equal(CoreState.Empty, coreProxy.State);
+            Assert.Equal(CoreState.Disconnected, coreProxy.State);
+
+            // Simulate the core sending first state information.
+            coreProxy.State = CoreState.Empty;
 
             coreProxy.StateChanged += (sender, args) => waitEvent.Set();
 
@@ -141,7 +144,9 @@ namespace GoodAI.Arnold.UI.Tests
             var waitEvent = new AutoResetEvent(false);
 
             var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
-            Assert.Equal(CoreState.Empty, coreProxy.State);
+            Assert.Equal(CoreState.Disconnected, coreProxy.State);
+
+            coreProxy.State = CoreState.Empty;
 
             coreProxy.StateChangeFailed += (sender, args) => waitEvent.Set();
 
@@ -154,22 +159,20 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void RefreshesState()
         {
-            const int timeoutMs = 100;
+            const int timeoutMs = 150;
 
             ICoreLink coreLink = new DummyCoreLink();
 
             var waitEvent = new AutoResetEvent(false);
 
             var coreControllerMock = new Mock<ICoreController>();
+            coreControllerMock.Setup(controller => controller.StartStateChecking(It.IsAny<Action<KeepaliveResult>>()))
+                .Callback(() => waitEvent.Set());
             var coreController = coreControllerMock.Object;
 
             var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
-            Assert.Equal(CoreState.Empty, coreProxy.State);
 
-            coreProxy.StateChanged += (sender, args) => waitEvent.Set();
-
-            waitEvent.WaitOne(timeoutMs);
-            Assert.Equal(CoreState.Empty, coreProxy.State);
+            Assert.True(waitEvent.WaitOne(timeoutMs));
         }
     }
 }

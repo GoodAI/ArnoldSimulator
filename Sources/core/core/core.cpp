@@ -27,8 +27,8 @@ void CoreProcInit()
 }
 
 Core::Core(CkArgMsg *msg) : 
-    mState(Communication::StateType_Empty), mStartTime(0.0),
-    mBrainLoaded(false), mBrainIsUnloading(false), mRequestIdCounter(0)
+    mStartTime(0.0), mBrainLoaded(false),
+    mBrainIsUnloading(false), mIsShuttingDown(false), mRequestIdCounter(0)
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -110,8 +110,8 @@ Core::Core(CkArgMsg *msg) :
 }
 
 Core::Core(CkMigrateMessage *msg) :
-    mState(Communication::StateType::StateType_Empty), mStartTime(0.0), 
-    mBrainLoaded(false), mBrainIsUnloading(false), mRequestIdCounter(0)
+    mStartTime(0.0), mBrainLoaded(false),
+    mBrainIsUnloading(false), mIsShuttingDown(false), mRequestIdCounter(0)
 {
 }
 
@@ -125,10 +125,10 @@ Core::~Core()
 
 void Core::pup(PUP::er &p)
 {
-    p | mState;
     p | mStartTime;
     p | mBrainLoaded;
     p | mBrainIsUnloading;
+    p | mIsShuttingDown;
     p | mRequestIdCounter;
 
     if (p.isUnpacking()) {
@@ -187,10 +187,16 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
                 CkPrintf("Unknown request type %d\n", requestType);
             }
         }
-
     } catch (ShutdownRequestedException &exception) {
-        CkPrintf("ShutdownRequestedException: %s\n", exception.what());
-        Exit();
+        mIsShuttingDown = true;
+        if (IsBrainLoaded()) {
+            gBrain[0].RequestSimulationState(requestId, true, false);
+            UnloadBrain();
+        } else {
+            ProcessGetStateRequest(nullptr, requestId);
+
+            Exit();
+        }
     }
 }
 
@@ -211,12 +217,10 @@ void Core::LoadBrain(const BrainName &name, const BrainType &type, const BrainPa
         gBrain[0].insert(name, type, params);
         gBrain.doneInserting();
         mBrainLoaded = true;
-
-        mState = Communication::StateType_Paused;
     }
 }
 
-bool Core::IsBrainLoaded()
+bool Core::IsBrainLoaded() const
 {
     return (mBrainLoaded && !mBrainIsUnloading);
 }
@@ -235,6 +239,9 @@ void Core::BrainUnloaded()
         gBrain[0].ckDestroy();
         mBrainLoaded = false;
         mBrainIsUnloading = false;
+
+        if (mIsShuttingDown)
+            Exit();
     }
 }
 
@@ -248,8 +255,7 @@ void Core::SendSimulationState(RequestId requestId, bool isSimulationRunning,
     size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep)
 {
     flatbuffers::FlatBufferBuilder builder;
-    BuildSimulationStateResponse(isSimulationRunning,
-        atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
+    BuildStateResponse(isSimulationRunning, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
     SendResponseToClient(requestId, builder);
 }
 
@@ -277,49 +283,42 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
 
 void Core::ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId)
 {
-    flatbuffers::FlatBufferBuilder builder;
     Communication::CommandType commandType = commandRequest->command();
 
-    if (commandType == Communication::CommandType_Shutdown) {
-        BuildStateResponse(Communication::StateType_ShuttingDown, builder);
-        SendResponseToClient(requestId, builder);
+    if (commandType == Communication::CommandType_Shutdown)
         throw ShutdownRequestedException("Shutdown requested by the client");
-    }
 
     if (commandType == Communication::CommandType_Run) {
-        if (mState != Communication::StateType_Paused) {
+        if (!IsBrainLoaded()) {
             // TODO(Premek): return error response
             CkPrintf("Run command failed: invalid state\n");
         } else {
             uint32_t runSteps = commandRequest->stepsToRun();
-            gBrain.RunSimulation(runSteps, runSteps == 0);
-            // TODO(HonzaS): Consider waiting for the SendSimulationState method to be called.
-            // Now, we assume that the simulation really starts running when requested.
-            // Add error handling later.
-            mState = Communication::StateType_Running;
+            gBrain[0].RunSimulation(runSteps, runSteps == 0);
         }
     } else if (commandType == Communication::CommandType_Pause) {
-        if (mState != Communication::StateType_Running) {
+        if (!IsBrainLoaded()) {
             // TODO(Premek): return error response
             CkPrintf("Pause command failed: invalid state\n");
         } else {
-            gBrain.PauseSimulation();
-            // TODO(HonzaS): Consider waiting for the SendSimulationState method to be called.
-            mState = Communication::StateType_Paused;  // TODO(): Add actual logic here.
+            gBrain[0].PauseSimulation();
         }
-
-        mState = Communication::StateType_Paused;  // TODO(): Add actual logic here.
     }
 
-    BuildStateResponse(mState, builder);
-    SendResponseToClient(requestId, builder);
+    // TODO(HonzaS): Refactor (or at least rename).
+    ProcessGetStateRequest(nullptr, requestId);
 }
 
 void Core::ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId)
 {
     flatbuffers::FlatBufferBuilder builder;
-    BuildStateResponse(mState, builder);
-    SendResponseToClient(requestId, builder);
+
+    if (IsBrainLoaded()) {
+        gBrain[0].RequestSimulationState(requestId, true, false);
+    } else {
+        BuildStateResponse(false, 0, 0, 0, builder);
+        SendResponseToClient(requestId, builder);
+    }
 }
 
 // TODO(HonzaS): Remove this.
@@ -519,9 +518,10 @@ void Core::SendStubModel(RequestId requestId)
     mDummyTimestep++;
 }
 
-void Core::BuildStateResponse(Communication::StateType state, flatbuffers::FlatBufferBuilder &builder) const
+void Core::BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
+    size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const
 {
-    flatbuffers::Offset<Communication::StateResponse> stateResponseOffset = Communication::CreateStateResponse(builder, state);
+    auto stateResponseOffset = Communication::CreateStateResponse(builder, state, atBrainStep, atBodyStep, brainStepsPerBodyStep);
     BuildResponseMessage(builder, Communication::Response_StateResponse, stateResponseOffset);
 }
 
@@ -530,10 +530,21 @@ flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::F
     return Communication::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
 }
 
-void Core::BuildSimulationStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
     size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const
 {
-    // TODO(HonzaS): Build the actual message here.
+    Communication::StateType state;
+    if (mIsShuttingDown) {
+        state = Communication::StateType_ShuttingDown;
+    } else if (isSimulationRunning) {
+        state = Communication::StateType_Running;
+    } else if (IsBrainLoaded()) {
+        state = Communication::StateType_Paused;
+    } else {
+        state = Communication::StateType_Empty;
+    }
+
+    BuildStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
 }
 
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const

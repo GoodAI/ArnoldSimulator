@@ -57,16 +57,28 @@ public sealed class StateResponse : Table {
   public StateResponse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public StateType State { get { int o = __offset(4); return o != 0 ? (StateType)bb.GetSbyte(o + bb_pos) : StateType.Empty; } }
+  public uint BrainStep { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint BodyStep { get { int o = __offset(8); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint BrainStepsPerBodyStep { get { int o = __offset(10); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
 
   public static Offset<StateResponse> CreateStateResponse(FlatBufferBuilder builder,
-      StateType state = StateType.Empty) {
-    builder.StartObject(1);
+      StateType state = StateType.Empty,
+      uint brainStep = 0,
+      uint bodyStep = 0,
+      uint brainStepsPerBodyStep = 0) {
+    builder.StartObject(4);
+    StateResponse.AddBrainStepsPerBodyStep(builder, brainStepsPerBodyStep);
+    StateResponse.AddBodyStep(builder, bodyStep);
+    StateResponse.AddBrainStep(builder, brainStep);
     StateResponse.AddState(builder, state);
     return StateResponse.EndStateResponse(builder);
   }
 
-  public static void StartStateResponse(FlatBufferBuilder builder) { builder.StartObject(1); }
+  public static void StartStateResponse(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddState(FlatBufferBuilder builder, StateType state) { builder.AddSbyte(0, (sbyte)state, 0); }
+  public static void AddBrainStep(FlatBufferBuilder builder, uint brainStep) { builder.AddUint(1, brainStep, 0); }
+  public static void AddBodyStep(FlatBufferBuilder builder, uint bodyStep) { builder.AddUint(2, bodyStep, 0); }
+  public static void AddBrainStepsPerBodyStep(FlatBufferBuilder builder, uint brainStepsPerBodyStep) { builder.AddUint(3, brainStepsPerBodyStep, 0); }
   public static Offset<StateResponse> EndStateResponse(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<StateResponse>(o);

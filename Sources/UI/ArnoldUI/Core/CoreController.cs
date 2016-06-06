@@ -61,7 +61,7 @@ namespace GoodAI.Arnold.Core
         private CancellationTokenSource m_cancellationTokenSource;
 
         private const int CommandTimeoutMs = 15*1000;
-        private const int DefaultKeepaliveIntervalMs = 1000;
+        private const int DefaultKeepaliveIntervalMs = 500;
         private const int DefaultKeepaliveTimeoutMs = DefaultKeepaliveIntervalMs;
 
         public bool IsCommandInProgress => m_runningCommand != null;
