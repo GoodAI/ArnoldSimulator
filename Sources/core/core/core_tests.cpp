@@ -32,7 +32,6 @@ void SetupCharmTests()
 
 TEST_CASE("Region can foo", "[charm]")
 {
-
     CProxyElement_RegionBase regionProxy = gRegions[0];
 
     Box3D box;
@@ -40,7 +39,7 @@ TEST_CASE("Region can foo", "[charm]")
     box.second = Size3D(BOX_DEFAULT_SIZE_X, BOX_DEFAULT_SIZE_Y, BOX_DEFAULT_SIZE_Z);
     regionProxy.SetBox(box);
 
-    auto region = regionProxy.ckLocal();
+    RegionBase *region = regionProxy.ckLocal();
 
     REQUIRE(region != nullptr);
     REQUIRE(strcmp(region->GetName(), "Roger") == 0);
