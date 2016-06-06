@@ -54,9 +54,14 @@ namespace GoodAI.Arnold.Visualization.Models
         {
             get
             {
-                var baseMatrix = base.TranslationMatrix;
-                return baseMatrix*
-                       Matrix4.CreateTranslation(
+                Matrix4 baseMatrix = base.TranslationMatrix;
+
+                // TODO(HonzaS): Find a way to multiply the translation part without extracting it.
+                Vector3 regionInnerSize = (RegionModel.Size - 2*new Vector3(RegionModel.RegionMargin));
+                Vector3 translation = baseMatrix.ExtractTranslation() *
+                                  regionInnerSize;
+                return Matrix4.CreateTranslation(translation)
+                       * Matrix4.CreateTranslation(
                            -RegionModel.HalfSize.X + RegionModel.RegionMargin,
                            -RegionModel.HalfSize.Y + RegionModel.RegionMargin,
                            -RegionModel.HalfSize.Z + RegionModel.RegionMargin);
