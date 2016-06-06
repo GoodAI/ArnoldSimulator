@@ -90,6 +90,11 @@ protected:
         const ConnectorRemovals &connectors,
         std::vector<flatbuffers::Offset<Communication::ConnectorRemoval>> &connectorOffsets) const;
 
+    void Core::BuildConnectionOffsets(
+        flatbuffers::FlatBufferBuilder &builder,
+        const Connections &connections,
+        std::vector<flatbuffers::Offset<Communication::Connection>> &connectionOffsets) const;
+
     void BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;

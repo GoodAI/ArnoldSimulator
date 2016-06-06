@@ -611,6 +611,28 @@ void Core::BuildConnectorRemovalOffsets(
     }
 }
 
+void Core::BuildConnectionOffsets(
+    flatbuffers::FlatBufferBuilder &builder,
+    const Connections &connections,
+    std::vector<flatbuffers::Offset<Communication::Connection>> &connectionOffsets) const
+{
+    for (auto connection : connections) {
+        auto direction = std::get<0>(connection) == Direction::Forward
+            ? Communication::Direction::Direction_Forward
+            : Communication::Direction::Direction_Backward;
+
+        RegionIndex fromRegion = std::get<1>(connection);
+        auto fromConnector = builder.CreateString(std::get<2>(connection));
+
+        RegionIndex toRegion = std::get<3>(connection);
+        auto toConnector = builder.CreateString(std::get<4>(connection));
+
+        auto connectionOffset = Communication::CreateConnection(builder, fromRegion, fromConnector, toRegion, toConnector, direction);
+
+        connectionOffsets.push_back(connectionOffset);
+    }
+}
+
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
 {
     // Regions.
@@ -636,6 +658,15 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     BuildConnectorRemovalOffsets(builder, update.removedConnectors, removedConnectorOffsets);
     auto removedConnectorsVectorOffset = builder.CreateVector(removedConnectorOffsets);
 
+    // Connections.
+    std::vector<flatbuffers::Offset<Communication::Connection>> addedConnectionOffsets;
+    BuildConnectionOffsets(builder, update.addedConnections, addedConnectionOffsets);
+    auto addedConnectionsVectorOffset = builder.CreateVector(addedConnectionOffsets);
+
+    std::vector<flatbuffers::Offset<Communication::Connection>> removedConnectionOffsets;
+    BuildConnectionOffsets(builder, update.removedConnections, removedConnectionOffsets);
+    auto removedConnectionsVectorOffset = builder.CreateVector(removedConnectionOffsets);
+
     Communication::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_addedRegions(addedRegionsVectorOffset);
     responseBuilder.add_repositionedRegions(repositionedRegionsVectorOffset);
@@ -643,6 +674,11 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
 
     responseBuilder.add_addedConnectors(addedConnectorsVectorOffset);
     responseBuilder.add_removedConnectors(removedConnectorsVectorOffset);
+
+    responseBuilder.add_addedConnections(addedConnectionsVectorOffset);
+    responseBuilder.add_removedConnections(removedConnectionsVectorOffset);
+
+
     auto modelResponseOffset = responseBuilder.Finish();
 
     BuildResponseMessage(builder, Communication::Response_ModelResponse, modelResponseOffset);
