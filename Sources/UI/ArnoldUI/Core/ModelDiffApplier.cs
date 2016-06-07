@@ -170,11 +170,11 @@ namespace GoodAI.Arnold.Core
                     if (connectionModel == null)
                     {
                         LogConnectionNotProcessed(removedConnection, "remove", "Connection not found");
+                        return;
                     }
 
+                    connectionModel.Disconnect();
                     model.Connections.Remove(connectionModel);
-                    fromConnector.Connections.Remove(connectionModel);
-                    toConnector.Connections.Remove(connectionModel);
                 });
             }
         }
