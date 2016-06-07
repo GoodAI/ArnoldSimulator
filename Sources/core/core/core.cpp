@@ -365,28 +365,26 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
-    if (IsBrainLoaded()) {
-        if (getModelRequest->filter() != nullptr) {
-            Boxes roiBoxes;
-            auto size = getModelRequest->filter()->boxes()->size();
-            roiBoxes.reserve(size);
+    if (!IsBrainLoaded())
+        return;
 
-            for (int i = 0; i < size; i++) {
-                auto box = getModelRequest->filter()->boxes()->Get(i);
-                Point3D boxPosition(box->x(), box->y(), box->z());
-                Size3D boxSize(box->sizeX(), box->sizeY(), box->sizeZ());
-                Box3D roiBox(boxPosition, boxSize);
-                roiBoxes[i] = roiBox;
-            }
+    if (getModelRequest->filter() != nullptr) {
+        Boxes roiBoxes;
+        auto size = getModelRequest->filter()->boxes()->size();
+        roiBoxes.reserve(size);
 
-            gBrain[0].UpdateRegionOfInterest(roiBoxes);
+        for (int i = 0; i < size; i++) {
+            auto box = getModelRequest->filter()->boxes()->Get(i);
+            Point3D boxPosition(box->x(), box->y(), box->z());
+            Size3D boxSize(box->sizeX(), box->sizeY(), box->sizeZ());
+            Box3D roiBox(boxPosition, boxSize);
+            roiBoxes[i] = roiBox;
         }
 
-        gBrain[0].RequestViewportUpdate(requestId, getModelRequest->full(), true);
+        gBrain[0].UpdateRegionOfInterest(roiBoxes);
     }
 
-    // TODO(HonzaS): Remove.
-    //SendStubModel(requestId);
+    gBrain[0].RequestViewportUpdate(requestId, getModelRequest->full(), true);
 }
 
 void Core::SendStubModel(RequestId requestId)

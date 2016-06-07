@@ -160,17 +160,9 @@ namespace GoodAI.Arnold.Core
 
                 try
                 {
-                    ModelFilter filterToSend;
-                    if (m_filterChanged)
-                    {
-                        filterToSend = m_filter;
-                        m_filterChanged = false;
-                    }
-                    else
-                    {
-                        // If there is no change to the filter, send null.
-                        filterToSend = null;
-                    }
+                    // If there is no change to the filter, send null.
+                    ModelFilter filterToSend = m_filterChanged ? m_filter : null;
+                    m_filterChanged = false;
 
                     // Request a model diff from the core.
                     // TODO(HonzaS): Unless we lost connection or there was an error, request only incremental model (full: false).
