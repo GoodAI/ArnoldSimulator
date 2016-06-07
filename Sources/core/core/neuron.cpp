@@ -76,7 +76,10 @@ void Neuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Dat
 
 NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 {
-    json p = json::parse(params);
+    json p;
+    try {
+        p = json::parse(params);
+    } catch (std::invalid_argument &) { }
 
     auto engine = Random::GetThreadEngine();
     std::uniform_real_distribution<float> randFloat(0.0, 1.0);
@@ -800,7 +803,6 @@ void ThresholdNeuron::Control(size_t brainStep)
 
     auto engine = Random::GetThreadEngine();
     size_t inputSynapseCount = mBase.GetInputSynapses().size();
-    size_t outputSynapseCount = mBase.GetOutputSynapses().size();
 
     if (mReceivedSpikeCount * 10 < inputSynapseCount && mSentSpikeCount > 0) {
         std::uniform_int_distribution<size_t> randSynapse(0, inputSynapseCount - 1);

@@ -69,7 +69,10 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
     mUnlinking(false), mDoUpdate(false), mDoFullUpdate(false), mDoProgress(false), mBrainStep(0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFilled(false), mRegion(nullptr)
 {
-    json p = json::parse(params);
+    json p;
+    try {
+        p = json::parse(params);
+    } catch (std::invalid_argument &) { }
 
     auto engine = Random::GetThreadEngine();
     std::unordered_map<std::string, std::vector<NeuronId>> clusters;

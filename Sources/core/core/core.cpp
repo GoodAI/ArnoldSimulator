@@ -83,7 +83,13 @@ Core::Core(CkArgMsg *msg) :
     }
 
     if (!blueprintContent.str().empty()) {
-        json blueprint = json::parse(blueprintContent.str());
+        json blueprint;
+        try {
+            blueprint = json::parse(blueprintContent.str());
+        } catch (std::invalid_argument &) {
+            CkPrintf("Invalid blueprint.");
+        }
+
         if (!blueprint.empty()) {
             if (blueprint.begin().key() == "brain" && blueprint.begin()->is_object()) {
 

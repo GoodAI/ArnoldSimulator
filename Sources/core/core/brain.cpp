@@ -158,7 +158,10 @@ void BrainBase::Terminal::pup(PUP::er &p)
 
 Body *BrainBase::CreateBody(const std::string &type, const std::string &params)
 {
-    json p = json::parse(params);
+    json p;
+    try {
+        p = json::parse(params);
+    } catch (std::invalid_argument &) { }
 
     if (!p.empty()) {
         for (auto itParams = p.begin(); itParams != p.end(); ++itParams) {
@@ -239,7 +242,10 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
 
     mNeuronToTerminalId.set_deleted_key(DELETED_NEURON_ID);
 
-    json p = json::parse(params);
+    json p;
+    try {
+        p = json::parse(params);
+    } catch (std::invalid_argument &) { }
     std::unordered_map<std::string, RegionIndex> regionNameToIndex;
 
     if (!p.empty()) {
