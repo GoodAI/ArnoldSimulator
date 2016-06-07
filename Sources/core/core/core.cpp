@@ -82,36 +82,10 @@ Core::Core(CkArgMsg *msg) :
         blueprintFile.close();
     }
 
-    if (!blueprintContent.str().empty()) {
-        json blueprint;
-        try {
-            blueprint = json::parse(blueprintContent.str());
-        } catch (std::invalid_argument &) {
-            CkPrintf("Invalid blueprint.");
-        }
-
-        if (!blueprint.empty()) {
-            if (blueprint.begin().key() == "brain" && blueprint.begin()->is_object()) {
-
-                json brain = blueprint.begin().value();
-                std::string brainName, brainType, brainParams;
-                for (auto it = brain.begin(); it != brain.end(); ++it) {
-                    if (it.key() == "name" && it.value().is_string()) {
-                        brainName = it.value().get<std::string>();
-                    } else if (it.key() == "type" && it.value().is_string()) {
-                        brainType = it.value().get<std::string>();
-                    } else if (it.key() == "params" && it.value().is_object()) {
-                        brainParams = it.value().dump();
-                    }
-                }
-
-                if (!brainType.empty()) {
-                    LoadBrain(brainName, brainType, brainParams);
-                    std::thread input(&Core::DetectKeyPress, this);
-                    input.detach();
-                }
-            }
-        }
+    auto blueprintString = blueprintContent.str();
+    if (!blueprintString.empty() && TryLoadBrain(blueprintString)) {
+        std::thread input(&Core::DetectKeyPress, this);
+        input.detach();
     }
 
     delete msg;
@@ -121,6 +95,41 @@ Core::Core(CkMigrateMessage *msg) :
     mStartTime(0.0), mBrainLoaded(false),
     mBrainIsUnloading(false), mIsShuttingDown(false), mRequestIdCounter(0)
 {
+}
+
+bool Core::TryLoadBrain(const std::string &blueprintString)
+{
+    // TODO(HonzaS): let the caller know why loading failed (parsing or wrong structure).
+    json blueprint;
+    try {
+        blueprint = json::parse(blueprintString);
+    } catch (std::invalid_argument &) {
+        CkPrintf("Invalid blueprint.");
+    }
+
+    if (!blueprint.empty()) {
+        if (blueprint.begin().key() == "brain" && blueprint.begin()->is_object()) {
+
+            json brain = blueprint.begin().value();
+            std::string brainName, brainType, brainParams;
+            for (auto it = brain.begin(); it != brain.end(); ++it) {
+                if (it.key() == "name" && it.value().is_string()) {
+                    brainName = it.value().get<std::string>();
+                } else if (it.key() == "type" && it.value().is_string()) {
+                    brainType = it.value().get<std::string>();
+                } else if (it.key() == "params" && it.value().is_object()) {
+                    brainParams = it.value().dump();
+                }
+            }
+
+            if (!brainType.empty()) {
+                LoadBrain(brainName, brainType, brainParams);
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 Core::~Core()
@@ -323,7 +332,21 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
     if (commandType == Communication::CommandType_Shutdown)
         throw ShutdownRequestedException("Shutdown requested by the client");
 
-    if (commandType == Communication::CommandType_Run) {
+    if (commandType == Communication::CommandType_Load) {
+        if (IsBrainLoaded()) {
+            // TODO(Premek): return error response
+            CkPrintf("Load command failed: invalid state\n");
+        } else {
+            const flatbuffers::String *blueprint = commandRequest->blueprint();
+            if (blueprint == nullptr) {
+                CkPrintf("Load command failed: blueprint missing\n");
+            } else {
+                // TODO(HonzaS): Use real name and type.
+                if (!TryLoadBrain(blueprint->str()))
+                    CkPrintf("Load command failed: invalid blueprint\n");
+            }
+        }
+    } else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
             // TODO(Premek): return error response
             CkPrintf("Run command failed: invalid state\n");
