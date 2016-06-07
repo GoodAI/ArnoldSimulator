@@ -107,6 +107,8 @@ Core::Core(CkArgMsg *msg) :
 
                 if (!brainType.empty()) {
                     LoadBrain(brainName, brainType, brainParams);
+                    std::thread input(&Core::DetectKeyPress, this);
+                    input.detach();
                 }
             }
         }
@@ -158,6 +160,34 @@ void Core::Exit()
     // TODO(HonzaS): Handle graceful exit later (saving of the snapshot etc).
     CkPrintf("Exiting after %lf...\n", CmiWallTimer() - mStartTime);
     CkExit();
+}
+
+void Core::DetectKeyPress()
+{
+    while (true) {
+        char c = getchar();
+        if (c == 'r') {
+            if (IsBrainLoaded()) {
+                gBrain[0].RunSimulation(1, true);
+            }
+        } else if (c == 'p') {
+            if (IsBrainLoaded()) {
+                gBrain[0].PauseSimulation();
+            }
+        } else if (c == 's') {
+            if (IsBrainLoaded()) {
+                gBrain[0].RunSimulation(1, false);
+            }
+        } else if (c == 'q') {
+            mIsShuttingDown = true;
+            if (IsBrainLoaded()) {
+                UnloadBrain();
+            } else {
+                Exit();
+            }
+            break;
+        }
+    }
 }
 
 void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)

@@ -48,6 +48,8 @@ public:
 
     void Exit();
 
+    void DetectKeyPress();
+
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
     
     void RunTests();
