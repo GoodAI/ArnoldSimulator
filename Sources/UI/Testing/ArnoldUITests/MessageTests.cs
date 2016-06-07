@@ -37,14 +37,7 @@ namespace GoodAI.Arnold.UI.Tests
             var size = new Vector3(4, 5, 6);
             var filter = new ModelFilter
             {
-                Boxes =
-                {
-                    new FilterBox
-                    {
-                        Position = position,
-                        Size = size
-                    }
-                }
+                Boxes = {new FilterBox(position, size)}
             };
 
             var message = GetModelRequestBuilder.Build(full: true, filter: filter);

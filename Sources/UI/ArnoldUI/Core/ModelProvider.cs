@@ -11,6 +11,7 @@ namespace GoodAI.Arnold.Core
 {
     public interface IModelProvider
     {
+        ModelFilter Filter { set; }
         SimulationModel GetNewModel();
         SimulationModel LastReceivedModel { get; }
     }
@@ -23,7 +24,18 @@ namespace GoodAI.Arnold.Core
         public ILog Log { get; set; } = NullLogger.Instance;
 
         public SimulationModel LastReceivedModel { get; private set; }
-        
+
+        public ModelFilter Filter
+        {
+            set
+            {
+                if (m_conductor.CoreState == CoreState.Disconnected || m_conductor.CoreState == CoreState.Empty)
+                    return;
+
+                m_conductor.CoreProxy.ModelUpdater.Filter = value;
+            }
+        }
+
         public ModelProvider(IConductor conductor)
         {
             m_conductor = conductor;

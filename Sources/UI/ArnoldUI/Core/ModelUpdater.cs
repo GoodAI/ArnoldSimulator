@@ -15,6 +15,7 @@ namespace GoodAI.Arnold.Core
     public interface IModelUpdater : IDisposable
     {
         SimulationModel GetNewModel();
+        ModelFilter Filter { set; }
         void Start();
         void Stop();
     }
@@ -42,6 +43,17 @@ namespace GoodAI.Arnold.Core
         private CancellationTokenSource m_cancellation;
         private bool m_getFullModel;
 
+        private bool m_filterChanged;
+        private ModelFilter m_filter;
+
+        public ModelFilter Filter
+        {
+            set
+            {
+                m_filter = value;
+                m_filterChanged = true;
+            }
+        }
 
         public ModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
         {
@@ -58,7 +70,9 @@ namespace GoodAI.Arnold.Core
             m_modelReadEvent = new AutoResetEvent(false);
 
             m_cancellation = new CancellationTokenSource();
+
             m_getFullModel = true;
+            m_filterChanged = true;
             Task task = RepeatGetModelAsync(m_cancellation);
 
             m_currentModel = new SimulationModel();
@@ -146,9 +160,21 @@ namespace GoodAI.Arnold.Core
 
                 try
                 {
+                    ModelFilter filterToSend;
+                    if (m_filterChanged)
+                    {
+                        filterToSend = m_filter;
+                        m_filterChanged = false;
+                    }
+                    else
+                    {
+                        // If there is no change to the filter, send null.
+                        filterToSend = null;
+                    }
+
                     // Request a model diff from the core.
                     // TODO(HonzaS): Unless we lost connection or there was an error, request only incremental model (full: false).
-                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(m_getFullModel), TimeoutMs).ConfigureAwait(false);
+                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(m_getFullModel, filterToSend), TimeoutMs).ConfigureAwait(false);
                     m_getFullModel = false;
 
                     // Wait until the model has been read. This happens before the first request as well.

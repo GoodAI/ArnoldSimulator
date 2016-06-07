@@ -18,11 +18,15 @@ namespace GoodAI.Arnold.UI.Tests
     {
         class DummyModelResponseCoreLink : ICoreLink
         {
+            public GetModelRequest LastRequest { get; private set; }
+
             public Task<TResponse> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs) where TRequest : Table where TResponse : Table, new()
             {
                 var request = conversation.RequestData as GetModelRequest;
                 if (request == null)
                     throw new ArgumentException("Can only respond to a model request");
+
+                LastRequest = request;
 
                 return Task<TResponse>.Factory.StartNew(() =>
                 {
@@ -49,17 +53,18 @@ namespace GoodAI.Arnold.UI.Tests
 
         private readonly ModelUpdater m_modelUpdater;
         private DummyModelDiffApplier m_modelDiffApplier;
+        private DummyModelResponseCoreLink m_coreLink;
 
         public ModelUpdaterTests()
         {
             var coreControllerMock = new Mock<ICoreController>();
             ICoreController coreController = coreControllerMock.Object;
 
-            var coreLink = new DummyModelResponseCoreLink();
+            m_coreLink = new DummyModelResponseCoreLink();
             
             m_modelDiffApplier = new DummyModelDiffApplier();
 
-            m_modelUpdater = new ModelUpdater(coreLink, coreController, m_modelDiffApplier);
+            m_modelUpdater = new ModelUpdater(m_coreLink, coreController, m_modelDiffApplier);
         }
 
         private SimulationModel WaitAndGetNewModel()
@@ -125,6 +130,34 @@ namespace GoodAI.Arnold.UI.Tests
         public void GetNewModelFailsWhenNotStarted()
         {
             Assert.Throws<InvalidOperationException>(() => m_modelUpdater.GetNewModel());
+        }
+
+        [Fact]
+        public void SendsFilter()
+        {
+            m_modelUpdater.Start();
+
+            m_modelUpdater.GetNewModel();
+            WaitAndGetNewModel();
+            Assert.Null(m_coreLink.LastRequest.Filter);
+
+            var modelFilter = new ModelFilter
+            {
+                Boxes = {new FilterBox(new Vector3(1, 2, 3), new Vector3(4, 5, 6))}
+            };
+
+            m_modelUpdater.Filter = modelFilter;
+
+            // This allows the updater to send next request with the new filter.
+            WaitAndGetNewModel();
+
+            // Get the model that will already be filtered.
+            WaitAndGetNewModel();
+
+            // Only now can we check if it was sent (there is a race condition before the second wait).
+            Assert.NotNull(m_coreLink.LastRequest.Filter);
+
+            m_modelUpdater.Stop();
         }
     }
 }

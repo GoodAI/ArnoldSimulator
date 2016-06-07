@@ -189,9 +189,13 @@ namespace GoodAI.Arnold.Visualization
         {
             m_simulationModel = m_conductor.ModelProvider.GetNewModel() ?? m_simulationModel;
 
-            // TODO(HonzaS): When we have incremental updates, optimize this to not go through all neurons.
             if (m_simulationModel != null)
+            {
+                UpdateModelFilter();
+
+                // TODO(HonzaS): When we have incremental updates, optimize this to not go through all neurons.
                 InjectCamera();
+            }
 
             m_fps = 1000/elapsedMs;
 
@@ -209,6 +213,34 @@ namespace GoodAI.Arnold.Visualization
 
             UpdateFrame(elapsedMs);
             RenderFrame(elapsedMs);
+        }
+
+        private void UpdateModelFilter()
+        {
+            var lowerBound = new Vector3(float.MaxValue);
+            var upperBound = new Vector3(float.MinValue);
+            foreach (RegionModel region in m_simulationModel.Regions)
+            {
+                Vector3 regionLowerBound = region.Position - region.HalfSize;
+                Vector3 regionUpperBound = region.Position + region.HalfSize;
+
+                lowerBound.X = Math.Min(lowerBound.X, regionLowerBound.X);
+                lowerBound.Y = Math.Min(lowerBound.Y, regionLowerBound.Y);
+                lowerBound.Z = Math.Min(lowerBound.Z, regionLowerBound.Z);
+
+                upperBound.X = Math.Max(upperBound.X, regionUpperBound.X);
+                upperBound.Y = Math.Max(upperBound.Y, regionUpperBound.Y);
+                upperBound.Z = Math.Max(upperBound.Z, regionUpperBound.Z);
+            }
+
+            Vector3 size = upperBound - lowerBound;
+            Vector3 position = lowerBound + size/2;
+
+
+            m_conductor.ModelProvider.Filter = new ModelFilter
+            {
+                Boxes = {new FilterBox(position, size)}
+            };
         }
 
         private IEnumerable<IModel> AllModels()
