@@ -675,14 +675,14 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     delete msg;
 }
 
-ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params)
+ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params), 
+    mThresholdActivation(0.0), mAccumulatedActivation(0.0),
+    mReceivedSpikeCount(0), mSentSpikeCount(0)
 {
-    mThreshold = 0;
-
     if (!params.empty()) {
         for (auto itParams = params.begin(); itParams != params.end(); ++itParams) {
             if (itParams.key() == "threshold" && itParams->is_number_float()) {
-                mThreshold = itParams.value().get<double>();
+                mThresholdActivation = itParams.value().get<double>();
             }
         }
     } 
@@ -694,7 +694,10 @@ ThresholdNeuron::~ThresholdNeuron()
 
 void ThresholdNeuron::pup(PUP::er &p)
 {
-    p | mThreshold;
+    p | mThresholdActivation;
+    p | mAccumulatedActivation;
+    p | mReceivedSpikeCount;
+    p | mSentSpikeCount;
 }
 
 const char *ThresholdNeuron::Type = "ThresholdNeuron";
@@ -709,15 +712,29 @@ void ThresholdNeuron::HandleSpike(Direction direction, ContinuousSpike &spike, S
     uint16_t delay = spike.GetDelay(data);
     if (delay == 0) {
 
-        // TODO
+        NeuronId sender = Spike::GetSender(data);
+
+        Synapse::Data *synapseData;
+        if (direction == Direction::Forward) {
+            synapseData = mBase.AccessInputSynapse(sender);
+        } else {
+            synapseData = mBase.AccessOutputSynapse(sender);
+        }
+
+        double synapseWeight = 1.0;
+        if (Synapse::GetType(*synapseData) == Synapse::Type::Weighted) {
+            WeightedSynapse *synapse = static_cast<WeightedSynapse *>(Synapse::Edit(*synapseData));
+            synapseWeight = synapse->GetWeight(*synapseData);
+        }
+
+        double spikeIntensity = spike.GetIntensity(data);
+
+        mAccumulatedActivation += spikeIntensity * synapseWeight;
+        ++mReceivedSpikeCount;
 
     } else {
         spike.SetDelay(data, --delay);
-        if (direction == Direction::Forward) {
-            mBase.EnqueueSpike(Direction::Forward, data);
-        } else {
-            mBase.EnqueueSpike(Direction::Backward, data);
-        }
+        mBase.EnqueueSpike(direction, data);
     }
 }
 
@@ -750,20 +767,94 @@ void ThresholdNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, S
 
 void ThresholdNeuron::Control(size_t brainStep)
 {
-    // TODO
+    if (mAccumulatedActivation >= mThresholdActivation) {
+        mAccumulatedActivation = 0.0;
+        mSentSpikeCount = 0;
+
+        if (brainStep % 2) {
+            for (auto it = mBase.GetOutputSynapses().begin(); it != mBase.GetOutputSynapses().end(); ++it) {
+                
+                uint16_t delay = 0;
+                Synapse::Data *synapseData;
+                synapseData = mBase.AccessOutputSynapse(it->first);
+                if (Synapse::GetType(*synapseData) == Synapse::Type::Lagging) {
+                    LaggingSynapse *synapse = static_cast<LaggingSynapse *>(Synapse::Edit(*synapseData));
+                    delay = synapse->GetDelay(*synapseData);
+                }
+
+                SendContinuousSpike(Direction::Forward, it->first, delay, mThresholdActivation);
+                ++mSentSpikeCount;
+            }
+        } else {
+            for (auto it = mBase.GetInputSynapses().begin(); it != mBase.GetInputSynapses().end(); ++it) {
+                NeuronId sender = mBase.GetId();
+                NeuronId receiver = it->first;
+                RequestThresholdArgs request;
+                if (GetRegionIndex(sender) == GetRegionIndex(receiver)) {
+                    SendFunctionalSpike<RequestThresholdArgs>(
+                        Direction::Backward, receiver, Function::RequestThreshold, request);
+                }
+            }
+        }
+    }
+
+    auto engine = Random::GetThreadEngine();
+    size_t inputSynapseCount = mBase.GetInputSynapses().size();
+    size_t outputSynapseCount = mBase.GetOutputSynapses().size();
+
+    if (mReceivedSpikeCount * 10 < inputSynapseCount && mSentSpikeCount > 0) {
+        std::uniform_int_distribution<size_t> randSynapse(0, inputSynapseCount - 1);
+        NeuronId from = DELETED_NEURON_ID;
+        size_t whenToStop = randSynapse(engine);
+        for (auto it = mBase.GetInputSynapses().begin(); it != mBase.GetInputSynapses().end(); ++it) {
+            if (whenToStop == 0) {
+                from = it->first;
+                break;
+            }
+            --whenToStop;
+        }
+        mBase.RequestSynapseRemoval(Direction::Forward, from, mBase.GetId());
+    } else if (mReceivedSpikeCount > 10 * mSentSpikeCount && mReceivedSpikeCount < 100 * mSentSpikeCount) {
+        json params = {
+            { "threshold", mThresholdActivation }
+        };
+        NeuronId child = mBase.RequestNeuronAddition(GetType(), params.dump());
+        mBase.AdoptAsChild(child, true);
+    }
 }
 
 size_t ThresholdNeuron::ContributeToRegion(uint8_t *&contribution)
 {
-    // TODO
-    contribution = nullptr;
-    return 0;
+    size_t inputSynapseCount = mBase.GetInputSynapses().size();
+    size_t outputSynapseCount = mBase.GetOutputSynapses().size();
+
+    size_t size = (sizeof(size_t) * 4);
+    contribution = static_cast<uint8_t *>(std::malloc(size));
+    uint8_t *cur = contribution;
+
+    std::memcpy(cur, &mReceivedSpikeCount, sizeof(size_t));
+    cur += sizeof(size_t);  
+
+    std::memcpy(cur, &mSentSpikeCount, sizeof(size_t));
+    cur += sizeof(size_t);
+
+    std::memcpy(cur, &inputSynapseCount, sizeof(size_t));
+    cur += sizeof(size_t);
+
+    std::memcpy(cur, &outputSynapseCount, sizeof(size_t));
+    //cur += sizeof(size_t);
+
+    if (mSentSpikeCount > 0) {
+        mReceivedSpikeCount = 0;
+    }
+
+    return size;
 }
 
 void ThresholdNeuron::RequestThreshold(Direction direction, NeuronId sender)
 {
     ReceiveThresholdArgs response;
-    response.threshold = mThreshold;
+    response.threshold = mThresholdActivation;
 
     SendFunctionalSpike<ReceiveThresholdArgs>(
         OPPOSITE_DIRECTION(direction), sender, Function::ReceiveThreshold, response);
@@ -772,7 +863,7 @@ void ThresholdNeuron::RequestThreshold(Direction direction, NeuronId sender)
 void ThresholdNeuron::ReceiveThreshold(Direction direction, NeuronId sender, const ReceiveThresholdArgs &args)
 {
     ChangeThresholdArgs response;
-    response.delta = mThreshold - ((mThreshold + args.threshold) / 2);
+    response.delta = mThresholdActivation - ((mThresholdActivation + args.threshold) / 2);
 
     SendFunctionalSpike<ChangeThresholdArgs>(
         OPPOSITE_DIRECTION(direction), sender, Function::ChangeThreshold, response);
@@ -780,7 +871,18 @@ void ThresholdNeuron::ReceiveThreshold(Direction direction, NeuronId sender, con
 
 void ThresholdNeuron::ChangeThreshold(Direction direction, NeuronId sender, const ChangeThresholdArgs &args)
 {
-    mThreshold += args.delta;
+    mThresholdActivation += args.delta;
+}
+
+void ThresholdNeuron::SendContinuousSpike(Direction direction, NeuronId receiver, uint16_t delay, double intensity)
+{
+    Spike::Data data;
+    Spike::Initialize(Spike::Type::Continuous, mBase.GetId(), data);
+    ContinuousSpike *spike = static_cast<ContinuousSpike *>(Spike::Edit(data));
+    spike->SetDelay(data, delay);
+    spike->SetIntensity(data, mThresholdActivation);
+
+    mBase.SendSpike(receiver, direction, data);
 }
 
 #include "neuron.def.h"

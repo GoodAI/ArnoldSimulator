@@ -86,6 +86,7 @@ public:
     RegionIndex GetIndex() const;
 
     NeuronIndex GetNewNeuronIndex();
+    const NeuronIndices &GetNeuronIndices();
 
     const Connectors &GetInputs() const;
     const Connector &GetInput(const ConnectorName &name) const;
@@ -191,4 +192,8 @@ public:
     virtual void AcceptContributionFromNeuron(
         NeuronId neuronId, const uint8_t *contribution, size_t size) override;
     virtual size_t ContributeToBrain(uint8_t *&contribution) override;
+
+private:
+    std::vector<NeuronId> mConnectMore;
+    std::vector<NeuronId> mPruneAway;
 };

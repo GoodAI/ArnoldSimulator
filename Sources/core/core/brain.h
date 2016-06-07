@@ -273,4 +273,13 @@ public:
 
     virtual void AcceptContributionFromRegion(
         RegionIndex regIdx, const uint8_t *contribution, size_t size) override;
+
+private:
+    size_t mAddedNeurons;
+    size_t mRemovedNeurons;
+    size_t mAddedSynapses;
+    size_t mRemovedSynapses;
+    size_t mAddedChildLinks;
+    size_t mRemovedChildLinks;
+    size_t mTriggeredNeurons;
 };

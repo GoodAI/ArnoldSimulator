@@ -183,6 +183,10 @@ public:
         ChangeThreshold
     };
 
+    struct RequestThresholdArgs
+    {
+    };
+
     struct ReceiveThresholdArgs
     {
         double threshold;
@@ -200,8 +204,13 @@ public:
     template<typename Arguments>
     void SendFunctionalSpike(Direction direction, NeuronId receiver, Function function, Arguments &args);
 
+    void SendContinuousSpike(Direction direction, NeuronId receiver, uint16_t delay, double intensity);
+
 protected:
-    double mThreshold;
+    double mThresholdActivation;
+    double mAccumulatedActivation;
+    size_t mReceivedSpikeCount;
+    size_t mSentSpikeCount;
 };
 
 template<typename Arguments>
