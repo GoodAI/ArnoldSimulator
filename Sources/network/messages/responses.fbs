@@ -70,7 +70,6 @@ table Connection {
 	fromConnector:string;
 	toRegion:uint;
 	toConnector:string;
-	direction:Direction;
 }
 
 table NeuronId {

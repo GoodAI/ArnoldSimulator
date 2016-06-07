@@ -619,7 +619,7 @@ void Core::BuildConnectionOffsets(
     std::vector<flatbuffers::Offset<Communication::Connection>> &connectionOffsets) const
 {
     for (auto connection : connections) {
-        auto direction = CommunicationDirection(std::get<0>(connection));
+        auto direction = std::get<0>(connection);
 
         RegionIndex fromRegion = std::get<1>(connection);
         auto fromConnector = builder.CreateString(std::get<2>(connection));
@@ -627,7 +627,13 @@ void Core::BuildConnectionOffsets(
         RegionIndex toRegion = std::get<3>(connection);
         auto toConnector = builder.CreateString(std::get<4>(connection));
 
-        auto connectionOffset = Communication::CreateConnection(builder, fromRegion, fromConnector, toRegion, toConnector, direction);
+        if (direction == Direction::Backward) {
+            auto tmpConnector = fromConnector;
+            fromConnector = toConnector;
+            toConnector = tmpConnector;
+        }
+
+        auto connectionOffset = Communication::CreateConnection(builder, fromRegion, fromConnector, toRegion, toConnector);
 
         connectionOffsets.push_back(connectionOffset);
     }

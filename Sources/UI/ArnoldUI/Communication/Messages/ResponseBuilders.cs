@@ -236,8 +236,7 @@ namespace GoodAI.Arnold.Communication
                 StringOffset toConnectorName = builder.CreateString(connection.To.Name);
 
                 return Connection.CreateConnection(builder, connection.From.Region.Index,
-                    fromConnectorName, connection.To.Region.Index, toConnectorName,
-                    connection.From.Direction);
+                    fromConnectorName, connection.To.Region.Index, toConnectorName);
             });
             return addedConnectionsOffsets;
         }

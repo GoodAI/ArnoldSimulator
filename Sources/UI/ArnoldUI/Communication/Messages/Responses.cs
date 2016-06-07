@@ -234,29 +234,25 @@ public sealed class Connection : Table {
   public uint ToRegion { get { int o = __offset(8); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
   public string ToConnector { get { int o = __offset(10); return o != 0 ? __string(o + bb_pos) : null; } }
   public ArraySegment<byte>? GetToConnectorBytes() { return __vector_as_arraysegment(10); }
-  public Direction Direction { get { int o = __offset(12); return o != 0 ? (Direction)bb.GetSbyte(o + bb_pos) : Direction.Forward; } }
 
   public static Offset<Connection> CreateConnection(FlatBufferBuilder builder,
       uint fromRegion = 0,
       StringOffset fromConnectorOffset = default(StringOffset),
       uint toRegion = 0,
-      StringOffset toConnectorOffset = default(StringOffset),
-      Direction direction = Direction.Forward) {
-    builder.StartObject(5);
+      StringOffset toConnectorOffset = default(StringOffset)) {
+    builder.StartObject(4);
     Connection.AddToConnector(builder, toConnectorOffset);
     Connection.AddToRegion(builder, toRegion);
     Connection.AddFromConnector(builder, fromConnectorOffset);
     Connection.AddFromRegion(builder, fromRegion);
-    Connection.AddDirection(builder, direction);
     return Connection.EndConnection(builder);
   }
 
-  public static void StartConnection(FlatBufferBuilder builder) { builder.StartObject(5); }
+  public static void StartConnection(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddFromRegion(FlatBufferBuilder builder, uint fromRegion) { builder.AddUint(0, fromRegion, 0); }
   public static void AddFromConnector(FlatBufferBuilder builder, StringOffset fromConnectorOffset) { builder.AddOffset(1, fromConnectorOffset.Value, 0); }
   public static void AddToRegion(FlatBufferBuilder builder, uint toRegion) { builder.AddUint(2, toRegion, 0); }
   public static void AddToConnector(FlatBufferBuilder builder, StringOffset toConnectorOffset) { builder.AddOffset(3, toConnectorOffset.Value, 0); }
-  public static void AddDirection(FlatBufferBuilder builder, Direction direction) { builder.AddSbyte(4, (sbyte)direction, 0); }
   public static Offset<Connection> EndConnection(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Connection>(o);
