@@ -157,7 +157,6 @@ void Core::pup(PUP::er &p)
 
 void Core::Exit()
 {
-    // TODO(HonzaS): Handle graceful exit later (saving of the snapshot etc).
     CkPrintf("Exiting after %lf...\n", CmiWallTimer() - mStartTime);
     CkExit();
 }
@@ -223,7 +222,7 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
                 CkPrintf("Unknown request type %d\n", requestType);
             }
         }
-    } catch (ShutdownRequestedException &exception) {
+    } catch (ShutdownRequestedException &) {
         mIsShuttingDown = true;
         if (IsBrainLoaded()) {
             gBrain[0].RequestSimulationState(requestId, true, false);
@@ -355,12 +354,6 @@ void Core::ProcessGetStateRequest(const Communication::GetStateRequest *getState
         BuildStateResponse(false, 0, 0, 0, builder);
         SendResponseToClient(requestId, builder);
     }
-}
-
-// TODO(HonzaS): Remove this.
-bool chance()
-{
-    return rand() % 60;
 }
 
 template <typename TResponse>
