@@ -122,16 +122,16 @@ namespace GoodAI.Arnold
             m_uiMain.Disconnect();
         }
 
-        private void runButton_Click(object sender, EventArgs e)
+        private async void runButton_Click(object sender, EventArgs e)
         {
-            if (m_uiMain.Conductor.CoreState == CoreState.Empty)
-            {
-                Log.Warn("Cannot run empty simulation, loading blueprint not yet implemented");
-                return;
-            }
-
             DisableCommandButtons();
-            m_uiMain.StartSimulation();
+
+            await m_uiMain.StartSimulation().ContinueWith(task =>
+            {
+                if (task.IsFaulted)
+                    Log.Warn(task.Exception, "Failed to start simulation");
+            })
+            .ConfigureAwait(false);
         }
 
         private void pauseButton_Click(object sender, EventArgs e)

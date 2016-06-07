@@ -57,9 +57,9 @@ namespace ArnoldUI
             Conductor.ConnectToCore(endPoint: null);
         }
 
-        public void StartSimulation()
+        public async Task StartSimulation()
         {
-            Conductor.LoadBlueprint(m_blueprint);
+            await Conductor.LoadBlueprint(m_blueprint);
             Conductor.StartSimulation();
         }
 
