@@ -150,7 +150,7 @@ void Core::pup(PUP::er &p)
 void Core::Exit()
 {
     // TODO(HonzaS): Handle graceful exit later (saving of the snapshot etc).
-    CkPrintf("Exitting after %lf...\n", CmiWallTimer() - mStartTime);
+    CkPrintf("Exiting after %lf...\n", CmiWallTimer() - mStartTime);
     CkExit();
 }
 
@@ -571,6 +571,13 @@ void Core::BuildRegionOffsets(
     }
 }
 
+Communication::Direction Core::CommunicationDirection(Direction direction) const
+{
+    return direction == Direction::Forward
+        ? Communication::Direction::Direction_Forward
+        : Communication::Direction::Direction_Backward;
+}
+
 void Core::BuildConnectorOffsets(
     flatbuffers::FlatBufferBuilder &builder,
     const ConnectorAdditionReports &connectors,
@@ -579,9 +586,7 @@ void Core::BuildConnectorOffsets(
     for (auto connector : connectors) {
         RegionIndex regionIndex = std::get<0>(connector);
 
-        auto direction = std::get<1>(connector) == Direction::Forward
-            ? Communication::Direction::Direction_Forward
-            : Communication::Direction::Direction_Backward;
+        auto direction = CommunicationDirection(std::get<1>(connector));
         auto connectorName = builder.CreateString(std::get<2>(connector));
         auto size = std::get<3>(connector);
 
@@ -599,9 +604,7 @@ void Core::BuildConnectorRemovalOffsets(
     for (auto connector : connectors) {
         RegionIndex regionIndex = std::get<0>(connector);
 
-        auto direction = std::get<1>(connector) == Direction::Forward
-            ? Communication::Direction::Direction_Forward
-            : Communication::Direction::Direction_Backward;
+        auto direction = CommunicationDirection(std::get<1>(connector));
         auto connectorName = builder.CreateString(std::get<2>(connector));
 
         auto connectorOffset = Communication::CreateConnectorRemoval(builder, regionIndex, connectorName, direction);
@@ -616,9 +619,7 @@ void Core::BuildConnectionOffsets(
     std::vector<flatbuffers::Offset<Communication::Connection>> &connectionOffsets) const
 {
     for (auto connection : connections) {
-        auto direction = std::get<0>(connection) == Direction::Forward
-            ? Communication::Direction::Direction_Forward
-            : Communication::Direction::Direction_Backward;
+        auto direction = CommunicationDirection(std::get<0>(connection));
 
         RegionIndex fromRegion = std::get<1>(connection);
         auto fromConnector = builder.CreateString(std::get<2>(connection));
@@ -640,10 +641,7 @@ void Core::BuildNeuronOffsets(
     for (auto neuron : neurons) {
         NeuronId id = std::get<0>(neuron);
 
-        auto neuronIndex = GetNeuronIndex(id);
-        auto regionIndex = GetRegionIndex(id);
-
-        auto idOffset = Communication::CreateNeuronId(builder, neuronIndex, regionIndex);
+        auto idOffset = CommunicationNeuronId(builder, id);
         auto typeOffset = builder.CreateString(std::get<1>(neuron));
 
         auto position = std::get<2>(neuron);
@@ -655,6 +653,11 @@ void Core::BuildNeuronOffsets(
     }
 }
 
+flatbuffers::Offset<Communication::NeuronId> Core::CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const
+{
+    return Communication::CreateNeuronId(builder, GetNeuronIndex(neuronId), GetRegionIndex(neuronId));
+}
+
 void Core::BuildSynapseOffsets(
     flatbuffers::FlatBufferBuilder &builder,
     const Synapse::Links &synapses,
@@ -664,16 +667,9 @@ void Core::BuildSynapseOffsets(
         auto fromNeuronId = std::get<0>(synapse);
         auto toNeuronId = std::get<1>(synapse);
 
-        auto fromRegionIndex = GetRegionIndex(fromNeuronId);
-        auto fromNeuronIndex = GetNeuronIndex(fromNeuronId);
-
-        auto toRegionIndex = GetRegionIndex(toNeuronId);
-        auto toNeuronIndex = GetNeuronIndex(toNeuronId);
-
-        auto fromIdOffset = Communication::CreateNeuronId(builder, fromNeuronIndex, fromRegionIndex);
-        auto toIdOffset = Communication::CreateNeuronId(builder, toNeuronIndex, toRegionIndex);
-
-        auto synapseOffset = Communication::CreateSynapse(builder, fromIdOffset, toIdOffset);
+        auto fromOffset = CommunicationNeuronId(builder, fromNeuronId);
+        auto toOffset = CommunicationNeuronId(builder, toNeuronId);
+        auto synapseOffset = Communication::CreateSynapse(builder, fromOffset, toOffset);
 
         synapseOffsets.push_back(synapseOffset);
     }

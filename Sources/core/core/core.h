@@ -69,7 +69,8 @@ protected:
     void ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId);
     void ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId);
 
-    static flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
+    flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
+    flatbuffers::Offset<Communication::NeuronId> Core::CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const;
 
     void BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
@@ -78,6 +79,8 @@ protected:
         flatbuffers::FlatBufferBuilder &builder,
         const RegionAdditionReports &regions,
         std::vector<flatbuffers::Offset<Communication::Region>> &regionOffsets) const;
+
+    Communication::Direction CommunicationDirection(Direction direction) const;
 
     void Core::BuildConnectorOffsets(
         flatbuffers::FlatBufferBuilder &builder,
