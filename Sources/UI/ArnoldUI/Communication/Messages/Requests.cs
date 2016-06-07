@@ -30,19 +30,24 @@ public sealed class CommandRequest : Table {
 
   public CommandType Command { get { int o = __offset(4); return o != 0 ? (CommandType)bb.GetSbyte(o + bb_pos) : CommandType.Load; } }
   public uint StepsToRun { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public string Blueprint { get { int o = __offset(8); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetBlueprintBytes() { return __vector_as_arraysegment(8); }
 
   public static Offset<CommandRequest> CreateCommandRequest(FlatBufferBuilder builder,
       CommandType command = CommandType.Load,
-      uint stepsToRun = 0) {
-    builder.StartObject(2);
+      uint stepsToRun = 0,
+      StringOffset blueprintOffset = default(StringOffset)) {
+    builder.StartObject(3);
+    CommandRequest.AddBlueprint(builder, blueprintOffset);
     CommandRequest.AddStepsToRun(builder, stepsToRun);
     CommandRequest.AddCommand(builder, command);
     return CommandRequest.EndCommandRequest(builder);
   }
 
-  public static void StartCommandRequest(FlatBufferBuilder builder) { builder.StartObject(2); }
+  public static void StartCommandRequest(FlatBufferBuilder builder) { builder.StartObject(3); }
   public static void AddCommand(FlatBufferBuilder builder, CommandType command) { builder.AddSbyte(0, (sbyte)command, 0); }
   public static void AddStepsToRun(FlatBufferBuilder builder, uint stepsToRun) { builder.AddUint(1, stepsToRun, 0); }
+  public static void AddBlueprint(FlatBufferBuilder builder, StringOffset blueprintOffset) { builder.AddOffset(2, blueprintOffset.Value, 0); }
   public static Offset<CommandRequest> EndCommandRequest(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<CommandRequest>(o);

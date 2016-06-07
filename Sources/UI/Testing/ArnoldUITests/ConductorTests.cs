@@ -103,8 +103,8 @@ namespace GoodAI.Arnold.UI.Tests
         {
             m_conductor.ConnectToCore();
 
-            m_conductor.LoadBlueprint(new AgentBlueprint());
-            m_coreProxyMock.Verify(coreProxy => coreProxy.LoadBlueprint(It.IsAny<AgentBlueprint>()));
+            m_conductor.LoadBlueprint("{}");
+            m_coreProxyMock.Verify(coreProxy => coreProxy.LoadBlueprint(It.IsAny<string>()));
 
             m_conductor.StartSimulation();
             m_coreProxyMock.Verify(coreProxy => coreProxy.Run(It.IsAny<uint>()));

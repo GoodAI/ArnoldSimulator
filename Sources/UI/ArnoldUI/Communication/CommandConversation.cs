@@ -9,9 +9,9 @@ namespace GoodAI.Arnold.Communication
 {
     public sealed class CommandConversation : Conversation<CommandRequest, StateResponse>
     {
-        public CommandConversation(CommandType commandType, uint stepsToRun = 0)
+        public CommandConversation(CommandType commandType, uint stepsToRun = 0, string blueprint = null)
         {
-            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun);
+            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun, blueprint);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace ArnoldUI
             add { Conductor.StateChanged += value; }
             remove { Conductor.StateChanged -= value; }
         }
+
         public event EventHandler<StateChangeFailedEventArgs> SimulationStateChangeFailed
         {
             add { Conductor.StateChangeFailed += value; }
@@ -30,6 +31,8 @@ namespace ArnoldUI
         public IConductor Conductor { get; set; }
 
         public ICoreProxy CoreProxy => Conductor.CoreProxy;
+
+        private string m_blueprint = "{}";
 
         public UIMain(IConductor conductor)
         {
@@ -56,6 +59,7 @@ namespace ArnoldUI
 
         public void StartSimulation()
         {
+            Conductor.LoadBlueprint(m_blueprint);
             Conductor.StartSimulation();
         }
 

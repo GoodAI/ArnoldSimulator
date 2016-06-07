@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.Core
         void ConnectToCore(EndPoint endPoint = null);
         void Disconnect();
         void Shutdown();
-        void LoadBlueprint(AgentBlueprint blueprint);
+        void LoadBlueprint(string blueprint);
         void StartSimulation(uint stepsToRun = 0);
         void PauseSimulation();
         void KillSimulation();
@@ -200,7 +200,7 @@ namespace GoodAI.Arnold.Core
             Log.Info("Disconnected from core");
         }
 
-        public void LoadBlueprint(AgentBlueprint blueprint)
+        public void LoadBlueprint(string blueprint)
         {
             // TODO(HonzaS): Add this when blueprints come into play.
             Log.Info("Loading blueprint");

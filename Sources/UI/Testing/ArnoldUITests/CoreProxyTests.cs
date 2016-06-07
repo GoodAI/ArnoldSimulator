@@ -104,7 +104,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             coreProxy.StateChanged += (sender, args) => waitEvent.Set();
 
-            coreProxy.LoadBlueprint(new AgentBlueprint());
+            coreProxy.LoadBlueprint("{}");
             await WaitFor(waitEvent);
             Assert.Equal(CoreState.Paused, coreProxy.State);
 
@@ -121,7 +121,7 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.Equal(CoreState.Empty, coreProxy.State);
 
             // Test direct Clear from a Running state.
-            coreProxy.LoadBlueprint(new AgentBlueprint());
+            coreProxy.LoadBlueprint("{}");
             await WaitFor(waitEvent);
             coreProxy.Run();
             await WaitFor(waitEvent);
@@ -150,7 +150,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             coreProxy.StateChangeFailed += (sender, args) => waitEvent.Set();
 
-            coreProxy.LoadBlueprint(new AgentBlueprint());
+            coreProxy.LoadBlueprint("{}");
 
             // The event should be fired via StateChangeFailed.
             Assert.True(waitEvent.WaitOne(timeoutMs), "Timed out");

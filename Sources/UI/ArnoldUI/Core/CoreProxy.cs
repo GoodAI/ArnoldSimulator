@@ -41,7 +41,7 @@ namespace GoodAI.Arnold.Core
         /// Loads an agent into the handler, creates a new simulation.
         /// This moves the simulation from Empty state to Paused.
         /// </summary>
-        void LoadBlueprint(AgentBlueprint agentBlueprint);
+        void LoadBlueprint(string blueprint);
 
         /// <summary>
         /// Runs the given number of steps.
@@ -134,7 +134,7 @@ namespace GoodAI.Arnold.Core
             ModelUpdater.Dispose();
         }
 
-        public void LoadBlueprint(AgentBlueprint agentBlueprint)
+        public void LoadBlueprint(string blueprint)
         {
             if (State != CoreState.Empty)
             {
@@ -143,7 +143,7 @@ namespace GoodAI.Arnold.Core
             }
 
             // TODO(HonzaS): Add the blueprint data.
-            SendCommand(new CommandConversation(CommandType.Load));
+            SendCommand(new CommandConversation(CommandType.Load, blueprint: blueprint));
         }
 
         public void Clear()
