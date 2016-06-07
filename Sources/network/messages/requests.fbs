@@ -17,9 +17,21 @@ table CommandRequest {
 
 table GetStateRequest {}
 
-// TODO: Add filter specification in the request later.
+table Box3D {
+	x:float;
+	y:float;
+	z:float;
+	sizeX:float;
+	sizeY:float;
+	sizeZ:float;
+}
+
+table Filter {
+	boxes:[Box3D];
+}
 table GetModelRequest {
 	full:bool;
+	filter:Filter;
 }
 
 union Request {

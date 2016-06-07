@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Communication;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 using OpenTK;

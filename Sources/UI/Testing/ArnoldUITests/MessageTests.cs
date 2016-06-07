@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Arnold.Communication;
+using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Extensions;
 using OpenTK;
 using Xunit;
 
@@ -31,10 +33,28 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void WritesReadsGetModel()
         {
-            var message = GetModelRequestBuilder.Build(full: true);
+            var position = new Vector3(1, 2, 3);
+            var size = new Vector3(4, 5, 6);
+            var filter = new ModelFilter
+            {
+                Boxes =
+                {
+                    new FilterBox
+                    {
+                        Position = position,
+                        Size = size
+                    }
+                }
+            };
+
+            var message = GetModelRequestBuilder.Build(full: true, filter: filter);
 
             Assert.Equal(Request.GetModelRequest, message.RequestType);
-            Assert.True(message.GetRequest(new GetModelRequest()).Full);
+
+            GetModelRequest getModelRequest = message.GetRequest(new GetModelRequest());
+            Assert.True(getModelRequest.Full);
+            Assert.Equal(position, getModelRequest.Filter.GetBoxes(0).Position());
+            Assert.Equal(size, getModelRequest.Filter.GetBoxes(0).Size());
         }
 
         [Fact]

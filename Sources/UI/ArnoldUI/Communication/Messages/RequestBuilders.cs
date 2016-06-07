@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlatBuffers;
+using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Extensions;
 
 namespace GoodAI.Arnold.Communication
 {
@@ -50,11 +52,34 @@ namespace GoodAI.Arnold.Communication
 
     public static class GetModelRequestBuilder
     {
-        public static RequestMessage Build(bool full)
+        public static RequestMessage Build(bool full, ModelFilter filter = null)
         {
             var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
+            Offset<Filter>? filterOffset = null;
+            if (filter != null)
+            {
+                var boxes = new Offset<Box3D>[filter.Boxes.Count];
+                filter.Boxes.EachWithIndex((i, box) =>
+                {
+                    boxes[i] = Box3D.CreateBox3D(builder,
+                        box.Position.X,
+                        box.Position.Y,
+                        box.Position.Z,
+                        box.Size.X,
+                        box.Size.Y,
+                        box.Size.Z);
+                });
 
-            Offset<GetModelRequest> requestOffset = GetModelRequest.CreateGetModelRequest(builder, full);
+                VectorOffset boxesOffset = Filter.CreateBoxesVector(builder, boxes);
+
+                filterOffset = Filter.CreateFilter(builder, boxesOffset);
+            }
+
+            GetModelRequest.StartGetModelRequest(builder);
+            GetModelRequest.AddFull(builder, full);
+            if (filterOffset.HasValue)
+                GetModelRequest.AddFilter(builder, filterOffset.Value);
+            Offset<GetModelRequest> requestOffset = GetModelRequest.EndGetModelRequest(builder);
 
             return RequestMessageBuilder.Build(builder, Request.GetModelRequest, requestOffset);
         }

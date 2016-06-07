@@ -96,6 +96,8 @@
     <Compile Include="Core\Conductor.cs" />
     <Compile Include="Core\CoreProcess.cs" />
     <Compile Include="Composition\CoreProcessFactory.cs" />
+    <Compile Include="Core\ModelFilter.cs" />
+    <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Forms\VisualizationForm.cs">
       <SubType>Form</SubType>
@@ -130,7 +132,7 @@
     <Compile Include="Core\ModelProvider.cs" />
     <Compile Include="Composition\ModelProviderFactory.cs" />
     <Compile Include="Core\ModelUpdater.cs" />
-    <Compile Include="Communication\MessagesExtensions.cs" />
+    <Compile Include="Extensions\MessagesExtensions.cs" />
     <Compile Include="Project\Brain.cs" />
     <Compile Include="Forms\GraphForm.cs">
       <SubType>Form</SubType>
