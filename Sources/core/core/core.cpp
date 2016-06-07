@@ -372,8 +372,25 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
-    if (IsBrainLoaded())
+    if (IsBrainLoaded()) {
+        if (getModelRequest->filter() != nullptr) {
+            Boxes roiBoxes;
+            auto size = getModelRequest->filter()->boxes()->size();
+            roiBoxes.reserve(size);
+
+            for (int i = 0; i < size; i++) {
+                auto box = getModelRequest->filter()->boxes()->Get(i);
+                Point3D boxPosition(box->x(), box->y(), box->z());
+                Size3D boxSize(box->sizeX(), box->sizeY(), box->sizeZ());
+                Box3D roiBox(boxPosition, boxSize);
+                roiBoxes[i] = roiBox;
+            }
+
+            gBrain[0].UpdateRegionOfInterest(roiBoxes);
+        }
+
         gBrain[0].RequestViewportUpdate(requestId, getModelRequest->full(), true);
+    }
 
     // TODO(HonzaS): Remove.
     //SendStubModel(requestId);
