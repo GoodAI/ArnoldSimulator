@@ -9,6 +9,7 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Logging;
 using GoodAI.Arnold.Communication;
+using GoodAI.Arnold.Project;
 using GoodAI.Logging;
 using GoodAI.Net.ConverseSharpFlatBuffers;
 using GoodAI.TypeMapping;
@@ -48,10 +49,14 @@ namespace GoodAI.Arnold
             container.RegisterSingleton<IModelUpdaterFactory, ModelUpdaterFactory>();
             container.RegisterSingleton<IModelProviderFactory, ModelProviderFactory>();
 
+            container.RegisterSingleton<IDesigner, Designer>();
             container.RegisterSingleton<IConductor, Conductor>();
+
             container.RegisterSingleton<UIMain>();
             container.RegisterSingleton<LogForm>();
             container.RegisterSingleton<GraphForm>();
+            container.RegisterSingleton<JsonEditForm>();
+
             container.RegisterSingleton<MainForm>();
         }
     }

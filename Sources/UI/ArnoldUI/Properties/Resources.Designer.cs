@@ -81,6 +81,31 @@ namespace GoodAI.Arnold.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///    &quot;brain&quot;: {
+        ///        &quot;name&quot;: &quot;RandomModel&quot;,
+        ///        &quot;type&quot;: &quot;ThresholdBrain&quot;,
+        ///        &quot;params&quot;: {
+        ///        
+        ///            &quot;body&quot;: {
+        ///                &quot;type&quot;: &quot;RandomBody&quot;,
+        ///                &quot;params&quot;: {
+        ///                    &quot;sensors&quot;: [
+        ///                        {
+        ///                            &quot;name&quot;: &quot;LeftEye&quot;,
+        ///                            &quot;spikeType&quot;: &quot;Continuous&quot;,
+        ///                            &quot;size&quot;: 100
+        ///                        },
+        ///                        {
+        ///                            &quot;name&quot;: &quot;RightE [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string DefaultBlueprint {
+            get {
+                return ResourceManager.GetString("DefaultBlueprint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
         internal static System.Drawing.Icon EmptyCursor {

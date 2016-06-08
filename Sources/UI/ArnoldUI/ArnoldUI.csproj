@@ -99,12 +99,19 @@
     <Compile Include="Core\ModelFilter.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
+    <Compile Include="Forms\JsonEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\JsonEditForm.Designer.cs">
+      <DependentUpon>JsonEditForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\VisualizationForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\VisualizationForm.Designer.cs">
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Project\Designer.cs" />
     <Compile Include="Visualization\Blender.cs" />
     <Compile Include="Visualization\Camera.cs" />
     <Compile Include="Visualization\CompositeLookupModel.cs" />
@@ -179,6 +186,9 @@
     <EmbeddedResource Include="Forms\GraphForm.resx">
       <DependentUpon>GraphForm.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\JsonEditForm.resx">
+      <DependentUpon>JsonEditForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>

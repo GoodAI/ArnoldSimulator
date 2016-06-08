@@ -27,8 +27,9 @@ namespace GoodAI.Arnold
         public LogForm LogForm { get; }
         public GraphForm GraphForm { get; }
         public VisualizationForm VisualizationForm { get; set; }
+        public JsonEditForm JsonEditForm { get; set; }
 
-        public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm)
+        public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm, JsonEditForm jsonEditForm)
         {
             InitializeComponent();
 
@@ -37,11 +38,13 @@ namespace GoodAI.Arnold
             LogForm = logForm;
             LogForm.Show(dockPanel, DockState.DockBottom);
 
-            GraphForm = graphForm;
-            GraphForm.Show(dockPanel, DockState.Document);
-
+            //GraphForm = graphForm;
+            //GraphForm.Show(dockPanel, DockState.Document);
             // TODO(HonzaS): The blueprint should be in the Designer later.
-            GraphForm.AgentBlueprint = m_uiMain.AgentBlueprint;
+            //GraphForm.AgentBlueprint = m_uiMain.AgentBlueprint;
+
+            JsonEditForm = jsonEditForm;
+            JsonEditForm.Show(dockPanel, DockState.Document);
 
             m_uiMain.SimulationStateChanged += SimulationOnStateChanged;
             m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;

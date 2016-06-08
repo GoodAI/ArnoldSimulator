@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
-using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Project;
 using Region = GoodAI.Arnold.Project.Region;
 
@@ -29,12 +28,9 @@ namespace ArnoldUI
         public AgentBlueprint AgentBlueprint { get; }
 
         public IConductor Conductor { get; set; }
+        public IDesigner Designer { get; set; }
 
-        public ICoreProxy CoreProxy => Conductor.CoreProxy;
-
-        private string m_blueprint = "{}";
-
-        public UIMain(IConductor conductor)
+        public UIMain(IConductor conductor, IDesigner designer)
         {
             // TODO: This should move into the Designer.
             AgentBlueprint = new AgentBlueprint();
@@ -44,6 +40,7 @@ namespace ArnoldUI
             });
 
             Conductor = conductor;
+            Designer = designer;
         }
 
         public void VisualizationClosed()
@@ -59,7 +56,7 @@ namespace ArnoldUI
 
         public async Task StartSimulation()
         {
-            await Conductor.LoadBlueprint(m_blueprint);
+            await Conductor.LoadBlueprint(Designer.Blueprint);
             Conductor.StartSimulation();
         }
 
