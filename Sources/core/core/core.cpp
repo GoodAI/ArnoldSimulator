@@ -26,6 +26,12 @@ void CoreProcInit()
     TurnManualLBOn();
 }
 
+Core *GetCoreLocalPtr()
+{
+    //return gCore.ckLocal();
+    return static_cast<Core *>(gCore.ckGetChareID().objPtr);
+}
+
 Core::Core(CkArgMsg *msg) : 
     mStartTime(0.0), mBrainLoaded(false),
     mBrainIsUnloading(false), mIsShuttingDown(false), mRequestIdCounter(0)
@@ -284,8 +290,7 @@ void Core::BrainUnloaded()
         mBrainLoaded = false;
         mBrainIsUnloading = false;
 
-        if (mIsShuttingDown)
-            Exit();
+        if (mIsShuttingDown) Exit();
     }
 }
 

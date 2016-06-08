@@ -28,5 +28,7 @@ mainmodule core
         entry void HandleRequestFromClient(CkCcsRequestMsg *msg);
         
         entry void RunTests();
+
+        entry void BrainUnloaded();
     };
 };

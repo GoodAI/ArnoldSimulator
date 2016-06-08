@@ -34,6 +34,8 @@ public:
 void CoreNodeInit();
 void CoreProcInit();
 
+Core *GetCoreLocalPtr();
+
 class Core : public CBase_Core
 {
 public:

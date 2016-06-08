@@ -456,7 +456,9 @@ BrainBase::~BrainBase()
 void BrainBase::Unload()
 {
     mUnloadRequested = true;
-    if (!mIsSimulationRunning) {
+    if (mRegionIndices.empty()) {
+        Unloaded();
+    } else if (!mIsSimulationRunning) {
         gRegions.Unload();
     } else {
         PauseSimulation();
@@ -468,7 +470,7 @@ void BrainBase::Unloaded()
     for (auto it = mRegionIndices.begin(); it != mRegionIndices.end(); ++it) {
         gRegions[*it].ckDestroy();
     }
-    gCore.ckLocal()->BrainUnloaded();
+    gCore.BrainUnloaded();
 }
 
 void BrainBase::pup(PUP::er &p)
@@ -816,7 +818,7 @@ void BrainBase::RequestSimulationState(RequestId requestId, bool immediately, bo
 {
     if (flushRequests) {
         for (auto it = mSimulationStateRequests.begin(); it != mSimulationStateRequests.end(); ++it) {
-            gCore.ckLocal()->SendEmptyMessage(*it);
+            GetCoreLocalPtr()->SendEmptyMessage(*it);
         }
         mSimulationStateRequests.clear();
     }
@@ -824,7 +826,7 @@ void BrainBase::RequestSimulationState(RequestId requestId, bool immediately, bo
     if (mIsSimulationRunning && !immediately) {
         mSimulationStateRequests.push_back(requestId);  
     } else {
-        gCore.ckLocal()->SendSimulationState(requestId, mIsSimulationRunning,
+        GetCoreLocalPtr()->SendSimulationState(requestId, mIsSimulationRunning,
             mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
     }
 }
@@ -833,7 +835,7 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
 {
     if (flushRequests) {
         for (auto it = mViewportUpdateRequests.begin(); it != mViewportUpdateRequests.end(); ++it) {
-            gCore.ckLocal()->SendEmptyMessage(*it);
+            GetCoreLocalPtr()->SendEmptyMessage(*it);
         }
         mViewportUpdateRequests.clear();
     }
@@ -1386,7 +1388,7 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
         RequestId requestId = mViewportUpdateRequests.front();
         mViewportUpdateRequests.pop_front();
 
-        gCore.ckLocal()->SendViewportUpdate(requestId, mViewportUpdateAccumulator);
+        GetCoreLocalPtr()->SendViewportUpdate(requestId, mViewportUpdateAccumulator);
         flushViewportAccumulator = true;
     }
 
@@ -1441,7 +1443,7 @@ void BrainBase::SimulateDone()
     if (!mSimulationStateRequests.empty()) {
         RequestId requestId = mSimulationStateRequests.front();
         mSimulationStateRequests.pop_front();
-        gCore.ckLocal()->SendSimulationState(requestId, mIsSimulationRunning, 
+        GetCoreLocalPtr()->SendSimulationState(requestId, mIsSimulationRunning,
             mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
     }
 
