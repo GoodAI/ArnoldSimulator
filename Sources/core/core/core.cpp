@@ -300,6 +300,16 @@ void Core::SendEmptyMessage(RequestId requestId)
     SendResponseToClient(requestId, builder);
 }
 
+void Core::SendErrorResponse(RequestId requestId, std::string message)
+{
+    // TODO(Premek): More or replace with logging.
+    CkPrintf(message.c_str());
+
+    flatbuffers::FlatBufferBuilder builder;
+    BuildErrorResponse(message, builder);
+    SendResponseToClient(requestId, builder);
+}
+
 void Core::SendSimulationState(RequestId requestId, bool isSimulationRunning, 
     size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep)
 {
@@ -339,33 +349,36 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
     if (commandType == Communication::CommandType_Load) {
         if (IsBrainLoaded()) {
-            // TODO(Premek): return error response
-            CkPrintf("Load command failed: invalid state\n");
-        } else {
-            const flatbuffers::String *blueprint = commandRequest->blueprint();
-            if (blueprint == nullptr) {
-                CkPrintf("Load command failed: blueprint missing\n");
-            } else {
-                // TODO(HonzaS): Use real name and type.
-                if (!TryLoadBrain(blueprint->str()))
-                    CkPrintf("Load command failed: invalid blueprint\n");
-            }
+            // TODO(Premek): refactor using exceptions?
+            SendErrorResponse(requestId, "Load command failed: brain already loaded\n");
+            return;
+        }
+
+        const flatbuffers::String *blueprint = commandRequest->blueprint();
+        if (blueprint == nullptr) {
+            SendErrorResponse(requestId, "Load command failed: blueprint missing\n");
+            return;
+        }
+
+        if (!TryLoadBrain(blueprint->str())) {
+            SendErrorResponse(requestId, "Load command failed: invalid blueprint\n");
+            return;
         }
     } else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
-            // TODO(Premek): return error response
-            CkPrintf("Run command failed: invalid state\n");
-        } else {
-            uint32_t runSteps = commandRequest->stepsToRun();
-            gBrain[0].RunSimulation(runSteps, runSteps == 0);
+            SendErrorResponse(requestId, "Run command failed: brain not loaded\n");
+            return;
         }
+
+        uint32_t runSteps = commandRequest->stepsToRun();
+        gBrain[0].RunSimulation(runSteps, runSteps == 0);
     } else if (commandType == Communication::CommandType_Pause) {
         if (!IsBrainLoaded()) {
-            // TODO(Premek): return error response
-            CkPrintf("Pause command failed: invalid state\n");
-        } else {
-            gBrain[0].PauseSimulation();
+            SendErrorResponse(requestId, "Pause command failed: brain not loaded\n");
+            return;
         }
+
+        gBrain[0].PauseSimulation();
     }
 
     // TODO(HonzaS): Refactor (or at least rename).
@@ -592,16 +605,16 @@ void Core::SendStubModel(RequestId requestId)
     mDummyTimestep++;
 }
 
+flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
+{
+    return Communication::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
+}
+
 void Core::BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
     size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const
 {
     auto stateResponseOffset = Communication::CreateStateResponse(builder, state, atBrainStep, atBodyStep, brainStepsPerBodyStep);
     BuildResponseMessage(builder, Communication::Response_StateResponse, stateResponseOffset);
-}
-
-flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
-{
-    return Communication::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
 }
 
 void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
@@ -619,6 +632,13 @@ void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep,
     }
 
     BuildStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
+}
+
+void Core::BuildErrorResponse(std::string message, flatbuffers::FlatBufferBuilder &builder) const
+{
+    auto messageOffset = builder.CreateString(message);
+    auto errorResponseOffest = Communication::CreateErrorResponse(builder, messageOffset);
+    BuildResponseMessage(builder, Communication::Response_ErrorResponse, errorResponseOffest);
 }
 
 void Core::BuildRegionOffsets(
