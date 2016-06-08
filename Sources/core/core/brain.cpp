@@ -257,9 +257,6 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
                 regions = itParams.value();
             } else if (itParams.key() == "connections" && itParams->is_array()) {
                 connections = itParams.value();
-
-                
-
             }
         }
 
