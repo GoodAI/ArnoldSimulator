@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Project;
+using GoodAI.Logging;
 using Region = GoodAI.Arnold.Project.Region;
 
 namespace ArnoldUI
@@ -13,6 +14,9 @@ namespace ArnoldUI
     // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
     public class UIMain : IDisposable
     {
+        // Injected.
+        public ILog Log { get; set; } = NullLogger.Instance;
+
         public event EventHandler<StateChangedEventArgs> SimulationStateChanged
         {
             add { Conductor.StateChanged += value; }
@@ -27,8 +31,8 @@ namespace ArnoldUI
 
         public AgentBlueprint AgentBlueprint { get; }
 
-        public IConductor Conductor { get; set; }
-        public IDesigner Designer { get; set; }
+        public IConductor Conductor { get; }
+        public IDesigner Designer { get; }
 
         public UIMain(IConductor conductor, IDesigner designer)
         {
@@ -48,21 +52,30 @@ namespace ArnoldUI
             //Simulation.Clear();
         }
 
-        public void ConnectToCore()
+        public async void ConnectToCoreAsync()
         {
             // TODO(HonzaS): endPoint = null means local.
-            Conductor.ConnectToCore(endPoint: null);
+            await Conductor.ConnectToCoreAsync(endPoint: null);
         }
 
-        public async Task StartSimulation()
+        public async Task StartSimulationAsync()
         {
-            await Conductor.LoadBlueprint(Designer.Blueprint);
+            try
+            {
+                await Conductor.LoadBlueprintAsync(Designer.Blueprint);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Blueprint loading failed.");
+                throw;
+            }
+
             Conductor.StartSimulation();
         }
 
-        public void PauseSimulation()
+        public async Task PauseSimulationAsync()
         {
-            Conductor.PauseSimulation();
+            await Conductor.PauseSimulationAsync();
         }
 
         //public void KillSimulation()

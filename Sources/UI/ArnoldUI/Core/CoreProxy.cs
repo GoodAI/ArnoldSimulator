@@ -41,7 +41,7 @@ namespace GoodAI.Arnold.Core
         /// Loads an agent into the handler, creates a new simulation.
         /// This moves the simulation from Empty state to Paused.
         /// </summary>
-        Task LoadBlueprint(string blueprint);
+        Task<StateResponse> LoadBlueprintAsync(string blueprint);
 
         /// <summary>
         /// Runs the given number of steps.
@@ -55,7 +55,7 @@ namespace GoodAI.Arnold.Core
         /// Pauses the running simulation. If the simulation is not running, this does nothing.
         /// This moves the simulation from Running state to Paused.
         /// </summary>
-        void Pause();
+        Task PauseAsync();
 
         /// <summary>
         /// This moves the simulation from Running or Paused state to Empty.
@@ -134,7 +134,7 @@ namespace GoodAI.Arnold.Core
             ModelUpdater.Dispose();
         }
 
-        public Task LoadBlueprint(string blueprint)
+        public async Task<StateResponse> LoadBlueprintAsync(string blueprint)
         {
             if (State != CoreState.Empty)
             {
@@ -142,18 +142,18 @@ namespace GoodAI.Arnold.Core
                 throw new WrongHandlerStateException("LoadBlueprint", State);
             }
 
-            return SendCommand(new CommandConversation(CommandType.Load, blueprint: blueprint));
+            return await SendCommandAsync(new CommandConversation(CommandType.Load, blueprint: blueprint));
         }
 
         public void Clear()
         {
-            SendCommand(new CommandConversation(CommandType.Clear));
+            SendCommandAsync(new CommandConversation(CommandType.Clear));
         }
 
         public void Shutdown()
         {
             // Prevent the state checking from being restarted after the shutdown completes.
-            SendCommand(new CommandConversation(CommandType.Shutdown), stopChecking: true);
+            SendCommandAsync(new CommandConversation(CommandType.Shutdown), stopCheckingCoreState: true);
         }
 
         public void Run(uint brainStepsToRun = 0)
@@ -167,10 +167,10 @@ namespace GoodAI.Arnold.Core
             if (State == CoreState.Running)
                 return;
 
-            SendCommand(new CommandConversation(CommandType.Run, brainStepsToRun));
+            SendCommandAsync(new CommandConversation(CommandType.Run, brainStepsToRun));
         }
 
-        public void Pause()
+        public async Task PauseAsync()
         {
             if (State != CoreState.Paused && State != CoreState.Running)
             {
@@ -181,22 +181,25 @@ namespace GoodAI.Arnold.Core
             if (State == CoreState.Paused)
                 return;
 
-            SendCommand(new CommandConversation(CommandType.Pause));
+            await SendCommandAsync(new CommandConversation(CommandType.Pause));
         }
 
-        private async Task SendCommand(CommandConversation conversation, bool stopChecking = false)
+        private async Task<StateResponse> SendCommandAsync(CommandConversation conversation, bool stopCheckingCoreState = false)
         {
             try
             {
                 StateResponse response = await m_controller.Command(
-                        conversation, CreateTimeoutHandler(conversation.RequestData.Command),
-                        restartKeepaliveOnSuccess: !stopChecking);
+                    conversation, CreateTimeoutHandler(conversation.RequestData.Command),
+                    restartKeepaliveOnSuccess: !stopCheckingCoreState);
 
                 HandleStateResponse(response);
+
+                return response;
             }
-            catch (RemoteCoreException ex)
+            catch (Exception ex)
             {
                 HandleError(ex.Message);
+                throw;
             }
         }
 
@@ -254,6 +257,7 @@ namespace GoodAI.Arnold.Core
 
         private void HandleError(string errorMessage)
         {
+            // TODO(HonzaS): move this up to the clients of CoreProxy.
             Log.Warn("Core error: {error}", errorMessage);
             StateChangeFailed?.Invoke(this, new StateChangeFailedEventArgs(errorMessage));
         }

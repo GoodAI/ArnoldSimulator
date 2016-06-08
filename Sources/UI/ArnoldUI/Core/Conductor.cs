@@ -17,12 +17,12 @@ namespace GoodAI.Arnold.Core
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         event EventHandler<StateChangedEventArgs> StateChanged;
 
-        void ConnectToCore(EndPoint endPoint = null);
+        Task ConnectToCoreAsync(EndPoint endPoint = null);
         void Disconnect();
         void Shutdown();
-        Task LoadBlueprint(string blueprint);
+        Task<StateResponse> LoadBlueprintAsync(string blueprint);
         void StartSimulation(uint stepsToRun = 0);
-        void PauseSimulation();
+        Task PauseSimulationAsync();
         void KillSimulation();
 
         bool IsConnected { get; }
@@ -78,7 +78,7 @@ namespace GoodAI.Arnold.Core
             ModelProvider = modelProviderFactory.Create(this);
         }
 
-        public void ConnectToCore(EndPoint endPoint = null)
+        public async Task ConnectToCoreAsync(EndPoint endPoint = null)
         {
             if (CoreProxy != null)
             {
@@ -107,6 +107,7 @@ namespace GoodAI.Arnold.Core
 
             Log.Info("Connecting to Core running at {hostname:l}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
+            // TODO(HonzaS): Check if the endpoint exists (handshake), await the response.
 
             // TODO(HonzaS): Move these inside the factory method.
             ICoreController coreController = m_coreControllerFactory.Create(coreLink);
@@ -200,10 +201,10 @@ namespace GoodAI.Arnold.Core
             Log.Info("Disconnected from core");
         }
 
-        public Task LoadBlueprint(string blueprint)
+        public async Task<StateResponse> LoadBlueprintAsync(string blueprint)
         {
             Log.Info("Loading blueprint");
-            return CoreProxy.LoadBlueprint(blueprint);
+            return await CoreProxy.LoadBlueprintAsync(blueprint);
         }
 
         private void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
@@ -234,10 +235,10 @@ namespace GoodAI.Arnold.Core
             CoreProxy.Run(stepsToRun);
         }
 
-        public void PauseSimulation()
+        public async Task PauseSimulationAsync()
         {
             Log.Info("Pausing simulation");
-            CoreProxy.Pause();
+            await CoreProxy.PauseAsync();
         }
 
         public void KillSimulation()

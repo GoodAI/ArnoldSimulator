@@ -116,7 +116,7 @@ namespace GoodAI.Arnold
         {
             // TODO(HonzaS): Handle the core type (local/remote).
             DisableCommandButtons();
-            m_uiMain.ConnectToCore();
+            m_uiMain.ConnectToCoreAsync();
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
@@ -129,18 +129,20 @@ namespace GoodAI.Arnold
         {
             DisableCommandButtons();
 
-            await m_uiMain.StartSimulation().ContinueWith(task =>
+            try
             {
-                if (task.IsFaulted)
-                    Log.Warn(task.Exception, "Failed to start simulation");
-            })
-            .ConfigureAwait(false);
+                await m_uiMain.StartSimulationAsync();
+            }
+            finally
+            {
+                UpdateButtons();
+            }
         }
 
-        private void pauseButton_Click(object sender, EventArgs e)
+        private async void pauseButton_Click(object sender, EventArgs e)
         {
             DisableCommandButtons();
-            m_uiMain.PauseSimulation();
+            await m_uiMain.PauseSimulationAsync();
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

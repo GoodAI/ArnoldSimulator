@@ -90,6 +90,7 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void StateMachineTransitionsCorrectly()
         {
+            // TODO(HonzaS): Rewrite this test to take advantage of the control methods being async.
             ICoreLink coreLink = new DummyCoreLink();
 
             var coreController = new CoreController(coreLink, keepaliveIntervalMs: 20);
@@ -104,7 +105,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             coreProxy.StateChanged += (sender, args) => waitEvent.Set();
 
-            coreProxy.LoadBlueprint("{}");
+            await coreProxy.LoadBlueprintAsync("{}");
             await WaitFor(waitEvent);
             Assert.Equal(CoreState.Paused, coreProxy.State);
 
@@ -112,7 +113,7 @@ namespace GoodAI.Arnold.UI.Tests
             await WaitFor(waitEvent);
             Assert.Equal(CoreState.Running, coreProxy.State);
 
-            coreProxy.Pause();
+            await coreProxy.PauseAsync();
             await WaitFor(waitEvent);
             Assert.Equal(CoreState.Paused, coreProxy.State);
 
@@ -121,7 +122,7 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.Equal(CoreState.Empty, coreProxy.State);
 
             // Test direct Clear from a Running state.
-            coreProxy.LoadBlueprint("{}");
+            await coreProxy.LoadBlueprintAsync("{}");
             await WaitFor(waitEvent);
             coreProxy.Run();
             await WaitFor(waitEvent);
@@ -133,27 +134,18 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
-        public void SimulationHandlesErrors()
+        public async void SimulationHandlesErrors()
         {
-            const int timeoutMs = 100;
-
             var coreLink = new DummyCoreLink {Fail = true};
 
             var coreController = new CoreController(coreLink);
-
-            var waitEvent = new AutoResetEvent(false);
 
             var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
             Assert.Equal(CoreState.Disconnected, coreProxy.State);
 
             coreProxy.State = CoreState.Empty;
 
-            coreProxy.StateChangeFailed += (sender, args) => waitEvent.Set();
-
-            coreProxy.LoadBlueprint("{}");
-
-            // The event should be fired via StateChangeFailed.
-            Assert.True(waitEvent.WaitOne(timeoutMs), "Timed out");
+            await Assert.ThrowsAsync<RemoteCoreException>(() => coreProxy.LoadBlueprintAsync("{}"));
         }
 
         [Fact]

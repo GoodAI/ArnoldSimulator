@@ -76,9 +76,9 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
-        public void ConductorSetsUpAndTearsDown()
+        public async void ConductorSetsUpAndTearsDown()
         {
-            m_conductor.ConnectToCore();
+            await m_conductor.ConnectToCoreAsync();
 
             Assert.Equal(m_coreProxyMock.Object, m_conductor.CoreProxy);
 
@@ -91,26 +91,26 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
-        public void DoubleSetupFails()
+        public async void DoubleSetupFails()
         {
-            m_conductor.ConnectToCore();
+            await m_conductor.ConnectToCoreAsync();
 
-            Assert.Throws<InvalidOperationException>(() => m_conductor.ConnectToCore());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync());
         }
 
         [Fact(Skip = "When we have the logic in conductor done, enable and fix this")]
-        public void StartsAndStopsSimulation()
+        public async void StartsAndStopsSimulation()
         {
-            m_conductor.ConnectToCore();
+            await m_conductor.ConnectToCoreAsync();
 
-            m_conductor.LoadBlueprint("{}");
-            m_coreProxyMock.Verify(coreProxy => coreProxy.LoadBlueprint(It.IsAny<string>()));
+            await m_conductor.LoadBlueprintAsync("{}");
+            m_coreProxyMock.Verify(coreProxy => coreProxy.LoadBlueprintAsync(It.IsAny<string>()));
 
             m_conductor.StartSimulation();
             m_coreProxyMock.Verify(coreProxy => coreProxy.Run(It.IsAny<uint>()));
 
-            m_conductor.PauseSimulation();
-            m_coreProxyMock.Verify(coreProxy => coreProxy.Pause());
+            await m_conductor.PauseSimulationAsync();
+            m_coreProxyMock.Verify(coreProxy => coreProxy.PauseAsync());
 
             m_coreProxyMock.Setup(coreProxy => coreProxy.Clear())
                 .Callback(() =>
@@ -132,11 +132,11 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
-        public void NeedsEndpointToStartWithLocalCore()
+        public async void NeedsEndpointToStartWithLocalCore()
         {
             m_coreProcessMock.Setup(process => process.EndPoint).Returns(null as EndPoint);
 
-            Assert.Throws<InvalidOperationException>(() => m_conductor.ConnectToCore());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync());
         }
     }
 }
