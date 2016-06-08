@@ -292,9 +292,9 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
                         regionType = it.value().get<std::string>();
                     } else if (it.key() == "position" && it.value().is_array()) {
                         if (it.value().size() == 3) {
-                            haveRegionPosition = it.value().at(0).is_number_float() &&
-                                it.value().at(1).is_number_float() &&
-                                it.value().at(2).is_number_float();
+                            haveRegionPosition = it.value().at(0).is_number() &&
+                                it.value().at(1).is_number() &&
+                                it.value().at(2).is_number();
                             if (haveRegionPosition) {
                                 regionPosition = Point3D(it.value().at(0).get<float>(),
                                     it.value().at(1).get<float>(), it.value().at(2).get<float>());
@@ -302,9 +302,9 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
                         }
                     } else if (it.key() == "size" && it.value().is_array()) {
                         if (it.value().size() == 3) {
-                            haveRegionSize = it.value().at(0).is_number_float() &&
-                                it.value().at(1).is_number_float() &&
-                                it.value().at(2).is_number_float();
+                            haveRegionSize = it.value().at(0).is_number() &&
+                                it.value().at(1).is_number() &&
+                                it.value().at(2).is_number();
                             if (haveRegionSize) {
                                 regionSize = Size3D(it.value().at(0).get<float>(),
                                     it.value().at(1).get<float>(), it.value().at(2).get<float>());
@@ -626,7 +626,7 @@ RegionIndex BrainBase::GetNewNeuronIndex()
 
 RegionIndex BrainBase::GetNewRegionIndex()
 {
-    if (mNeuronIdxCounter == REGION_INDEX_MAX) CkAbort("Region indices depleted.");
+    if (mRegionIdxCounter == REGION_INDEX_MAX) CkAbort("Region indices depleted.");
     return mRegionIdxCounter++;
 }
 

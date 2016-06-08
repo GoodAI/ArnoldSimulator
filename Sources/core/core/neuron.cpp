@@ -684,7 +684,7 @@ ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, 
 {
     if (!params.empty()) {
         for (auto itParams = params.begin(); itParams != params.end(); ++itParams) {
-            if (itParams.key() == "threshold" && itParams->is_number_float()) {
+            if (itParams.key() == "threshold" && itParams->is_number()) {
                 mThresholdActivation = itParams.value().get<double>();
             }
         }
