@@ -41,7 +41,7 @@ namespace GoodAI.Arnold.Core
         /// Loads an agent into the handler, creates a new simulation.
         /// This moves the simulation from Empty state to Paused.
         /// </summary>
-        Task<StateResponse> LoadBlueprintAsync(string blueprint);
+        Task LoadBlueprintAsync(string blueprint);
 
         /// <summary>
         /// Runs the given number of steps.
@@ -134,7 +134,7 @@ namespace GoodAI.Arnold.Core
             ModelUpdater.Dispose();
         }
 
-        public async Task<StateResponse> LoadBlueprintAsync(string blueprint)
+        public async Task LoadBlueprintAsync(string blueprint)
         {
             if (State != CoreState.Empty)
             {
@@ -142,7 +142,7 @@ namespace GoodAI.Arnold.Core
                 throw new WrongHandlerStateException("LoadBlueprint", State);
             }
 
-            return await SendCommandAsync(new CommandConversation(CommandType.Load, blueprint: blueprint));
+            await SendCommandAsync(new CommandConversation(CommandType.Load, blueprint: blueprint));
         }
 
         public void Clear()
@@ -184,7 +184,7 @@ namespace GoodAI.Arnold.Core
             await SendCommandAsync(new CommandConversation(CommandType.Pause));
         }
 
-        private async Task<StateResponse> SendCommandAsync(CommandConversation conversation, bool stopCheckingCoreState = false)
+        private async Task SendCommandAsync(CommandConversation conversation, bool stopCheckingCoreState = false)
         {
             try
             {
@@ -193,8 +193,6 @@ namespace GoodAI.Arnold.Core
                     restartKeepaliveOnSuccess: !stopCheckingCoreState);
 
                 HandleStateResponse(response);
-
-                return response;
             }
             catch (Exception ex)
             {
