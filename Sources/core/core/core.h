@@ -71,8 +71,7 @@ protected:
     void ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId);
     void ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId);
 
-
-    bool TryLoadBrain(const std::string &blueprintContent);
+    bool TryLoadBrain(const std::string &blueprintString);
 
     flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
     flatbuffers::Offset<Communication::NeuronId> Core::CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const;
