@@ -269,8 +269,6 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
             
             } else if (itParams.key() == "regions" && itParams->is_array()) {
 
-                
-                
                 for (auto itRegion = itParams.value().begin(); itRegion != itParams.value().end(); ++itRegion) {
                     if (itRegion->is_object()) {
 
