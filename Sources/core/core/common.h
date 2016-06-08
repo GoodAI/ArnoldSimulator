@@ -38,7 +38,7 @@ typedef uint64_t RequestId;
 
 inline NeuronId GetNeuronId(RegionIndex regionIndex, NeuronIndex neuronIndex)
 {
-    return (regionIndex << REGION_INDEX_OFFSET) & neuronIndex;
+    return (regionIndex << REGION_INDEX_OFFSET) | neuronIndex;
 }
 
 inline NeuronIndex GetNeuronIndex(NeuronId neuronId)
