@@ -52,7 +52,7 @@ namespace ArnoldUI
             //Simulation.Clear();
         }
 
-        public async void ConnectToCoreAsync()
+        public async Task ConnectToCoreAsync()
         {
             // TODO(HonzaS): endPoint = null means local.
             await Conductor.ConnectToCoreAsync(endPoint: null);

@@ -111,12 +111,24 @@ namespace GoodAI.Arnold
             VisualizationForm.FormClosed += VisualizationFormOnClosed;
         }
 
+        private async Task RunButtonActionAsync(Func<Task> asyncAction)
+        {
+            DisableCommandButtons();
 
-        private void connectButton_Click(object sender, EventArgs e)
+            try
+            {
+                await asyncAction();
+            }
+            finally
+            {
+                UpdateButtons();
+            }
+        }
+
+        private async void connectButton_Click(object sender, EventArgs e)
         {
             // TODO(HonzaS): Handle the core type (local/remote).
-            DisableCommandButtons();
-            m_uiMain.ConnectToCoreAsync();
+            await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync());
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
@@ -127,22 +139,12 @@ namespace GoodAI.Arnold
 
         private async void runButton_Click(object sender, EventArgs e)
         {
-            DisableCommandButtons();
-
-            try
-            {
-                await m_uiMain.StartSimulationAsync();
-            }
-            finally
-            {
-                UpdateButtons();
-            }
+            await RunButtonActionAsync(() => m_uiMain.StartSimulationAsync());
         }
 
         private async void pauseButton_Click(object sender, EventArgs e)
         {
-            DisableCommandButtons();
-            await m_uiMain.PauseSimulationAsync();
+            await RunButtonActionAsync(() => m_uiMain.PauseSimulationAsync());
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
