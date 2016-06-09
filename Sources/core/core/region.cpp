@@ -78,13 +78,62 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
     std::unordered_map<std::string, std::vector<NeuronId>> clusterContent;
 
     if (!p.empty()) {
-        json clusters, webs;
+        json inputs, outputs, clusters, webs;
         for (auto itParams = p.begin(); itParams != p.end(); ++itParams) {
-
-            if (itParams.key() == "clusters" && itParams->is_array()) {
+            if (itParams.key() == "inputs" && itParams->is_array()) {
+                inputs = itParams.value();
+            } else if (itParams.key() == "outputs" && itParams->is_array()) {
+                outputs = itParams.value();
+            } else if (itParams.key() == "clusters" && itParams->is_array()) {
                 clusters = itParams.value();
             } else if (itParams.key() == "webs" && itParams->is_array()) {
                 webs = itParams.value();
+            }
+        }
+
+        for (auto itInput = inputs.begin(); itInput != inputs.end(); ++itInput) {
+            if (itInput->is_object()) {
+
+                std::string inputName, neuronType, neuronParams;
+                size_t neuronCount = 0;
+                for (auto it = itInput->begin(); it != itInput->end(); ++it) {
+                    if (it.key() == "name" && it.value().is_string()) {
+                        inputName = it.value().get<std::string>();
+                    } else if (it.key() == "neuronType" && it.value().is_string()) {
+                        neuronType = it.value().get<std::string>();
+                    } else if (it.key() == "neuronParams" && it.value().is_object()) {
+                        neuronParams = it.value().dump();
+                    } else if (it.key() == "neuronCount" && it.value().is_number_integer()) {
+                        neuronCount = it.value().get<size_t>();
+                    }
+                }
+
+                if (!inputName.empty()) {
+                    CreateInput(inputName, neuronType, neuronParams, neuronCount);
+                }
+            }
+        }
+
+        for (auto itOutput = outputs.begin(); itOutput != outputs.end(); ++itOutput) {
+            if (itOutput->is_object()) {
+
+                std::string outputName, neuronType, neuronParams;
+                size_t neuronCount = 0;
+                for (auto it = itOutput->begin(); it != itOutput->end(); ++it) {
+                    if (it.key() == "name" && it.value().is_string()) {
+                        outputName = it.value().get<std::string>();
+                    } else if (it.key() == "neuronType" && it.value().is_string()) {
+                        neuronType = it.value().get<std::string>();
+                    } else if (it.key() == "neuronParams" && it.value().is_object()) {
+                        neuronParams = it.value().dump();
+                    } else if (it.key() == "neuronCount" && it.value().is_number_integer()) {
+                        neuronCount = it.value().get<size_t>();
+                    }
+                }
+
+                if (!outputName.empty()) {
+                    CreateOutput(outputName, neuronType, neuronParams, neuronCount);
+                }
             }
         }
 
@@ -432,13 +481,16 @@ void RegionBase::RequestChildRemoval(NeuronId parent, NeuronId child)
 void RegionBase::CreateInput(const ConnectorName &name,
     const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount)
 {
-    Connector connector;
-    connector.name = name;
-    for (size_t i = 0; i < neuronCount; ++i) {
-        connector.neurons.push_back(
-            RequestNeuronAddition(neuronType, neuronParams));
+    auto itConn = mInputConnectors.find(name);
+    if (itConn == mInputConnectors.end()) {
+        Connector connector;
+        connector.name = name;
+        for (size_t i = 0; i < neuronCount; ++i) {
+            connector.neurons.push_back(
+                RequestNeuronAddition(neuronType, neuronParams));
+        }
+        mInputConnectors.insert(std::make_pair(name, connector));
     }
-    mInputConnectors.insert(std::make_pair(name, connector));
 
     gCompletionDetector.ckLocalBranch()->consume();
 }
@@ -545,21 +597,24 @@ void RegionBase::DisconnectInputNeurons(const ConnectorName &name, NeuronId dest
 void RegionBase::CreateOutput(const ConnectorName &name,
     const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount)
 {
-    Connector connector;
-    connector.name = name;
-    for (size_t i = 0; i < neuronCount; ++i) {
-        connector.neurons.push_back(
-            RequestNeuronAddition(neuronType, neuronParams));
+    auto itConn = mOutputConnectors.find(name);
+    if (itConn == mOutputConnectors.end()) {
+        Connector connector;
+        connector.name = name;
+        for (size_t i = 0; i < neuronCount; ++i) {
+            connector.neurons.push_back(
+                RequestNeuronAddition(neuronType, neuronParams));
+        }
+        mOutputConnectors.insert(std::make_pair(name, connector));
     }
-    mOutputConnectors.insert(std::make_pair(name, connector));
 
     gCompletionDetector.ckLocalBranch()->consume();
 }
 
 void RegionBase::DeleteOutput(const ConnectorName &name)
 {
-    auto itConn = mInputConnectors.find(name);
-    if (itConn != mInputConnectors.end()) {
+    auto itConn = mOutputConnectors.find(name);
+    if (itConn != mOutputConnectors.end()) {
         Connector &connector = itConn->second;
 
         for (auto it = connector.connections.begin(); it != connector.connections.end(); ++it) {
@@ -578,7 +633,7 @@ void RegionBase::DeleteOutput(const ConnectorName &name)
             RequestNeuronRemoval(*it);
         }
 
-        mInputConnectors.erase(name);
+        mOutputConnectors.erase(name);
     }
 
     if (!mUnlinking) {
