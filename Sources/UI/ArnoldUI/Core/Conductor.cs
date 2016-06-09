@@ -19,11 +19,11 @@ namespace GoodAI.Arnold.Core
 
         Task ConnectToCoreAsync(EndPoint endPoint = null);
         void Disconnect();
-        void Shutdown();
+        Task ShutdownAsync();
         Task LoadBlueprintAsync(string blueprint);
-        void StartSimulation(uint stepsToRun = 0);
+        Task StartSimulationAsync(uint stepsToRun = 0);
         Task PauseSimulationAsync();
-        void KillSimulation();
+        Task ClearSimulationAsync();
 
         bool IsConnected { get; }
 
@@ -147,13 +147,12 @@ namespace GoodAI.Arnold.Core
             FinishDisconnect();
         }
 
-        public void Shutdown()
+        public async Task ShutdownAsync()
         {
             if (CoreProxy != null)
             {
                 Log.Info("Shutting down the core");
-                CoreProxy.ShutdownAsync();
-                return;
+                await CoreProxy.ShutdownAsync();
             }
 
             AfterShutdown();
@@ -209,9 +208,6 @@ namespace GoodAI.Arnold.Core
 
         private void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
         {
-            if (stateChangedEventArgs.CurrentState == CoreState.ShuttingDown)
-                AfterShutdown();
-
             Log.Debug("Core state changed: {previousState} -> {currentState}", stateChangedEventArgs.PreviousState, stateChangedEventArgs.CurrentState);
 
             StateChanged?.Invoke(this, stateChangedEventArgs);
@@ -223,7 +219,7 @@ namespace GoodAI.Arnold.Core
             StateChangeFailed?.Invoke(this, stateChangeFailedEventArgs);
         }
 
-        public void StartSimulation(uint stepsToRun = 0)
+        public async Task StartSimulationAsync(uint stepsToRun = 0)
         {
             if (CoreProxy == null)
             {
@@ -232,7 +228,7 @@ namespace GoodAI.Arnold.Core
             }
 
             Log.Info("Starting simulation");
-            CoreProxy.RunAsync(stepsToRun);
+            await CoreProxy.RunAsync(stepsToRun);
         }
 
         public async Task PauseSimulationAsync()
@@ -241,7 +237,7 @@ namespace GoodAI.Arnold.Core
             await CoreProxy.PauseAsync();
         }
 
-        public void KillSimulation()
+        public async Task ClearSimulationAsync()
         {
             throw new NotImplementedException();
         }
@@ -262,12 +258,12 @@ namespace GoodAI.Arnold.Core
             CoreProxy.RunAsync(1);
         }
 
-        public void Dispose()
+        public async void Dispose()
         {
             Log.Debug("Disposing conductor");
             if (m_process != null)
             {
-                Shutdown();
+                await ShutdownAsync();
                 // Process will wait for a while to let the core process finish gracefully.
                 // TODO(HonzaS): Wait for the core to finish before killing.
                 // When the local simulation is auto-saving before closing, it might take a long time.

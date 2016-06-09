@@ -70,7 +70,7 @@ namespace ArnoldUI
                 throw;
             }
 
-            Conductor.StartSimulation();
+            Conductor.StartSimulationAsync();
         }
 
         public async Task PauseSimulationAsync()
@@ -89,7 +89,7 @@ namespace ArnoldUI
         public void Disconnect()
         {
             // TODO(HonzaS): Change this to Disconnect when we allow that.
-            Conductor.Shutdown();
+            Conductor.ShutdownAsync();
         }
 
         public void Dispose()
