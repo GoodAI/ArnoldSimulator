@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using GoodAI.Arnold.Visualization;
 using OpenTK;
 using Xunit;
@@ -23,7 +22,7 @@ namespace GoodAI.Arnold.UI.Tests
             camera.UpdateCurrentFrameMatrix();
 
             // The values were measured when it worked correctly. No way I'm calculating these.
-            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new [,]
             {
                 {0, 0.866f, -0.5f, 0},
                 {0, 0.5f, 0.866f, 0},
@@ -50,7 +49,7 @@ namespace GoodAI.Arnold.UI.Tests
             camera.UpdateCurrentFrameMatrix();
 
             // The values were measured when it worked correctly. No way I'm calculating these.
-            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new [,]
             {
                 {0, 0.866f, -0.5f, 0},
                 {0, 0.5f, 0.866f, 0},
@@ -76,7 +75,7 @@ namespace GoodAI.Arnold.UI.Tests
             camera.UpdateCurrentFrameMatrix();
 
             // The values were measured when it worked correctly. No way I'm calculating these.
-            Matrix4 expected = MathTestHelpers.BuildMatrix(new float[,]
+            Matrix4 expected = MathTestHelpers.BuildMatrix(new [,]
             {
                 {-1, 0, -0.002f, 0},
                 {0, 1, -0.004f, 0},

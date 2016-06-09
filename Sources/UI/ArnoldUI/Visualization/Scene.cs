@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
-using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Properties;
 using GoodAI.Arnold.Visualization.Models;
 using OpenTK;

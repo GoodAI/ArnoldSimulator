@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Logging;
-using TaskExtensions = GoodAI.Arnold.Extensions.TaskExtensions;
 
 namespace GoodAI.Arnold.Core
 {

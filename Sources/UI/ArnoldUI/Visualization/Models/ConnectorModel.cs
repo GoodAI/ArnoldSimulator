@@ -139,7 +139,7 @@ namespace GoodAI.Arnold.Visualization.Models
         internal void Reposition(float position, float sizeZ)
         {
             Position = new Vector3(0, 0, position + sizeZ/2);
-            Size = new Vector3(ConnectorModel.SizeX, ConnectorModel.SizeY, sizeZ - MarginZ*2);
+            Size = new Vector3(SizeX, SizeY, sizeZ - MarginZ*2);
         }
 
         protected abstract Color4 Color { get; }

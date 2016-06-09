@@ -9,12 +9,12 @@ namespace GoodAI.Arnold.Visualization.Models
 {
     public abstract class ConnectorStripModel<TConnector> : CompositeModelBase<TConnector> where TConnector : ConnectorModel
     {
-        protected readonly RegionModel m_region;
+        protected readonly RegionModel Region;
         public uint TotalSlots { get; set; }
 
         public ConnectorStripModel(RegionModel region)
         {
-            m_region = region;
+            Region = region;
         }
 
         public bool Remove(string name)
@@ -34,11 +34,11 @@ namespace GoodAI.Arnold.Visualization.Models
             Position = AdjustedPosition;
 
             // Starting position of the connector in the strip.
-            var position = -m_region.HalfSize.Z;
+            var position = -Region.HalfSize.Z;
 
             foreach (TConnector connector in Children)
             {
-                float sizeZ = (float) connector.SlotCount/TotalSlots * m_region.Size.Z;
+                float sizeZ = (float) connector.SlotCount/TotalSlots * Region.Size.Z;
 
                 // Positioned relatively to the strip, which is in the center of the input or output face.
                 connector.Reposition(position, sizeZ);
@@ -65,7 +65,7 @@ namespace GoodAI.Arnold.Visualization.Models
         {
         }
 
-        protected override Vector3 AdjustedPosition => new Vector3(-m_region.HalfSize.X, 0, 0);
+        protected override Vector3 AdjustedPosition => new Vector3(-Region.HalfSize.X, 0, 0);
     }
 
     public class OutputConnectorStripModel : ConnectorStripModel<OutputConnectorModel>
@@ -74,6 +74,6 @@ namespace GoodAI.Arnold.Visualization.Models
         {
         }
 
-        protected override Vector3 AdjustedPosition => new Vector3(m_region.HalfSize.X, 0, 0);
+        protected override Vector3 AdjustedPosition => new Vector3(Region.HalfSize.X, 0, 0);
     }
 }

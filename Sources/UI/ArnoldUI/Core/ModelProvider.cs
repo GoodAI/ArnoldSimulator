@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 

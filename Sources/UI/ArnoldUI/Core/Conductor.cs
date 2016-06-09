@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Communication;
-using GoodAI.Arnold.Project;
 using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Core
@@ -32,16 +31,6 @@ namespace GoodAI.Arnold.Core
         IModelProvider ModelProvider { get; }
 
         void PerformBrainStep();
-    }
-
-    public class SimulationInstanceEventArgs : EventArgs
-    {
-        private ICoreProxy CoreProxy { get; set; }
-
-        public SimulationInstanceEventArgs(ICoreProxy coreProxy)
-        {
-            CoreProxy = coreProxy;
-        }
     }
 
     public class Conductor : IConductor
@@ -108,6 +97,7 @@ namespace GoodAI.Arnold.Core
             Log.Info("Connecting to Core running at {hostname:l}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
             // TODO(HonzaS): Check if the endpoint exists (handshake), await the response.
+
 
             // TODO(HonzaS): Move these inside the factory method.
             ICoreController coreController = m_coreControllerFactory.Create(coreLink);

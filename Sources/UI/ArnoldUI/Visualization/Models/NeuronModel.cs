@@ -5,7 +5,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GoodAI.Arnold.Visualization;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -14,8 +13,6 @@ namespace GoodAI.Arnold.Visualization.Models
 {
     public class NeuronModel : ModelBase, IPickable
     {
-        private static readonly Random m_random = new Random();
-
         public static int NeuronTexture;
 
         public const float MinAlpha = 0.4f;

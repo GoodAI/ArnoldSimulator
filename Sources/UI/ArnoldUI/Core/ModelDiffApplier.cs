@@ -8,7 +8,6 @@ using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
-using OpenTK;
 
 namespace GoodAI.Arnold.Core
 {
