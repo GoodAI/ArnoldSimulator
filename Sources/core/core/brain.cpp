@@ -761,7 +761,9 @@ void BrainBase::PullSensoMotoricData(const std::string &terminalName, std::vecto
     Spike::Initialize(terminal.spikeType, 0, dummySpike);
     size_t spikeSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
     
-    terminal.data.resize(terminal.neuronCount * spikeSize, 0);
+    if (!terminal.data.empty()) {
+        terminal.data.resize(terminal.neuronCount * spikeSize, 0);
+    }
     std::swap(data, terminal.data);
     terminal.data.clear();
     terminal.data.reserve(terminal.neuronCount * spikeSize);
@@ -920,7 +922,7 @@ void BrainBase::SimulateAddConnectors()
         gCompletionDetector.ckLocalBranch()->produce(mConnectorAdditions.size());
 
         for (auto it = mConnectorAdditions.begin(); it != mConnectorAdditions.end(); ++it) {
-            if (std::get<1>(*it) == Direction::Forward) {
+            if (std::get<1>(*it) == Direction::Backward) {
                 gRegions[std::get<0>(*it)].CreateInput(
                     std::get<2>(*it), std::get<3>(*it), std::get<4>(*it), std::get<5>(*it));
             } else {
@@ -1031,7 +1033,7 @@ void BrainBase::SimulateRemoveConnectors()
         gCompletionDetector.ckLocalBranch()->produce(mConnectorRemovals.size());
 
         for (auto it = mConnectorRemovals.begin(); it != mConnectorRemovals.end(); ++it) {
-            if (std::get<1>(*it) == Direction::Forward) {
+            if (std::get<1>(*it) == Direction::Backward) {
                 gRegions[std::get<0>(*it)].DeleteInput(std::get<2>(*it));
             } else {
                 gRegions[std::get<0>(*it)].DeleteOutput(std::get<2>(*it));
@@ -1126,7 +1128,7 @@ void BrainBase::SimulateRegionCommitTopologyChangeDone(size_t triggeredNeurons)
 
 void BrainBase::SimulateAllTopologyChangesDelivered()
 {
-    mAllSpikesDelivered = true;
+    mAllTopologyChangesDelivered = true;
     if (mRegionCommitTopologyChangeDone && mAllTopologyChangesDelivered) {
         this->SimulateBodySimulate();
     }
