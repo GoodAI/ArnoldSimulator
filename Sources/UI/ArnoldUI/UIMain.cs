@@ -70,7 +70,7 @@ namespace ArnoldUI
                 throw;
             }
 
-            Conductor.StartSimulationAsync();
+            await Conductor.StartSimulationAsync();
         }
 
         public async Task PauseSimulationAsync()

@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Communication;
-using GoodAI.Arnold.Project;
 using Moq;
 using Xunit;
 
@@ -15,25 +13,16 @@ namespace GoodAI.Arnold.UI.Tests
 {
     public class ConductorTests
     {
-        private Mock<ICoreProcess> m_coreProcessMock;
-        private Mock<ICoreLink> m_coreLinkMock;
-        private Mock<ICoreProxy> m_coreProxyMock;
-        private Mock<ICoreProcessFactory> m_coreProcessFactoryMock;
-        private Mock<ICoreLinkFactory> m_coreLinkFactoryMock;
-        private Mock<ICoreControllerFactory> m_coreControllerFactoryMock;
-        private Mock<ICoreProxyFactory> m_coreProxyFactoryMock;
+        private readonly Mock<ICoreProcess> m_coreProcessMock;
+        private readonly Mock<ICoreProxy> m_coreProxyMock;
         private readonly Conductor m_conductor;
-        private ICoreController m_coreController;
-        private Mock<IModelUpdaterFactory> m_modelUpdaterFactoryMock;
-        private Mock<IModelProviderFactory> m_modelProviderFactoryMock;
-        private const int TimeoutMs = 100;
 
         public ConductorTests()
         {
             m_coreProcessMock = new Mock<ICoreProcess>();
             m_coreProcessMock.Setup(process => process.EndPoint).Returns(new EndPoint("localhost", 42));
 
-            m_coreLinkMock = new Mock<ICoreLink>();
+            var coreLinkMock = new Mock<ICoreLink>();
 
             m_coreProxyMock = new Mock<ICoreProxy>();
             m_coreProxyMock.Setup(coreProxy => coreProxy.ShutdownAsync())
@@ -41,39 +30,35 @@ namespace GoodAI.Arnold.UI.Tests
                 .Raises(coreProxy => coreProxy.StateChanged += null,
                     new StateChangedEventArgs(CoreState.Empty, CoreState.ShuttingDown));
 
-            m_coreProcessFactoryMock = new Mock<ICoreProcessFactory>();
-            m_coreProcessFactoryMock.Setup(factory => factory.Create())
+            var coreProcessFactoryMock = new Mock<ICoreProcessFactory>();
+            coreProcessFactoryMock.Setup(factory => factory.Create())
                 .Returns(m_coreProcessMock.Object);
 
-            m_coreLinkFactoryMock = new Mock<ICoreLinkFactory>();
-            m_coreLinkFactoryMock.Setup(factory => factory.Create(It.IsAny<EndPoint>()))
-                .Returns(m_coreLinkMock.Object);
+            var coreLinkFactoryMock = new Mock<ICoreLinkFactory>();
+            coreLinkFactoryMock.Setup(factory => factory.Create(It.IsAny<EndPoint>()))
+                .Returns(coreLinkMock.Object);
 
-            m_coreController = new CoreController(m_coreLinkMock.Object);
-            m_coreControllerFactoryMock = new Mock<ICoreControllerFactory>();
-            m_coreControllerFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>())).Returns(m_coreController);
-
-            m_modelUpdaterFactoryMock = new Mock<IModelUpdaterFactory>();
-            m_modelProviderFactoryMock = new Mock<IModelProviderFactory>();
+            var coreControllerFactoryMock = new Mock<ICoreControllerFactory>();
+            coreControllerFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>())).Returns(new CoreController(coreLinkMock.Object));
 
 
             var response = StateResponseBuilder.Build(StateType.ShuttingDown);
             var stateResponse = response.GetResponse(new StateResponse());
 
-            m_coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>())).Returns(() =>
+            coreLinkMock.Setup(link => link.Request(It.IsAny<CommandConversation>(), It.IsAny<int>())).Returns(() =>
             {
                 return Task<StateResponse>.Factory.StartNew(
                     () => stateResponse);
             });
 
 
-            m_coreProxyFactoryMock = new Mock<ICoreProxyFactory>();
-            m_coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreController>(), It.IsAny<IModelUpdater>()))
+            var coreProxyFactoryMock = new Mock<ICoreProxyFactory>();
+            coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreController>(), It.IsAny<IModelUpdater>()))
                 .Returns(m_coreProxyMock.Object);
 
-            m_conductor = new Conductor(m_coreProcessFactoryMock.Object, m_coreLinkFactoryMock.Object,
-                m_coreControllerFactoryMock.Object, m_coreProxyFactoryMock.Object, m_modelUpdaterFactoryMock.Object,
-                m_modelProviderFactoryMock.Object);
+            m_conductor = new Conductor(coreProcessFactoryMock.Object, coreLinkFactoryMock.Object,
+                coreControllerFactoryMock.Object, coreProxyFactoryMock.Object, new Mock<IModelUpdaterFactory>().Object,
+                new Mock<IModelProviderFactory>().Object);
         }
 
         [Fact]

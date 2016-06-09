@@ -23,7 +23,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             ResponseMessage responseMessage = StateResponseBuilder.Build(StateType.Running);
 
-            ICoreLink coreLink = GenerateCoreLink(conversation, responseMessage);
+            ICoreLink coreLink = GenerateCoreLink(responseMessage);
 
             Task<StateResponse> futureResponse = coreLink.Request(conversation, WaitMs);
 
@@ -45,7 +45,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var conv = new CommandConversation(CommandType.Run);
             var responseMessage = ErrorResponseBuilder.Build(errorMessage);
-            ICoreLink coreLink = GenerateCoreLink(conv, responseMessage);
+            ICoreLink coreLink = GenerateCoreLink(responseMessage);
 
             var ex = await Assert.ThrowsAsync<RemoteCoreException>(() => coreLink.Request(conv, WaitMs));
 
@@ -71,16 +71,15 @@ namespace GoodAI.Arnold.UI.Tests
             await Assert.ThrowsAsync<TaskTimeoutException<StateResponse>>(() => coreLink.Request(conv, WaitMs));
         }
 
-        private static CoreLink GenerateCoreLink(CommandConversation conv, ResponseMessage response)
+        private static CoreLink GenerateCoreLink(ResponseMessage response)
         {
-            IConverseFlatBuffersClient converseClient = GenerateConverseClient(conv, response);
+            IConverseFlatBuffersClient converseClient = GenerateConverseClient(response);
 
             var coreLink = new CoreLink(converseClient);
             return coreLink;
         }
 
-        private static IConverseFlatBuffersClient GenerateConverseClient(CommandConversation conv,
-            ResponseMessage response)
+        private static IConverseFlatBuffersClient GenerateConverseClient(ResponseMessage response)
         {
             var converseClientMock = new Mock<IConverseFlatBuffersClient>();
             converseClientMock.Setup(

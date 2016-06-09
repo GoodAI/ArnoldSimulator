@@ -14,7 +14,6 @@ namespace GoodAI.Arnold.UI.Tests
 {
     public class CoreControllerTests
     {
-        private ICoreLink m_coreLink;
         private readonly CoreController m_controller;
         private readonly Mock<ICoreLink> m_coreLinkMock;
 
@@ -23,9 +22,9 @@ namespace GoodAI.Arnold.UI.Tests
         public CoreControllerTests()
         {
             m_coreLinkMock = new Mock<ICoreLink>();
-            m_coreLink = m_coreLinkMock.Object;
+            ICoreLink coreLink = m_coreLinkMock.Object;
 
-            m_controller = new CoreController(m_coreLink, TimeoutMs/5);
+            m_controller = new CoreController(coreLink, TimeoutMs/5);
         }
 
         [Fact]
