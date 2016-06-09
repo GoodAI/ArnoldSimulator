@@ -106,12 +106,19 @@
     <Compile Include="Forms\JsonEditForm.Designer.cs">
       <DependentUpon>JsonEditForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ObserverForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ObserverForm.Designer.cs">
+      <DependentUpon>ObserverForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\VisualizationForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\VisualizationForm.Designer.cs">
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Observation\Observer.cs" />
     <Compile Include="Project\Designer.cs" />
     <Compile Include="Visualization\Blender.cs" />
     <Compile Include="Visualization\Camera.cs" />
@@ -196,6 +203,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ObserverForm.resx">
+      <DependentUpon>ObserverForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\VisualizationForm.resx">
       <DependentUpon>VisualizationForm.cs</DependentUpon>
