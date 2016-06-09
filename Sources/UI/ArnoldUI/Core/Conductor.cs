@@ -113,7 +113,7 @@ namespace GoodAI.Arnold.Core
             ICoreController coreController = m_coreControllerFactory.Create(coreLink);
             IModelUpdater modelUpdater = m_modelUpdaterFactory.Create(coreLink, coreController);
 
-            CoreProxy = m_coreProxyFactory.Create(coreLink, coreController, modelUpdater);
+            CoreProxy = m_coreProxyFactory.Create(coreController, modelUpdater);
 
             RegisterCoreEvents();
         }

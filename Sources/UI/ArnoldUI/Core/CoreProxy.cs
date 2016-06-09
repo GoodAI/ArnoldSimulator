@@ -108,7 +108,6 @@ namespace GoodAI.Arnold.Core
         }
         private CoreState m_state = CoreState.Disconnected;
 
-        private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_controller;
 
         private const int FailCountBeforeDisconnect = 3;
@@ -117,9 +116,8 @@ namespace GoodAI.Arnold.Core
 
         public IModelUpdater ModelUpdater { get; }
 
-        public CoreProxy(ICoreLink coreLink, ICoreController controller, IModelUpdater modelUpdater)
+        public CoreProxy(ICoreController controller, IModelUpdater modelUpdater)
         {
-            m_coreLink = coreLink;
             m_controller = controller;
             ModelUpdater = modelUpdater;
 

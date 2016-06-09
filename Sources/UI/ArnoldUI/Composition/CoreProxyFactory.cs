@@ -11,7 +11,7 @@ namespace GoodAI.Arnold
 {
     public interface ICoreProxyFactory
     {
-        ICoreProxy Create(ICoreLink coreLink, ICoreController controller, IModelUpdater modelUpdater);
+        ICoreProxy Create(ICoreController controller, IModelUpdater modelUpdater);
     }
 
     public class CoreProxyFactory : PropertyInjectingFactory, ICoreProxyFactory
@@ -19,9 +19,9 @@ namespace GoodAI.Arnold
         public CoreProxyFactory(Container container) : base(container)
         { }
 
-        public ICoreProxy Create(ICoreLink coreLink, ICoreController controller, IModelUpdater modelUpdater)
+        public ICoreProxy Create(ICoreController controller, IModelUpdater modelUpdater)
         {
-            return InjectProperties(new CoreProxy(coreLink, controller, modelUpdater));
+            return InjectProperties(new CoreProxy(controller, modelUpdater));
         }
     }
 }

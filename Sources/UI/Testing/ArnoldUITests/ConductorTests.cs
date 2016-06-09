@@ -67,7 +67,7 @@ namespace GoodAI.Arnold.UI.Tests
 
 
             m_coreProxyFactoryMock = new Mock<ICoreProxyFactory>();
-            m_coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreLink>(), It.IsAny<ICoreController>(), It.IsAny<IModelUpdater>()))
+            m_coreProxyFactoryMock.Setup(factory => factory.Create(It.IsAny<ICoreController>(), It.IsAny<IModelUpdater>()))
                 .Returns(m_coreProxyMock.Object);
 
             m_conductor = new Conductor(m_coreProcessFactoryMock.Object, m_coreLinkFactoryMock.Object,

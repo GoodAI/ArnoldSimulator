@@ -97,7 +97,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var waitEvent = new AutoResetEvent(false);
 
-            var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
+            var coreProxy = new CoreProxy(coreController, m_modelUpdater);
             Assert.Equal(CoreState.Disconnected, coreProxy.State);
 
             // Simulate the core sending first state information.
@@ -140,7 +140,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             var coreController = new CoreController(coreLink);
 
-            var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
+            var coreProxy = new CoreProxy(coreController, m_modelUpdater);
             Assert.Equal(CoreState.Disconnected, coreProxy.State);
 
             coreProxy.State = CoreState.Empty;
@@ -153,8 +153,6 @@ namespace GoodAI.Arnold.UI.Tests
         {
             const int timeoutMs = 150;
 
-            ICoreLink coreLink = new DummyCoreLink();
-
             var waitEvent = new AutoResetEvent(false);
 
             var coreControllerMock = new Mock<ICoreController>();
@@ -162,7 +160,7 @@ namespace GoodAI.Arnold.UI.Tests
                 .Callback(() => waitEvent.Set());
             var coreController = coreControllerMock.Object;
 
-            var coreProxy = new CoreProxy(coreLink, coreController, m_modelUpdater);
+            var coreProxy = new CoreProxy(coreController, m_modelUpdater);
 
             Assert.True(waitEvent.WaitOne(timeoutMs));
         }
