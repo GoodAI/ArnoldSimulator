@@ -1,21 +1,23 @@
 #include "catch.hpp"
 
+#include "common.h"
 #include "core.h"
 #include "region.h"
 
 #include "core_tests.h"
 
-unsigned int Factorial(unsigned int number)
+TEST_CASE("NeuronId packing is correct", "[common]")
 {
-    return number <= 1 ? number : Factorial(number - 1)*number;
-}
+    const NeuronIndex neuronIndex = 500'000;
+    const RegionIndex regionIndex = 400;
 
-TEST_CASE("Factorials are computed", "[factorial]")
-{
-    REQUIRE(Factorial(1) == 1);
-    REQUIRE(Factorial(2) == 2);
-    REQUIRE(Factorial(3) == 6);
-    REQUIRE(Factorial(10) == 3628800);
+    REQUIRE(neuronIndex <= NEURON_INDEX_MAX);
+    REQUIRE(regionIndex <= REGION_INDEX_MAX);
+
+    NeuronId neuronId = GetNeuronId(regionIndex, neuronIndex);
+
+    REQUIRE(GetNeuronIndex(neuronId) == neuronIndex);
+    REQUIRE(GetRegionIndex(neuronId) == regionIndex);
 }
 
 extern CProxy_RegionBase gRegions;
