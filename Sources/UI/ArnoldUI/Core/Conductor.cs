@@ -152,7 +152,7 @@ namespace GoodAI.Arnold.Core
             if (CoreProxy != null)
             {
                 Log.Info("Shutting down the core");
-                CoreProxy.Shutdown();
+                CoreProxy.ShutdownAsync();
                 return;
             }
 
@@ -232,7 +232,7 @@ namespace GoodAI.Arnold.Core
             }
 
             Log.Info("Starting simulation");
-            CoreProxy.Run(stepsToRun);
+            CoreProxy.RunAsync(stepsToRun);
         }
 
         public async Task PauseSimulationAsync()
@@ -259,7 +259,7 @@ namespace GoodAI.Arnold.Core
             }
 
             Log.Info("Performing brain step");
-            CoreProxy.Run(1);
+            CoreProxy.RunAsync(1);
         }
 
         public void Dispose()

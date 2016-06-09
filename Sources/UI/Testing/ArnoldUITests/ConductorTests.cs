@@ -36,7 +36,8 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreLinkMock = new Mock<ICoreLink>();
 
             m_coreProxyMock = new Mock<ICoreProxy>();
-            m_coreProxyMock.Setup(coreProxy => coreProxy.Shutdown())
+            m_coreProxyMock.Setup(coreProxy => coreProxy.ShutdownAsync())
+                .Returns(Task.CompletedTask)
                 .Raises(coreProxy => coreProxy.StateChanged += null,
                     new StateChangedEventArgs(CoreState.Empty, CoreState.ShuttingDown));
 
@@ -107,12 +108,12 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreProxyMock.Verify(coreProxy => coreProxy.LoadBlueprintAsync(It.IsAny<string>()));
 
             m_conductor.StartSimulation();
-            m_coreProxyMock.Verify(coreProxy => coreProxy.Run(It.IsAny<uint>()));
+            m_coreProxyMock.Verify(coreProxy => coreProxy.RunAsync(It.IsAny<uint>()));
 
             await m_conductor.PauseSimulationAsync();
             m_coreProxyMock.Verify(coreProxy => coreProxy.PauseAsync());
 
-            m_coreProxyMock.Setup(coreProxy => coreProxy.Clear())
+            m_coreProxyMock.Setup(coreProxy => coreProxy.ClearAsync())
                 .Callback(() =>
                 {
                     m_coreProxyMock.Raise(coreProxy => coreProxy.StateChanged += null,
@@ -123,7 +124,7 @@ namespace GoodAI.Arnold.UI.Tests
             var waitEvent = new AutoResetEvent(false);
             m_conductor.StateChanged += (sender, args) => waitEvent.Set();
             m_conductor.KillSimulation();
-            m_coreProxyMock.Verify(coreProxy => coreProxy.Clear());
+            m_coreProxyMock.Verify(coreProxy => coreProxy.ClearAsync());
 
             // This checks that the CleanupSimulation method completed. The conductor must emit the Null state.
             Assert.True(waitEvent.WaitOne());

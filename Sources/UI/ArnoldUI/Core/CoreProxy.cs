@@ -49,7 +49,7 @@ namespace GoodAI.Arnold.Core
         /// of steps are performed, moves to state Paused.
         /// </summary>
         /// <param name="brainStepsToRun">The number of steps to run. 0 is infinity.</param>
-        void Run(uint brainStepsToRun = 0);
+        Task RunAsync(uint brainStepsToRun = 0);
 
         /// <summary>
         /// Pauses the running simulation. If the simulation is not running, this does nothing.
@@ -60,13 +60,13 @@ namespace GoodAI.Arnold.Core
         /// <summary>
         /// This moves the simulation from Running or Paused state to Empty.
         /// </summary>
-        void Clear();
+        Task ClearAsync();
 
         /// <summary>
         /// Shut down the core.
         /// The core should shut down after it confirms the ShuttingDown state.
         /// </summary>
-        void Shutdown();
+        Task ShutdownAsync();
 
         CoreState State { get; }
 
@@ -143,18 +143,18 @@ namespace GoodAI.Arnold.Core
             await SendCommandAsync(new CommandConversation(CommandType.Load, blueprint: blueprint));
         }
 
-        public void Clear()
+        public async Task ClearAsync()
         {
-            SendCommandAsync(new CommandConversation(CommandType.Clear));
+            await SendCommandAsync(new CommandConversation(CommandType.Clear));
         }
 
-        public void Shutdown()
+        public async Task ShutdownAsync()
         {
             // Prevent the state checking from being restarted after the shutdown completes.
-            SendCommandAsync(new CommandConversation(CommandType.Shutdown), stopCheckingCoreState: true);
+            await SendCommandAsync(new CommandConversation(CommandType.Shutdown), stopCheckingCoreState: true);
         }
 
-        public void Run(uint brainStepsToRun = 0)
+        public async Task RunAsync(uint brainStepsToRun = 0)
         {
             if (State != CoreState.Paused && State != CoreState.Running)
             {
@@ -165,7 +165,7 @@ namespace GoodAI.Arnold.Core
             if (State == CoreState.Running)
                 return;
 
-            SendCommandAsync(new CommandConversation(CommandType.Run, brainStepsToRun));
+            await SendCommandAsync(new CommandConversation(CommandType.Run, brainStepsToRun));
         }
 
         public async Task PauseAsync()

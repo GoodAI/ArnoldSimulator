@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Communication;
-using GoodAI.Arnold.Project;
 using Moq;
 using Xunit;
 
@@ -14,8 +13,7 @@ namespace GoodAI.Arnold.UI.Tests
 {
     public class CoreProxyTests
     {
-        private IModelUpdater m_modelUpdater;
-        public const int TimeoutMs = 100;
+        private readonly IModelUpdater m_modelUpdater;
 
         public CoreProxyTests()
         {
@@ -79,14 +77,6 @@ namespace GoodAI.Arnold.UI.Tests
             }
         }
 
-        private async Task WaitFor(AutoResetEvent waitEvent)
-        {
-            await Task.Factory.StartNew(() =>
-            {
-                Assert.True(waitEvent.WaitOne(TimeoutMs));
-            }).ConfigureAwait(false);
-        }
-
         [Fact]
         public async void StateMachineTransitionsCorrectly()
         {
@@ -95,41 +85,29 @@ namespace GoodAI.Arnold.UI.Tests
 
             var coreController = new CoreController(coreLink, keepaliveIntervalMs: 20);
 
-            var waitEvent = new AutoResetEvent(false);
-
             var coreProxy = new CoreProxy(coreController, m_modelUpdater);
             Assert.Equal(CoreState.Disconnected, coreProxy.State);
 
             // Simulate the core sending first state information.
             coreProxy.State = CoreState.Empty;
 
-            coreProxy.StateChanged += (sender, args) => waitEvent.Set();
-
             await coreProxy.LoadBlueprintAsync("{}");
-            await WaitFor(waitEvent);
             Assert.Equal(CoreState.Paused, coreProxy.State);
 
-            coreProxy.Run();
-            await WaitFor(waitEvent);
+            await coreProxy.RunAsync();
             Assert.Equal(CoreState.Running, coreProxy.State);
 
             await coreProxy.PauseAsync();
-            await WaitFor(waitEvent);
             Assert.Equal(CoreState.Paused, coreProxy.State);
 
-            coreProxy.Clear();
-            await WaitFor(waitEvent);
+            await coreProxy.ClearAsync();
             Assert.Equal(CoreState.Empty, coreProxy.State);
 
             // Test direct Clear from a Running state.
             await coreProxy.LoadBlueprintAsync("{}");
-            await WaitFor(waitEvent);
-            coreProxy.Run();
-            await WaitFor(waitEvent);
-            coreProxy.Clear();
-            await WaitFor(waitEvent);
-            coreProxy.Shutdown();
-            await WaitFor(waitEvent);
+            await coreProxy.RunAsync();
+            await coreProxy.ClearAsync();
+            await coreProxy.ShutdownAsync();
             Assert.Equal(CoreState.ShuttingDown, coreProxy.State);
         }
 
