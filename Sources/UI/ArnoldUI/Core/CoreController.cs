@@ -143,14 +143,14 @@ namespace GoodAI.Arnold.Core
 
             m_cancellationTokenSource.Cancel();
 
-            var retry = true; // Count the first try as a retry.
+            var retry = false;
 
             StateResponse result = null;
             while (true)
             {
                 try
                 {
-                    if (retry)
+                    if (retry || m_runningCommand == null)
                     {
                         retry = false;
                         m_runningCommand = m_coreLink.Request(conversation, timeoutMs);
