@@ -300,7 +300,7 @@ void Core::SendEmptyMessage(RequestId requestId)
     SendResponseToClient(requestId, builder);
 }
 
-void Core::SendErrorResponse(RequestId requestId, std::string message)
+void Core::SendErrorResponse(RequestId requestId, const std::string &message)
 {
     // TODO(Premek): More or replace with logging.
     CkPrintf(message.c_str());

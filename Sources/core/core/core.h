@@ -75,7 +75,7 @@ protected:
 
     bool TryLoadBrain(const std::string &blueprintString);
 
-    void SendErrorResponse(RequestId requestId, std::string message);
+    void SendErrorResponse(RequestId requestId, const std::string &message);
 
     flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
     flatbuffers::Offset<Communication::NeuronId> Core::CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const;
