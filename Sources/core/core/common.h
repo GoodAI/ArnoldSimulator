@@ -24,8 +24,8 @@ typedef uint32_t NeuronId;
 typedef uint32_t TerminalId;
 typedef uint64_t RequestId;
 
-#define REGION_INDEX_MASK 0xFFC00000
 #define REGION_INDEX_OFFSET 22
+#define REGION_INDEX_MASK (0xFFFFFFFF << REGION_INDEX_OFFSET)
 
 #define BRAIN_REGION_INDEX 0
 #define TEMP_REGION_INDEX (REGION_INDEX_MASK >> REGION_INDEX_OFFSET)

@@ -8,7 +8,7 @@
 
 TEST_CASE("NeuronId packing is correct", "[common]")
 {
-    const NeuronIndex neuronIndex = 500'000;
+    const NeuronIndex neuronIndex = 500000;
     const RegionIndex regionIndex = 400;
 
     REQUIRE(neuronIndex <= NEURON_INDEX_MAX);
