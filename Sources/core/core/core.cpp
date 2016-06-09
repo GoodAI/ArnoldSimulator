@@ -605,7 +605,7 @@ void Core::SendStubModel(RequestId requestId)
     mDummyTimestep++;
 }
 
-flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder& builder, Point3D point)
+flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D point)
 {
     return Communication::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
 }
@@ -634,7 +634,7 @@ void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep,
     BuildStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
 }
 
-void Core::BuildErrorResponse(std::string message, flatbuffers::FlatBufferBuilder &builder) const
+void Core::BuildErrorResponse(const std::string &message, flatbuffers::FlatBufferBuilder &builder) const
 {
     auto messageOffset = builder.CreateString(message);
     auto errorResponseOffest = Communication::CreateErrorResponse(builder, messageOffset);

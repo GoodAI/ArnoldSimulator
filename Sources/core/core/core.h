@@ -83,7 +83,7 @@ protected:
     void BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
 
-    void BuildErrorResponse(std::string message, flatbuffers::FlatBufferBuilder &builder) const;
+    void BuildErrorResponse(const std::string &message, flatbuffers::FlatBufferBuilder &builder) const;
 
     void BuildRegionOffsets(
         flatbuffers::FlatBufferBuilder &builder,
