@@ -131,7 +131,7 @@ void RandomBody::Simulate(
 
     // Here, world would react to motoric output, simulate next timestep and prepare sensoric input.
 
-    for (auto it = mActuatorsInfo.begin(); it != mActuatorsInfo.end(); ++it) {
+    for (auto it = mSensorsInfo.begin(); it != mSensorsInfo.end(); ++it) {
         size_t elemSize = it->second.first;
         size_t elemCount = it->second.second;
 
