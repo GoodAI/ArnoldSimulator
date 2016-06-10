@@ -7,6 +7,7 @@ using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Observation;
 using OpenTK;
 using Xunit;
 
@@ -79,6 +80,22 @@ namespace GoodAI.Arnold.UI.Tests
             var message = ErrorResponseBuilder.Build("foo");
 
             Assert.Equal("foo", message.GetResponse(new ErrorResponse()).Message);
+        }
+
+        [Fact]
+        public void WritesReadsObserverSetupRequest()
+        {
+            var definitions = new List<ObserverDefinition>
+            {
+                new ObserverDefinition(1, 2, "foofighter")
+            };
+
+            var message = ObserverSetupRequestBuilder.Build(definitions);
+
+            var requestedObserver = message.GetRequest(new ObserverSetupRequest()).GetObservers(0);
+            Assert.Equal((uint) 1, requestedObserver.GetNeuron(new NeuronId()).Neuron);
+            Assert.Equal((uint) 2, requestedObserver.GetNeuron(new NeuronId()).Region);
+            Assert.Equal("foofighter", requestedObserver.Type);
         }
     }
 }

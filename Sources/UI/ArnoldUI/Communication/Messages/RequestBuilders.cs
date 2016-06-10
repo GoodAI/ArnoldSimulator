@@ -5,6 +5,7 @@ using System.Text;
 using FlatBuffers;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Observation;
 
 namespace GoodAI.Arnold.Communication
 {
@@ -93,6 +94,29 @@ namespace GoodAI.Arnold.Communication
             Offset<GetModelRequest> requestOffset = GetModelRequest.EndGetModelRequest(builder);
 
             return RequestMessageBuilder.Build(builder, Request.GetModelRequest, requestOffset);
+        }
+    }
+
+    public static class ObserverSetupRequestBuilder
+    {
+        public static RequestMessage Build(IList<ObserverDefinition> definitions)
+        {
+            var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
+
+            var observerOffsets = new Offset<ObserverSetup>[definitions.Count()];
+            definitions.EachWithIndex((i, definition) =>
+            {
+                Offset<NeuronId> neuronId = NeuronId.CreateNeuronId(builder, definition.NeuronIndex,
+                    definition.RegionIndex);
+                StringOffset observerType = builder.CreateString(definition.Type);
+
+                observerOffsets[i] = ObserverSetup.CreateObserverSetup(builder, neuronId, observerType);
+            });
+
+            VectorOffset observersVectorOffset = ObserverSetupRequest.CreateObserversVector(builder, observerOffsets);
+            Offset<ObserverSetupRequest> requestOffset = ObserverSetupRequest.CreateObserverSetupRequest(builder, observersVectorOffset);
+
+            return RequestMessageBuilder.Build(builder, Request.ObserverSetupRequest, requestOffset);
         }
     }
 }
