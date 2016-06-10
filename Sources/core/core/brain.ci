@@ -41,10 +41,12 @@ module brain
         entry void SimulateRegionPrepareTopologyChange();
         entry [reductiontarget] void SimulateRegionPrepareTopologyChangeDone(size_t deletedNeurons);
         entry void SimulateRegionCommitTopologyChange();
-        entry [reductiontarget] void SimulateRegionCommitTopologyChangeDone(size_t triggeredNeurons);
+        entry [reductiontarget] void SimulateRegionCommitTopologyChangeDone();
         entry void SimulateAllTopologyChangesDelivered();
         entry void SimulateBodySimulate();
         entry void SimulateBodySimulateDone();
+        entry void SimulateRegionReportTriggeredNeurons();
+        entry [reductiontarget] void SimulateRegionReportTriggeredNeuronsDone(size_t triggeredNeurons);
         entry void SimulateRegionSimulate();
         entry [reductiontarget] void SimulateRegionSimulateDone(CkReductionMsg *msg);
         entry void SimulateAllSpikesDelivered();

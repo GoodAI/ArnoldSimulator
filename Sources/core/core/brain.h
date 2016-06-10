@@ -196,10 +196,12 @@ public:
     void SimulateRegionPrepareTopologyChange();
     void SimulateRegionPrepareTopologyChangeDone(size_t deletedNeurons);
     void SimulateRegionCommitTopologyChange();
-    void SimulateRegionCommitTopologyChangeDone(size_t triggeredNeurons);
+    void SimulateRegionCommitTopologyChangeDone();
     void SimulateAllTopologyChangesDelivered();
     void SimulateBodySimulate();
     void SimulateBodySimulateDone();
+    void SimulateRegionReportTriggeredNeurons();
+    void SimulateRegionReportTriggeredNeuronsDone(size_t triggeredNeurons);
     void SimulateRegionSimulate();
     void SimulateRegionSimulateDone(CkReductionMsg *msg);
     void SimulateAllSpikesDelivered();

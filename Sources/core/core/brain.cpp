@@ -1113,13 +1113,12 @@ void BrainBase::SimulateRegionCommitTopologyChange()
         gRegions.CommitTopologyChange();
     } else {
         this->SimulateAllTopologyChangesDelivered();
-        this->SimulateRegionCommitTopologyChangeDone(0);
+        this->SimulateRegionCommitTopologyChangeDone();
     }
 }
 
-void BrainBase::SimulateRegionCommitTopologyChangeDone(size_t triggeredNeurons)
+void BrainBase::SimulateRegionCommitTopologyChangeDone()
 {
-    mTriggeredNeurons = triggeredNeurons;
     mRegionCommitTopologyChangeDone = true;
     if (mRegionCommitTopologyChangeDone && mAllTopologyChangesDelivered) {
         this->SimulateBodySimulate();
@@ -1159,7 +1158,6 @@ void BrainBase::SimulateBodySimulate()
             gCompletionDetector.start_detection(1 + touchedRegions.size(), CkCallback(), CkCallback(),
                 CkCallback(CkIndex_BrainBase::SimulateBodySimulateDone(), thisProxy[thisIndex]), 0);
 
-            std::unordered_set<RemoteConnector> touchedConnectors;
             for (auto it = mTerminals.begin(); it != mTerminals.end(); ++it) {
 
                 Terminal &terminal = it->second;
@@ -1181,10 +1179,6 @@ void BrainBase::SimulateBodySimulate()
 
                 Direction direction = terminal.isSensor ? Direction::Forward : Direction::Backward;
                 for (auto itConn = terminal.connections.begin(); itConn != terminal.connections.end(); ++itConn) {
-                    if (touchedConnectors.find(*itConn) == touchedConnectors.end()) {
-                        touchedConnectors.insert(*itConn);
-                        mTriggeredNeurons += spikes.size();
-                    }
                     gCompletionDetector.ckLocalBranch()->produce();
                     gRegions[itConn->first].ReceiveSensoMotoricData(direction, itConn->second, spikes);
                 }
@@ -1203,6 +1197,21 @@ void BrainBase::SimulateBodySimulate()
 
 void BrainBase::SimulateBodySimulateDone()
 {
+    this->SimulateRegionReportTriggeredNeurons();
+}
+
+void BrainBase::SimulateRegionReportTriggeredNeurons()
+{
+    if (!mRegionIndices.empty()) {
+        gRegions.ReportTriggeredNeurons();
+    } else {
+        this->SimulateRegionReportTriggeredNeuronsDone(0);
+    }
+}
+
+void BrainBase::SimulateRegionReportTriggeredNeuronsDone(size_t triggeredNeurons)
+{
+    mTriggeredNeurons = triggeredNeurons;
     this->SimulateRegionSimulate();
 }
 

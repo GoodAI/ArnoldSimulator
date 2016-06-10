@@ -133,6 +133,7 @@ public:
     void Unlink();
     void PrepareTopologyChange(size_t brainStep, bool doProgress);
     void CommitTopologyChange();
+    void ReportTriggeredNeurons();
     void Simulate(SimulateMsg *msg);
 
     void NeuronFlipSpikeQueuesDone(CkReductionMsg *msg);

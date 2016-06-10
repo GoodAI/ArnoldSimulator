@@ -34,6 +34,7 @@ module region
         entry void Unlink();
         entry void PrepareTopologyChange(size_t brainStep, bool doProgress);
         entry void CommitTopologyChange();
+        entry void ReportTriggeredNeurons();
         entry void Simulate(SimulateMsg *msg);
 
         entry [reductiontarget] void NeuronFlipSpikeQueuesDone(CkReductionMsg *msg);

@@ -731,6 +731,7 @@ void RegionBase::ReceiveSensoMotoricData(Direction direction, const ConnectorNam
             gCompletionDetector.ckLocalBranch()->produce(data.size());
             for (size_t i = 0; i < data.size(); ++i) {
                 NeuronId neuronId = connector->neurons[i];
+                mNeuronsTriggered.insert(neuronId);
                 gNeurons(GetRegionIndex(neuronId), GetNeuronIndex(neuronId)).EnqueueSpike(direction, data[i]);
             }
         }
@@ -846,6 +847,7 @@ void RegionBase::CommitTopologyChange()
             for (auto it = deletedNeurons.begin(); it != deletedNeurons.end(); ++it) {
                 CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
                 deletedNeuronIndices.push_back(index);
+                mNeuronsTriggered.erase(*it);
             }
         }
         CProxySection_NeuronBase neuronSection = CProxySection_NeuronBase::ckNew(
@@ -857,6 +859,12 @@ void RegionBase::CommitTopologyChange()
     gCompletionDetector.ckLocalBranch()->done();
 
     CkCallback cb(CkReductionTarget(BrainBase, SimulateRegionCommitTopologyChangeDone), gBrain[0]);
+    contribute(cb);
+}
+
+void RegionBase::ReportTriggeredNeurons()
+{
+    CkCallback cb(CkReductionTarget(BrainBase, SimulateRegionReportTriggeredNeuronsDone), gBrain[0]);
     size_t triggeredNeuronCount = mNeuronsTriggered.size();
     contribute(sizeof(size_t), &triggeredNeuronCount, CkReduction::sum_ulong_long, cb);
 }
