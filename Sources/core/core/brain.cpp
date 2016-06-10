@@ -1164,7 +1164,8 @@ void BrainBase::SimulateBodySimulate()
                 if (terminal.data.empty()) continue;
 
                 size_t dataIdx = 0;
-                Spike::BrainSource spikes(terminal.neuronCount);
+                Spike::BrainSource spikes;
+                spikes.reserve(terminal.neuronCount);
                 for (size_t i = 0; i < terminal.neuronCount; ++i) {
                     Spike::Data spike;
                     Spike::Initialize(terminal.spikeType, terminal.firstNeuron + i, spike);
