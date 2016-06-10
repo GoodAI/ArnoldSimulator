@@ -1103,12 +1103,8 @@ void BrainBase::SimulateRegionPrepareTopologyChangeDone(size_t deletedNeurons)
 void BrainBase::SimulateRegionCommitTopologyChange()
 {
     if (!mRegionIndices.empty()) {
-        if (mDeletedNeurons > 0) {
-            gCompletionDetector.start_detection(mRegionIndices.size() + mDeletedNeurons, CkCallback(), CkCallback(),
-                CkCallback(CkIndex_BrainBase::SimulateAllTopologyChangesDelivered(), thisProxy[thisIndex]), 0);
-        } else {
-            this->SimulateAllTopologyChangesDelivered();
-        }
+        gCompletionDetector.start_detection(mRegionIndices.size() + mDeletedNeurons, CkCallback(), CkCallback(),
+            CkCallback(CkIndex_BrainBase::SimulateAllTopologyChangesDelivered(), thisProxy[thisIndex]), 0);
 
         gRegions.CommitTopologyChange();
     } else {

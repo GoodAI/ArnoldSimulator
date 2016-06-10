@@ -791,9 +791,11 @@ void RegionBase::CommitTopologyChange()
     if (!mNeuronAdditions.empty()) {
         gNeurons.beginInserting();
         for (auto it = mNeuronAdditions.begin(); it != mNeuronAdditions.end(); ++it) {
-            mNeuronIndices.insert(std::get<0>(*it));
-            mNeuronsTriggered.insert(std::get<0>(*it));
-            gNeurons(thisIndex, std::get<0>(*it)).insert(std::get<1>(*it), std::get<2>(*it));
+            NeuronId neuronId = std::get<0>(*it);
+            NeuronIndex neuronIdx = GetNeuronIndex(neuronId);
+            mNeuronIndices.insert(neuronIdx);
+            mNeuronsTriggered.insert(neuronId);
+            gNeurons(thisIndex, neuronIdx).insert(std::get<1>(*it), std::get<2>(*it));
         }
         gNeurons.doneInserting();
     }
