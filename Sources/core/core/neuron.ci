@@ -29,7 +29,7 @@ module neuron
         entry void EnqueueSpike(Direction direction, Spike::Data data);
 
         entry void Unlink();
-        entry void FlipSpikeQueues(EmptyMsg *msg);
-        entry void Simulate(SimulateMsg *msg);
+        entry [nokeep] void FlipSpikeQueues(EmptyMsg *msg);
+        entry [nokeep] void Simulate(SimulateMsg *msg);
     };   	
 };

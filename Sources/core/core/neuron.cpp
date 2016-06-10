@@ -500,8 +500,6 @@ void NeuronBase::FlipSpikeQueues(EmptyMsg *msg)
     CkCallback cb(CkReductionTarget(RegionBase, NeuronFlipSpikeQueuesDone), gRegions[thisIndex.x]);
     CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->contribute(
         0, nullptr, CkReduction::nop, mSectionInfo, cb);
-
-    delete msg;
 }
 
 void NeuronBase::Simulate(SimulateMsg *msg)
@@ -675,7 +673,6 @@ void NeuronBase::Simulate(SimulateMsg *msg)
 
     delete[] resultPtr;
     if (customContributionSize > 0) delete customContributionPtr;
-    delete msg;
 }
 
 ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params), 

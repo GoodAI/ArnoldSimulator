@@ -67,8 +67,7 @@ void *SimulateMsg::pack(SimulateMsg *msg)
     std::memcpy(cur, msg->roiBoxesLast.data(), sizeof(Box3D) * boxLastCnt);
     //cur += sizeof(Box3D) * boxLastCnt;
 
-    msg->~SimulateMsg();
-    CkFreeMsg(msg);
+    delete msg;
     return static_cast<void *>(buf);
 }
 

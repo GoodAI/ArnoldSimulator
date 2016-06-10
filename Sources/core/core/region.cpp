@@ -913,11 +913,13 @@ void RegionBase::Simulate(SimulateMsg *msg)
 
     CkVec<CkArrayIndex2D> sectionNeuronIndices;
     if ((mDoFullUpdate || !almostSameIntersection) && !mNeuronIndices.empty()) {
+        sectionNeuronIndices.reserve(mNeuronIndices.size());
         for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
             CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
             sectionNeuronIndices.push_back(index);
         }
     } else if (mDoProgress && !mNeuronsTriggered.empty()) {
+        sectionNeuronIndices.reserve(mNeuronsTriggered.size());
         for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
             CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
             sectionNeuronIndices.push_back(index);
@@ -926,7 +928,7 @@ void RegionBase::Simulate(SimulateMsg *msg)
 
     if (sectionNeuronIndices.size() > 0) {
         mNeuronSectionFilled = true;
-        CProxySection_NeuronBase mNeuronSection = CProxySection_NeuronBase::ckNew(
+        mNeuronSection = CProxySection_NeuronBase::ckNew(
             gNeurons.ckGetArrayID(), sectionNeuronIndices.getVec(), sectionNeuronIndices.size());
         mNeuronSection.ckSectionDelegate(CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch());
     }
@@ -937,8 +939,6 @@ void RegionBase::Simulate(SimulateMsg *msg)
     } else {
         NeuronFlipSpikeQueuesDone(nullptr);
     }
-
-    delete msg;
 }
 
 void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
