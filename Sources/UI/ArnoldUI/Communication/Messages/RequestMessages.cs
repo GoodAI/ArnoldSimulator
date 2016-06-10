@@ -21,6 +21,7 @@ public enum Request : byte
  CommandRequest = 1,
  GetStateRequest = 2,
  GetModelRequest = 3,
+ ObserverSetupRequest = 4,
 };
 
 public sealed class CommandRequest : Table {
@@ -159,6 +160,60 @@ public sealed class GetModelRequest : Table {
   public static Offset<GetModelRequest> EndGetModelRequest(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<GetModelRequest>(o);
+  }
+};
+
+public sealed class ObserverSetup : Table {
+  public static ObserverSetup GetRootAsObserverSetup(ByteBuffer _bb) { return GetRootAsObserverSetup(_bb, new ObserverSetup()); }
+  public static ObserverSetup GetRootAsObserverSetup(ByteBuffer _bb, ObserverSetup obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public ObserverSetup __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+  public NeuronId Neuron { get { return GetNeuron(new NeuronId()); } }
+  public NeuronId GetNeuron(NeuronId obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public string Type { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(6); }
+
+  public static Offset<ObserverSetup> CreateObserverSetup(FlatBufferBuilder builder,
+      Offset<NeuronId> neuronOffset = default(Offset<NeuronId>),
+      StringOffset typeOffset = default(StringOffset)) {
+    builder.StartObject(2);
+    ObserverSetup.AddType(builder, typeOffset);
+    ObserverSetup.AddNeuron(builder, neuronOffset);
+    return ObserverSetup.EndObserverSetup(builder);
+  }
+
+  public static void StartObserverSetup(FlatBufferBuilder builder) { builder.StartObject(2); }
+  public static void AddNeuron(FlatBufferBuilder builder, Offset<NeuronId> neuronOffset) { builder.AddOffset(0, neuronOffset.Value, 0); }
+  public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(1, typeOffset.Value, 0); }
+  public static Offset<ObserverSetup> EndObserverSetup(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<ObserverSetup>(o);
+  }
+};
+
+public sealed class ObserverSetupRequest : Table {
+  public static ObserverSetupRequest GetRootAsObserverSetupRequest(ByteBuffer _bb) { return GetRootAsObserverSetupRequest(_bb, new ObserverSetupRequest()); }
+  public static ObserverSetupRequest GetRootAsObserverSetupRequest(ByteBuffer _bb, ObserverSetupRequest obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public ObserverSetupRequest __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+  public ObserverSetup GetObservers(int j) { return GetObservers(new ObserverSetup(), j); }
+  public ObserverSetup GetObservers(ObserverSetup obj, int j) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int ObserversLength { get { int o = __offset(4); return o != 0 ? __vector_len(o) : 0; } }
+
+  public static Offset<ObserverSetupRequest> CreateObserverSetupRequest(FlatBufferBuilder builder,
+      VectorOffset observersOffset = default(VectorOffset)) {
+    builder.StartObject(1);
+    ObserverSetupRequest.AddObservers(builder, observersOffset);
+    return ObserverSetupRequest.EndObserverSetupRequest(builder);
+  }
+
+  public static void StartObserverSetupRequest(FlatBufferBuilder builder) { builder.StartObject(1); }
+  public static void AddObservers(FlatBufferBuilder builder, VectorOffset observersOffset) { builder.AddOffset(0, observersOffset.Value, 0); }
+  public static VectorOffset CreateObserversVector(FlatBufferBuilder builder, Offset<ObserverSetup>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
+  public static void StartObserversVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static Offset<ObserverSetupRequest> EndObserverSetupRequest(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<ObserverSetupRequest>(o);
   }
 };
 

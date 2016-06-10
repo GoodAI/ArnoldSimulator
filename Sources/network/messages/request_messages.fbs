@@ -1,5 +1,7 @@
 // Definitions for the Request messages
 
+include "common_messages.fbs";
+
 namespace GoodAI.Arnold.Communication;
 
 enum CommandType:byte {
@@ -30,15 +32,26 @@ table Box3D {
 table Filter {
 	boxes:[Box3D];
 }
+
 table GetModelRequest {
 	full:bool;
 	filter:Filter;
 }
 
+table ObserverSetup {
+	neuron:NeuronId;
+	type:string;
+}
+
+table ObserverSetupRequest {
+	observers:[ObserverSetup];
+}
+
 union Request {
 	CommandRequest,
 	GetStateRequest,
-	GetModelRequest
+	GetModelRequest,
+	ObserverSetupRequest,
 }
 
 table RequestMessage {

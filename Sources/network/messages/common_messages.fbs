@@ -1,0 +1,13 @@
+// Common items used in both requests and responses
+
+table Position {
+	x:float;
+	y:float;
+	z:float;
+}
+
+table NeuronId {
+	neuron:uint;
+	region:uint;
+}
+

@@ -1,7 +1,8 @@
 // Definitions for the Request messages
 
-namespace GoodAI.Arnold.Communication;
+include "common_messages.fbs";
 
+namespace GoodAI.Arnold.Communication;
 
 // Error response.
 
@@ -32,12 +33,6 @@ table StateResponse {
 
 
 // Model (topology and activity) response.
-
-table Position {
-	x:float;
-	y:float;
-	z:float;
-}
 
 table Region {
 	index:uint;
@@ -70,11 +65,6 @@ table Connection {
 	fromConnector:string;
 	toRegion:uint;
 	toConnector:string;
-}
-
-table NeuronId {
-	neuron:uint;
-	region:uint;
 }
 
 table Neuron {

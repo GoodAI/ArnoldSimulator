@@ -85,36 +85,6 @@ public sealed class StateResponse : Table {
   }
 };
 
-public sealed class Position : Table {
-  public static Position GetRootAsPosition(ByteBuffer _bb) { return GetRootAsPosition(_bb, new Position()); }
-  public static Position GetRootAsPosition(ByteBuffer _bb, Position obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
-  public Position __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
-
-  public float X { get { int o = __offset(4); return o != 0 ? bb.GetFloat(o + bb_pos) : (float)0; } }
-  public float Y { get { int o = __offset(6); return o != 0 ? bb.GetFloat(o + bb_pos) : (float)0; } }
-  public float Z { get { int o = __offset(8); return o != 0 ? bb.GetFloat(o + bb_pos) : (float)0; } }
-
-  public static Offset<Position> CreatePosition(FlatBufferBuilder builder,
-      float x = 0,
-      float y = 0,
-      float z = 0) {
-    builder.StartObject(3);
-    Position.AddZ(builder, z);
-    Position.AddY(builder, y);
-    Position.AddX(builder, x);
-    return Position.EndPosition(builder);
-  }
-
-  public static void StartPosition(FlatBufferBuilder builder) { builder.StartObject(3); }
-  public static void AddX(FlatBufferBuilder builder, float x) { builder.AddFloat(0, x, 0); }
-  public static void AddY(FlatBufferBuilder builder, float y) { builder.AddFloat(1, y, 0); }
-  public static void AddZ(FlatBufferBuilder builder, float z) { builder.AddFloat(2, z, 0); }
-  public static Offset<Position> EndPosition(FlatBufferBuilder builder) {
-    int o = builder.EndObject();
-    return new Offset<Position>(o);
-  }
-};
-
 public sealed class Region : Table {
   public static Region GetRootAsRegion(ByteBuffer _bb) { return GetRootAsRegion(_bb, new Region()); }
   public static Region GetRootAsRegion(ByteBuffer _bb, Region obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
@@ -256,32 +226,6 @@ public sealed class Connection : Table {
   public static Offset<Connection> EndConnection(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Connection>(o);
-  }
-};
-
-public sealed class NeuronId : Table {
-  public static NeuronId GetRootAsNeuronId(ByteBuffer _bb) { return GetRootAsNeuronId(_bb, new NeuronId()); }
-  public static NeuronId GetRootAsNeuronId(ByteBuffer _bb, NeuronId obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
-  public NeuronId __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
-
-  public uint Neuron { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public uint Region { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-
-  public static Offset<NeuronId> CreateNeuronId(FlatBufferBuilder builder,
-      uint neuron = 0,
-      uint region = 0) {
-    builder.StartObject(2);
-    NeuronId.AddRegion(builder, region);
-    NeuronId.AddNeuron(builder, neuron);
-    return NeuronId.EndNeuronId(builder);
-  }
-
-  public static void StartNeuronId(FlatBufferBuilder builder) { builder.StartObject(2); }
-  public static void AddNeuron(FlatBufferBuilder builder, uint neuron) { builder.AddUint(0, neuron, 0); }
-  public static void AddRegion(FlatBufferBuilder builder, uint region) { builder.AddUint(1, region, 0); }
-  public static Offset<NeuronId> EndNeuronId(FlatBufferBuilder builder) {
-    int o = builder.EndObject();
-    return new Offset<NeuronId>(o);
   }
 };
 

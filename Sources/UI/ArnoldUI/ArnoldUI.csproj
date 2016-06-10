@@ -91,6 +91,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Communication\Messages\CommonMessages.cs" />
+    <Compile Include="Communication\Messages\RequestMessages.cs" />
+    <Compile Include="Communication\Messages\ResponseMessages.cs" />
     <Compile Include="Composition\ModelUpdaterFactory.cs" />
     <Compile Include="Composition\PropertyInjectingFactory.cs" />
     <Compile Include="Core\Conductor.cs" />
@@ -139,9 +142,7 @@
     <Compile Include="Communication\GetModelConversation.cs" />
     <Compile Include="Communication\GetStateConversation.cs" />
     <Compile Include="Communication\Messages\RequestBuilders.cs" />
-    <Compile Include="Communication\Messages\Requests.cs" />
     <Compile Include="Communication\Messages\ResponseBuilders.cs" />
-    <Compile Include="Communication\Messages\Responses.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="Core\ModelDiffApplier.cs" />
     <Compile Include="Core\ModelProvider.cs" />
