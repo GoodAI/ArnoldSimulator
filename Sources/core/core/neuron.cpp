@@ -578,10 +578,6 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         }
     }
 
-    bool skipDynamicityReport =
-        mNeuronAdditions.empty() && mNeuronRemovals.empty() && mSynapseAdditions.empty() &&
-        mSynapseRemovals.empty() && mChildAdditions.empty() && mChildRemovals.empty();
-
     uint8_t *customContributionPtr = nullptr;
     size_t customContributionSize = 0;
 
@@ -606,6 +602,10 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     }
 
     gCompletionDetector.ckLocalBranch()->done();
+
+    bool skipDynamicityReport =
+        mNeuronAdditions.empty() && mNeuronRemovals.empty() && mSynapseAdditions.empty() &&
+        mSynapseRemovals.empty() && mChildAdditions.empty() && mChildRemovals.empty();
     
     uint8_t *resultPtr = nullptr;
     size_t resultSize = 0;
