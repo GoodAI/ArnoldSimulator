@@ -96,6 +96,7 @@
     <Compile Include="Core\Conductor.cs" />
     <Compile Include="Core\CoreProcess.cs" />
     <Compile Include="Composition\CoreProcessFactory.cs" />
+    <Compile Include="Core\LockingModelUpdater.cs" />
     <Compile Include="Core\ModelFilter.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />

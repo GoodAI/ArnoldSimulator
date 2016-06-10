@@ -25,7 +25,8 @@ namespace GoodAI.Arnold
 
         public IModelUpdater Create(ICoreLink coreLink, ICoreController coreController)
         {
-            return InjectProperties(new ModelUpdater(coreLink, coreController, m_modelDiffApplier));
+            //return InjectProperties(new ModelUpdater(coreLink, coreController, m_modelDiffApplier));
+            return InjectProperties(new LockingModelUpdater(coreLink, coreController, m_modelDiffApplier));
         }
     }
 }

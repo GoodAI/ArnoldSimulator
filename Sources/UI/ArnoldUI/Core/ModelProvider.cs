@@ -45,7 +45,8 @@ namespace GoodAI.Arnold.Core
             // NOTE: the idea was that we would get empty model when core state is Empty,
             // but in reality there is some time in the Empty state when the core is not really connected yet
             // You can comment out "m_conductor.CoreState == CoreState.Empty" to debug model retrieval error handling.
-            if (m_conductor.CoreState == CoreState.Disconnected || m_conductor.CoreState == CoreState.Empty)
+            //if (m_conductor.CoreState == CoreState.Disconnected || m_conductor.CoreState == CoreState.Empty)
+            if (m_conductor.CoreState == CoreState.Disconnected)
                 return null;
 
             try

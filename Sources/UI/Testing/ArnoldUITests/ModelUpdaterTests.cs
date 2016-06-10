@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FlatBuffers;
 using GoodAI.Arnold.Core;
@@ -14,11 +15,11 @@ using Xunit;
 
 namespace GoodAI.Arnold.UI.Tests
 {
-    public class ModelUpdaterTests
+    public abstract class ModelUpdaterTestBase
     {
-        class DummyModelResponseCoreLink : ICoreLink
+        protected class DummyModelResponseCoreLink : ICoreLink
         {
-            public GetModelRequest LastRequest { get; private set; }
+            public Filter Filter { get; set; }
 
             public Task<TResponse> Request<TRequest, TResponse>(IConversation<TRequest, TResponse> conversation, int timeoutMs) where TRequest : Table where TResponse : Table, new()
             {
@@ -26,7 +27,7 @@ namespace GoodAI.Arnold.UI.Tests
                 if (request == null)
                     throw new ArgumentException("Can only respond to a model request");
 
-                LastRequest = request;
+                Filter = Filter ?? request.Filter;
 
                 return Task<TResponse>.Factory.StartNew(() =>
                 {
@@ -38,7 +39,7 @@ namespace GoodAI.Arnold.UI.Tests
             }
         }
 
-        private class DummyModelDiffApplier : IModelDiffApplier
+        protected class DummyModelDiffApplier : IModelDiffApplier
         {
             public Dictionary<SimulationModel, int> DiffsApplied { get; } = new Dictionary<SimulationModel, int>();
 
@@ -51,36 +52,39 @@ namespace GoodAI.Arnold.UI.Tests
             }
         }
 
-        private readonly ModelUpdater m_modelUpdater;
-        private DummyModelDiffApplier m_modelDiffApplier;
-        private DummyModelResponseCoreLink m_coreLink;
+        private readonly IModelUpdater m_modelUpdater;
+        protected readonly DummyModelDiffApplier ModelDiffApplier;
+        protected readonly DummyModelResponseCoreLink CoreLink;
+        protected readonly ICoreController CoreController;
 
-        public ModelUpdaterTests()
+        public ModelUpdaterTestBase()
         {
             var coreControllerMock = new Mock<ICoreController>();
-            ICoreController coreController = coreControllerMock.Object;
+            CoreController = coreControllerMock.Object;
 
-            m_coreLink = new DummyModelResponseCoreLink();
+            CoreLink = new DummyModelResponseCoreLink();
             
-            m_modelDiffApplier = new DummyModelDiffApplier();
+            ModelDiffApplier = new DummyModelDiffApplier();
 
-            m_modelUpdater = new ModelUpdater(m_coreLink, coreController, m_modelDiffApplier);
+            m_modelUpdater = SetupModelUpdater();
         }
+
+        protected abstract IModelUpdater SetupModelUpdater();
 
         private SimulationModel WaitAndGetNewModel()
         {
-            const int timeoutMs = 100;
+            const int timeoutMs = 10000;
             var stopwatch = new Stopwatch();
 
-            SimulationModel third;
+            SimulationModel model;
             while (true)
             {
-                if ((third = m_modelUpdater.GetNewModel()) != null)
+                if ((model = m_modelUpdater.GetNewModel()) != null)
                     break;
 
                 Assert.True(stopwatch.ElapsedMilliseconds < timeoutMs);
             }
-            return third;
+            return model;
         }
 
         [Fact]
@@ -119,7 +123,7 @@ namespace GoodAI.Arnold.UI.Tests
                 model = WaitAndGetNewModel();
 
             // The model we currently have must have been updated exactly 100 times.
-            Assert.Equal(100, m_modelDiffApplier.DiffsApplied[model]);
+            Assert.Equal(100, ModelDiffApplier.DiffsApplied[model]);
 
             // Note: The hidden (buffered) model might have been updated 99, 100 or 101 times in this moment.
 
@@ -139,7 +143,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             m_modelUpdater.GetNewModel();
             WaitAndGetNewModel();
-            Assert.Null(m_coreLink.LastRequest.Filter);
+            Assert.Null(CoreLink.Filter);
 
             var modelFilter = new ModelFilter
             {
@@ -148,16 +152,32 @@ namespace GoodAI.Arnold.UI.Tests
 
             m_modelUpdater.Filter = modelFilter;
 
-            // This allows the updater to send next request with the new filter.
+            // This allows the updater to provide the already received modelResponse.
             WaitAndGetNewModel();
 
-            // Get the model that will already be filtered.
+            // Now the updater is sending the filter, wait for the filtered model.
             WaitAndGetNewModel();
 
             // Only now can we check if it was sent (there is a race condition before the second wait).
-            Assert.NotNull(m_coreLink.LastRequest.Filter);
+            Assert.NotNull(CoreLink.Filter);
 
             m_modelUpdater.Stop();
+        }
+    }
+
+    public class ModelUpdaterTests : ModelUpdaterTestBase
+    {
+        protected override IModelUpdater SetupModelUpdater()
+        {
+            return new ModelUpdater(CoreLink, CoreController, ModelDiffApplier);
+        }
+    }
+
+    public class LockingModelUpdaterTests : ModelUpdaterTestBase
+    {
+        protected override IModelUpdater SetupModelUpdater()
+        {
+            return new LockingModelUpdater(CoreLink, CoreController, ModelDiffApplier);
         }
     }
 }

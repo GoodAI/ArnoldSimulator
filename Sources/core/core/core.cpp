@@ -427,6 +427,9 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
+    SendStubModel(requestId);
+    return;
+
     if (!IsBrainLoaded())
         return;
 

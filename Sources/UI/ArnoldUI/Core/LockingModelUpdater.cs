@@ -11,15 +11,7 @@ using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Core
 {
-    public interface IModelUpdater : IDisposable
-    {
-        SimulationModel GetNewModel();
-        ModelFilter Filter { set; }
-        void Start();
-        void Stop();
-    }
-
-    public class ModelUpdater : IModelUpdater
+    public class LockingModelUpdater : IModelUpdater
     {
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
@@ -36,14 +28,14 @@ namespace GoodAI.Arnold.Core
         private bool m_isNewModelReady;
 
         // Double buffering.
-        private SimulationModel m_currentModel;
-        private SimulationModel m_previousModel;
+        private SimulationModel m_model;
 
         private CancellationTokenSource m_cancellation;
         private bool m_getFullModel;
 
         private bool m_filterChanged;
         private ModelFilter m_filter;
+        private ModelResponse m_modelResponse;
 
         public ModelFilter Filter
         {
@@ -54,7 +46,7 @@ namespace GoodAI.Arnold.Core
             }
         }
 
-        public ModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
+        public LockingModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
         {
             m_coreLink = coreLink;
             m_coreController = coreController;
@@ -73,8 +65,7 @@ namespace GoodAI.Arnold.Core
             m_getFullModel = true;
             Task task = RepeatGetModelAsync(m_cancellation);
 
-            m_currentModel = new SimulationModel();
-            m_previousModel = new SimulationModel();
+            m_model = new SimulationModel();
 
             // The empty model is what we have at the beginning.
             m_isNewModelReady = true;
@@ -109,11 +100,17 @@ namespace GoodAI.Arnold.Core
             if (m_isNewModelReady)
             {
                 m_isNewModelReady = false;
-                result = m_currentModel;
-                m_currentModel = m_previousModel;
-                m_previousModel = result;
 
-                // Allow the network thread to replace the model with whatever it has buffered.
+                // This is null the first time a model is requested.
+                if (m_modelResponse != null)
+                {
+                    ApplyModelDiffAsync(m_modelResponse).Wait();
+                    m_modelResponse = null;
+                }
+
+                result = m_model;
+
+                // Let the other thread know the model has been updated so it can replace m_modelResponse.
                 m_modelReadEvent.Set();
             }
 
@@ -147,7 +144,7 @@ namespace GoodAI.Arnold.Core
         {
             // TODO(HonzaS): If a command is in progress and visualization is fast enough, this actively waits (loops).
             // Can we replace this with another reset event?
-            ModelResponse modelResponse = null;
+            m_modelResponse = null;
             while (true)
             {
                 if (await WaitForEvent(m_requestModelEvent, cancellation) == WaitEventResult.Cancelled)
@@ -171,15 +168,8 @@ namespace GoodAI.Arnold.Core
                     if (await WaitForEvent(m_modelReadEvent, cancellation) == WaitEventResult.Cancelled)
                         return;
 
-                    // Wait for the previous diff to be applied to the new model (skip if this is the first request).
-                    if (modelResponse != null)
-                        await ApplyModelDiffAsync(modelResponse);
-
                     // Wait for a new diff from the core.
-                    modelResponse = await modelResponseTask;
-
-                    // Apply current diff to the new model.
-                    await ApplyModelDiffAsync(modelResponse);
+                    m_modelResponse = await modelResponseTask;
 
                     // Allow visualization to read current (updated) model.
                     m_isNewModelReady = true;
@@ -208,9 +198,9 @@ namespace GoodAI.Arnold.Core
             return Task.Factory.StartNew(() =>
             {
                 if (diff.IsFull)
-                    m_currentModel = new SimulationModel();
+                    m_model = new SimulationModel();
 
-                m_modelDiffApplier.ApplyModelDiff(m_currentModel, diff);
+                m_modelDiffApplier.ApplyModelDiff(m_model, diff);
             });
         }
 
