@@ -104,7 +104,7 @@ namespace GoodAI.Arnold.Core
                 // This is null the first time a model is requested.
                 if (m_modelResponse != null)
                 {
-                    ApplyModelDiffAsync(m_modelResponse).Wait();
+                    ApplyModelDiff(m_modelResponse);
                     m_modelResponse = null;
                 }
 
@@ -193,15 +193,12 @@ namespace GoodAI.Arnold.Core
             }
         }
 
-        private Task ApplyModelDiffAsync(ModelResponse diff)
+        private void ApplyModelDiff(ModelResponse diff)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                if (diff.IsFull)
-                    m_model = new SimulationModel();
+            if (diff.IsFull)
+                m_model = new SimulationModel();
 
-                m_modelDiffApplier.ApplyModelDiff(m_model, diff);
-            });
+            m_modelDiffApplier.ApplyModelDiff(m_model, diff);
         }
 
 
