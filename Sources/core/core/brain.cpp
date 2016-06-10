@@ -39,9 +39,19 @@ void *SimulateMsg::pack(SimulateMsg *msg)
 {
     size_t boxCnt = msg->roiBoxes.size();
     size_t boxLastCnt = msg->roiBoxesLast.size();
-    size_t size = (sizeof(bool) * 3) + (sizeof(size_t) * 3) + (sizeof(Box3D) * (boxCnt + boxLastCnt));
+    size_t size = (sizeof(CkSectionInfo) + sizeof(char) + sizeof(unsigned short) + 
+        sizeof(bool) * 3) + (sizeof(size_t) * 3) + (sizeof(Box3D) * (boxCnt + boxLastCnt));
     char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
+
+    std::memcpy(cur, &msg->_cookie, sizeof(CkSectionInfo));
+    cur += sizeof(CkSectionInfo);
+
+    std::memcpy(cur, &msg->magic, sizeof(char));
+    cur += sizeof(char);
+
+    std::memcpy(cur, &msg->ep, sizeof(unsigned short));
+    cur += sizeof(unsigned short);
 
     std::memcpy(cur, &msg->doUpdate, sizeof(bool));
     cur += sizeof(bool);
@@ -76,6 +86,15 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
     char* cur = static_cast<char *>(buf);
     SimulateMsg *msg = static_cast<SimulateMsg *>(CkAllocBuffer(buf, sizeof(SimulateMsg)));
     msg = new (static_cast<void *>(msg)) SimulateMsg();
+
+    std::memcpy(&msg->_cookie, cur, sizeof(CkSectionInfo));
+    cur += sizeof(CkSectionInfo);
+
+    std::memcpy(&msg->magic, cur, sizeof(char));
+    cur += sizeof(char);
+
+    std::memcpy(&msg->ep, cur, sizeof(unsigned short));
+    cur += sizeof(unsigned short);
 
     std::memcpy(&msg->doUpdate, cur, sizeof(bool));
     cur += sizeof(bool);
