@@ -78,6 +78,11 @@ table Synapse {
 	to:NeuronId;
 }
 
+table ObserverData {
+	observer:[Observer];
+	data:[byte];
+}
+
 table ModelResponse {
 	isFull:bool;
 
@@ -100,6 +105,9 @@ table ModelResponse {
 	addedSynapses:[Synapse];
 	spikedSynapses:[Synapse];
 	removedSynapses:[Synapse];
+
+	// Data for observers
+	observers:[ObserverData];
 }
 
 // End of model response.

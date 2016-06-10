@@ -36,22 +36,13 @@ table Filter {
 table GetModelRequest {
 	full:bool;
 	filter:Filter;
-}
-
-table ObserverSetup {
-	neuron:NeuronId;
-	type:string;
-}
-
-table ObserverSetupRequest {
-	observers:[ObserverSetup];
+	observers:[Observer];
 }
 
 union Request {
 	CommandRequest,
 	GetStateRequest,
-	GetModelRequest,
-	ObserverSetupRequest,
+	GetModelRequest
 }
 
 table RequestMessage {

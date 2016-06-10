@@ -40,8 +40,13 @@ namespace GoodAI.Arnold.UI.Tests
             {
                 Boxes = {new FilterBox(position, size)}
             };
+            
+            var observerDefinitions = new List<ObserverDefinition>
+            {
+                new ObserverDefinition(1, 2, "foofighter")
+            };
 
-            var message = GetModelRequestBuilder.Build(full: true, filter: filter);
+            var message = GetModelRequestBuilder.Build(full: true, filter: filter, observers: observerDefinitions);
 
             Assert.Equal(Request.GetModelRequest, message.RequestType);
 
@@ -49,6 +54,12 @@ namespace GoodAI.Arnold.UI.Tests
             Assert.True(getModelRequest.Full);
             Assert.Equal(position, getModelRequest.Filter.GetBoxes(0).Position());
             Assert.Equal(size, getModelRequest.Filter.GetBoxes(0).Size());
+
+            var requestedObserver = getModelRequest.GetObservers(0);
+            Assert.Equal((uint) 1, requestedObserver.NeuronId.Neuron);
+            Assert.Equal((uint) 2, requestedObserver.NeuronId.Region);
+            Assert.Equal("foofighter", requestedObserver.Type);
+
         }
 
         [Fact]
@@ -80,22 +91,6 @@ namespace GoodAI.Arnold.UI.Tests
             var message = ErrorResponseBuilder.Build("foo");
 
             Assert.Equal("foo", message.GetResponse(new ErrorResponse()).Message);
-        }
-
-        [Fact]
-        public void WritesReadsObserverSetupRequest()
-        {
-            var definitions = new List<ObserverDefinition>
-            {
-                new ObserverDefinition(1, 2, "foofighter")
-            };
-
-            var message = ObserverSetupRequestBuilder.Build(definitions);
-
-            var requestedObserver = message.GetRequest(new ObserverSetupRequest()).GetObservers(0);
-            Assert.Equal((uint) 1, requestedObserver.GetNeuron(new NeuronId()).Neuron);
-            Assert.Equal((uint) 2, requestedObserver.GetNeuron(new NeuronId()).Region);
-            Assert.Equal("foofighter", requestedObserver.Type);
         }
     }
 }

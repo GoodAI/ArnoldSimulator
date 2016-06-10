@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using FlatBuffers;
+using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Visualization.Models;
 using OpenTK;
 

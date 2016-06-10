@@ -59,3 +59,31 @@ public sealed class NeuronId : Table {
   }
 };
 
+public sealed class Observer : Table {
+  public static Observer GetRootAsObserver(ByteBuffer _bb) { return GetRootAsObserver(_bb, new Observer()); }
+  public static Observer GetRootAsObserver(ByteBuffer _bb, Observer obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public Observer __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+  public NeuronId NeuronId { get { return GetNeuronId(new NeuronId()); } }
+  public NeuronId GetNeuronId(NeuronId obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public string Type { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(6); }
+
+  public static Offset<Observer> CreateObserver(FlatBufferBuilder builder,
+      Offset<NeuronId> neuronIdOffset = default(Offset<NeuronId>),
+      StringOffset typeOffset = default(StringOffset)) {
+    builder.StartObject(2);
+    Observer.AddType(builder, typeOffset);
+    Observer.AddNeuronId(builder, neuronIdOffset);
+    return Observer.EndObserver(builder);
+  }
+
+  public static void StartObserver(FlatBufferBuilder builder) { builder.StartObject(2); }
+  public static void AddNeuronId(FlatBufferBuilder builder, Offset<NeuronId> neuronIdOffset) { builder.AddOffset(0, neuronIdOffset.Value, 0); }
+  public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(1, typeOffset.Value, 0); }
+  public static Offset<Observer> EndObserver(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<Observer>(o);
+  }
+};
+

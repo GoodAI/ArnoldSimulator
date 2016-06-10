@@ -64,7 +64,7 @@ namespace GoodAI.Arnold.Communication
 
     public static class GetModelRequestBuilder
     {
-        public static RequestMessage Build(bool full, ModelFilter filter = null)
+        public static RequestMessage Build(bool full, ModelFilter filter = null, IList<ObserverDefinition> observers = null)
         {
             var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
             Offset<Filter>? filterOffset = null;
@@ -87,36 +87,31 @@ namespace GoodAI.Arnold.Communication
                 filterOffset = Filter.CreateFilter(builder, boxesOffset);
             }
 
+            VectorOffset? observersVectorOffset = null;
+            if (observers != null)
+            {
+                var observerOffsets = new Offset<Observer>[observers.Count()];
+                observers.EachWithIndex((i, definition) =>
+                {
+                    Offset<NeuronId> neuronId = NeuronId.CreateNeuronId(builder, definition.NeuronIndex,
+                        definition.RegionIndex);
+                    StringOffset observerType = builder.CreateString(definition.Type);
+
+                    observerOffsets[i] = Observer.CreateObserver(builder, neuronId, observerType);
+                });
+
+                observersVectorOffset = GetModelRequest.CreateObserversVector(builder, observerOffsets);
+            }
+
             GetModelRequest.StartGetModelRequest(builder);
             GetModelRequest.AddFull(builder, full);
             if (filterOffset.HasValue)
                 GetModelRequest.AddFilter(builder, filterOffset.Value);
+            if (observersVectorOffset.HasValue)
+                GetModelRequest.AddObservers(builder, observersVectorOffset.Value);
             Offset<GetModelRequest> requestOffset = GetModelRequest.EndGetModelRequest(builder);
 
             return RequestMessageBuilder.Build(builder, Request.GetModelRequest, requestOffset);
-        }
-    }
-
-    public static class ObserverSetupRequestBuilder
-    {
-        public static RequestMessage Build(IList<ObserverDefinition> definitions)
-        {
-            var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
-
-            var observerOffsets = new Offset<ObserverSetup>[definitions.Count()];
-            definitions.EachWithIndex((i, definition) =>
-            {
-                Offset<NeuronId> neuronId = NeuronId.CreateNeuronId(builder, definition.NeuronIndex,
-                    definition.RegionIndex);
-                StringOffset observerType = builder.CreateString(definition.Type);
-
-                observerOffsets[i] = ObserverSetup.CreateObserverSetup(builder, neuronId, observerType);
-            });
-
-            VectorOffset observersVectorOffset = ObserverSetupRequest.CreateObserversVector(builder, observerOffsets);
-            Offset<ObserverSetupRequest> requestOffset = ObserverSetupRequest.CreateObserverSetupRequest(builder, observersVectorOffset);
-
-            return RequestMessageBuilder.Build(builder, Request.ObserverSetupRequest, requestOffset);
         }
     }
 }
