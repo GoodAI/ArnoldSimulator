@@ -302,7 +302,7 @@ void Core::SendEmptyMessage(RequestId requestId)
 
 void Core::SendErrorResponse(RequestId requestId, const std::string &message)
 {
-    // TODO(Premek): More or replace with logging.
+    // TODO(Premek): Move elsewhere or replace with logging.
     CkPrintf(message.c_str());
 
     flatbuffers::FlatBufferBuilder builder;
