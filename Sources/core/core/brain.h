@@ -150,8 +150,8 @@ public:
 
     const Terminals &GetTerminals() const;
     void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount, bool isSensor);
-    void ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
-    void DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
+    NeuronId ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
+    NeuronId DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
 
     RegionIndex RequestRegionAddition(const RegionName &name, const RegionType &type, const RegionParams &params);
     void RequestRegionRemoval(RegionIndex regIdx);

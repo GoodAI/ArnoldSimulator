@@ -692,22 +692,26 @@ void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType,
     }
 }
 
-void BrainBase::ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
+NeuronId BrainBase::ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
 {
     auto itTerm = mTerminalNameToId.find(name);
-    if (itTerm == mTerminalNameToId.end()) return;
+    if (itTerm == mTerminalNameToId.end()) return DELETED_NEURON_ID;
 
     Terminal &terminal = mTerminals.find(itTerm->second)->second;
     terminal.connections.insert(destination);
+
+    return terminal.firstNeuron;
 }
 
-void BrainBase::DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
+NeuronId BrainBase::DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination)
 {
     auto itTerm = mTerminalNameToId.find(name);
-    if (itTerm == mTerminalNameToId.end()) return;
+    if (itTerm == mTerminalNameToId.end()) return DELETED_NEURON_ID;
 
     Terminal &terminal = mTerminals.find(itTerm->second)->second;
     terminal.connections.erase(destination);
+
+    return terminal.firstNeuron;
 }
 
 RegionIndex BrainBase::RequestRegionAddition(const RegionName &name, const RegionType &type, const RegionParams &params)
@@ -985,14 +989,24 @@ void BrainBase::SimulateAddRemoveConnections()
                 std::get<0>(*it) == Direction::Forward ? std::get<4>(*it) : std::get<2>(*it));
             
             if (outIdx == BRAIN_REGION_INDEX) {
-                this->ConnectTerminal(outName, RemoteConnector(inIdx, inName));
+                NeuronId destFirstNeuron = this->ConnectTerminal(
+                    outName, RemoteConnector(inIdx, inName));
+                if (destFirstNeuron != DELETED_NEURON_ID) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gRegions[inIdx].ConnectInputNeurons(inName, destFirstNeuron);
+                }
             } else {
                 gCompletionDetector.ckLocalBranch()->produce();
-                gRegions[outIdx].ConnectOutput(outName, RemoteConnector(inIdx, inName), true);
+                gRegions[outIdx].ConnectOutput(outName, RemoteConnector(inIdx, inName), true); 
             }
 
             if (inIdx == BRAIN_REGION_INDEX) {
-                this->ConnectTerminal(inName, RemoteConnector(outIdx, outName));
+                NeuronId destFirstNeuron = this->ConnectTerminal(
+                    inName, RemoteConnector(outIdx, outName));
+                if (destFirstNeuron != DELETED_NEURON_ID) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gRegions[outIdx].ConnectOutputNeurons(outName, destFirstNeuron);
+                }
             } else {
                 gCompletionDetector.ckLocalBranch()->produce();
                 gRegions[inIdx].ConnectInput(inName, RemoteConnector(outIdx, outName), true);
@@ -1010,14 +1024,24 @@ void BrainBase::SimulateAddRemoveConnections()
                 std::get<0>(*it) == Direction::Forward ? std::get<4>(*it) : std::get<2>(*it));
 
             if (outIdx == BRAIN_REGION_INDEX) {
-                this->DisconnectTerminal(outName, RemoteConnector(inIdx, inName));
+                NeuronId destFirstNeuron = this->DisconnectTerminal(
+                    outName, RemoteConnector(inIdx, inName));
+                if (destFirstNeuron != DELETED_NEURON_ID) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gRegions[inIdx].DisconnectInputNeurons(inName, destFirstNeuron);
+                }
             } else {
                 gCompletionDetector.ckLocalBranch()->produce();
                 gRegions[outIdx].DisconnectOutput(outName, RemoteConnector(inIdx, inName), true);
             }
 
             if (inIdx == BRAIN_REGION_INDEX) {
-                this->DisconnectTerminal(inName, RemoteConnector(outIdx, outName));
+                NeuronId destFirstNeuron = this->DisconnectTerminal(
+                    inName, RemoteConnector(outIdx, outName));
+                if (destFirstNeuron != DELETED_NEURON_ID) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gRegions[outIdx].DisconnectOutputNeurons(outName, destFirstNeuron);
+                }
             } else {
                 gCompletionDetector.ckLocalBranch()->produce();
                 gRegions[inIdx].DisconnectInput(inName, RemoteConnector(outIdx, outName), true);

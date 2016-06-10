@@ -802,11 +802,16 @@ void RegionBase::CommitTopologyChange()
 
     if (!mSynapseAdditions.empty()) {
         for (auto it = mSynapseAdditions.begin(); it != mSynapseAdditions.end(); ++it) {
-            gCompletionDetector.ckLocalBranch()->produce(2);
             NeuronId from = std::get<0>(*it) == Direction::Forward ? std::get<1>(*it) : std::get<2>(*it);
             NeuronId to = std::get<0>(*it) == Direction::Forward ? std::get<2>(*it) : std::get<1>(*it);
-            gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).AddOutputSynapse(to, std::get<3>(*it));
-            gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).AddInputSynapse(from, std::get<3>(*it));
+            if (GetRegionIndex(from) != BRAIN_REGION_INDEX) {
+                gCompletionDetector.ckLocalBranch()->produce();
+                gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).AddOutputSynapse(to, std::get<3>(*it));
+            }
+            if (GetRegionIndex(to) != BRAIN_REGION_INDEX) {
+                gCompletionDetector.ckLocalBranch()->produce();
+                gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).AddInputSynapse(from, std::get<3>(*it));
+            }
         }
     }
 
@@ -832,11 +837,16 @@ void RegionBase::CommitTopologyChange()
 
     if (!mSynapseRemovals.empty()) {
         for (auto it = mSynapseRemovals.begin(); it != mSynapseRemovals.end(); ++it) {
-            gCompletionDetector.ckLocalBranch()->produce(2);
             NeuronId from = std::get<0>(*it) == Direction::Forward ? std::get<1>(*it) : std::get<2>(*it);
             NeuronId to = std::get<0>(*it) == Direction::Forward ? std::get<2>(*it) : std::get<1>(*it);
-            gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).RemoveOutputSynapse(to);
-            gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).RemoveInputSynapse(from);
+            if (GetRegionIndex(from) != BRAIN_REGION_INDEX) {
+                gCompletionDetector.ckLocalBranch()->produce();
+                gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).RemoveOutputSynapse(to);
+            }
+            if (GetRegionIndex(to) != BRAIN_REGION_INDEX) {
+                gCompletionDetector.ckLocalBranch()->produce();
+                gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).RemoveInputSynapse(from);
+            }
         }
     }
 
