@@ -39,7 +39,7 @@ void *SimulateMsg::pack(SimulateMsg *msg)
 {
     size_t boxCnt = msg->roiBoxes.size();
     size_t boxLastCnt = msg->roiBoxesLast.size();
-    size_t size = (sizeof(bool) * 3) + (sizeof(size_t) * 2) + (sizeof(Box3D) * (boxCnt + boxLastCnt));
+    size_t size = (sizeof(bool) * 3) + (sizeof(size_t) * 3) + (sizeof(Box3D) * (boxCnt + boxLastCnt));
     char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
 
@@ -67,7 +67,8 @@ void *SimulateMsg::pack(SimulateMsg *msg)
     std::memcpy(cur, msg->roiBoxesLast.data(), sizeof(Box3D) * boxLastCnt);
     //cur += sizeof(Box3D) * boxLastCnt;
 
-    delete msg;
+    msg->~SimulateMsg();
+    CkFreeMsg(msg);
     return static_cast<void *>(buf);
 }
 
@@ -76,10 +77,6 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
     char* cur = static_cast<char *>(buf);
     SimulateMsg *msg = static_cast<SimulateMsg *>(CkAllocBuffer(buf, sizeof(SimulateMsg)));
     msg = new (static_cast<void *>(msg)) SimulateMsg();
-
-    int num_nodes = 0;
-    memcpy(&num_nodes, cur, sizeof(int));
-    cur = cur + sizeof(int);
 
     std::memcpy(&msg->doUpdate, cur, sizeof(bool));
     cur += sizeof(bool);
