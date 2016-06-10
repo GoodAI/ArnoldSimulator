@@ -51,6 +51,12 @@
     <ClCompile Include="core_tests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="log.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="log_tests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -82,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="core_tests.h">
       <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
