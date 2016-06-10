@@ -79,8 +79,8 @@ table Synapse {
 }
 
 table ObserverData {
-	observer:[Observer];
-	data:[byte];
+	observer:Observer;
+	data:[ubyte];
 }
 
 table ModelResponse {

@@ -53,6 +53,18 @@ namespace GoodAI.Arnold.Communication
         }
     }
 
+    public class ObserverDataContainer
+    {
+        public ObserverDefinition Definition { get; }
+        public byte[] Data { get; }
+
+        public ObserverDataContainer(ObserverDefinition definition, byte[] data)
+        {
+            Definition = definition;
+            Data = data;
+        }
+    }
+
     public static class ModelResponseBuilder
     {
         public static ResponseMessage Build(
@@ -68,7 +80,8 @@ namespace GoodAI.Arnold.Communication
             IList<NeuronModel> removedNeurons = null,
             IList<SynapseModel> addedSynapses = null,
             IList<SynapseModel> spikedSynapses = null,
-            IList<SynapseModel> removedSynapses = null)
+            IList<SynapseModel> removedSynapses = null,
+            IList<ObserverDataContainer> observers = null)
         {
             var builder = new FlatBufferBuilder(ResponseMessageBuilder.BufferInitialSize);
 
@@ -89,6 +102,8 @@ namespace GoodAI.Arnold.Communication
             VectorOffset? addedSynapsesVectorOffset = BuildAddedSynapses(addedSynapses, builder);
             VectorOffset? spikedSynapsesVectorOffset = BuildSpikedSynapses(spikedSynapses, builder);
             VectorOffset? removedSynapsesVectorOffset = BuildRemovedSynapses(removedSynapses, builder);
+
+            VectorOffset? observersVectorOffset = BuildObservers(observers, builder);
 
             ModelResponse.StartModelResponse(builder);
 
@@ -122,6 +137,9 @@ namespace GoodAI.Arnold.Communication
                 ModelResponse.AddSpikedSynapses(builder, spikedSynapsesVectorOffset.Value);
             if (removedSynapsesVectorOffset.HasValue)
                 ModelResponse.AddRemovedSynapses(builder, removedSynapsesVectorOffset.Value);
+
+            if (observersVectorOffset.HasValue)
+                ModelResponse.AddObservers(builder, observersVectorOffset.Value);
 
             return ResponseMessageBuilder.Build(builder, Response.ModelResponse, ModelResponse.EndModelResponse(builder));
         }
@@ -332,6 +350,28 @@ namespace GoodAI.Arnold.Communication
                     return Synapse.CreateSynapse(builder, fromNeuronId, toNeuronId);
                 });
             return addedSynapsesOffsets;
+        }
+
+        private static VectorOffset? BuildObservers(IList<ObserverDataContainer> observers, FlatBufferBuilder builder)
+        {
+            Offset<ObserverData>[] observersOffsets = BuildOffsets(observers,
+                observer =>
+                {
+                    var neuronId = NeuronId.CreateNeuronId(builder, observer.Definition.NeuronIndex,
+                        observer.Definition.RegionIndex);
+                    var observerType = builder.CreateString(observer.Definition.Type);
+
+                    var observerOffset = Observer.CreateObserver(builder, neuronId, observerType);
+
+                    var dataOffset = ObserverData.CreateDataVector(builder, observer.Data);
+
+                    return ObserverData.CreateObserverData(builder, observerOffset, dataOffset);
+                });
+
+            if (observersOffsets == null)
+                return null;
+
+            return ModelResponse.CreateObserversVector(builder, observersOffsets);
         }
 
         private static Offset<TMessageEntity>[] BuildOffsets<TModel, TMessageEntity>(IList<TModel> models,

@@ -76,13 +76,22 @@ namespace GoodAI.Arnold.UI.Tests
             const string regionName = "test region name";
             const string regionType = "test region type";
 
-            var message =
-                ModelResponseBuilder.Build(new List<RegionModel>
-                {
-                    new RegionModel(1, regionName, regionType, new Vector3(10, 20, 30), new Vector3(40, 30, 20))
-                });
+            var observer = new ObserverDefinition(1, 2, "foo");
+            var data = new byte[] {1, 2, 3};
 
-            Assert.Equal(regionName, message.GetResponse(new ModelResponse()).GetAddedRegions(0).Name);
+            var observerData = new ObserverDataContainer(observer, data);
+
+            var addedRegions = new List<RegionModel>
+            {
+                new RegionModel(1, regionName, regionType, new Vector3(10, 20, 30), new Vector3(40, 30, 20))
+            };
+            var message = ModelResponseBuilder.Build(addedRegions: addedRegions,
+                observers: new List<ObserverDataContainer> {observerData});
+
+            ModelResponse modelResponse = message.GetResponse(new ModelResponse());
+            Assert.Equal(regionName, modelResponse.GetAddedRegions(0).Name);
+            Assert.Equal(observer.Type, modelResponse.GetObservers(0).Observer.Type);
+            Assert.Equal(data[0], modelResponse.GetObservers(0).GetData(0));
         }
 
         [Fact]

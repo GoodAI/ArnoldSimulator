@@ -295,15 +295,14 @@ public sealed class ObserverData : Table {
   public static ObserverData GetRootAsObserverData(ByteBuffer _bb, ObserverData obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public ObserverData __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public Observer GetObserver(int j) { return GetObserver(new Observer(), j); }
-  public Observer GetObserver(Observer obj, int j) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int ObserverLength { get { int o = __offset(4); return o != 0 ? __vector_len(o) : 0; } }
-  public sbyte GetData(int j) { int o = __offset(6); return o != 0 ? bb.GetSbyte(__vector(o) + j * 1) : (sbyte)0; }
+  public Observer Observer { get { return GetObserver(new Observer()); } }
+  public Observer GetObserver(Observer obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public byte GetData(int j) { int o = __offset(6); return o != 0 ? bb.Get(__vector(o) + j * 1) : (byte)0; }
   public int DataLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
   public ArraySegment<byte>? GetDataBytes() { return __vector_as_arraysegment(6); }
 
   public static Offset<ObserverData> CreateObserverData(FlatBufferBuilder builder,
-      VectorOffset observerOffset = default(VectorOffset),
+      Offset<Observer> observerOffset = default(Offset<Observer>),
       VectorOffset dataOffset = default(VectorOffset)) {
     builder.StartObject(2);
     ObserverData.AddData(builder, dataOffset);
@@ -312,11 +311,9 @@ public sealed class ObserverData : Table {
   }
 
   public static void StartObserverData(FlatBufferBuilder builder) { builder.StartObject(2); }
-  public static void AddObserver(FlatBufferBuilder builder, VectorOffset observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
-  public static VectorOffset CreateObserverVector(FlatBufferBuilder builder, Offset<Observer>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
-  public static void StartObserverVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static void AddObserver(FlatBufferBuilder builder, Offset<Observer> observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
   public static void AddData(FlatBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(1, dataOffset.Value, 0); }
-  public static VectorOffset CreateDataVector(FlatBufferBuilder builder, sbyte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddSbyte(data[i]); return builder.EndVector(); }
+  public static VectorOffset CreateDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
   public static void StartDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
   public static Offset<ObserverData> EndObserverData(FlatBufferBuilder builder) {
     int o = builder.EndObject();
