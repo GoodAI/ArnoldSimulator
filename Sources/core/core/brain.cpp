@@ -1404,8 +1404,6 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
 
             regionResult = regionResult->next();
         }
-
-        delete msg;
     }
 
     if (mDoFullViewportUpdate) {

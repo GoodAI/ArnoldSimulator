@@ -968,8 +968,6 @@ void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
     } else {
         NeuronSimulateDone(nullptr);
     }
-
-    if (msg) delete msg;
 }
 
 void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
@@ -1198,8 +1196,6 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
             neuronResult = neuronResult->next();
         }
-
-        delete msg;
     }
 
     uint8_t *customContribution = nullptr;
