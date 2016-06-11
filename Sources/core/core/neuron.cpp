@@ -623,7 +623,10 @@ void NeuronBase::Simulate(SimulateMsg *msg)
             NeuronId triggered = *it; *p | triggered;
         }
 
-        (*p)(customContributionPtr, customContributionSize);
+        *p | customContributionSize;
+        if (customContributionSize > 0) {
+            (*p)(customContributionPtr, customContributionSize);
+        }
 
         *p | skipDynamicityReport;
         if (!skipDynamicityReport) {
@@ -672,7 +675,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     mNeverSimulated = false;
 
     delete[] resultPtr;
-    if (customContributionSize > 0) delete customContributionPtr;
+    if (customContributionSize > 0) delete[] customContributionPtr;
 }
 
 ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params), 
@@ -828,7 +831,7 @@ size_t ThresholdNeuron::ContributeToRegion(uint8_t *&contribution)
     size_t outputSynapseCount = mBase.GetOutputSynapses().size();
 
     size_t size = (sizeof(size_t) * 4);
-    contribution = static_cast<uint8_t *>(std::malloc(size));
+    contribution = new uint8_t[size];
     uint8_t *cur = contribution;
 
     std::memcpy(cur, &mReceivedSpikeCount, sizeof(size_t));

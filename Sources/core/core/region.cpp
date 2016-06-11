@@ -1047,6 +1047,13 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
         }
     }
 
+    uint8_t *customContributionPtr = nullptr;
+    size_t customContributionSize = 0;
+
+    if (mDoProgress) {
+        customContributionSize = mRegion->ContributeToBrain(customContributionPtr);
+    }
+
     mNeuronAdditions.clear();
     mNeuronRemovals.clear();
     mSynapseAdditions.clear();
@@ -1072,13 +1079,15 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                 mNeuronsTriggered.insert(triggered);
             }
 
-            uint8_t *neuronContributionPtr = nullptr;
-            size_t neuronContributionSize = 0;
-            p(neuronContributionPtr, neuronContributionSize);
-            if (mRegion && neuronContributionSize > 0) {
-                mRegion->AcceptContributionFromNeuron(neuronId,
-                    neuronContributionPtr, neuronContributionSize);
-                delete neuronContributionPtr;
+            size_t neuronContributionSize; p | neuronContributionSize;
+            if (neuronContributionSize > 0) {
+                uint8_t *neuronContributionPtr = new uint8_t[neuronContributionSize];
+                p(neuronContributionPtr, neuronContributionSize);
+                if (mRegion) {
+                    mRegion->AcceptContributionFromNeuron(neuronId,
+                        neuronContributionPtr, neuronContributionSize);       
+                }
+                delete[] neuronContributionPtr;
             }
 
             bool skipDynamicityReport; p | skipDynamicityReport;
@@ -1198,13 +1207,6 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
         }
     }
 
-    uint8_t *customContribution = nullptr;
-    size_t customContributionSize = 0;
-
-    if (mDoProgress) {
-        customContributionSize = mRegion->ContributeToBrain(customContribution);
-    }
-
     uint8_t *resultPtr = nullptr;
     size_t resultSize = 0;
 
@@ -1218,7 +1220,10 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
         *p | mBrainSink;
 
-        (*p)(customContribution, customContributionSize);
+        *p | customContributionSize;
+        if (customContributionSize > 0) {
+            (*p)(customContributionPtr, customContributionSize);
+        }
 
         if (mDoUpdate) {
             if (mDoFullUpdate) {
@@ -1250,7 +1255,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
     mBrainSink.clear();
     delete[] resultPtr;
-    if (customContributionSize > 0) delete customContribution;
+    if (customContributionSize > 0) delete[] customContributionPtr;
 }
 
 const char *ThresholdRegion::Type = "ThresholdRegion";
@@ -1335,7 +1340,7 @@ void ThresholdRegion::AcceptContributionFromNeuron(
 size_t ThresholdRegion::ContributeToBrain(uint8_t *&contribution)
 {
     size_t size = (sizeof(size_t) * 7);
-    contribution = static_cast<uint8_t *>(std::malloc(size));
+    contribution = new uint8_t[size];
     uint8_t *cur = contribution;
 
     size_t addedNeurons = mBase.GetNeuronAdditions().size();

@@ -1294,13 +1294,15 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
             Spike::BrainSink brainSink; p | brainSink;
             ReceiveTerminalData(brainSink);
 
-            uint8_t *regionContributionPtr = nullptr;
-            size_t regionContributionSize = 0;
-            p(regionContributionPtr, regionContributionSize);
-            if (mBrain && regionContributionSize > 0) {
-                mBrain->AcceptContributionFromRegion(regionIndex,
-                    regionContributionPtr, regionContributionSize);
-                delete regionContributionPtr;
+            size_t regionContributionSize; p | regionContributionSize;
+            if (regionContributionSize > 0) {
+                uint8_t *regionContributionPtr = new uint8_t[regionContributionSize];
+                p(regionContributionPtr, regionContributionSize);
+                if (mBrain) {
+                    mBrain->AcceptContributionFromRegion(regionIndex,
+                        regionContributionPtr, regionContributionSize);
+                }
+                delete[] regionContributionPtr;
             }
 
             ViewportUpdate *accum = mDoFullViewportUpdate ?
