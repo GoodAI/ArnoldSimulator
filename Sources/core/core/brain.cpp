@@ -1535,6 +1535,9 @@ void ThresholdBrain::Control(size_t brainStep)
     CkPrintf("%u: +N %u, -N %u, +S %u, -S %u, +C %u, -C %u, TRG %u\n", 
         brainStep, mAddedNeurons, mRemovedNeurons, mAddedSynapses, mRemovedSynapses,
         mAddedChildLinks, mRemovedChildLinks, mTriggeredNeurons);
+
+    mAddedNeurons = 0; mRemovedNeurons = 0; mAddedSynapses = 0; mRemovedSynapses = 0;
+    mAddedChildLinks = 0; mRemovedChildLinks = 0; mTriggeredNeurons = 0;
 }
 
 void ThresholdBrain::AcceptContributionFromRegion(
