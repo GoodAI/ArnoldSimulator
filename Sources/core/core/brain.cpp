@@ -1170,6 +1170,9 @@ void BrainBase::SimulateAllTopologyChangesDelivered()
 
 void BrainBase::SimulateBodySimulate()
 {
+    mRegionCommitTopologyChangeDone = false;
+    mAllTopologyChangesDelivered = false;
+
     if (mBrainStep % mBrainStepsPerBodyStep == 0 && mDoSimulationProgress) {
 
         ++mBodyStep;
