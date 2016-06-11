@@ -502,6 +502,7 @@ void NeuronBase::FlipSpikeQueues(EmptyMsg *msg)
     std::swap(mForwardSpikesCurrent, mForwardSpikesNext);
     std::swap(mBackwardSpikesCurrent, mBackwardSpikesNext);
 
+    mSectionInfo = CkSectionInfo();
     CkGetSectionInfo(mSectionInfo, msg);
     CkCallback cb(CkReductionTarget(RegionBase, NeuronFlipSpikeQueuesDone), gRegions[thisIndex.x]);
     CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->contribute(
