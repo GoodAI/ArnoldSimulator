@@ -747,6 +747,12 @@ void RegionBase::EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &
     gCompletionDetector.ckLocalBranch()->consume();
 }
 
+void RegionBase::TriggerRemotelyTriggeredNeuron(NeuronId neuronId)
+{
+    mNeuronsTriggered.insert(neuronId);
+    gCompletionDetector.ckLocalBranch()->consume();
+}
+
 void RegionBase::SetBox(Box3D &box)
 {
     mBoxChanged = true;

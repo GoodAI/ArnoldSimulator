@@ -128,6 +128,7 @@ public:
 
     void ReceiveSensoMotoricData(Direction direction, const ConnectorName &connectorName, Spike::BrainSource &data);
     void EnqueueSensoMotoricSpike(NeuronId receiver, const Spike::Data &data);
+    void TriggerRemotelyTriggeredNeuron(NeuronId neuronId);
 
     void SetBox(Box3D &box);
     void Unlink();

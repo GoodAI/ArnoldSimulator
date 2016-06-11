@@ -29,6 +29,7 @@ module region
 
         entry void ReceiveSensoMotoricData(Direction direction, ConnectorName connectorName, Spike::BrainSource data);
         entry void EnqueueSensoMotoricSpike(NeuronId receiver, Spike::Data data);
+        entry void TriggerRemotelyTriggeredNeuron(NeuronId neuronId);
 
         entry void SetBox(Box3D box);
         entry void Unlink();

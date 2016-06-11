@@ -432,12 +432,18 @@ bool NeuronBase::AdaptPosition()
 
 void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
 {
-    gCompletionDetector.ckLocalBranch()->produce();
     RegionIndex destRegIdx = GetRegionIndex(receiver);
     if (destRegIdx == BRAIN_REGION_INDEX) {
+        gCompletionDetector.ckLocalBranch()->produce();
         gRegions[thisIndex.x].EnqueueSensoMotoricSpike(receiver, data);
     } else {
-        mNeuronsTriggered.insert(receiver);
+        if (destRegIdx != thisIndex.x) {
+            gCompletionDetector.ckLocalBranch()->produce();
+            gRegions[destRegIdx].TriggerRemotelyTriggeredNeuron(receiver);
+        } else {
+            mNeuronsTriggered.insert(receiver);
+        }
+        gCompletionDetector.ckLocalBranch()->produce();
         gNeurons(destRegIdx, GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
     }
 }
