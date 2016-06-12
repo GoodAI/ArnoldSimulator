@@ -808,6 +808,7 @@ void ThresholdNeuron::Control(size_t brainStep)
         }
     }
 
+    /*
     auto engine = Random::GetThreadEngine();
     size_t inputSynapseCount = mBase.GetInputSynapses().size();
 
@@ -830,6 +831,7 @@ void ThresholdNeuron::Control(size_t brainStep)
         NeuronId child = mBase.RequestNeuronAddition(GetType(), params.dump());
         mBase.AdoptAsChild(child, true);
     }
+    */
 }
 
 size_t ThresholdNeuron::ContributeToRegion(uint8_t *&contribution)

@@ -1287,6 +1287,7 @@ const char *ThresholdRegion::GetType() const
 
 void ThresholdRegion::Control(size_t brainStep)
 {
+    /*
     auto engine = Random::GetThreadEngine();
     
     if (!mConnectMore.empty()) {
@@ -1309,6 +1310,7 @@ void ThresholdRegion::Control(size_t brainStep)
     for (auto it = mPruneAway.begin(); it != mPruneAway.end(); ++it) {
         mBase.RequestNeuronRemoval(*it);
     }
+    */
 }
 
 void ThresholdRegion::AcceptContributionFromNeuron(
