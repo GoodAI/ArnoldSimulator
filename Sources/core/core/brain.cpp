@@ -1478,7 +1478,7 @@ void BrainBase::SimulateDone()
     
     if (mDoSimulationProgress) {
         ++mBrainStep;
-        if (mBrainStepsToRun != SIZE_MAX) {
+        if (mBrainStepsToRun != SIZE_MAX && mBrainStepsToRun != 0) {
             --mBrainStepsToRun;
         }
         if (mBrainStepsToRun > 0) {
