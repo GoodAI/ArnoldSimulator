@@ -178,6 +178,7 @@ void Core::Exit()
 
 void Core::DetectKeyPress()
 {
+    static size_t brainStepsPerBodyStep = DEFAULT_BRAIN_STEPS_PER_BODY_STEP;
     while (true) {
         char c = getchar();
         if (c == 'r') {
@@ -191,6 +192,26 @@ void Core::DetectKeyPress()
         } else if (c == 's') {
             if (IsBrainLoaded()) {
                 gBrain[0].RunSimulation(1, false);
+            }
+        } else if (c == 'i') {
+            if (IsBrainLoaded()) {
+                if (brainStepsPerBodyStep == 1) {
+                    brainStepsPerBodyStep = 5;
+                } else {
+                    brainStepsPerBodyStep += 5;
+                }
+                CkPrintf("SetBrainStepsPerBodyStep: %u\n", brainStepsPerBodyStep);
+                gBrain[0].SetBrainStepsPerBodyStep(10);
+            }
+        } else if (c == 'd') {
+            if (IsBrainLoaded()) {
+                if (brainStepsPerBodyStep <= 5) {
+                    brainStepsPerBodyStep = 1;
+                } else {
+                    brainStepsPerBodyStep -= 5;
+                }
+                CkPrintf("SetBrainStepsPerBodyStep: %u\n", brainStepsPerBodyStep);
+                gBrain[0].SetBrainStepsPerBodyStep(1);
             }
         } else if (c == 'q') {
             mIsShuttingDown = true;
