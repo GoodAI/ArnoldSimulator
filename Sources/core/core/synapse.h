@@ -30,7 +30,7 @@ public:
         Data();
         ~Data();
         Data(const Data &other);
-        Data(const Data &&other);
+        Data(Data &&other);
         Data &operator=(const Data &other);
         Data &operator=(Data &&other);
 

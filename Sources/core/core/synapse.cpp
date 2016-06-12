@@ -52,15 +52,30 @@ Synapse::Data::Data(const Data &other)
     type = other.type;
     bits8 = other.bits8;
     bits16 = other.bits16;
-    bits64 = other.bits64;
+
+    Editor *ed = Edit(*this);
+    if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
+        bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra());
+        std::memcpy(reinterpret_cast<unsigned char *>(bits64), 
+            reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes());
+    } else {
+        bits64 = other.bits64;
+    }
 }
 
-Synapse::Data::Data(const Data &&other)
+Synapse::Data::Data(Data &&other)
 {
     type = other.type;
     bits8 = other.bits8;
     bits16 = other.bits16;
-    bits64 = other.bits64;
+    
+    Editor *ed = Edit(*this);
+    if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
+        bits64 = other.bits64;
+        other.bits64 = 0;
+    } else {
+        bits64 = other.bits64;
+    }
 }
 
 Synapse::Data &Synapse::Data::operator=(const Data &other)
@@ -70,7 +85,15 @@ Synapse::Data &Synapse::Data::operator=(const Data &other)
         type = other.type;
         bits8 = other.bits8;
         bits16 = other.bits16;
-        bits64 = other.bits64;
+        
+        Editor *ed = Edit(*this);
+        if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
+            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra());
+            std::memcpy(reinterpret_cast<unsigned char *>(bits64),
+                reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes());
+        } else {
+            bits64 = other.bits64;
+        }
     }
     return *this;
 }
@@ -82,7 +105,14 @@ Synapse::Data &Synapse::Data::operator=(Data &&other)
         type = other.type;
         bits8 = other.bits8;
         bits16 = other.bits16;
-        bits64 = other.bits64;
+        
+        Editor *ed = Edit(*this);
+        if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
+            bits64 = other.bits64;
+            other.bits64 = 0;
+        } else {
+            bits64 = other.bits64;
+        }
     }
     return *this;
 }
@@ -106,7 +136,9 @@ void Synapse::Data::pup(PUP::er &p)
         if (p.isUnpacking()) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra());
         }
-        p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes());
+        if (bits64 != 0) {
+            p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes());
+        }
     } else {
         p | bits64;
     }
@@ -241,7 +273,7 @@ void ConductiveSynapse::Clone(const Synapse::Data &original, Synapse::Data &data
 {
     SetWeight(data, GetWeight(original));
     SetDelay(data, GetDelay(original));
-    SetConductance(data, GetConductance(data));
+    SetConductance(data, GetConductance(original));
 }
 
 float ConductiveSynapse::GetWeight(const Synapse::Data &data) const
@@ -310,14 +342,14 @@ void ProbabilisticSynapse::Clone(const Synapse::Data &original, Synapse::Data &d
     data.bits64 = reinterpret_cast<uintptr_t>(ext);
 
     SetMean(data, GetMean(original));
-    SetVariance(data, GetVariance(data));
+    SetVariance(data, GetVariance(original));
     SetWeight(data, GetWeight(original));
 }
 
 void ProbabilisticSynapse::Release(Synapse::Data &data)
 {
     DataExtended *ext = reinterpret_cast<DataExtended *>(data.bits64);
-    mAllocator.deallocate(ext, 1);
+    if (ext) mAllocator.deallocate(ext, 1);
 }
 
 double ProbabilisticSynapse::GetWeight(const Synapse::Data &data) const

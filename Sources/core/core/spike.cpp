@@ -50,6 +50,80 @@ Spike::Data::~Data()
     Spike::Release(*this);
 }
 
+Spike::Data::Data(const Data &other)
+{
+    type = other.type;
+    bits8 = other.bits8;
+    bits16 = other.bits16;
+    sender = other.sender;
+
+    Editor *ed = Edit(*this);
+    if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
+        bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
+        std::memcpy(reinterpret_cast<unsigned char *>(bits64),
+            reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
+    } else {
+        bits64 = other.bits64;
+    }
+}
+
+Spike::Data::Data(Data &&other)
+{
+    type = other.type;
+    bits8 = other.bits8;
+    bits16 = other.bits16;
+    sender = other.sender;
+
+    Editor *ed = Edit(*this);
+    if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
+        bits64 = other.bits64;
+        other.bits64 = 0;
+    } else {
+        bits64 = other.bits64;
+    }
+}
+
+Spike::Data &Spike::Data::operator=(const Data &other)
+{
+    if (this != &other)
+    {
+        type = other.type;
+        bits8 = other.bits8;
+        bits16 = other.bits16;
+        sender = other.sender;
+
+        Editor *ed = Edit(*this);
+        if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
+            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
+            std::memcpy(reinterpret_cast<unsigned char *>(bits64),
+                reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
+        } else {
+            bits64 = other.bits64;
+        }
+    }
+    return *this;
+}
+
+Spike::Data &Spike::Data::operator=(Data &&other)
+{
+    if (this != &other)
+    {
+        type = other.type;
+        bits8 = other.bits8;
+        bits16 = other.bits16;
+        sender = other.sender;
+
+        Editor *ed = Edit(*this);
+        if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
+            bits64 = other.bits64;
+            other.bits64 = 0;
+        } else {
+            bits64 = other.bits64;
+        }
+    }
+    return *this;
+}
+
 void Spike::Data::pup(PUP::er &p)
 {
     uint8_t temp;
@@ -71,7 +145,9 @@ void Spike::Data::pup(PUP::er &p)
         if (p.isUnpacking()) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         }
-        p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes(*this));
+        if (bits64 != 0) {
+            p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes(*this));
+        }
     } else {
         p | bits64;
     }
@@ -312,9 +388,11 @@ void FunctionalSpike::Initialize(Spike::Data &data)
 
 void FunctionalSpike::Release(Spike::Data &data)
 {
-    if (ExtraBytes(data) > 0) {
+    if (ExtraBytes(data) > 0 && data.bits64 != 0) {
         void *extra = reinterpret_cast<void *>(data.bits64);
         scalable_free(extra);
+        data.bits64 = 0;
+        data.bits16 = 0;
     }
 }
 
