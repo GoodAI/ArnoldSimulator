@@ -9,8 +9,9 @@
 #include <completion.h>
 #include <ckmulticast.h>
 
-#include "requests_generated.h"
-#include "responses_generated.h"
+#include "common_messages_generated.h"
+#include "request_messages_generated.h"
+#include "response_messages_generated.h"
 
 #include "common.h"
 

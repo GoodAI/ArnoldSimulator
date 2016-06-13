@@ -143,8 +143,8 @@ public sealed class GetModelRequest : Table {
   public bool Full { get { int o = __offset(4); return o != 0 ? 0!=bb.Get(o + bb_pos) : (bool)false; } }
   public Filter Filter { get { return GetFilter(new Filter()); } }
   public Filter GetFilter(Filter obj) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
-  public Observer GetObservers(int j) { return GetObservers(new Observer(), j); }
-  public Observer GetObservers(Observer obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public GoodAI.Arnold.Communication.Observer GetObservers(int j) { return GetObservers(new GoodAI.Arnold.Communication.Observer(), j); }
+  public GoodAI.Arnold.Communication.Observer GetObservers(GoodAI.Arnold.Communication.Observer obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int ObserversLength { get { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; } }
 
   public static Offset<GetModelRequest> CreateGetModelRequest(FlatBufferBuilder builder,
@@ -162,7 +162,7 @@ public sealed class GetModelRequest : Table {
   public static void AddFull(FlatBufferBuilder builder, bool full) { builder.AddBool(0, full, false); }
   public static void AddFilter(FlatBufferBuilder builder, Offset<Filter> filterOffset) { builder.AddOffset(1, filterOffset.Value, 0); }
   public static void AddObservers(FlatBufferBuilder builder, VectorOffset observersOffset) { builder.AddOffset(2, observersOffset.Value, 0); }
-  public static VectorOffset CreateObserversVector(FlatBufferBuilder builder, Offset<Observer>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
+  public static VectorOffset CreateObserversVector(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Observer>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartObserversVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static Offset<GetModelRequest> EndGetModelRequest(FlatBufferBuilder builder) {
     int o = builder.EndObject();

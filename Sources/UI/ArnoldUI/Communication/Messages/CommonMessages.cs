@@ -1,5 +1,8 @@
 // automatically generated, do not modify
 
+namespace GoodAI.Arnold.Communication
+{
+
 using System;
 using FlatBuffers;
 
@@ -87,3 +90,5 @@ public sealed class Observer : Table {
   }
 };
 
+
+}

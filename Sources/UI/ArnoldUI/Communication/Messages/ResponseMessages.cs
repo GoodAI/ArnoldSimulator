@@ -95,17 +95,17 @@ public sealed class Region : Table {
   public ArraySegment<byte>? GetNameBytes() { return __vector_as_arraysegment(6); }
   public string Type { get { int o = __offset(8); return o != 0 ? __string(o + bb_pos) : null; } }
   public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(8); }
-  public Position Position { get { return GetPosition(new Position()); } }
-  public Position GetPosition(Position obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
-  public Position Size { get { return GetSize(new Position()); } }
-  public Position GetSize(Position obj) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.Position Position { get { return GetPosition(new GoodAI.Arnold.Communication.Position()); } }
+  public GoodAI.Arnold.Communication.Position GetPosition(GoodAI.Arnold.Communication.Position obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.Position Size { get { return GetSize(new GoodAI.Arnold.Communication.Position()); } }
+  public GoodAI.Arnold.Communication.Position GetSize(GoodAI.Arnold.Communication.Position obj) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<Region> CreateRegion(FlatBufferBuilder builder,
       uint index = 0,
       StringOffset nameOffset = default(StringOffset),
       StringOffset typeOffset = default(StringOffset),
-      Offset<Position> positionOffset = default(Offset<Position>),
-      Offset<Position> sizeOffset = default(Offset<Position>)) {
+      Offset<GoodAI.Arnold.Communication.Position> positionOffset = default(Offset<GoodAI.Arnold.Communication.Position>),
+      Offset<GoodAI.Arnold.Communication.Position> sizeOffset = default(Offset<GoodAI.Arnold.Communication.Position>)) {
     builder.StartObject(5);
     Region.AddSize(builder, sizeOffset);
     Region.AddPosition(builder, positionOffset);
@@ -119,8 +119,8 @@ public sealed class Region : Table {
   public static void AddIndex(FlatBufferBuilder builder, uint index) { builder.AddUint(0, index, 0); }
   public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset.Value, 0); }
   public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(2, typeOffset.Value, 0); }
-  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(3, positionOffset.Value, 0); }
-  public static void AddSize(FlatBufferBuilder builder, Offset<Position> sizeOffset) { builder.AddOffset(4, sizeOffset.Value, 0); }
+  public static void AddPosition(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Position> positionOffset) { builder.AddOffset(3, positionOffset.Value, 0); }
+  public static void AddSize(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Position> sizeOffset) { builder.AddOffset(4, sizeOffset.Value, 0); }
   public static Offset<Region> EndRegion(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Region>(o);
@@ -234,17 +234,17 @@ public sealed class Neuron : Table {
   public static Neuron GetRootAsNeuron(ByteBuffer _bb, Neuron obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public Neuron __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public NeuronId Id { get { return GetId(new NeuronId()); } }
-  public NeuronId GetId(NeuronId obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.NeuronId Id { get { return GetId(new GoodAI.Arnold.Communication.NeuronId()); } }
+  public GoodAI.Arnold.Communication.NeuronId GetId(GoodAI.Arnold.Communication.NeuronId obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   public string Type { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
   public ArraySegment<byte>? GetTypeBytes() { return __vector_as_arraysegment(6); }
-  public Position Position { get { return GetPosition(new Position()); } }
-  public Position GetPosition(Position obj) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.Position Position { get { return GetPosition(new GoodAI.Arnold.Communication.Position()); } }
+  public GoodAI.Arnold.Communication.Position GetPosition(GoodAI.Arnold.Communication.Position obj) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<Neuron> CreateNeuron(FlatBufferBuilder builder,
-      Offset<NeuronId> idOffset = default(Offset<NeuronId>),
+      Offset<GoodAI.Arnold.Communication.NeuronId> idOffset = default(Offset<GoodAI.Arnold.Communication.NeuronId>),
       StringOffset typeOffset = default(StringOffset),
-      Offset<Position> positionOffset = default(Offset<Position>)) {
+      Offset<GoodAI.Arnold.Communication.Position> positionOffset = default(Offset<GoodAI.Arnold.Communication.Position>)) {
     builder.StartObject(3);
     Neuron.AddPosition(builder, positionOffset);
     Neuron.AddType(builder, typeOffset);
@@ -253,9 +253,9 @@ public sealed class Neuron : Table {
   }
 
   public static void StartNeuron(FlatBufferBuilder builder) { builder.StartObject(3); }
-  public static void AddId(FlatBufferBuilder builder, Offset<NeuronId> idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
+  public static void AddId(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.NeuronId> idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
   public static void AddType(FlatBufferBuilder builder, StringOffset typeOffset) { builder.AddOffset(1, typeOffset.Value, 0); }
-  public static void AddPosition(FlatBufferBuilder builder, Offset<Position> positionOffset) { builder.AddOffset(2, positionOffset.Value, 0); }
+  public static void AddPosition(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Position> positionOffset) { builder.AddOffset(2, positionOffset.Value, 0); }
   public static Offset<Neuron> EndNeuron(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Neuron>(o);
@@ -267,14 +267,14 @@ public sealed class Synapse : Table {
   public static Synapse GetRootAsSynapse(ByteBuffer _bb, Synapse obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public Synapse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public NeuronId From { get { return GetFrom(new NeuronId()); } }
-  public NeuronId GetFrom(NeuronId obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
-  public NeuronId To { get { return GetTo(new NeuronId()); } }
-  public NeuronId GetTo(NeuronId obj) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.NeuronId From { get { return GetFrom(new GoodAI.Arnold.Communication.NeuronId()); } }
+  public GoodAI.Arnold.Communication.NeuronId GetFrom(GoodAI.Arnold.Communication.NeuronId obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.NeuronId To { get { return GetTo(new GoodAI.Arnold.Communication.NeuronId()); } }
+  public GoodAI.Arnold.Communication.NeuronId GetTo(GoodAI.Arnold.Communication.NeuronId obj) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<Synapse> CreateSynapse(FlatBufferBuilder builder,
-      Offset<NeuronId> fromOffset = default(Offset<NeuronId>),
-      Offset<NeuronId> toOffset = default(Offset<NeuronId>)) {
+      Offset<GoodAI.Arnold.Communication.NeuronId> fromOffset = default(Offset<GoodAI.Arnold.Communication.NeuronId>),
+      Offset<GoodAI.Arnold.Communication.NeuronId> toOffset = default(Offset<GoodAI.Arnold.Communication.NeuronId>)) {
     builder.StartObject(2);
     Synapse.AddTo(builder, toOffset);
     Synapse.AddFrom(builder, fromOffset);
@@ -282,8 +282,8 @@ public sealed class Synapse : Table {
   }
 
   public static void StartSynapse(FlatBufferBuilder builder) { builder.StartObject(2); }
-  public static void AddFrom(FlatBufferBuilder builder, Offset<NeuronId> fromOffset) { builder.AddOffset(0, fromOffset.Value, 0); }
-  public static void AddTo(FlatBufferBuilder builder, Offset<NeuronId> toOffset) { builder.AddOffset(1, toOffset.Value, 0); }
+  public static void AddFrom(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.NeuronId> fromOffset) { builder.AddOffset(0, fromOffset.Value, 0); }
+  public static void AddTo(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.NeuronId> toOffset) { builder.AddOffset(1, toOffset.Value, 0); }
   public static Offset<Synapse> EndSynapse(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Synapse>(o);
@@ -295,14 +295,14 @@ public sealed class ObserverData : Table {
   public static ObserverData GetRootAsObserverData(ByteBuffer _bb, ObserverData obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public ObserverData __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public Observer Observer { get { return GetObserver(new Observer()); } }
-  public Observer GetObserver(Observer obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public GoodAI.Arnold.Communication.Observer Observer { get { return GetObserver(new GoodAI.Arnold.Communication.Observer()); } }
+  public GoodAI.Arnold.Communication.Observer GetObserver(GoodAI.Arnold.Communication.Observer obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   public byte GetData(int j) { int o = __offset(6); return o != 0 ? bb.Get(__vector(o) + j * 1) : (byte)0; }
   public int DataLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
   public ArraySegment<byte>? GetDataBytes() { return __vector_as_arraysegment(6); }
 
   public static Offset<ObserverData> CreateObserverData(FlatBufferBuilder builder,
-      Offset<Observer> observerOffset = default(Offset<Observer>),
+      Offset<GoodAI.Arnold.Communication.Observer> observerOffset = default(Offset<GoodAI.Arnold.Communication.Observer>),
       VectorOffset dataOffset = default(VectorOffset)) {
     builder.StartObject(2);
     ObserverData.AddData(builder, dataOffset);
@@ -311,7 +311,7 @@ public sealed class ObserverData : Table {
   }
 
   public static void StartObserverData(FlatBufferBuilder builder) { builder.StartObject(2); }
-  public static void AddObserver(FlatBufferBuilder builder, Offset<Observer> observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
+  public static void AddObserver(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Observer> observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
   public static void AddData(FlatBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(1, dataOffset.Value, 0); }
   public static VectorOffset CreateDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
   public static void StartDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
@@ -354,8 +354,8 @@ public sealed class ModelResponse : Table {
   public Neuron GetRepositionedNeurons(int j) { return GetRepositionedNeurons(new Neuron(), j); }
   public Neuron GetRepositionedNeurons(Neuron obj, int j) { int o = __offset(22); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int RepositionedNeuronsLength { get { int o = __offset(22); return o != 0 ? __vector_len(o) : 0; } }
-  public NeuronId GetRemovedNeurons(int j) { return GetRemovedNeurons(new NeuronId(), j); }
-  public NeuronId GetRemovedNeurons(NeuronId obj, int j) { int o = __offset(24); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public GoodAI.Arnold.Communication.NeuronId GetRemovedNeurons(int j) { return GetRemovedNeurons(new GoodAI.Arnold.Communication.NeuronId(), j); }
+  public GoodAI.Arnold.Communication.NeuronId GetRemovedNeurons(GoodAI.Arnold.Communication.NeuronId obj, int j) { int o = __offset(24); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int RemovedNeuronsLength { get { int o = __offset(24); return o != 0 ? __vector_len(o) : 0; } }
   public Synapse GetAddedSynapses(int j) { return GetAddedSynapses(new Synapse(), j); }
   public Synapse GetAddedSynapses(Synapse obj, int j) { int o = __offset(26); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
@@ -435,7 +435,7 @@ public sealed class ModelResponse : Table {
   public static VectorOffset CreateRepositionedNeuronsVector(FlatBufferBuilder builder, Offset<Neuron>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRepositionedNeuronsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddRemovedNeurons(FlatBufferBuilder builder, VectorOffset removedNeuronsOffset) { builder.AddOffset(10, removedNeuronsOffset.Value, 0); }
-  public static VectorOffset CreateRemovedNeuronsVector(FlatBufferBuilder builder, Offset<NeuronId>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
+  public static VectorOffset CreateRemovedNeuronsVector(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.NeuronId>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRemovedNeuronsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddAddedSynapses(FlatBufferBuilder builder, VectorOffset addedSynapsesOffset) { builder.AddOffset(11, addedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateAddedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }

@@ -1,5 +1,7 @@
 // Common items used in both requests and responses
 
+namespace GoodAI.Arnold.Communication;
+
 table Position {
 	x:float;
 	y:float;
