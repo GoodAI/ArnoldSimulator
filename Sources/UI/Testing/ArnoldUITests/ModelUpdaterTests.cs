@@ -57,7 +57,7 @@ namespace GoodAI.Arnold.UI.Tests
         protected readonly DummyModelResponseCoreLink CoreLink;
         protected readonly ICoreController CoreController;
 
-        public ModelUpdaterTestBase()
+        protected ModelUpdaterTestBase()
         {
             var coreControllerMock = new Mock<ICoreController>();
             CoreController = coreControllerMock.Object;
@@ -155,7 +155,8 @@ namespace GoodAI.Arnold.UI.Tests
             // This allows the updater to provide the already received modelResponse.
             WaitAndGetNewModel();
 
-            // Now the updater is sending the filter, wait for the filtered model.
+            // Now the updater is sending the filter, wait for the filtered model (we don't need it, but it guarantees the request to have been made).
+            WaitAndGetNewModel();
             WaitAndGetNewModel();
 
             // Only now can we check if it was sent (there is a race condition before the second wait).
