@@ -73,7 +73,7 @@ namespace GoodAI.Arnold.UI.Tests
 
         private SimulationModel WaitAndGetNewModel()
         {
-            const int timeoutMs = 10000;
+            const int timeoutMs = 100;
             var stopwatch = new Stopwatch();
 
             SimulationModel model;

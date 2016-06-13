@@ -63,12 +63,13 @@ namespace GoodAI.Arnold.Core
             m_cancellation = new CancellationTokenSource();
 
             m_getFullModel = true;
-            Task task = RepeatGetModelAsync(m_cancellation);
 
             m_model = new SimulationModel();
 
             // The empty model is what we have at the beginning.
             m_isNewModelReady = true;
+
+            Task task = RepeatGetModelAsync(m_cancellation);
         }
 
         public void Stop()
@@ -160,7 +161,6 @@ namespace GoodAI.Arnold.Core
                     m_filterChanged = false;
 
                     // Request a model diff from the core.
-                    // TODO(HonzaS): Unless we lost connection or there was an error, request only incremental model (full: false).
                     var modelResponseTask = m_coreLink.Request(new GetModelConversation(m_getFullModel, filterToSend), TimeoutMs).ConfigureAwait(false);
                     m_getFullModel = false;
 
