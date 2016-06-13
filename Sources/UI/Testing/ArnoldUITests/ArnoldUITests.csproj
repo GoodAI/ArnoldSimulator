@@ -84,6 +84,7 @@
     <Compile Include="MessageTests.cs" />
     <Compile Include="ModelBaseTests.cs" />
     <Compile Include="ModelDiffApplierTests.cs" />
+    <Compile Include="ModelTests.cs" />
     <Compile Include="ModelUpdaterTests.cs" />
     <Compile Include="PickRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

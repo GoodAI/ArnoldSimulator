@@ -24,6 +24,10 @@ namespace GoodAI.Arnold.Visualization.Models
             {
                 m_size = value;
                 HalfSize = Size/2;
+                InnerHalfSize = HalfSize - new Vector3(RegionMargin);
+                InnerSize = 2*InnerHalfSize;
+                foreach (NeuronModel neuron in Neurons)
+                    neuron.UpdatePosition();
             }
         }
 
@@ -33,6 +37,9 @@ namespace GoodAI.Arnold.Visualization.Models
         public CompositeModel<SynapseModel> Synapses { get; } = new CompositeModel<SynapseModel>();
 
         public Vector3 HalfSize { get; private set; }
+
+        public Vector3 InnerHalfSize { get; private set; }
+        public Vector3 InnerSize { get; private set; }
 
         public RegionModel(uint index, string name, string type, Vector3 position, Vector3 size)
         {
@@ -57,37 +64,6 @@ namespace GoodAI.Arnold.Visualization.Models
         public void AddNeuron(NeuronModel neuron) => Neurons[neuron.Index] = neuron;
 
         public void AddSynapse(SynapseModel synapse) => Synapses.AddChild(synapse);
-
-        public void AdjustSize()
-        {
-            float minX = 0;
-            float maxX = 0;
-
-            // The neurons spread into both Y and Z.
-            float minY = 0;
-            float maxY = 0;
-
-            float minZ = 0;
-            float maxZ = 0;
-
-            foreach (NeuronModel neuron in Neurons)
-            {
-                maxX = Math.Max(neuron.Position.X, maxX);
-                maxY = Math.Max(neuron.Position.Y, maxY);
-                maxZ = Math.Max(neuron.Position.Z, maxZ);
-
-                minX = Math.Min(neuron.Position.Z, minX);
-                minY = Math.Min(neuron.Position.Y, minY);
-                minZ = Math.Min(neuron.Position.Z, minZ);
-            }
-
-            Size = new Vector3
-            {
-                X = maxX - minX + 2*RegionMargin,
-                Y = maxY - minY + 2*RegionMargin,
-                Z = maxZ - minZ + 2*RegionMargin
-            };
-        }
 
         protected override void UpdateModel(float elapsedMs)
         {

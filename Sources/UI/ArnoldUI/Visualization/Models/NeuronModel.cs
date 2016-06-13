@@ -18,7 +18,7 @@ namespace GoodAI.Arnold.Visualization.Models
         /// <summary>
         /// The position relative to region in the 0;1 interval.
         /// </summary>
-        public Vector3 RelativePosition { get; set; }
+        public Vector3 ProportionalPosition { get; set; }
 
         public const float MinAlpha = 0.4f;
         public const float SpikeAlpha = 1f;
@@ -45,7 +45,7 @@ namespace GoodAI.Arnold.Visualization.Models
             Index = index;
             Type = type;
             RegionModel = regionModel;
-            RelativePosition = position;
+            ProportionalPosition = position;
 
             UpdatePosition();
 
@@ -145,11 +145,9 @@ namespace GoodAI.Arnold.Visualization.Models
             return t;
         }
 
-        private void UpdatePosition()
+        public void UpdatePosition()
         {
-            Position = RelativePosition*(RegionModel.Size - new Vector3(RegionModel.RegionMargin)*2);
-            Position -= RegionModel.HalfSize;
-            Position += new Vector3(RegionModel.RegionMargin);
+            Position = ProportionalPosition*RegionModel.InnerSize - RegionModel.InnerHalfSize;
         }
     }
 }
