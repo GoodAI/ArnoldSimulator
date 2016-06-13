@@ -6,8 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
+using GoodAI.Net.ConverseSharpFlatBuffers;
 
 namespace GoodAI.Arnold.Core
 {
@@ -40,6 +42,8 @@ namespace GoodAI.Arnold.Core
             ApplyAddedSynapses(model, diff);
             ApplySpikedSynapses(model, diff);
             ApplyRemovedSynapses(model, diff);
+
+            ApplyObservers(model, diff);
         }
 
         private static void ApplyAddedRegions(SimulationModel model, ModelResponse diff)
@@ -104,7 +108,7 @@ namespace GoodAI.Arnold.Core
                 });
             }
         }
-        
+
         private void ApplyRemovedConnectors(SimulationModel model, ModelResponse diff)
         {
             for (int i = 0; i < diff.RemovedConnectorsLength; i++)
@@ -394,6 +398,19 @@ namespace GoodAI.Arnold.Core
                 addedSynapse.To.Region,
                 addedSynapse.To.Neuron,
                 reason);
+        }
+
+        private void ApplyObservers(SimulationModel model, ModelResponse diff)
+        {
+            for (int i = 0; i < diff.ObserversLength; i++)
+            {
+                ObserverData observer = diff.GetObservers(i);
+
+                NeuronId neuronId = observer.Observer.NeuronId;
+                var definition = new ObserverDefinition(neuronId.Neuron, neuronId.Region, observer.Observer.Type);
+
+                model.Observers[definition] = observer.GetDataBytes()?.ToArray();
+            }
         }
     }
 }

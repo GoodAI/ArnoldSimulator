@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +11,12 @@ using GoodAI.Arnold.Forms;
 
 namespace GoodAI.Arnold.Observation
 {
-    public class BitmapObserver
+    public interface IObserver
+    {
+        byte[] Data { set; get; }
+    }
+
+    public class BitmapObserver : IObserver
     {
         public event EventHandler Updated;
 
@@ -22,6 +29,18 @@ namespace GoodAI.Arnold.Observation
             {
                 m_image = value;
                 Updated?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public byte[] Data
+        {
+            get { throw new NotImplementedException(); }
+            set
+            {
+                using (var stream = new MemoryStream(value))
+                {
+                    Image = new Bitmap(stream);
+                }
             }
         }
     }

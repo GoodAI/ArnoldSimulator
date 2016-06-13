@@ -568,6 +568,25 @@ void Core::SendStubModel(RequestId requestId)
         addedNeuronCount++;
     }
 
+    std::vector<flatbuffers::Offset<Communication::ObserverData>> observersOffsets;
+
+    if (mDummyTimestep > 0) {
+        auto neuronId = Communication::CreateNeuronId(builder, 1, 1);
+        auto observerType = builder.CreateString("foo");
+
+        auto observerOffset = Communication::CreateObserver(builder, neuronId, observerType);
+        std::vector<uint8_t> data;
+        data.push_back(1);
+        data.push_back(2);
+        data.push_back(3);
+        auto dataVectorOffset = builder.CreateVector(data);
+
+        auto observerDataOffset = Communication::CreateObserverData(builder, observerOffset, dataVectorOffset);
+        observersOffsets.push_back(observerDataOffset);
+    }
+
+    auto observersVector = builder.CreateVector(observersOffsets);
+
     auto addedNeuronsVector = builder.CreateVector(addedNeuronsOffsets);
 
     auto synapseAddInterval = 20;
@@ -620,6 +639,9 @@ void Core::SendStubModel(RequestId requestId)
 
     // Removed items.
     responseBuilder.add_removedRegions(removedRegionsVector);
+
+    // Observers.
+    responseBuilder.add_observers(observersVector);
 
     auto modelResponseOffset = responseBuilder.Finish();
 

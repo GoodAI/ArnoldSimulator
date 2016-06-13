@@ -5,6 +5,7 @@ using System.Text;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Arnold.Communication;
+using GoodAI.Arnold.Observation;
 using KellermanSoftware.CompareNetObjects;
 using OpenTK;
 using Xunit;
@@ -370,6 +371,19 @@ namespace GoodAI.Arnold.UI.Tests
             ApplyModelDiff(diff);
 
             Assert.Equal(neuron2.Position, neuron1.Position + synapse.TargetPosition);
+        }
+
+        [Fact]
+        public void LoadsObserverData()
+        {
+            var observerDefinition = new ObserverDefinition(1, 1, "foo");
+            var data = new byte[] {1, 2, 3};
+            var observer = new ObserverDataContainer(observerDefinition, data);
+
+            ResponseMessage diff = ModelResponseBuilder.Build(observers: new List<ObserverDataContainer> {observer});
+            ApplyModelDiff(diff);
+
+            Assert.Equal(data, m_model.Observers.Values.First());
         }
 
         private void SetupRegionWithSynapse(out RegionModel addedRegion, out SynapseModel addedSynapse)
