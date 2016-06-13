@@ -15,6 +15,11 @@ namespace GoodAI.Arnold.Visualization.Models
     {
         public static int NeuronTexture;
 
+        /// <summary>
+        /// The position relative to region in the 0;1 interval.
+        /// </summary>
+        public Vector3 RelativePosition { get; set; }
+
         public const float MinAlpha = 0.4f;
         public const float SpikeAlpha = 1f;
         public const float AlphaReductionPerMs = 1/1000f;
@@ -40,29 +45,11 @@ namespace GoodAI.Arnold.Visualization.Models
             Index = index;
             Type = type;
             RegionModel = regionModel;
-            Position = position;
+            RelativePosition = position;
+
+            UpdatePosition();
 
             Translucent = true;
-        }
-
-        // The neurons are indexed from 0 (not centered within the region).
-        // Therefore we need to translate them to the region's corner of origin.
-        protected override Matrix4 TranslationMatrix
-        {
-            get
-            {
-                Matrix4 baseMatrix = base.TranslationMatrix;
-
-                // TODO(HonzaS): Find a way to multiply the translation part without extracting it.
-                Vector3 regionInnerSize = (RegionModel.Size - 2*new Vector3(RegionModel.RegionMargin));
-                Vector3 translation = baseMatrix.ExtractTranslation() *
-                                  regionInnerSize;
-                return Matrix4.CreateTranslation(translation)
-                       * Matrix4.CreateTranslation(
-                           -RegionModel.HalfSize.X + RegionModel.RegionMargin,
-                           -RegionModel.HalfSize.Y + RegionModel.RegionMargin,
-                           -RegionModel.HalfSize.Z + RegionModel.RegionMargin);
-            }
         }
 
         // Neurons are rendered as billboards - they turn towards the camera.
@@ -156,6 +143,13 @@ namespace GoodAI.Arnold.Visualization.Models
                 t = 0;
 
             return t;
+        }
+
+        private void UpdatePosition()
+        {
+            Position = RelativePosition*(RegionModel.Size - new Vector3(RegionModel.RegionMargin)*2);
+            Position -= RegionModel.HalfSize;
+            Position += new Vector3(RegionModel.RegionMargin);
         }
     }
 }

@@ -558,9 +558,9 @@ void Core::SendStubModel(RequestId requestId)
         auto z = addedNeuronCount % layerSizeX;
 
         auto neuronPosition = Communication::CreatePosition(builder,
-            5.f * static_cast<float>(x),
-            2.f * static_cast<float>(y),
-            2.f * static_cast<float>(z));
+            static_cast<float>(x) / layerSizeX,
+            static_cast<float>(y) / layerSizeX,
+            static_cast<float>(z) / layerSizeX);
         auto neuronId = Communication::CreateNeuronId(builder, addedNeuronCount + 1, 1);
         auto neuronOffset = Communication::CreateNeuron(builder, neuronId, neuronType, neuronPosition);
 

@@ -61,21 +61,6 @@ namespace GoodAI.Arnold.Visualization.Models
         public NeuronModel FromNeuron { get; private set; }
         public NeuronModel ToNeuron { get; private set; }
 
-        protected override Matrix4 TranslationMatrix
-        {
-            // The neurons are indexed from 0 now (not centered within the region).
-            // Therefore we need to translate them ToNeuron the region's corner of origin.
-            get
-            {
-                var baseMatrix = base.TranslationMatrix;
-                return baseMatrix*
-                       Matrix4.CreateTranslation(
-                           -FromRegion.HalfSize.X + RegionModel.RegionMargin,
-                           -FromRegion.HalfSize.Y + RegionModel.RegionMargin,
-                           -FromRegion.HalfSize.Z + RegionModel.RegionMargin);
-            }
-        }
-
         protected override void RenderModel(float elapsedMs)
         {
             using (Blender.MultiplicativeBlender())
