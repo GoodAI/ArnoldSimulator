@@ -464,13 +464,13 @@ void Core::SendStubModel(RequestId requestId)
         auto regionName = builder.CreateString("testname");
         auto regionType = builder.CreateString("testtype");
         auto lowerBound = Communication::CreatePosition(builder, 30.0f, 00.0f, 10.0f);
-        auto upperBound = Communication::CreatePosition(builder, 82.0f, 22.0f, 32.0f);
+        auto upperBound = Communication::CreatePosition(builder, 50.0f, 20.0f, 20.0f);
         auto regionOffset = Communication::CreateRegion(builder, 1, regionName, regionType, lowerBound, upperBound);
 
         auto regionName2 = builder.CreateString("testname 2");
         auto regionType2 = builder.CreateString("testtype 2");
         auto lowerBound2 = Communication::CreatePosition(builder, 110.0f, 00.0f, 10.0f);
-        auto upperBound2 = Communication::CreatePosition(builder, 162.0f, 22.0f, 32.0f);
+        auto upperBound2 = Communication::CreatePosition(builder, 50.0f, 20.0f, 20.0f);
         auto regionOffset2 = Communication::CreateRegion(builder, 2, regionName2, regionType2, lowerBound2, upperBound2);
 
         addedRegionsOffsets.push_back(regionOffset);
@@ -483,7 +483,7 @@ void Core::SendStubModel(RequestId requestId)
         auto regionName3 = builder.CreateString("testname 3");
         auto regionType3 = builder.CreateString("testtype 3");
         auto lowerBound3 = Communication::CreatePosition(builder, 210.0f, 00.0f, 10.0f);
-        auto upperBound3 = Communication::CreatePosition(builder, 252.0f, 22.0f, 32.0f);
+        auto upperBound3 = Communication::CreatePosition(builder, 50.0f, 20.0f, 20.0f);
         auto regionOffset3 = Communication::CreateRegion(builder, 3, regionName3, regionType3, lowerBound3, upperBound3);
 
         addedRegionsOffsets.push_back(regionOffset3);
