@@ -3,10 +3,21 @@
 
 #include "log.h"
 
-bool ShouldPrintLogItem(LogLevel level)
+static LogLevel gCurrentLogLevel(LogLevel::Debug);
+
+void SetLogLevel(LogLevel level)
 {
-    // TODO(Premek): Implement the check;
-    return true;
+    gCurrentLogLevel = level;
+}
+
+LogLevel GetLogLevel()
+{
+    return gCurrentLogLevel;
+}
+
+bool internal_ShouldPrintLogItem(LogLevel level)
+{
+    return level <= gCurrentLogLevel;
 }
 
 static void WriteLogLevel(std::ostringstream &stream, LogLevel level)
@@ -29,10 +40,11 @@ static void WriteLogTimestamp(std::ostringstream &stream)
     time_t nowTimeT = std::chrono::system_clock::to_time_t(nowTimePoint);
     tm *localTime = localtime(&nowTimeT);
     
-    // NOTE: this prints one hour less even if localTime->tm_isdst == 1
+    // NOTE(Premek): This prints one hour less even if localTime->tm_isdst == 1
     stream << std::put_time(localTime, "%F %H:%M:%S");
 
-    std::chrono::system_clock::time_point timeRoundedToSeconds = std::chrono::system_clock::from_time_t(mktime(localTime));
+    std::chrono::system_clock::time_point timeRoundedToSeconds =
+        std::chrono::system_clock::from_time_t(mktime(localTime));
 
     long long milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
         nowTimePoint - timeRoundedToSeconds).count();
@@ -40,7 +52,7 @@ static void WriteLogTimestamp(std::ostringstream &stream)
     stream << '.' << std::setfill('0') << std::setw(3) << milliseconds << ' ';
 }
 
-void WriteLogItemPrefix(std::ostringstream &stream, LogLevel level)
+void internal_WriteLogItemPrefix(std::ostringstream &stream, LogLevel level)
 {
     WriteLogLevel(stream, level);
 

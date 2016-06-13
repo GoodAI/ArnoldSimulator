@@ -13,17 +13,22 @@ enum class LogLevel
     Verbose
 };
 
-bool ShouldPrintLogItem(LogLevel level);
+/// Set log level for the current process.
+void SetLogLevel(LogLevel level);
 
-void WriteLogItemPrefix(std::ostringstream &stream, LogLevel level);
+LogLevel GetLogLevel();
 
-//void Log(LogLevel level, const char * format, ...);
+/// Don't use. Intended for the macro definition.
+bool internal_ShouldPrintLogItem(LogLevel level);
+
+/// Don't use. Intended for the macro definition.
+void internal_WriteLogItemPrefix(std::ostringstream &stream, LogLevel level);
 
 #define Log(level, format, ...) \
     do { \
-        if (ShouldPrintLogItem(level)) { \
+        if (internal_ShouldPrintLogItem(level)) { \
             std::ostringstream stream; \
-            WriteLogItemPrefix(stream, (level)); \
+            internal_WriteLogItemPrefix(stream, (level)); \
             stream << (format); \
             CkPrintf(stream.str().c_str(), ##__VA_ARGS__); \
         } \
