@@ -16,25 +16,26 @@ namespace GoodAI.Arnold.Forms
 {
     public partial class ObserverForm : DockContent
     {
-        private readonly GreyscaleObserver m_observer;
+        public GreyscaleObserver Observer { get; }
 
         public ObserverForm(GreyscaleObserver observer)
         {
-            m_observer = observer;
+            Observer = observer;
             InitializeComponent();
 
-            m_observer.Updated += OnObserverUpdated;
+            Observer.Updated += OnObserverUpdated;
         }
 
         private void OnObserverUpdated(object sender, EventArgs e)
         {
-            this.Invoke(() => pictureBox.Image = m_observer.Image);
+            this.Invoke(() => pictureBox.Image = Observer.Image);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            m_observer.Updated -= OnObserverUpdated;
+            Observer.Updated -= OnObserverUpdated;
+            Observer.Dispose();
         }
     }
 

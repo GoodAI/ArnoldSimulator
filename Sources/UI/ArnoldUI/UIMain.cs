@@ -8,6 +8,7 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Project;
+using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 using Region = GoodAI.Arnold.Project.Region;
 
@@ -35,7 +36,7 @@ namespace ArnoldUI
 
         public IConductor Conductor { get; }
         public IDesigner Designer { get; }
-        public List<GreyscaleObserver> Observers { get; set; }
+        public ISet<ObserverForm> Observers { get; set; }
 
         public UIMain(IConductor conductor, IDesigner designer)
         {
@@ -48,14 +49,7 @@ namespace ArnoldUI
 
             Conductor = conductor;
             Designer = designer;
-            Observers = new List<GreyscaleObserver>();
-
-            // TODO(HonzaS): Stub below, remove.
-            var bitmapObserver = new GreyscaleObserver(new ObserverDefinition(1, 1, "foo"), Conductor.ModelProvider);
-            bitmapObserver.Log = ((Conductor)conductor).Log;
-            Observers.Add(bitmapObserver);
-            var observerForm = new ObserverForm(bitmapObserver);
-            observerForm.Show();
+            Observers = new HashSet<ObserverForm>();
         }
 
         public void VisualizationClosed()
@@ -114,6 +108,39 @@ namespace ArnoldUI
         public void PerformBrainStep()
         {
             Conductor.PerformBrainStep();
+        }
+
+        public void ToggleObserver(NeuronModel neuron)
+        {
+            const string observerType = "greyscale";
+            var definition = new ObserverDefinition(neuron.Index, neuron.RegionModel.Index, observerType);
+            if (neuron.Picked)
+                OpenObserver(definition);
+            else
+                CloseObserver(definition);
+        }
+
+        private void OpenObserver(ObserverDefinition definition)
+        {
+            // TODO(HonzaS): Factory + injection.
+            var observer = new GreyscaleObserver(definition, Conductor.ModelProvider);
+            observer.Log = Log;
+            var form = new ObserverForm(observer);
+            Observers.Add(form);
+            form.Show();
+        }
+
+        private void CloseObserver(ObserverDefinition definition)
+        {
+            ObserverForm form = Observers.FirstOrDefault(observerForm => Equals(observerForm.Observer.Definition, definition));
+            if (form == null)
+            {
+                Log.Warn("Observer with {@definition} not found, cannot close", definition);
+                return;
+            }
+
+            form.Close();
+            Observers.Remove(form);
         }
     }
 }

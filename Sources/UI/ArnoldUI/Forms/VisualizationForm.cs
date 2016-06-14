@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Visualization;
 using GoodAI.Arnold.Properties;
@@ -24,11 +25,11 @@ namespace GoodAI.Arnold.Forms
 
         private readonly Scene m_scene;
 
-        public VisualizationForm(IConductor conductor)
+        public VisualizationForm(UIMain uiMain)
         {
             InitializeComponent();
 
-            m_scene = new Scene(glControl, conductor);
+            m_scene = new Scene(glControl, uiMain);
         }
 
         // Resize the glControl

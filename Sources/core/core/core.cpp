@@ -572,7 +572,7 @@ void Core::SendStubModel(RequestId requestId)
 
     if (mDummyTimestep > 0) {
         auto neuronId = Communication::CreateNeuronId(builder, 1, 1);
-        auto observerType = builder.CreateString("foo");
+        auto observerType = builder.CreateString("greyscale");
 
         auto observerOffset = Communication::CreateObserver(builder, neuronId, observerType);
         std::vector<uint8_t> data;

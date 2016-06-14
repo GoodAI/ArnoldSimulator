@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Properties;
@@ -40,14 +41,16 @@ namespace GoodAI.Arnold.Visualization
         private float m_fps;
 
         private readonly ISet<NeuronModel> m_pickedNeurons = new HashSet<NeuronModel>();
+        private readonly UIMain m_uiMain;
         private readonly IConductor m_conductor;
 
         private SimulationModel m_simulationModel;
 
-        public Scene(GLControl glControl, IConductor conductor)
+        public Scene(GLControl glControl, UIMain uiMain)
         {
             m_control = glControl;
-            m_conductor = conductor;
+            m_uiMain = uiMain;
+            m_conductor = m_uiMain.Conductor;
             m_conductor.ModelProvider.ModelUpdated += OnModelUpdated;
 
             m_camera = new Camera
@@ -159,6 +162,8 @@ namespace GoodAI.Arnold.Visualization
                 m_pickedNeurons.Add(neuron);
             else
                 m_pickedNeurons.Remove(neuron);
+
+            m_uiMain.ToggleObserver(neuron);
         }
 
         private Vector3 ModelToScreenCoordinates(IModel model, out bool isBehindCamera)

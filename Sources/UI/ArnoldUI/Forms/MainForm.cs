@@ -101,7 +101,7 @@ namespace GoodAI.Arnold
         private void StartVisualization()
         {
             if (VisualizationForm == null || VisualizationForm.IsDisposed)
-                VisualizationForm = new VisualizationForm(m_uiMain.Conductor);
+                VisualizationForm = new VisualizationForm(m_uiMain);
 
             VisualizationForm.Show();
             VisualizationForm.FormClosed += VisualizationFormOnClosed;

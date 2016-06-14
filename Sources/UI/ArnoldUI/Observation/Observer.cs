@@ -14,17 +14,23 @@ using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Observation
 {
-    public class GreyscaleObserver : IDisposable
+    public interface IObserver : IDisposable
+    {
+        ObserverDefinition Definition { get; }
+    }
+
+    public class GreyscaleObserver : IObserver
     {
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
-        private readonly ObserverDefinition m_observerDefinition;
+        public ObserverDefinition Definition { get; }
+
         private readonly IModelProvider m_modelProvider;
 
         public GreyscaleObserver(ObserverDefinition observerDefinition, IModelProvider modelProvider)
         {
-            m_observerDefinition = observerDefinition;
+            Definition = observerDefinition;
             m_modelProvider = modelProvider;
             m_modelProvider.ModelUpdated += OnModelUpdated;
         }
@@ -35,9 +41,9 @@ namespace GoodAI.Arnold.Observation
                 return;
 
             byte[] data;
-            if (!e.Model.Observers.TryGetValue(m_observerDefinition, out data))
+            if (!e.Model.Observers.TryGetValue(Definition, out data))
             {
-                Log.Warn("Observer with {@observerDefinition} is missing data from Core", m_observerDefinition);
+                Log.Warn("Observer with {@observerDefinition} is missing data from Core", Definition);
                 return;
             }
 
@@ -75,7 +81,7 @@ namespace GoodAI.Arnold.Observation
             }
             catch (Exception ex)
             {
-                Log.Warn(ex, "Observer with {@observerDefinition} received invalid data from Core", m_observerDefinition);
+                Log.Warn(ex, "Observer with {@observerDefinition} received invalid data from Core", Definition);
             }
         }
 
