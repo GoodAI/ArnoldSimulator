@@ -61,6 +61,10 @@
       <HintPath>..\packages\AdamsLair.OpenTK.GLControl.1.1.6.0\lib\net20\OpenTK.GLControl.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ScintillaNET, Version=3.5.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\jacobslusser.ScintillaNET.3.5.6\lib\net40\ScintillaNET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.1.5.14\lib\net45\Serilog.dll</HintPath>
       <Private>True</Private>

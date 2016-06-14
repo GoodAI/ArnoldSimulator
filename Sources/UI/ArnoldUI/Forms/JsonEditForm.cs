@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Properties;
+using ScintillaNET;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace GoodAI.Arnold.Forms
@@ -26,6 +27,27 @@ namespace GoodAI.Arnold.Forms
 
             content.TextChanged += OnTextChanged;
             content.Text = m_defaultBlueprint;
+
+            content.Lexer = Lexer.Cpp;
+
+            content.StyleResetDefault();
+            content.Styles[Style.Default].Font = "Consolas";
+            content.Styles[Style.Default].Size = 10;
+            content.StyleClearAll();
+
+            content.Styles[Style.Cpp.Default].ForeColor = Color.Silver;
+            content.Styles[Style.Cpp.Comment].ForeColor = Color.Green;
+            content.Styles[Style.Cpp.CommentLine].ForeColor = Color.Green;
+            content.Styles[Style.Cpp.Number].ForeColor = Color.Teal;
+            content.Styles[Style.Cpp.Word].ForeColor = Color.Blue;
+            content.Styles[Style.Cpp.String].ForeColor = Color.Blue;
+            content.Styles[Style.Cpp.Character].ForeColor = Color.Maroon;
+            content.Styles[Style.Cpp.Preprocessor].ForeColor = Color.Maroon;
+            content.Styles[Style.Cpp.Operator].ForeColor = Color.Firebrick;
+            content.Styles[Style.Cpp.StringEol].BackColor = Color.Pink;
+            content.Styles[Style.Cpp.Verbatim].ForeColor = Color.FromArgb(-6089451);
+            content.Styles[Style.Cpp.CommentLineDoc].ForeColor = Color.Gray;
+            content.Styles[Style.Cpp.Word2].ForeColor = Color.Blue;
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -37,15 +59,6 @@ namespace GoodAI.Arnold.Forms
         private void OnTextChanged(object sender, EventArgs e)
         {
             m_designer.Blueprint = content.Text;
-        }
-
-        private void content_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Tab)
-            {
-                e.Handled = true;
-                content.SelectedText = new string(' ', 4);
-            }
         }
     }
 }

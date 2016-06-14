@@ -28,23 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.content = new System.Windows.Forms.TextBox();
+            this.content = new ScintillaNET.Scintilla();
             this.SuspendLayout();
             // 
             // content
             // 
-            this.content.AcceptsReturn = true;
-            this.content.AcceptsTab = true;
-            this.content.AllowDrop = true;
             this.content.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.content.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.content.FontQuality = ScintillaNET.FontQuality.AntiAliased;
+            this.content.IndentationGuides = ScintillaNET.IndentView.Real;
+            this.content.Lexer = ScintillaNET.Lexer.Cpp;
             this.content.Location = new System.Drawing.Point(0, 0);
-            this.content.Multiline = true;
             this.content.Name = "content";
-            this.content.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
+            this.content.ScrollWidth = 800;
             this.content.Size = new System.Drawing.Size(1114, 606);
             this.content.TabIndex = 0;
-            this.content.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.content_KeyPress);
+            this.content.UseTabs = false;
             // 
             // JsonEditForm
             // 
@@ -56,12 +54,11 @@
             this.Name = "JsonEditForm";
             this.Text = "JsonEditForm";
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TextBox content;
+        private ScintillaNET.Scintilla content;
     }
 }
