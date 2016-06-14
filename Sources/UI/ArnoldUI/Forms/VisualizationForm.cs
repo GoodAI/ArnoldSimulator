@@ -22,13 +22,13 @@ namespace GoodAI.Arnold.Forms
         private bool m_mouseCaptured;
         private Vector2 m_lastMousePosition;
 
-        private readonly Scene m_visualization;
+        private readonly Scene m_scene;
 
         public VisualizationForm(IConductor conductor)
         {
             InitializeComponent();
 
-            m_visualization = new Scene(glControl, conductor);
+            m_scene = new Scene(glControl, conductor);
         }
 
         // Resize the glControl
@@ -39,7 +39,7 @@ namespace GoodAI.Arnold.Forms
             glControl.Resize += glControl_Resize;
             glControl.MouseUp += glControl_MouseUp;
 
-            m_visualization.Init();
+            m_scene.Init();
 
             Application.Idle += Application_Idle;
 
@@ -68,7 +68,7 @@ namespace GoodAI.Arnold.Forms
                 ResetLastMousePosition();
 
             if (!m_mouseCaptured && e.Button == MouseButtons.Left)
-                m_visualization.PickObject(e.X, glControl.Size.Height - e.Y);  // Invert Y (windows 0,0 is top left, GL is bottom left).
+                m_scene.PickObject(e.X, glControl.Size.Height - e.Y);  // Invert Y (windows 0,0 is top left, GL is bottom left).
         }
 
         private void ResetLastMousePosition()
@@ -138,7 +138,7 @@ namespace GoodAI.Arnold.Forms
                 return;
             }
 
-            m_visualization.Step(m_inputInfo, elapsedMs);
+            m_scene.Step(m_inputInfo, elapsedMs);
         }
 
         private void ResetInput()

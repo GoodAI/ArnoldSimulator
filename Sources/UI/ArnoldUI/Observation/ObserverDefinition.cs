@@ -19,5 +19,28 @@ namespace GoodAI.Arnold.Observation
             RegionIndex = regionIndex;
             Type = type;
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as ObserverDefinition;
+            if (other != null)
+                return GetHashCode().Equals(other.GetHashCode());
+
+            return ReferenceEquals(this, obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hash = 17;
+
+                hash = hash*31 + NeuronIndex.GetHashCode();
+                hash = hash*31 + RegionIndex.GetHashCode();
+                hash = hash*31 + Type.GetHashCode();
+
+                return hash;
+            }
+        }
     }
 }
