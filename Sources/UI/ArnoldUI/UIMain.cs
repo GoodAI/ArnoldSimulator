@@ -60,14 +60,17 @@ namespace ArnoldUI
 
         public async Task StartSimulationAsync()
         {
-            try
+            if (Conductor.CoreState == CoreState.Empty)
             {
-                await Conductor.LoadBlueprintAsync(Designer.Blueprint);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Blueprint loading failed.");
-                throw;
+                try
+                {
+                    await Conductor.LoadBlueprintAsync(Designer.Blueprint);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Blueprint loading failed.");
+                    throw;
+                }
             }
 
             await Conductor.StartSimulationAsync();
