@@ -8,10 +8,21 @@ using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Core
 {
+    public class NewModelEventArgs : EventArgs
+    {
+        public SimulationModel Model { get; }
+
+        public NewModelEventArgs(SimulationModel model)
+        {
+            Model = model;
+        }
+    }
+
     public interface IModelProvider
     {
         ModelFilter Filter { set; }
-        SimulationModel GetNewModel();
+        void GetNewModel();
+        event EventHandler<NewModelEventArgs> ModelUpdated;
         SimulationModel LastReceivedModel { get; }
     }
 
@@ -23,6 +34,8 @@ namespace GoodAI.Arnold.Core
         public ILog Log { get; set; } = NullLogger.Instance;
 
         public SimulationModel LastReceivedModel { get; private set; }
+
+        public event EventHandler<NewModelEventArgs> ModelUpdated;
 
         public ModelFilter Filter
         {
@@ -40,14 +53,14 @@ namespace GoodAI.Arnold.Core
             m_conductor = conductor;
         }
 
-        public SimulationModel GetNewModel()
+        public void GetNewModel()
         {
             // NOTE: the idea was that we would get empty model when core state is Empty,
             // but in reality there is some time in the Empty state when the core is not really connected yet
             // You can comment out "m_conductor.CoreState == CoreState.Empty" to debug model retrieval error handling.
             //if (m_conductor.CoreState == CoreState.Disconnected || m_conductor.CoreState == CoreState.Empty)
             if (m_conductor.CoreState == CoreState.Disconnected)
-                return null;
+                return;
 
             try
             {
@@ -55,14 +68,12 @@ namespace GoodAI.Arnold.Core
                 if (newModel != null)
                     LastReceivedModel = newModel;
 
-                return newModel;
+                ModelUpdated?.Invoke(this, new NewModelEventArgs(newModel));
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to get new model");
             }
-
-            return null;
         }
     }
 }

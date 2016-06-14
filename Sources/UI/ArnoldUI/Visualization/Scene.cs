@@ -48,6 +48,7 @@ namespace GoodAI.Arnold.Visualization
         {
             m_control = glControl;
             m_conductor = conductor;
+            m_conductor.ModelProvider.ModelUpdated += OnModelUpdated;
 
             m_camera = new Camera
             {
@@ -58,6 +59,11 @@ namespace GoodAI.Arnold.Visualization
             m_gridModel = new GridModel(GridWidth, GridDepth, GridCellSize);
 
             //InjectCamera();
+        }
+
+        private void OnModelUpdated(object sender, NewModelEventArgs e)
+        {
+            m_simulationModel = e.Model ?? m_simulationModel;
         }
 
         private void InjectCamera()
@@ -186,7 +192,7 @@ namespace GoodAI.Arnold.Visualization
 
         public void Step(InputInfo inputInfo, float elapsedMs)
         {
-            m_simulationModel = m_conductor.ModelProvider.GetNewModel() ?? m_simulationModel;
+            m_conductor.ModelProvider.GetNewModel();
 
             if (m_simulationModel != null)
             {
