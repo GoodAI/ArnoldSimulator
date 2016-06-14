@@ -13,7 +13,7 @@ using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 using Region = GoodAI.Arnold.Project.Region;
 
-namespace ArnoldUI
+namespace GoodAI.Arnold
 {
     // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
     public class UIMain : IDisposable

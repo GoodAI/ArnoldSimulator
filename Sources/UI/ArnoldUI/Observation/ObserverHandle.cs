@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Visualization;
-using GoodAI.Arnold.Visualization.Models;
 
 namespace GoodAI.Arnold.Observation
 {

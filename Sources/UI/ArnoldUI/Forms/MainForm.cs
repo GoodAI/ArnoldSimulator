@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ArnoldUI;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Logging;
