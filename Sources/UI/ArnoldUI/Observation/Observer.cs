@@ -43,7 +43,9 @@ namespace GoodAI.Arnold.Observation
             byte[] data;
             if (!e.Model.Observers.TryGetValue(Definition, out data))
             {
-                Log.Warn("Observer with {@observerDefinition} is missing data from Core", Definition);
+                // This is only a debug message - sometimes it happens that the observer gets a new model
+                // before the request propagates to Core.
+                Log.Debug("Observer with {@observerDefinition} is missing data from Core", Definition);
                 return;
             }
 

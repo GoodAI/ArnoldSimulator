@@ -51,7 +51,6 @@
             this.ClientSize = new System.Drawing.Size(482, 451);
             this.Controls.Add(this.pictureBox);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.HideOnClose = true;
             this.Name = "ObserverForm";
             this.Text = "Observer";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();

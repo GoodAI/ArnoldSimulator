@@ -155,15 +155,38 @@ namespace GoodAI.Arnold.Visualization
 
         private void ToggleNeuron(NeuronModel neuron)
         {
-            neuron.Picked = !neuron.Picked;
-
-            // The neuron is recorded in a hashset for future drawing of it's properties.
             if (neuron.Picked)
-                m_pickedNeurons.Add(neuron);
+                DeselectNeuron(neuron.Index, neuron.RegionModel.Index);
             else
-                m_pickedNeurons.Remove(neuron);
+                SelectNeuron(neuron.Index, neuron.RegionModel.Index);
+        }
 
-            m_uiMain.ToggleObserver(neuron);
+        public void SelectNeuron(uint neuronIndex, uint regionIndex)
+        {
+            var region = m_simulationModel.Regions[regionIndex];
+            var neuron = region.Neurons[neuronIndex];
+
+            if (neuron.Picked)
+                return;
+
+            neuron.Picked = true;
+            m_pickedNeurons.Add(neuron);
+
+            m_uiMain.OpenObserver(neuron, this);
+        }
+
+        public void DeselectNeuron(uint neuronIndex, uint regionIndex)
+        {
+            var region = m_simulationModel.Regions[regionIndex];
+            var neuron = region.Neurons[neuronIndex];
+
+            if (!neuron.Picked)
+                return;
+
+            neuron.Picked = false;
+            m_pickedNeurons.Remove(neuron);
+
+            m_uiMain.CloseObserver(neuron);
         }
 
         private Vector3 ModelToScreenCoordinates(IModel model, out bool isBehindCamera)

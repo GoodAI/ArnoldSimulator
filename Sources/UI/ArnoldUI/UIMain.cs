@@ -8,6 +8,7 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Project;
+using GoodAI.Arnold.Visualization;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 using Region = GoodAI.Arnold.Project.Region;
@@ -17,6 +18,7 @@ namespace ArnoldUI
     // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
     public class UIMain : IDisposable
     {
+        private string m_observerType = "greyscale";
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
@@ -110,31 +112,34 @@ namespace ArnoldUI
             Conductor.PerformBrainStep();
         }
 
-        public void ToggleObserver(NeuronModel neuron)
+        public void OpenObserver(NeuronModel neuron, Scene scene)
         {
-            const string observerType = "greyscale";
-            var definition = new ObserverDefinition(neuron.Index, neuron.RegionModel.Index, observerType);
-            if (neuron.Picked)
-                OpenObserver(definition);
-            else
-                CloseObserver(definition);
-        }
-
-        private void OpenObserver(ObserverDefinition definition)
-        {
+            ObserverDefinition definition = CreateObserverDefinition(neuron);
             // TODO(HonzaS): Factory + injection.
             var observer = new GreyscaleObserver(definition, Conductor.ModelProvider);
             observer.Log = Log;
-            var form = new ObserverForm(observer);
+            var form = new ObserverForm(this, observer);
 
-            var handle = new ObserverHandle(observer, form);
+            var handle = new ObserverHandle(observer, form, scene);
             Observers.Add(handle);
             form.Show();
 
             RefreshObserverRequests();
         }
 
-        private void CloseObserver(ObserverDefinition definition)
+        private ObserverDefinition CreateObserverDefinition(NeuronModel neuron)
+        {
+            var definition = new ObserverDefinition(neuron.Index, neuron.RegionModel.Index, m_observerType);
+            return definition;
+        }
+
+        public void CloseObserver(NeuronModel neuron)
+        {
+            ObserverDefinition definition = CreateObserverDefinition(neuron);
+            CloseObserver(definition);
+        }
+
+        public void CloseObserver(ObserverDefinition definition)
         {
             ObserverHandle handle = Observers.FirstOrDefault(observerForm => Equals(observerForm.Observer.Definition, definition));
             if (handle == null)

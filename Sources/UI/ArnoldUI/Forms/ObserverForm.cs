@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ArnoldUI;
 using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Extensions;
 using WeifenLuo.WinFormsUI.Docking;
@@ -16,10 +17,12 @@ namespace GoodAI.Arnold.Forms
 {
     public partial class ObserverForm : DockContent
     {
+        private readonly UIMain m_uiMain;
         public GreyscaleObserver Observer { get; }
 
-        public ObserverForm(GreyscaleObserver observer)
+        public ObserverForm(UIMain uiMain, GreyscaleObserver observer)
         {
+            m_uiMain = uiMain;
             Observer = observer;
             InitializeComponent();
 
@@ -35,6 +38,7 @@ namespace GoodAI.Arnold.Forms
         {
             base.OnFormClosing(e);
             Observer.Updated -= OnObserverUpdated;
+            m_uiMain.CloseObserver(Observer.Definition);
         }
     }
 
