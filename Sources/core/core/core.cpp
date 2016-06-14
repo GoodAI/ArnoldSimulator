@@ -443,7 +443,7 @@ void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModel
             Point3D boxPosition(box->x(), box->y(), box->z());
             Size3D boxSize(box->sizeX(), box->sizeY(), box->sizeZ());
             Box3D roiBox(boxPosition, boxSize);
-            roiBoxes[i] = roiBox;
+            roiBoxes.push_back(roiBox);
         }
 
         gBrain[0].UpdateRegionOfInterest(roiBoxes);
