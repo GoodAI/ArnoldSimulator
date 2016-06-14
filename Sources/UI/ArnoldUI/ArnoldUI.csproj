@@ -124,6 +124,7 @@
     </Compile>
     <Compile Include="Observation\Observer.cs" />
     <Compile Include="Observation\ObserverDefinition.cs" />
+    <Compile Include="Observation\ObserverHandle.cs" />
     <Compile Include="Project\Designer.cs" />
     <Compile Include="Visualization\Blender.cs" />
     <Compile Include="Visualization\Camera.cs" />

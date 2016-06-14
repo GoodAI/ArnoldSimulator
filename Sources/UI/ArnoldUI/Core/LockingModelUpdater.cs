@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Extensions;
+using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 
@@ -36,6 +37,7 @@ namespace GoodAI.Arnold.Core
         private bool m_filterChanged;
         private ModelFilter m_filter;
         private ModelResponse m_modelResponse;
+        private IList<ObserverDefinition> m_observerRequests;
 
         public ModelFilter Filter
         {
@@ -44,6 +46,11 @@ namespace GoodAI.Arnold.Core
                 m_filter = value;
                 m_filterChanged = true;
             }
+        }
+
+        public IList<ObserverDefinition> ObserverRequests
+        {
+            set { m_observerRequests = value; }
         }
 
         public LockingModelUpdater(ICoreLink coreLink, ICoreController coreController, IModelDiffApplier modelDiffApplier)
@@ -161,7 +168,9 @@ namespace GoodAI.Arnold.Core
                     m_filterChanged = false;
 
                     // Request a model diff from the core.
-                    var modelResponseTask = m_coreLink.Request(new GetModelConversation(m_getFullModel, filterToSend), TimeoutMs).ConfigureAwait(false);
+                    var modelResponseTask =
+                        m_coreLink.Request(new GetModelConversation(m_getFullModel, filterToSend, m_observerRequests),
+                            TimeoutMs).ConfigureAwait(false);
                     m_getFullModel = false;
 
                     // Wait until the model has been read. This happens before the first request as well.

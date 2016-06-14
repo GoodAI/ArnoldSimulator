@@ -64,7 +64,7 @@ namespace GoodAI.Arnold.Communication
 
     public static class GetModelRequestBuilder
     {
-        public static RequestMessage Build(bool full, ModelFilter filter = null, IList<ObserverDefinition> observers = null)
+        public static RequestMessage Build(bool full, ModelFilter filter = null, IList<ObserverDefinition> observerRequests = null)
         {
             var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
             Offset<Filter>? filterOffset = null;
@@ -88,10 +88,10 @@ namespace GoodAI.Arnold.Communication
             }
 
             VectorOffset? observersVectorOffset = null;
-            if (observers != null)
+            if (observerRequests != null)
             {
-                var observerOffsets = new Offset<Observer>[observers.Count()];
-                observers.EachWithIndex((i, definition) =>
+                var observerOffsets = new Offset<Observer>[observerRequests.Count()];
+                observerRequests.EachWithIndex((i, definition) =>
                 {
                     Offset<NeuronId> neuronId = NeuronId.CreateNeuronId(builder, definition.NeuronIndex,
                         definition.RegionIndex);

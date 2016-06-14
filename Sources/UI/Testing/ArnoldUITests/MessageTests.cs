@@ -46,7 +46,7 @@ namespace GoodAI.Arnold.UI.Tests
                 new ObserverDefinition(1, 2, "foofighter")
             };
 
-            var message = GetModelRequestBuilder.Build(full: true, filter: filter, observers: observerDefinitions);
+            var message = GetModelRequestBuilder.Build(full: true, filter: filter, observerRequests: observerDefinitions);
 
             Assert.Equal(Request.GetModelRequest, message.RequestType);
 

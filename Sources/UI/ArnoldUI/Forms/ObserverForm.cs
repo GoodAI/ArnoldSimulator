@@ -35,7 +35,6 @@ namespace GoodAI.Arnold.Forms
         {
             base.OnFormClosing(e);
             Observer.Updated -= OnObserverUpdated;
-            Observer.Dispose();
         }
     }
 

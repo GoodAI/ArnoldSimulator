@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 
@@ -24,6 +25,7 @@ namespace GoodAI.Arnold.Core
         void GetNewModel();
         event EventHandler<NewModelEventArgs> ModelUpdated;
         SimulationModel LastReceivedModel { get; }
+        IList<ObserverDefinition> ObserverRequests { set; }
     }
 
     public class ModelProvider : IModelProvider
@@ -35,13 +37,24 @@ namespace GoodAI.Arnold.Core
 
         public SimulationModel LastReceivedModel { get; private set; }
 
+        public IList<ObserverDefinition> ObserverRequests
+        {
+            set
+            {
+                if (m_conductor.CoreState == CoreState.Disconnected)
+                    return;
+
+                m_conductor.CoreProxy.ModelUpdater.ObserverRequests = value;
+            }
+        }
+
         public event EventHandler<NewModelEventArgs> ModelUpdated;
 
         public ModelFilter Filter
         {
             set
             {
-                if (m_conductor.CoreState == CoreState.Disconnected || m_conductor.CoreState == CoreState.Empty)
+                if (m_conductor.CoreState == CoreState.Disconnected)
                     return;
 
                 m_conductor.CoreProxy.ModelUpdater.Filter = value;

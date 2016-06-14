@@ -427,7 +427,7 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
-    SendStubModel(requestId);
+    SendStubModel(getModelRequest, requestId);
     return;
 
     if (!IsBrainLoaded())
@@ -452,7 +452,7 @@ void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModel
     gBrain[0].RequestViewportUpdate(requestId, getModelRequest->full(), true);
 }
 
-void Core::SendStubModel(RequestId requestId)
+void Core::SendStubModel(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
     flatbuffers::FlatBufferBuilder builder;
 
@@ -570,28 +570,39 @@ void Core::SendStubModel(RequestId requestId)
 
     std::vector<flatbuffers::Offset<Communication::ObserverData>> observersOffsets;
 
-    if (mDummyTimestep > 0) {
-        auto neuronId = Communication::CreateNeuronId(builder, 1, 1);
-        auto observerType = builder.CreateString("greyscale");
+    auto observers = getModelRequest->observers();
+    if (observers != nullptr) {
+        for (int i = 0; i < observers->size(); i++) {
+            auto observer = observers->Get(i);
 
-        auto observerOffset = Communication::CreateObserver(builder, neuronId, observerType);
-        std::vector<uint8_t> data;
-        data.push_back(255);
-        data.push_back(0);
-        data.push_back(128);
-        data.push_back(255);
-        data.push_back(0);
-        data.push_back(128);
-        data.push_back(255);
-        data.push_back(0);
-        data.push_back(128);
-        data.push_back(255);
-        data.push_back(0);
-        data.push_back(128);
-        auto dataVectorOffset = builder.CreateVector(data);
+            auto neuronId = observer->neuronId();
 
-        auto observerDataOffset = Communication::CreateObserverData(builder, observerOffset, dataVectorOffset);
-        observersOffsets.push_back(observerDataOffset);
+            uint32_t neuronIndex = neuronId->neuron();
+            uint32_t regionIndex = neuronId->region();
+            std::string observerType = observer->type()->str();
+
+            auto neuronIdOffset = Communication::CreateNeuronId(builder, neuronIndex, regionIndex);
+            auto observerTypeOffset = builder.CreateString(observerType);
+
+            auto observerOffset = Communication::CreateObserver(builder, neuronIdOffset, observerTypeOffset);
+            std::vector<uint8_t> data;
+            data.push_back(255);
+            data.push_back(0);
+            data.push_back(128);
+            data.push_back(255);
+            data.push_back(0);
+            data.push_back(128);
+            data.push_back(255);
+            data.push_back(0);
+            data.push_back(128);
+            data.push_back(255);
+            data.push_back(0);
+            data.push_back(128);
+            auto dataVectorOffset = builder.CreateVector(data);
+
+            auto observerDataOffset = Communication::CreateObserverData(builder, observerOffset, dataVectorOffset);
+            observersOffsets.push_back(observerDataOffset);
+        }    
     }
 
     auto observersVector = builder.CreateVector(observersOffsets);

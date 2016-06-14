@@ -36,7 +36,7 @@ namespace ArnoldUI
 
         public IConductor Conductor { get; }
         public IDesigner Designer { get; }
-        public ISet<ObserverForm> Observers { get; set; }
+        public ISet<ObserverHandle> Observers { get; set; }
 
         public UIMain(IConductor conductor, IDesigner designer)
         {
@@ -49,7 +49,7 @@ namespace ArnoldUI
 
             Conductor = conductor;
             Designer = designer;
-            Observers = new HashSet<ObserverForm>();
+            Observers = new HashSet<ObserverHandle>();
         }
 
         public void VisualizationClosed()
@@ -126,21 +126,33 @@ namespace ArnoldUI
             var observer = new GreyscaleObserver(definition, Conductor.ModelProvider);
             observer.Log = Log;
             var form = new ObserverForm(observer);
-            Observers.Add(form);
+
+            var handle = new ObserverHandle(observer, form);
+            Observers.Add(handle);
             form.Show();
+
+            RefreshObserverRequests();
         }
 
         private void CloseObserver(ObserverDefinition definition)
         {
-            ObserverForm form = Observers.FirstOrDefault(observerForm => Equals(observerForm.Observer.Definition, definition));
-            if (form == null)
+            ObserverHandle handle = Observers.FirstOrDefault(observerForm => Equals(observerForm.Observer.Definition, definition));
+            if (handle == null)
             {
                 Log.Warn("Observer with {@definition} not found, cannot close", definition);
                 return;
             }
 
-            form.Close();
-            Observers.Remove(form);
+            handle.Dispose();
+            Observers.Remove(handle);
+
+            RefreshObserverRequests();
+        }
+
+        private void RefreshObserverRequests()
+        {
+            Conductor.ModelProvider.ObserverRequests =
+                Observers.Select(observerHandle => observerHandle.Definition).ToList();
         }
     }
 }
