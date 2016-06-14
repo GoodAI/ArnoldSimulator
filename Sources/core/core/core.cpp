@@ -576,9 +576,18 @@ void Core::SendStubModel(RequestId requestId)
 
         auto observerOffset = Communication::CreateObserver(builder, neuronId, observerType);
         std::vector<uint8_t> data;
-        data.push_back(1);
-        data.push_back(2);
-        data.push_back(3);
+        data.push_back(255);
+        data.push_back(0);
+        data.push_back(128);
+        data.push_back(255);
+        data.push_back(0);
+        data.push_back(128);
+        data.push_back(255);
+        data.push_back(0);
+        data.push_back(128);
+        data.push_back(255);
+        data.push_back(0);
+        data.push_back(128);
         auto dataVectorOffset = builder.CreateVector(data);
 
         auto observerDataOffset = Communication::CreateObserverData(builder, observerOffset, dataVectorOffset);

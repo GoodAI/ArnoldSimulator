@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Forms;
 using GoodAI.Logging;
 
 namespace GoodAI.Arnold.Observation
 {
-    public class BitmapObserver
+    public class GreyscaleObserver : IDisposable
     {
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
@@ -21,7 +22,7 @@ namespace GoodAI.Arnold.Observation
         private readonly ObserverDefinition m_observerDefinition;
         private readonly IModelProvider m_modelProvider;
 
-        public BitmapObserver(ObserverDefinition observerDefinition, IModelProvider modelProvider)
+        public GreyscaleObserver(ObserverDefinition observerDefinition, IModelProvider modelProvider)
         {
             m_observerDefinition = observerDefinition;
             m_modelProvider = modelProvider;
@@ -30,7 +31,10 @@ namespace GoodAI.Arnold.Observation
 
         private void OnModelUpdated(object sender, NewModelEventArgs e)
         {
-            byte[] data = null;
+            if (e.Model == null)
+                return;
+
+            byte[] data;
             if (!e.Model.Observers.TryGetValue(m_observerDefinition, out data))
             {
                 Log.Warn("Observer with {@observerDefinition} is missing data from Core", m_observerDefinition);
@@ -58,10 +62,16 @@ namespace GoodAI.Arnold.Observation
         {
             try
             {
-                using (var stream = new MemoryStream(data))
+                var image = new Bitmap(data.Length, 1);
+                data.EachWithIndex((index, value) =>
                 {
-                    Image = new Bitmap(stream);
-                }
+                    image.SetPixel(index, 0, Color.FromArgb(255, value, value, value));
+                });
+                Image = image;
+                //using (var stream = new MemoryStream(data))
+                //{
+                //    Image = new Bitmap(stream);
+                //}
             }
             catch (Exception ex)
             {

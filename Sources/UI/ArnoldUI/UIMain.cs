@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Core;
+using GoodAI.Arnold.Forms;
+using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Project;
 using GoodAI.Logging;
 using Region = GoodAI.Arnold.Project.Region;
@@ -33,6 +35,7 @@ namespace ArnoldUI
 
         public IConductor Conductor { get; }
         public IDesigner Designer { get; }
+        public List<GreyscaleObserver> Observers { get; set; }
 
         public UIMain(IConductor conductor, IDesigner designer)
         {
@@ -45,6 +48,14 @@ namespace ArnoldUI
 
             Conductor = conductor;
             Designer = designer;
+            Observers = new List<GreyscaleObserver>();
+
+            // TODO(HonzaS): Stub below, remove.
+            var bitmapObserver = new GreyscaleObserver(new ObserverDefinition(1, 1, "foo"), Conductor.ModelProvider);
+            bitmapObserver.Log = ((Conductor)conductor).Log;
+            Observers.Add(bitmapObserver);
+            var observerForm = new ObserverForm(bitmapObserver);
+            observerForm.Show();
         }
 
         public void VisualizationClosed()

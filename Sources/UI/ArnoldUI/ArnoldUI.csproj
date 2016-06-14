@@ -103,6 +103,7 @@
     <Compile Include="Core\ModelFilter.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
+    <Compile Include="Extensions\WinFormsExtensions.cs" />
     <Compile Include="Forms\JsonEditForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -34,12 +34,13 @@
             // 
             // pictureBox
             // 
+            this.pictureBox.BackColor = System.Drawing.SystemColors.Control;
             this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
             this.pictureBox.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.Size = new System.Drawing.Size(482, 451);
-            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox.TabIndex = 0;
             this.pictureBox.TabStop = false;
             // 
@@ -49,6 +50,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(482, 451);
             this.Controls.Add(this.pictureBox);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.HideOnClose = true;
             this.Name = "ObserverForm";
             this.Text = "Observer";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
