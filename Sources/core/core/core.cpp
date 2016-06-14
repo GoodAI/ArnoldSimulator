@@ -428,8 +428,8 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
 {
-    SendStubModel(getModelRequest, requestId);
-    return;
+    //SendStubModel(requestId);
+    //return;
 
     if (!IsBrainLoaded()) {
         SendErrorResponse(requestId, "Get model failed: brain not loaded.");
