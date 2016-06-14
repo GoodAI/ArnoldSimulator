@@ -4,9 +4,11 @@
 
 #include "core.h"
 #include "brain.h"
+#include "log.h"
 
 #define CATCH_IMPL  // Unofficial macro that does not add the main() function.
 #include "catch.hpp"
+
 #include "core_tests.h"
 
 CkGroupID gMulticastGroupId;
@@ -323,8 +325,7 @@ void Core::SendEmptyMessage(RequestId requestId)
 
 void Core::SendErrorResponse(RequestId requestId, const std::string &message)
 {
-    // TODO(Premek): Move elsewhere or replace with logging.
-    CkPrintf(message.c_str());
+    Log(LogLevel::Warn, message.c_str());
 
     flatbuffers::FlatBufferBuilder builder;
     BuildErrorResponse(message, builder);
@@ -430,8 +431,10 @@ void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModel
     SendStubModel(getModelRequest, requestId);
     return;
 
-    if (!IsBrainLoaded())
+    if (!IsBrainLoaded()) {
+        SendErrorResponse(requestId, "Get model failed: brain not loaded.");
         return;
+    }
 
     if (getModelRequest->filter() != nullptr) {
         Boxes roiBoxes;
