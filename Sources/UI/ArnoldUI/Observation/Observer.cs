@@ -19,6 +19,7 @@ namespace GoodAI.Arnold.Observation
         ObserverDefinition Definition { get; }
     }
 
+    // TODO(HonzaS): Add a base class requiring IModelProvider in constructor as a hint at how to get the data.
     public class GreyscaleObserver : IObserver
     {
         // Injected.
@@ -49,7 +50,7 @@ namespace GoodAI.Arnold.Observation
                 return;
             }
 
-            Data(data);
+            SetData(data);
         }
 
         public event EventHandler Updated;
@@ -66,7 +67,7 @@ namespace GoodAI.Arnold.Observation
             }
         }
 
-        private void Data(byte[] data)
+        private void SetData(byte[] data)
         {
             try
             {

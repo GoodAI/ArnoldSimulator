@@ -404,12 +404,12 @@ namespace GoodAI.Arnold.Core
         {
             for (int i = 0; i < diff.ObserversLength; i++)
             {
-                ObserverData observer = diff.GetObservers(i);
+                ObserverData observerData = diff.GetObservers(i);
 
-                NeuronId neuronId = observer.Observer.NeuronId;
-                var definition = new ObserverDefinition(neuronId.Neuron, neuronId.Region, observer.Observer.Type);
+                NeuronId neuronId = observerData.Observer.NeuronId;
+                var definition = new ObserverDefinition(neuronId.Neuron, neuronId.Region, observerData.Observer.Type);
 
-                model.Observers[definition] = observer.GetDataBytes()?.ToArray();
+                model.Observers[definition] = observerData.GetDataBytes()?.ToArray();
             }
         }
     }
