@@ -17,7 +17,7 @@ namespace GoodAI.Arnold.Core
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
-        private const int TimeoutMs = 1000;
+        private const int TimeoutMs = 5000;
 
         private readonly ICoreLink m_coreLink;
         private readonly ICoreController m_coreController;
