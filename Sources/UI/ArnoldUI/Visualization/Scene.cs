@@ -473,6 +473,13 @@ namespace GoodAI.Arnold.Visualization
 
         private void SetUpProjection()
         {
+            // In some very rare cases width is zero causing the aspectRatio argument below go out of range.
+            if (m_control.Size.Width == 0)
+            {
+                // TODO(Premek): Log;
+                return;
+            }
+
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
 
