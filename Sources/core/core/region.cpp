@@ -931,7 +931,7 @@ void RegionBase::Simulate(SimulateMsg *msg)
     if ((mDoFullUpdate || !almostSameIntersection) && !mNeuronIndices.empty()) {
         sectionNeuronIndices.reserve(mNeuronIndices.size());
         for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
-            CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
+            CkArrayIndex2D index(thisIndex, GetNeuronIndex(*it));
             sectionNeuronIndices.push_back(index);
         }
     } else if (mDoProgress && !mNeuronsTriggered.empty()) {
