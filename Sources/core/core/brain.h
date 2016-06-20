@@ -205,6 +205,7 @@ public:
     void SimulateRegionSimulate();
     void SimulateRegionSimulateDone(CkReductionMsg *msg);
     void SimulateAllSpikesDelivered();
+    bool IsSimulationRunning();
     void SimulateDone();
 
 private:

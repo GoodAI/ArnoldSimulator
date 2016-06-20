@@ -847,7 +847,7 @@ void BrainBase::RequestSimulationState(RequestId requestId, bool immediately, bo
     if (mIsSimulationRunning && !immediately) {
         mSimulationStateRequests.push_back(requestId);  
     } else {
-        GetCoreLocalPtr()->SendSimulationState(requestId, mIsSimulationRunning,
+        GetCoreLocalPtr()->SendSimulationState(requestId, IsSimulationRunning(),
             mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
     }
 }
@@ -1472,6 +1472,11 @@ void BrainBase::SimulateAllSpikesDelivered()
     }
 }
 
+bool BrainBase::IsSimulationRunning()
+{
+    return mIsSimulationRunning && mDoSimulationProgress;
+}
+
 void BrainBase::SimulateDone()
 {
     mRegionSimulateDone = false;
@@ -1494,7 +1499,7 @@ void BrainBase::SimulateDone()
     if (!mSimulationStateRequests.empty()) {
         RequestId requestId = mSimulationStateRequests.front();
         mSimulationStateRequests.pop_front();
-        GetCoreLocalPtr()->SendSimulationState(requestId, mIsSimulationRunning,
+        GetCoreLocalPtr()->SendSimulationState(requestId, IsSimulationRunning(),
             mBrainStep, mBodyStep, mBrainStepsPerBodyStep);
     }
 
