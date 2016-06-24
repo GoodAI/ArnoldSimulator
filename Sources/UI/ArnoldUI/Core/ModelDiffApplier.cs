@@ -185,6 +185,10 @@ namespace GoodAI.Arnold.Core
 
         private void ProcessConnection(SimulationModel model, Connection connection, string actionName, Action<OutputConnectorModel, InputConnectorModel> action)
         {
+            // TODO(HonzaS): These two mean connections to the sensors/actuators, add support for those
+            if (connection.FromRegion == 0 || connection.ToRegion == 0)
+                return;
+
             RegionModel fromRegion = model.Regions[connection.FromRegion];
             RegionModel toRegion = model.Regions[connection.ToRegion];
 
