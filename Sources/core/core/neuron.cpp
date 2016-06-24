@@ -663,6 +663,10 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         }
     }
 
+    // If there is no progress, FlipSpikeQueues wasn't called and we need to reset the section info.
+    if (!doProgress)
+        mSectionInfo = CkSectionInfo();
+
     CkGetSectionInfo(mSectionInfo, msg);
     CkCallback cb(CkReductionTarget(RegionBase, NeuronSimulateDone), gRegions[thisIndex.x]);
     CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->contribute(
