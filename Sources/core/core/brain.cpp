@@ -112,7 +112,7 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
     std::memcpy(&boxCnt, cur, sizeof(size_t));
     cur += sizeof(size_t);
 
-    msg->roiBoxes.reserve(boxCnt);
+    msg->roiBoxes.resize(boxCnt);
     std::memcpy(msg->roiBoxes.data(), cur, sizeof(Box3D) * boxCnt);
     cur += sizeof(Box3D) * boxCnt;
 
@@ -120,7 +120,7 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
     std::memcpy(&boxLastCnt, cur, sizeof(size_t));
     cur += sizeof(size_t);
 
-    msg->roiBoxesLast.reserve(boxLastCnt);
+    msg->roiBoxesLast.resize(boxLastCnt);
     std::memcpy(msg->roiBoxesLast.data(), cur, sizeof(Box3D) * boxLastCnt);
     //cur += sizeof(Box3D) * boxLastCnt;
 
