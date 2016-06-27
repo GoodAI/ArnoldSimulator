@@ -361,7 +361,7 @@ namespace GoodAI.Arnold.Core
                 return;
 
             var fromRegion = model.Regions[synapse.From.Region];
-            var toRegion = model.Regions[synapse.From.Region];
+            var toRegion = model.Regions[synapse.To.Region];
 
             if (fromRegion == null || toRegion == null)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GoodAI.Arnold.Extensions;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Visualization;
 
@@ -24,7 +25,7 @@ namespace GoodAI.Arnold.Observation
 
         public void Dispose()
         {
-            Form.Close();
+            Form.Invoke(() => Form.Close());
             Observer.Dispose();
             m_scene.DeselectNeuron(Definition.NeuronIndex, Definition.RegionIndex);
         }
