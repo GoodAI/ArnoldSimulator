@@ -74,9 +74,9 @@ namespace GoodAI.Arnold.Communication
                 filter.Boxes.EachWithIndex((i, box) =>
                 {
                     boxes[i] = Box3D.CreateBox3D(builder,
-                        box.Position.X,
-                        box.Position.Y,
-                        box.Position.Z,
+                        box.LowerBound.X,
+                        box.LowerBound.Y,
+                        box.LowerBound.Z,
                         box.Size.X,
                         box.Size.Y,
                         box.Size.Z);

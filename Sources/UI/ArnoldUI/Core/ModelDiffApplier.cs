@@ -10,6 +10,7 @@ using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
 using GoodAI.Net.ConverseSharpFlatBuffers;
+using OpenTK;
 
 namespace GoodAI.Arnold.Core
 {
@@ -52,8 +53,13 @@ namespace GoodAI.Arnold.Core
             {
                 Region addedRegion = diff.GetAddedRegions(i);
 
+                Vector3 lower = addedRegion.Position.ToVector3();
+                Vector3 size = addedRegion.Size.ToVector3();
+
+                Vector3 position = lower + size/2;
+
                 model.Regions[addedRegion.Index] = new RegionModel(addedRegion.Index, addedRegion.Name, addedRegion.Type,
-                    addedRegion.Position.ToVector3(), addedRegion.Size.ToVector3());
+                    position, size);
             }
         }
 
@@ -241,6 +247,12 @@ namespace GoodAI.Arnold.Core
                     continue;
                 }
 
+                if (region.Neurons.ContainsKey(neuronId.Neuron))
+                {
+                    LogNeuronNotProcessed(neuronId, "add", "Neuron with this id is already present");
+                    continue;
+                }
+
                 region.AddNeuron(new NeuronModel(neuron.Id.Neuron, neuron.Type, region, neuron.Position.ToVector3()));
             }
         }
@@ -360,25 +372,22 @@ namespace GoodAI.Arnold.Core
             if (!CheckSameRegion(synapse))
                 return;
 
-            var fromRegion = model.Regions[synapse.From.Region];
-            var toRegion = model.Regions[synapse.To.Region];
-
-            if (fromRegion == null || toRegion == null)
+            RegionModel fromRegion;
+            RegionModel toRegion;
+            if (!model.Regions.TryGetModel(synapse.From.Region, out fromRegion) ||
+                !model.Regions.TryGetModel(synapse.To.Region, out toRegion))
             {
                 string missingRegion = fromRegion == null ? "Source" : "Target";
                 LogSynapseNotProcessed(synapse, actionName, $"{missingRegion} region not found");
                 return;
             }
 
-            var fromNeuron = fromRegion.Neurons[synapse.From.Neuron];
-            var toNeuron = toRegion.Neurons[synapse.To.Neuron];
-
-            if (fromNeuron == null || toNeuron == null)
-            {
-                string missingNeuron = fromNeuron == null ? "Source" : "Target";
-                LogSynapseNotProcessed(synapse, actionName, $"{missingNeuron} neuron not found");
+            NeuronModel fromNeuron;
+            NeuronModel toNeuron;
+            // These are synapses that outside of the region of interest, they are skipped.
+            if (!fromRegion.Neurons.TryGetModel(synapse.From.Neuron, out fromNeuron) ||
+                !toRegion.Neurons.TryGetModel(synapse.To.Neuron, out toNeuron))
                 return;
-            }
 
             action(fromRegion, fromNeuron, toRegion, toNeuron);
         }
@@ -388,7 +397,7 @@ namespace GoodAI.Arnold.Core
             if (synapse.From.Region == synapse.To.Region)
                 return true;
 
-            Log.Debug("Synapses crossing regions are not supported by visualization yet");
+            //Log.Debug("Synapses crossing regions are not supported by visualization yet");
             return false;
         }
 

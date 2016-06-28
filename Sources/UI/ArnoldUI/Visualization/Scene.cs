@@ -266,11 +266,10 @@ namespace GoodAI.Arnold.Visualization
             }
 
             Vector3 size = upperBound - lowerBound;
-            Vector3 position = lowerBound + size/2;
 
             m_conductor.ModelProvider.Filter = new ModelFilter
             {
-                Boxes = {new FilterBox(position, size)}
+                Boxes = {new FilterBox(lowerBound, size)}
             };
         }
 

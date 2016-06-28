@@ -9,13 +9,13 @@ namespace GoodAI.Arnold.Core
 {
     public class FilterBox
     {
-        public FilterBox(Vector3 position, Vector3 size)
+        public FilterBox(Vector3 lowerBound, Vector3 size)
         {
-            Position = position;
+            LowerBound = lowerBound;
             Size = size;
         }
 
-        public Vector3 Position;
+        public Vector3 LowerBound;
         public Vector3 Size;
     }
 
