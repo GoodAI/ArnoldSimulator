@@ -217,7 +217,7 @@ private:
     bool mDoSimulationProgress;
     bool mDoSimulationProgressNext;
     bool mViewportUpdateOverflowed;
-    bool mIsSimulationRunning;
+    bool mIsSimulationLoopActive;
     bool mUnloadRequested;
 
     bool mRegionCommitTopologyChangeDone;

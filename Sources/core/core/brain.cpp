@@ -246,7 +246,7 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params) :
     mName(name), mDoViewportUpdate(true), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
-    mIsSimulationRunning(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
+    mIsSimulationLoopActive(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
     mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
     mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
     mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
@@ -452,7 +452,7 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
 BrainBase::BrainBase(CkMigrateMessage *msg) :
     mDoViewportUpdate(true), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
-    mIsSimulationRunning(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
+    mIsSimulationLoopActive(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
     mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
     mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
     mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
@@ -473,7 +473,7 @@ void BrainBase::Unload()
     mUnloadRequested = true;
     if (mRegionIndices.empty()) {
         Unloaded();
-    } else if (!mIsSimulationRunning) {
+    } else if (!mIsSimulationLoopActive) {
         gRegions.Unload();
     } else {
         PauseSimulation();
@@ -498,7 +498,7 @@ void BrainBase::pup(PUP::er &p)
     p | mDoSimulationProgress;
     p | mDoSimulationProgressNext;
     p | mViewportUpdateOverflowed;
-    p | mIsSimulationRunning;
+    p | mIsSimulationLoopActive;
     p | mUnloadRequested;
 
     p | mRegionCommitTopologyChangeDone;
@@ -810,7 +810,7 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
 {
     mDoSimulationProgressNext = true;
     mBrainStepsToRun = untilStopped ? SIZE_MAX : brainSteps;
-    if (!mIsSimulationRunning) {
+    if (!mIsSimulationLoopActive) {
         thisProxy[thisIndex].Simulate();
     }
 }
@@ -844,7 +844,7 @@ void BrainBase::RequestSimulationState(RequestId requestId, bool immediately, bo
         mSimulationStateRequests.clear();
     }
 
-    if (mIsSimulationRunning && !immediately) {
+    if (mIsSimulationLoopActive && !immediately) {
         mSimulationStateRequests.push_back(requestId);  
     } else {
         GetCoreLocalPtr()->SendSimulationState(requestId, IsSimulationRunning(),
@@ -864,7 +864,7 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
     mViewportUpdateRequests.push_back(requestId);
     mDoFullViewportUpdateNext = full || mViewportUpdateOverflowed;
     mViewportUpdateOverflowed = false;
-    if (!mIsSimulationRunning) {
+    if (!mIsSimulationLoopActive) {
         mDoSimulationProgressNext = false;
         thisProxy[thisIndex].Simulate();
     }
@@ -876,7 +876,7 @@ void BrainBase::Simulate()
     mDoFullViewportUpdate = mDoFullViewportUpdateNext;
     mDoFullViewportUpdateNext = false;
     mDoViewportUpdate = mDoFullViewportUpdate || !mViewportUpdateOverflowed;
-    mIsSimulationRunning = true;
+    mIsSimulationLoopActive = true;
     this->SimulateBrainControl();
 }
 
@@ -1474,7 +1474,7 @@ void BrainBase::SimulateAllSpikesDelivered()
 
 bool BrainBase::IsSimulationRunning()
 {
-    return mIsSimulationRunning && mDoSimulationProgress;
+    return mIsSimulationLoopActive && mDoSimulationProgress;
 }
 
 void BrainBase::SimulateDone()
@@ -1490,10 +1490,10 @@ void BrainBase::SimulateDone()
         if (mBrainStepsToRun > 0) {
             thisProxy[thisIndex].Simulate();
         } else {
-            mIsSimulationRunning = false;
+            mIsSimulationLoopActive = false;
         }
     } else {
-        mIsSimulationRunning = false;
+        mIsSimulationLoopActive = false;
     }
 
     if (!mSimulationStateRequests.empty()) {
