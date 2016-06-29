@@ -1431,7 +1431,7 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
         (!mDoFullViewportUpdate && mDoFullViewportUpdateNext);
 
     if (cannotRespond) {
-        if (mViewportUpdateAccumulator.brainStepCount > mBrainStepsPerBodyStep) {
+        if (mViewportUpdateAccumulator.brainStepCount > (std::max)(static_cast<size_t>(VIEWPORT_MIN_ACCUMULATED_STEPS), mBrainStepsPerBodyStep)) {
             mViewportUpdateOverflowed = true;
             flushViewportAccumulator = true;
         }
