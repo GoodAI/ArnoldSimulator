@@ -9,13 +9,20 @@ enum CommandType:byte {
 	Run,
 	Pause,
 	Clear,
-	Shutdown
+	Shutdown,
+	Configure
+}
+
+table Configuration {
+	systemConfiguration:string;	// json.
+	// Add configuration for model (e.g. regions) later.
 }
 
 table CommandRequest {
 	command:CommandType;
 	stepsToRun:uint;
 	blueprint:string;
+	configuration:Configuration;
 }
 
 table GetStateRequest {}

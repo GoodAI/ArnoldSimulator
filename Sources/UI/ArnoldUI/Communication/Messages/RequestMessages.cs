@@ -13,6 +13,7 @@ public enum CommandType : sbyte
  Pause = 2,
  Clear = 3,
  Shutdown = 4,
+ Configure = 5,
 };
 
 public enum Request : byte
@@ -21,6 +22,29 @@ public enum Request : byte
  CommandRequest = 1,
  GetStateRequest = 2,
  GetModelRequest = 3,
+};
+
+public sealed class Configuration : Table {
+  public static Configuration GetRootAsConfiguration(ByteBuffer _bb) { return GetRootAsConfiguration(_bb, new Configuration()); }
+  public static Configuration GetRootAsConfiguration(ByteBuffer _bb, Configuration obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public Configuration __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+  public string SystemConfiguration { get { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; } }
+  public ArraySegment<byte>? GetSystemConfigurationBytes() { return __vector_as_arraysegment(4); }
+
+  public static Offset<Configuration> CreateConfiguration(FlatBufferBuilder builder,
+      StringOffset systemConfigurationOffset = default(StringOffset)) {
+    builder.StartObject(1);
+    Configuration.AddSystemConfiguration(builder, systemConfigurationOffset);
+    return Configuration.EndConfiguration(builder);
+  }
+
+  public static void StartConfiguration(FlatBufferBuilder builder) { builder.StartObject(1); }
+  public static void AddSystemConfiguration(FlatBufferBuilder builder, StringOffset systemConfigurationOffset) { builder.AddOffset(0, systemConfigurationOffset.Value, 0); }
+  public static Offset<Configuration> EndConfiguration(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<Configuration>(o);
+  }
 };
 
 public sealed class CommandRequest : Table {
@@ -32,22 +56,27 @@ public sealed class CommandRequest : Table {
   public uint StepsToRun { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
   public string Blueprint { get { int o = __offset(8); return o != 0 ? __string(o + bb_pos) : null; } }
   public ArraySegment<byte>? GetBlueprintBytes() { return __vector_as_arraysegment(8); }
+  public Configuration Configuration { get { return GetConfiguration(new Configuration()); } }
+  public Configuration GetConfiguration(Configuration obj) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<CommandRequest> CreateCommandRequest(FlatBufferBuilder builder,
       CommandType command = CommandType.Load,
       uint stepsToRun = 0,
-      StringOffset blueprintOffset = default(StringOffset)) {
-    builder.StartObject(3);
+      StringOffset blueprintOffset = default(StringOffset),
+      Offset<Configuration> configurationOffset = default(Offset<Configuration>)) {
+    builder.StartObject(4);
+    CommandRequest.AddConfiguration(builder, configurationOffset);
     CommandRequest.AddBlueprint(builder, blueprintOffset);
     CommandRequest.AddStepsToRun(builder, stepsToRun);
     CommandRequest.AddCommand(builder, command);
     return CommandRequest.EndCommandRequest(builder);
   }
 
-  public static void StartCommandRequest(FlatBufferBuilder builder) { builder.StartObject(3); }
+  public static void StartCommandRequest(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddCommand(FlatBufferBuilder builder, CommandType command) { builder.AddSbyte(0, (sbyte)command, 0); }
   public static void AddStepsToRun(FlatBufferBuilder builder, uint stepsToRun) { builder.AddUint(1, stepsToRun, 0); }
   public static void AddBlueprint(FlatBufferBuilder builder, StringOffset blueprintOffset) { builder.AddOffset(2, blueprintOffset.Value, 0); }
+  public static void AddConfiguration(FlatBufferBuilder builder, Offset<Configuration> configurationOffset) { builder.AddOffset(3, configurationOffset.Value, 0); }
   public static Offset<CommandRequest> EndCommandRequest(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<CommandRequest>(o);

@@ -24,6 +24,17 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
+        public void WritesReadsConfigurationCommand()
+        {
+            var configContent = "foo";
+            var message = CommandRequestBuilder.Build(CommandType.Configure, configuration: new CoreConfiguration(configContent));
+
+            CommandRequest commandRequest = message.GetRequest(new CommandRequest());
+            Assert.Equal(CommandType.Configure, commandRequest.Command);
+            Assert.Equal(configContent, commandRequest.Configuration.SystemConfiguration);
+        }
+
+        [Fact]
         public void WritesReadsGetState()
         {
             var message = GetStateRequestBuilder.Build();

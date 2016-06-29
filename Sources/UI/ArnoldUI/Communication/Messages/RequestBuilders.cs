@@ -26,13 +26,20 @@ namespace GoodAI.Arnold.Communication
 
     public static class CommandRequestBuilder
     {
-        public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, string blueprint = null)
+        public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, string blueprint = null, CoreConfiguration configuration = null)
         {
             var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
 
             StringOffset? blueprintOffset = null;
             if (blueprint != null)
                 blueprintOffset = builder.CreateString(blueprint);
+
+            Offset<Configuration>? configurationOffset = null;
+            if (configuration != null)
+            {
+                StringOffset systemConfigurationOffset = builder.CreateString(configuration.SystemConfiguration);
+                configurationOffset = Configuration.CreateConfiguration(builder, systemConfigurationOffset);
+            }
 
             CommandRequest.StartCommandRequest(builder);
 
@@ -41,6 +48,9 @@ namespace GoodAI.Arnold.Communication
 
             if (blueprintOffset.HasValue)
                 CommandRequest.AddBlueprint(builder, blueprintOffset.Value);
+
+            if (configurationOffset.HasValue)
+                CommandRequest.AddConfiguration(builder, configurationOffset.Value);
 
             Offset<CommandRequest> requestOffset = CommandRequest.EndCommandRequest(builder);
 
