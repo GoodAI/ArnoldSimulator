@@ -783,11 +783,11 @@ void ThresholdNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, S
 
 void ThresholdNeuron::Control(size_t brainStep)
 {
-    if (mAccumulatedActivation >= mThresholdActivation) {
+    if (mAccumulatedActivation >= 100 * mThresholdActivation) {
         mAccumulatedActivation = 0.0;
         mSentSpikeCount = 0;
 
-        if (brainStep % 2) {
+        //if (brainStep % 2) {
             for (auto it = mBase.GetOutputSynapses().begin(); it != mBase.GetOutputSynapses().end(); ++it) {
                 
                 uint16_t delay = 0;
@@ -801,7 +801,7 @@ void ThresholdNeuron::Control(size_t brainStep)
                 SendContinuousSpike(Direction::Forward, it->first, delay, mThresholdActivation);
                 ++mSentSpikeCount;
             }
-        } else {
+        /*} else {
             for (auto it = mBase.GetInputSynapses().begin(); it != mBase.GetInputSynapses().end(); ++it) {
                 NeuronId sender = mBase.GetId();
                 NeuronId receiver = it->first;
@@ -811,7 +811,7 @@ void ThresholdNeuron::Control(size_t brainStep)
                         Direction::Backward, receiver, Function::RequestThreshold, request);
                 }
             }
-        }
+        }*/
     }
 
     /*

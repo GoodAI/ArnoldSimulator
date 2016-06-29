@@ -71,7 +71,7 @@ namespace GoodAI.Arnold
         {
             if (Conductor.CoreState == CoreState.Empty)
             {
-                var configuration = new JObject {{"brainStepsPerBodyStep", 1}};
+                var configuration = new JObject {{"brainStepsPerBodyStep", 10}};
                 try
                 {
                     await Conductor.LoadBlueprintAsync(Designer.Blueprint);
