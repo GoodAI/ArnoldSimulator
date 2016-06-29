@@ -249,7 +249,7 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
     mIsSimulationLoopActive(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
     mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
     mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
-    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
+    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -455,7 +455,7 @@ BrainBase::BrainBase(CkMigrateMessage *msg) :
     mIsSimulationLoopActive(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
     mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
     mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
-    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP),
+    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -513,6 +513,8 @@ void BrainBase::pup(PUP::er &p)
     p | mBrainStep;
     p | mBrainStepsToRun;
     p | mBrainStepsPerBodyStep;
+
+    p | mSimulationWallTime;
 
     p | mNeuronIdxCounter;
     p | mRegionIdxCounter;
@@ -805,12 +807,12 @@ void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
     }
 }
 
-
 void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
 {
     mDoSimulationProgressNext = true;
     mBrainStepsToRun = untilStopped ? SIZE_MAX : brainSteps;
     if (!mIsSimulationLoopActive) {
+        mSimulationWallTime = CmiWallTimer();
         thisProxy[thisIndex].Simulate();
     }
 }
@@ -866,6 +868,7 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
     mViewportUpdateOverflowed = false;
     if (!mIsSimulationLoopActive) {
         mDoSimulationProgressNext = false;
+        mSimulationWallTime = CmiWallTimer();
         thisProxy[thisIndex].Simulate();
     }
 }
@@ -1490,6 +1493,7 @@ void BrainBase::SimulateDone()
         if (mBrainStepsToRun > 0) {
             thisProxy[thisIndex].Simulate();
         } else {
+            CkPrintf("Simulation took %f seconds.\n", CmiWallTimer() - mSimulationWallTime);
             mIsSimulationLoopActive = false;
         }
     } else {

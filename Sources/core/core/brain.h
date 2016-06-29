@@ -232,6 +232,8 @@ private:
     size_t mBrainStep;
     size_t mBrainStepsToRun;
     size_t mBrainStepsPerBodyStep;
+
+    double mSimulationWallTime;
     
     NeuronIndex mNeuronIdxCounter;
     RegionIndex mRegionIdxCounter;

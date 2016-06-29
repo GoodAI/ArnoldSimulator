@@ -174,7 +174,7 @@ void Core::pup(PUP::er &p)
 
 void Core::Exit()
 {
-    CkPrintf("Exiting after %lf...\n", CmiWallTimer() - mStartTime);
+    CkPrintf("Exiting after %f seconds...\n", CmiWallTimer() - mStartTime);
     CkExit();
 }
 
@@ -183,7 +183,11 @@ void Core::DetectKeyPress()
     static size_t brainStepsPerBodyStep = DEFAULT_BRAIN_STEPS_PER_BODY_STEP;
     while (true) {
         char c = getchar();
-        if (c == 'r') {
+        if (c == 'b') {
+            if (IsBrainLoaded()) {
+                gBrain[0].RunSimulation(10, false);
+            }
+        } else if (c == 'r') {
             if (IsBrainLoaded()) {
                 gBrain[0].RunSimulation(1, true);
             }
