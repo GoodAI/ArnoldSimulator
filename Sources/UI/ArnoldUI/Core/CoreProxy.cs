@@ -41,6 +41,13 @@ namespace GoodAI.Arnold.Core
         Task LoadBlueprintAsync(string blueprint);
 
         /// <summary>
+        /// Configures the core system, or model properties.
+        /// </summary>
+        /// <param name="coreConfiguration"></param>
+        /// <returns></returns>
+        Task SendConfigurationAsync(CoreConfiguration coreConfiguration);
+
+        /// <summary>
         /// Runs the given number of steps.
         /// This moves the simulation from Paused to Running. When the requested number
         /// of steps are performed, moves to state Paused.
@@ -138,6 +145,11 @@ namespace GoodAI.Arnold.Core
             }
 
             await SendCommandAsync(new CommandConversation(CommandType.Load, blueprint: blueprint));
+        }
+
+        public async Task SendConfigurationAsync(CoreConfiguration coreConfiguration)
+        {
+            await SendCommandAsync(new CommandConversation(CommandType.Configure, configuration: coreConfiguration));
         }
 
         public async Task ClearAsync()

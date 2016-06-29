@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GoodAI.Arnold.Communication;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Observation;
@@ -11,6 +12,7 @@ using GoodAI.Arnold.Project;
 using GoodAI.Arnold.Visualization;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
+using Newtonsoft.Json.Linq;
 using Region = GoodAI.Arnold.Project.Region;
 
 namespace GoodAI.Arnold
@@ -69,9 +71,11 @@ namespace GoodAI.Arnold
         {
             if (Conductor.CoreState == CoreState.Empty)
             {
+                var configuration = new JObject {{"brainStepsPerBodyStep", 1}};
                 try
                 {
                     await Conductor.LoadBlueprintAsync(Designer.Blueprint);
+                    await Conductor.SendConfigurationAsync(new CoreConfiguration(configuration.ToString()));
                 }
                 catch (Exception ex)
                 {

@@ -4,14 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlatBuffers;
+using GoodAI.Arnold.Core;
 
 namespace GoodAI.Arnold.Communication
 {
     public sealed class CommandConversation : Conversation<CommandRequest, StateResponse>
     {
-        public CommandConversation(CommandType commandType, uint stepsToRun = 0, string blueprint = null)
+        // TODO(HonzaS): Unify the parameters - either configuration -> json string, or blueprint -> AgentBlueprint (or similar).
+        public CommandConversation(CommandType commandType, uint stepsToRun = 0, string blueprint = null, CoreConfiguration configuration = null)
         {
-            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun, blueprint);
+            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun, blueprint, configuration);
         }
     }
 }
