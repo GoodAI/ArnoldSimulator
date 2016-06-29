@@ -554,11 +554,6 @@ void NeuronBase::Simulate(SimulateMsg *msg)
             for (auto it = mChildren.begin(); it != mChildren.end(); ++it) {
                 addedChildren.push_back(ChildLink(neuronId, *it));
             }
-            spikedSynapses.reserve(mNeuronsTriggered.size());
-            for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
-                spikedSynapses.push_back(Synapse::Link(neuronId, *it));
-            }
-
         } else if (wasInsideOfAny && !isInsideOfAny) {
 
             removedNeurons.push_back((neuronId));
@@ -576,12 +571,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
             }
 
         } else if (changedPosition) {
-
             repositionedNeurons.push_back(NeuronAdditionReport(neuronId, GetType(), mPosition));
-            spikedSynapses.reserve(mNeuronsTriggered.size());
-            for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
-                spikedSynapses.push_back(Synapse::Link(neuronId, *it));
-            }
         }
     }
 
@@ -605,6 +595,14 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         if (mNeuron && wasSpiked) {
             mNeuron->Control(brainStep);
             customContributionSize = mNeuron->ContributeToRegion(customContributionPtr);
+        }
+    }
+    
+    // Spikes happened during Control(), we can gather them for UI now.
+    if (isInsideOfAny) {
+        spikedSynapses.reserve(mNeuronsTriggered.size());
+        for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
+            spikedSynapses.push_back(Synapse::Link(neuronId, *it));
         }
     }
 
@@ -651,10 +649,14 @@ void NeuronBase::Simulate(SimulateMsg *msg)
             *p | repositionedNeurons;
             *p | removedNeurons;
             *p | addedSynapses;
-            *p | spikedSynapses;
             *p | removedSynapses;
             *p | addedChildren;
             *p | removedChildren;
+        }
+
+        *p | isInsideOfAny;
+        if (isInsideOfAny) {
+            *p | spikedSynapses;
         }
 
         if (i == 0) {

@@ -1188,11 +1188,6 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                 addedSynapses.insert(addedSynapses.begin(),
                     tmpAddedSynapses.begin(), tmpAddedSynapses.end());
 
-                Synapse::Links tmpSpikedSynapses; p | tmpSpikedSynapses;
-                spikedSynapses.reserve(spikedSynapses.size() + tmpSpikedSynapses.size());
-                spikedSynapses.insert(spikedSynapses.begin(),
-                    tmpSpikedSynapses.begin(), tmpSpikedSynapses.end());
-
                 Synapse::Links tmpRemovedSynapses; p | tmpRemovedSynapses;
                 removedSynapses.reserve(removedSynapses.size() + tmpRemovedSynapses.size());
                 removedSynapses.insert(removedSynapses.begin(),
@@ -1207,6 +1202,14 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                 removedChildren.reserve(removedChildren.size() + tmpRemovedChildren.size());
                 removedChildren.insert(removedChildren.begin(),
                     tmpRemovedChildren.begin(), tmpRemovedChildren.end());
+            }
+
+            bool isInsideOfRoi; p | isInsideOfRoi;
+            if (isInsideOfRoi) {
+                Synapse::Links tmpSpikedSynapses; p | tmpSpikedSynapses;
+                spikedSynapses.reserve(spikedSynapses.size() + tmpSpikedSynapses.size());
+                spikedSynapses.insert(spikedSynapses.begin(),
+                    tmpSpikedSynapses.begin(), tmpSpikedSynapses.end());
             }
 
             neuronResult = neuronResult->next();
