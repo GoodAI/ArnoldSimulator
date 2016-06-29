@@ -401,6 +401,16 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         }
 
         gBrain[0].PauseSimulation();
+    } else if (commandType == Communication::CommandType_Configure) {
+        json configuration;
+        try {
+            configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
+        } catch (std::invalid_argument &) {
+            CkPrintf("Invalid configuration.");
+        }
+
+        uint32_t brainStepsPerBodyStep = configuration["brainStepsPerBodyStep"].get<uint32_t>();
+        gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
     }
 
     // TODO(HonzaS): Refactor (or at least rename).
@@ -909,6 +919,8 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     auto removedSynapsesVectorOffset = builder.CreateVector(removedSynapseOffsets);
 
     Communication::ModelResponseBuilder responseBuilder(builder);
+    responseBuilder.add_isFull(update.isFull);
+
     responseBuilder.add_addedRegions(addedRegionsVectorOffset);
     responseBuilder.add_repositionedRegions(repositionedRegionsVectorOffset);
     responseBuilder.add_removedRegions(removedRegionsVectorOffset);

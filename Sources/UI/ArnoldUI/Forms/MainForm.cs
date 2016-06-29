@@ -74,7 +74,8 @@ namespace GoodAI.Arnold
 
         private void SimulationOnStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
         {
-            Invoke((MethodInvoker)UpdateButtons);
+            if (!IsDisposed)
+                Invoke((MethodInvoker)UpdateButtons);
         }
 
         private void SimulationOnStateChangeFailed(object sender, StateChangeFailedEventArgs e)
