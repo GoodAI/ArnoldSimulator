@@ -354,11 +354,12 @@ namespace GoodAI.Arnold.Core
                 Synapse spikedSynapse = diff.GetSpikedSynapses(i);
                 ProcessSynapse(model, spikedSynapse, "spike", (fromRegion, fromNeuron, toRegion, toNeuron) =>
                 {
-                    SynapseModel synapseModel = fromNeuron.Outputs[toNeuron.Index];
-
-                    if (synapseModel == null)
+                    SynapseModel synapseModel;
+                    if (!fromNeuron.Outputs.TryGetValue(toNeuron.Index, out synapseModel))
                     {
-                        LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
+                        // Do not log this, it happens a lot and is expected.
+                        // The core sends a lot of synapses that lead to neurons which are not displayed.
+                        //LogSynapseNotProcessed(spikedSynapse, "spike", "Synapse not found");
                         return;
                     }
 
