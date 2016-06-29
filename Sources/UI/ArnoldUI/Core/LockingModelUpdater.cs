@@ -168,7 +168,7 @@ namespace GoodAI.Arnold.Core
                     m_filterChanged = false;
 
                     // Request a model diff from the core.
-                    Log.Debug("Sending model request.");
+                    //Log.Debug("Sending model request.");
                     var modelResponseTask =
                         m_coreLink.Request(new GetModelConversation(m_getFullModel, filterToSend, m_observerRequests),
                             TimeoutMs).ConfigureAwait(false);
