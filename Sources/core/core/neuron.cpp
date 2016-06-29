@@ -81,7 +81,7 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
         p = json::parse(params);
     } catch (std::invalid_argument &) { }
 
-    auto engine = Random::GetThreadEngine();
+    Random::Engines::reference engine = Random::GetThreadEngine();
     std::uniform_real_distribution<float> randFloat(0.0, 1.0);
 
     mNeverSimulated = true;

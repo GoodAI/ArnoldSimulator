@@ -108,7 +108,7 @@ void RandomBody::Simulate(
     std::function<void(const std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
     std::function<void(const std::string &, std::vector<uint8_t> &)> pullSensoMotoricData)
 {
-    auto engine = Random::GetThreadEngine();
+    Random::Engines::reference engine = Random::GetThreadEngine();
     std::uniform_real_distribution<double> randDouble(0.0, 1.0);
 
     for (auto it = mActuatorsInfo.begin(); it != mActuatorsInfo.end(); ++it) {
