@@ -1102,7 +1102,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
             ObserverResults tmpObserverResults; p | tmpObserverResults;
             observerResults.reserve(observerResults.size() + tmpObserverResults.size());
-            observerResults.insert(observerResults.begin(),
+            observerResults.insert(observerResults.end(),
                 tmpObserverResults.begin(), tmpObserverResults.end());
 
             bool skipDynamicityReport; p | skipDynamicityReport;
@@ -1152,7 +1152,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
                 Synapse::Removals tmpSynapseRemovals; p | tmpSynapseRemovals;
                 mSynapseRemovals.reserve(mSynapseRemovals.size() + tmpSynapseRemovals.size());
-                mSynapseRemovals.insert(mSynapseRemovals.begin(),
+                mSynapseRemovals.insert(mSynapseRemovals.end(),
                     tmpSynapseRemovals.begin(), tmpSynapseRemovals.end());
 
                 ChildLinks tmpChildAdditions; p | tmpChildAdditions;
@@ -1171,7 +1171,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 
                 ChildLinks tmpChildRemovals; p | tmpChildRemovals;
                 mChildRemovals.reserve(mChildRemovals.size() + tmpChildRemovals.size());
-                mChildRemovals.insert(mChildRemovals.begin(),
+                mChildRemovals.insert(mChildRemovals.end(),
                     tmpChildRemovals.begin(), tmpChildRemovals.end());
             }
 
@@ -1179,37 +1179,37 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
             if (!skipTopologyReport) {
                 NeuronAdditionReports tmpAddedNeurons; p | tmpAddedNeurons;
                 addedNeurons.reserve(addedNeurons.size() + tmpAddedNeurons.size());
-                addedNeurons.insert(addedNeurons.begin(),
+                addedNeurons.insert(addedNeurons.end(),
                     tmpAddedNeurons.begin(), tmpAddedNeurons.end());
 
                 NeuronAdditionReports tmpRepositionedNeurons; p | tmpRepositionedNeurons;
                 repositionedNeurons.reserve(repositionedNeurons.size() + tmpRepositionedNeurons.size());
-                repositionedNeurons.insert(repositionedNeurons.begin(),
+                repositionedNeurons.insert(repositionedNeurons.end(),
                     tmpRepositionedNeurons.begin(), tmpRepositionedNeurons.end());
 
                 NeuronRemovals tmpRemovedNeurons; p | tmpRemovedNeurons;
                 removedNeurons.reserve(removedNeurons.size() + tmpRemovedNeurons.size());
-                removedNeurons.insert(removedNeurons.begin(),
+                removedNeurons.insert(removedNeurons.end(),
                     tmpRemovedNeurons.begin(), tmpRemovedNeurons.end());
 
                 Synapse::Links tmpAddedSynapses; p | tmpAddedSynapses;
                 addedSynapses.reserve(addedSynapses.size() + tmpAddedSynapses.size());
-                addedSynapses.insert(addedSynapses.begin(),
+                addedSynapses.insert(addedSynapses.end(),
                     tmpAddedSynapses.begin(), tmpAddedSynapses.end());
 
                 Synapse::Links tmpRemovedSynapses; p | tmpRemovedSynapses;
                 removedSynapses.reserve(removedSynapses.size() + tmpRemovedSynapses.size());
-                removedSynapses.insert(removedSynapses.begin(),
+                removedSynapses.insert(removedSynapses.end(),
                     tmpRemovedSynapses.begin(), tmpRemovedSynapses.end());
 
                 ChildLinks tmpAddedChildren; p | tmpAddedChildren;
                 addedChildren.reserve(addedChildren.size() + tmpAddedChildren.size());
-                addedChildren.insert(addedChildren.begin(),
+                addedChildren.insert(addedChildren.end(),
                     tmpAddedChildren.begin(), tmpAddedChildren.end());
 
                 ChildLinks tmpRemovedChildren; p | tmpRemovedChildren;
                 removedChildren.reserve(removedChildren.size() + tmpRemovedChildren.size());
-                removedChildren.insert(removedChildren.begin(),
+                removedChildren.insert(removedChildren.end(),
                     tmpRemovedChildren.begin(), tmpRemovedChildren.end());
             }
 
@@ -1217,7 +1217,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
             if (isInsideOfRoi) {
                 Synapse::Links tmpSpikedSynapses; p | tmpSpikedSynapses;
                 spikedSynapses.reserve(spikedSynapses.size() + tmpSpikedSynapses.size());
-                spikedSynapses.insert(spikedSynapses.begin(),
+                spikedSynapses.insert(spikedSynapses.end(),
                     tmpSpikedSynapses.begin(), tmpSpikedSynapses.end());
             }
 

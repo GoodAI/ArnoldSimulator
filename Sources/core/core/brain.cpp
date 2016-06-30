@@ -1338,7 +1338,7 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
             if (mDoViewportUpdate) {
                 ObserverResults tmpObserverResults; p | tmpObserverResults;
                 accum->observerResults.reserve(accum->observerResults.size() + tmpObserverResults.size());
-                accum->observerResults.insert(accum->observerResults.begin(),
+                accum->observerResults.insert(accum->observerResults.end(),
                     tmpObserverResults.begin(), tmpObserverResults.end());
 
                 if (mDoFullViewportUpdate) {
@@ -1346,17 +1346,17 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
                     RegionAdditionReports tmpAddedRegions; p | tmpAddedRegions;
                     accum->addedRegions.reserve(accum->addedRegions.size() + tmpAddedRegions.size());
                     // TODO(Premek): Insert to the end, it's more efficient (repeats below).
-                    accum->addedRegions.insert(accum->addedRegions.begin(),
+                    accum->addedRegions.insert(accum->addedRegions.end(),
                         tmpAddedRegions.begin(), tmpAddedRegions.end());
 
                     ConnectorAdditionReports tmpAddedConnectors; p | tmpAddedConnectors;
                     accum->addedConnectors.reserve(accum->addedConnectors.size() + tmpAddedConnectors.size());
-                    accum->addedConnectors.insert(accum->addedConnectors.begin(),
+                    accum->addedConnectors.insert(accum->addedConnectors.end(),
                         tmpAddedConnectors.begin(), tmpAddedConnectors.end());
 
                     Connections tmpAddedConnections; p | tmpAddedConnections;
                     accum->addedConnections.reserve(accum->addedConnections.size() + tmpAddedConnections.size());
-                    accum->addedConnections.insert(accum->addedConnections.begin(),
+                    accum->addedConnections.insert(accum->addedConnections.end(),
                         tmpAddedConnections.begin(), tmpAddedConnections.end());
 
                 } else {
@@ -1368,7 +1368,7 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
                     }
 
                     accum->removedRegions.reserve(accum->removedRegions.size() + mRegionRemovals.size());
-                    accum->removedRegions.insert(accum->removedRegions.begin(),
+                    accum->removedRegions.insert(accum->removedRegions.end(),
                         mRegionRemovals.begin(), mRegionRemovals.end());
 
                     accum->addedConnectors.reserve(accum->addedConnectors.size() + mConnectorAdditions.size());
@@ -1378,61 +1378,61 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
                     }
 
                     accum->removedConnectors.reserve(accum->removedConnectors.size() + mConnectorRemovals.size());
-                    accum->removedConnectors.insert(accum->removedConnectors.begin(),
+                    accum->removedConnectors.insert(accum->removedConnectors.end(),
                         mConnectorRemovals.begin(), mConnectorRemovals.end());
 
                     accum->addedConnections.reserve(accum->addedConnections.size() + mConnectionAdditions.size());
-                    accum->addedConnections.insert(accum->addedConnections.begin(),
+                    accum->addedConnections.insert(accum->addedConnections.end(),
                         mConnectionAdditions.begin(), mConnectionAdditions.end());
 
                     accum->removedConnections.reserve(accum->removedConnections.size() + mConnectionRemovals.size());
-                    accum->removedConnections.insert(accum->removedConnections.begin(),
+                    accum->removedConnections.insert(accum->removedConnections.end(),
                         mConnectionRemovals.begin(), mConnectionRemovals.end());
                 }
 
                 RegionAdditionReports tmpRepositionedRegions; p | tmpRepositionedRegions;
                 accum->repositionedRegions.reserve(accum->repositionedRegions.size() + tmpRepositionedRegions.size());
-                accum->repositionedRegions.insert(accum->repositionedRegions.begin(),
+                accum->repositionedRegions.insert(accum->repositionedRegions.end(),
                     tmpRepositionedRegions.begin(), tmpRepositionedRegions.end());
 
                 NeuronAdditionReports tmpAddedNeurons; p | tmpAddedNeurons;
                 accum->addedNeurons.reserve(accum->addedNeurons.size() + tmpAddedNeurons.size());
-                accum->addedNeurons.insert(accum->addedNeurons.begin(),
+                accum->addedNeurons.insert(accum->addedNeurons.end(),
                     tmpAddedNeurons.begin(), tmpAddedNeurons.end());
 
                 NeuronAdditionReports tmpRepositionedNeurons; p | tmpRepositionedNeurons;
                 accum->repositionedNeurons.reserve(accum->repositionedNeurons.size() + tmpRepositionedNeurons.size());
-                accum->repositionedNeurons.insert(accum->repositionedNeurons.begin(),
+                accum->repositionedNeurons.insert(accum->repositionedNeurons.end(),
                     tmpRepositionedNeurons.begin(), tmpRepositionedNeurons.end());
 
                 NeuronRemovals tmpRemovedNeurons; p | tmpRemovedNeurons;
                 accum->removedNeurons.reserve(accum->removedNeurons.size() + tmpRemovedNeurons.size());
-                accum->removedNeurons.insert(accum->removedNeurons.begin(),
+                accum->removedNeurons.insert(accum->removedNeurons.end(),
                     tmpRemovedNeurons.begin(), tmpRemovedNeurons.end());
 
                 Synapse::Links tmpAddedSynapses; p | tmpAddedSynapses;
                 accum->addedSynapses.reserve(accum->addedSynapses.size() + tmpAddedSynapses.size());
-                accum->addedSynapses.insert(accum->addedSynapses.begin(),
+                accum->addedSynapses.insert(accum->addedSynapses.end(),
                     tmpAddedSynapses.begin(), tmpAddedSynapses.end());
 
                 Synapse::Links tmpSpikedSynapses; p | tmpSpikedSynapses;
                 accum->spikedSynapses.reserve(accum->spikedSynapses.size() + tmpSpikedSynapses.size());
-                accum->spikedSynapses.insert(accum->spikedSynapses.begin(),
+                accum->spikedSynapses.insert(accum->spikedSynapses.end(),
                     tmpSpikedSynapses.begin(), tmpSpikedSynapses.end());
 
                 Synapse::Links tmpRemovedSynapses; p | tmpRemovedSynapses;
                 accum->removedSynapses.reserve(accum->removedSynapses.size() + tmpRemovedSynapses.size());
-                accum->removedSynapses.insert(accum->removedSynapses.begin(),
+                accum->removedSynapses.insert(accum->removedSynapses.end(),
                     tmpRemovedSynapses.begin(), tmpRemovedSynapses.end());
 
                 ChildLinks tmpAddedChildren; p | tmpAddedChildren;
                 accum->addedChildren.reserve(accum->addedChildren.size() + tmpAddedChildren.size());
-                accum->addedChildren.insert(accum->addedChildren.begin(),
+                accum->addedChildren.insert(accum->addedChildren.end(),
                     tmpAddedChildren.begin(), tmpAddedChildren.end());
 
                 ChildLinks tmpRemovedChildren; p | tmpRemovedChildren;
                 accum->removedChildren.reserve(accum->removedChildren.size() + tmpRemovedChildren.size());
-                accum->removedChildren.insert(accum->removedChildren.begin(),
+                accum->removedChildren.insert(accum->removedChildren.end(),
                     tmpRemovedChildren.begin(), tmpRemovedChildren.end());
             }
 
