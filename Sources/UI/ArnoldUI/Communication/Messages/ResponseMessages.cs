@@ -290,10 +290,10 @@ public sealed class Synapse : Table {
   }
 };
 
-public sealed class ObserverData : Table {
-  public static ObserverData GetRootAsObserverData(ByteBuffer _bb) { return GetRootAsObserverData(_bb, new ObserverData()); }
-  public static ObserverData GetRootAsObserverData(ByteBuffer _bb, ObserverData obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
-  public ObserverData __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+public sealed class ObserverResult : Table {
+  public static ObserverResult GetRootAsObserverResult(ByteBuffer _bb) { return GetRootAsObserverResult(_bb, new ObserverResult()); }
+  public static ObserverResult GetRootAsObserverResult(ByteBuffer _bb, ObserverResult obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public ObserverResult __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public GoodAI.Arnold.Communication.Observer Observer { get { return GetObserver(new GoodAI.Arnold.Communication.Observer()); } }
   public GoodAI.Arnold.Communication.Observer GetObserver(GoodAI.Arnold.Communication.Observer obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
@@ -301,23 +301,23 @@ public sealed class ObserverData : Table {
   public int DataLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
   public ArraySegment<byte>? GetDataBytes() { return __vector_as_arraysegment(6); }
 
-  public static Offset<ObserverData> CreateObserverData(FlatBufferBuilder builder,
+  public static Offset<ObserverResult> CreateObserverResult(FlatBufferBuilder builder,
       Offset<GoodAI.Arnold.Communication.Observer> observerOffset = default(Offset<GoodAI.Arnold.Communication.Observer>),
       VectorOffset dataOffset = default(VectorOffset)) {
     builder.StartObject(2);
-    ObserverData.AddData(builder, dataOffset);
-    ObserverData.AddObserver(builder, observerOffset);
-    return ObserverData.EndObserverData(builder);
+    ObserverResult.AddData(builder, dataOffset);
+    ObserverResult.AddObserver(builder, observerOffset);
+    return ObserverResult.EndObserverResult(builder);
   }
 
-  public static void StartObserverData(FlatBufferBuilder builder) { builder.StartObject(2); }
+  public static void StartObserverResult(FlatBufferBuilder builder) { builder.StartObject(2); }
   public static void AddObserver(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Observer> observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
   public static void AddData(FlatBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(1, dataOffset.Value, 0); }
   public static VectorOffset CreateDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
   public static void StartDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static Offset<ObserverData> EndObserverData(FlatBufferBuilder builder) {
+  public static Offset<ObserverResult> EndObserverResult(FlatBufferBuilder builder) {
     int o = builder.EndObject();
-    return new Offset<ObserverData>(o);
+    return new Offset<ObserverResult>(o);
   }
 };
 
@@ -366,9 +366,9 @@ public sealed class ModelResponse : Table {
   public Synapse GetRemovedSynapses(int j) { return GetRemovedSynapses(new Synapse(), j); }
   public Synapse GetRemovedSynapses(Synapse obj, int j) { int o = __offset(30); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int RemovedSynapsesLength { get { int o = __offset(30); return o != 0 ? __vector_len(o) : 0; } }
-  public ObserverData GetObservers(int j) { return GetObservers(new ObserverData(), j); }
-  public ObserverData GetObservers(ObserverData obj, int j) { int o = __offset(32); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int ObserversLength { get { int o = __offset(32); return o != 0 ? __vector_len(o) : 0; } }
+  public ObserverResult GetObserverResults(int j) { return GetObserverResults(new ObserverResult(), j); }
+  public ObserverResult GetObserverResults(ObserverResult obj, int j) { int o = __offset(32); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int ObserverResultsLength { get { int o = __offset(32); return o != 0 ? __vector_len(o) : 0; } }
 
   public static Offset<ModelResponse> CreateModelResponse(FlatBufferBuilder builder,
       bool isFull = false,
@@ -385,9 +385,9 @@ public sealed class ModelResponse : Table {
       VectorOffset addedSynapsesOffset = default(VectorOffset),
       VectorOffset spikedSynapsesOffset = default(VectorOffset),
       VectorOffset removedSynapsesOffset = default(VectorOffset),
-      VectorOffset observersOffset = default(VectorOffset)) {
+      VectorOffset observerResultsOffset = default(VectorOffset)) {
     builder.StartObject(15);
-    ModelResponse.AddObservers(builder, observersOffset);
+    ModelResponse.AddObserverResults(builder, observerResultsOffset);
     ModelResponse.AddRemovedSynapses(builder, removedSynapsesOffset);
     ModelResponse.AddSpikedSynapses(builder, spikedSynapsesOffset);
     ModelResponse.AddAddedSynapses(builder, addedSynapsesOffset);
@@ -446,9 +446,9 @@ public sealed class ModelResponse : Table {
   public static void AddRemovedSynapses(FlatBufferBuilder builder, VectorOffset removedSynapsesOffset) { builder.AddOffset(13, removedSynapsesOffset.Value, 0); }
   public static VectorOffset CreateRemovedSynapsesVector(FlatBufferBuilder builder, Offset<Synapse>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartRemovedSynapsesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddObservers(FlatBufferBuilder builder, VectorOffset observersOffset) { builder.AddOffset(14, observersOffset.Value, 0); }
-  public static VectorOffset CreateObserversVector(FlatBufferBuilder builder, Offset<ObserverData>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
-  public static void StartObserversVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static void AddObserverResults(FlatBufferBuilder builder, VectorOffset observerResultsOffset) { builder.AddOffset(14, observerResultsOffset.Value, 0); }
+  public static VectorOffset CreateObserverResultsVector(FlatBufferBuilder builder, Offset<ObserverResult>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
+  public static void StartObserverResultsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static Offset<ModelResponse> EndModelResponse(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<ModelResponse>(o);

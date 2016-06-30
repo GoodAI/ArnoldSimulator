@@ -101,8 +101,8 @@ namespace GoodAI.Arnold.UI.Tests
 
             ModelResponse modelResponse = message.GetResponse(new ModelResponse());
             Assert.Equal(regionName, modelResponse.GetAddedRegions(0).Name);
-            Assert.Equal(observer.Type, modelResponse.GetObservers(0).Observer.Type);
-            Assert.Equal(data[0], modelResponse.GetObservers(0).GetData(0));
+            Assert.Equal(observer.Type, modelResponse.GetObserverResults(0).Observer.Type);
+            Assert.Equal(data[0], modelResponse.GetObserverResults(0).GetData(0));
         }
 
         [Fact]

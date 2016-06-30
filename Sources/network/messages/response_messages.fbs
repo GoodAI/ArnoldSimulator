@@ -78,7 +78,7 @@ table Synapse {
 	to:NeuronId;
 }
 
-table ObserverData {
+table ObserverResult {
 	observer:Observer;
 	data:[ubyte];
 }
@@ -107,7 +107,7 @@ table ModelResponse {
 	removedSynapses:[Synapse];
 
 	// Data for observers
-	observers:[ObserverData];
+	observerResults:[ObserverResult];
 }
 
 // End of model response.

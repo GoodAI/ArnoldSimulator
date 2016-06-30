@@ -416,9 +416,9 @@ namespace GoodAI.Arnold.Core
 
         private void ApplyObservers(SimulationModel model, ModelResponse diff)
         {
-            for (int i = 0; i < diff.ObserversLength; i++)
+            for (int i = 0; i < diff.ObserverResultsLength; i++)
             {
-                ObserverData observerData = diff.GetObservers(i);
+                ObserverResult observerData = diff.GetObserverResults(i);
 
                 NeuronId neuronId = observerData.Observer.NeuronId;
                 var definition = new ObserverDefinition(neuronId.Neuron, neuronId.Region, observerData.Observer.Type);

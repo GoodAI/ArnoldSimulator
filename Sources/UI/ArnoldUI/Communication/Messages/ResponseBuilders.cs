@@ -139,7 +139,7 @@ namespace GoodAI.Arnold.Communication
                 ModelResponse.AddRemovedSynapses(builder, removedSynapsesVectorOffset.Value);
 
             if (observersVectorOffset.HasValue)
-                ModelResponse.AddObservers(builder, observersVectorOffset.Value);
+                ModelResponse.AddObserverResults(builder, observersVectorOffset.Value);
 
             return ResponseMessageBuilder.Build(builder, Response.ModelResponse, ModelResponse.EndModelResponse(builder));
         }
@@ -354,7 +354,7 @@ namespace GoodAI.Arnold.Communication
 
         private static VectorOffset? BuildObservers(IList<ObserverDataContainer> observers, FlatBufferBuilder builder)
         {
-            Offset<ObserverData>[] observersOffsets = BuildOffsets(observers,
+            Offset<ObserverResult>[] observersOffsets = BuildOffsets(observers,
                 observer =>
                 {
                     var neuronId = NeuronId.CreateNeuronId(builder, observer.Definition.NeuronIndex,
@@ -363,15 +363,15 @@ namespace GoodAI.Arnold.Communication
 
                     var observerOffset = Observer.CreateObserver(builder, neuronId, observerType);
 
-                    var dataOffset = ObserverData.CreateDataVector(builder, observer.Data);
+                    var dataOffset = ObserverResult.CreateDataVector(builder, observer.Data);
 
-                    return ObserverData.CreateObserverData(builder, observerOffset, dataOffset);
+                    return ObserverResult.CreateObserverResult(builder, observerOffset, dataOffset);
                 });
 
             if (observersOffsets == null)
                 return null;
 
-            return ModelResponse.CreateObserversVector(builder, observersOffsets);
+            return ModelResponse.CreateObserverResultsVector(builder, observersOffsets);
         }
 
         private static Offset<TMessageEntity>[] BuildOffsets<TModel, TMessageEntity>(IList<TModel> models,
