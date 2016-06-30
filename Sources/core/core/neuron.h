@@ -50,7 +50,7 @@ public:
     virtual void Control(size_t brainStep) = 0;
 
     virtual size_t ContributeToRegion(uint8_t *&contribution) = 0;
-    virtual void CalculateObserver(std::vector<uint8_t> &observerData) {};
+    virtual void CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData) {};
 
     virtual void HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data);
     virtual void HandleSpike(Direction direction, BinarySpike &spike, Spike::Data &data);
@@ -176,6 +176,8 @@ public:
     virtual void Control(size_t brainStep) override;
 
     virtual size_t ContributeToRegion(uint8_t *&contribution) override;
+
+    void CalculateObserver(ObserverType type, std::vector<uint8_t>& observerData) override;
 
     enum class Function : uint8_t
     {

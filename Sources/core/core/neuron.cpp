@@ -601,9 +601,9 @@ void NeuronBase::Simulate(SimulateMsg *msg)
 
             for (auto observer : observers) {
                 if (std::get<0>(observer) == neuronId) {
-                    ObserverResult currentData;
-                    mNeuron->CalculateObserver(std::get<1>(currentData));
-                    observerResults.push_back(currentData);
+                    ObserverResult currentResult(observer, std::vector<uint8_t>());
+                    mNeuron->CalculateObserver(std::get<1>(observer), std::get<1>(currentResult));
+                    observerResults.push_back(currentResult);
                 }
             }
         }
@@ -764,6 +764,21 @@ void ThresholdNeuron::HandleSpike(Direction direction, ContinuousSpike &spike, S
     } else {
         spike.SetDelay(data, --delay);
         mBase.EnqueueSpike(direction, data);
+    }
+}
+
+void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData)
+{
+    Neuron::CalculateObserver(type, observerData);
+
+    // TODO(HonzaS): Use composition here, provide observer classes.
+    if (type == ObserverType::Greyscale) {
+        observerData.push_back(0);
+        observerData.push_back(50);
+        observerData.push_back(100);
+        observerData.push_back(150);
+        observerData.push_back(200);
+        observerData.push_back(250);
     }
 }
 
