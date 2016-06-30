@@ -773,12 +773,7 @@ void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> 
 
     // TODO(HonzaS): Use composition here, provide observer classes.
     if (type == ObserverType::Greyscale) {
-        observerData.push_back(0);
-        observerData.push_back(50);
-        observerData.push_back(100);
-        observerData.push_back(150);
-        observerData.push_back(200);
-        observerData.push_back(250);
+        observerData.push_back(mAccumulatedActivation * 255 / (100 * mThresholdActivation));
     }
 }
 
