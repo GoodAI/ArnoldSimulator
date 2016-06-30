@@ -517,6 +517,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     size_t brainStep = msg->brainStep;
     Boxes roiBoxes = msg->roiBoxes;
     Boxes roiBoxesLast = msg->roiBoxesLast;
+    Observers observers = msg->observers;
 
     NeuronId neuronId = GetNeuronId(thisIndex.x, thisIndex.y);
 
@@ -578,6 +579,8 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     uint8_t *customContributionPtr = nullptr;
     size_t customContributionSize = 0;
 
+    ObserverResults observerResults;
+
     if (doProgress) {
         bool wasSpiked = !mForwardSpikesCurrent->empty() || mBackwardSpikesCurrent->empty();
 
@@ -595,6 +598,14 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         if (mNeuron && wasSpiked) {
             mNeuron->Control(brainStep);
             customContributionSize = mNeuron->ContributeToRegion(customContributionPtr);
+
+            for (auto observer : observers) {
+                if (std::get<0>(observer) == neuronId) {
+                    ObserverResult currentData;
+                    mNeuron->CalculateObserver(std::get<1>(currentData));
+                    observerResults.push_back(currentData);
+                }
+            }
         }
     }
     
@@ -632,6 +643,8 @@ void NeuronBase::Simulate(SimulateMsg *msg)
         if (customContributionSize > 0) {
             (*p)(customContributionPtr, customContributionSize);
         }
+
+        *p | observerResults;
 
         *p | skipDynamicityReport;
         if (!skipDynamicityReport) {

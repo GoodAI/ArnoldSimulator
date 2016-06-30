@@ -893,6 +893,7 @@ void RegionBase::Simulate(SimulateMsg *msg)
     mDoFullUpdate = msg->doFullUpdate;
     mDoProgress = msg->doProgress;
     mBrainStep = msg->brainStep;
+    mObservers = msg->observers;
 
     Boxes intersection;
     Box3D commonBox;
@@ -968,6 +969,7 @@ void RegionBase::NeuronFlipSpikeQueuesDone(CkReductionMsg *msg)
         simulateMsg->brainStep = mBrainStep;
         simulateMsg->roiBoxes = mRoiTransformedBoxes;
         simulateMsg->roiBoxesLast = mRoiTransformedBoxesLast;
+        simulateMsg->observers = mObservers;
 
         mNeuronSection.Simulate(simulateMsg);
 
@@ -1035,6 +1037,8 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
     ChildLinks addedChildren;
     ChildLinks removedChildren;
 
+    std::vector<ObserverResult> observerResults;
+
     if (mDoUpdate && !mNeuronRemovals.empty()) {
         std::unordered_set<NeuronId> removedNeuronSet(
             mNeuronRemovals.begin(), mNeuronRemovals.end());
@@ -1095,6 +1099,11 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                 }
                 delete[] neuronContributionPtr;
             }
+
+            ObserverResults tmpObserverResults; p | tmpObserverResults;
+            observerResults.reserve(observerResults.size() + tmpObserverResults.size());
+            observerResults.insert(observerResults.begin(),
+                tmpObserverResults.begin(), tmpObserverResults.end());
 
             bool skipDynamicityReport; p | skipDynamicityReport;
             if (!skipDynamicityReport) {
@@ -1233,6 +1242,8 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
         if (customContributionSize > 0) {
             (*p)(customContributionPtr, customContributionSize);
         }
+
+        *p | observerResults;
 
         if (mDoUpdate) {
             if (mDoFullUpdate) {

@@ -39,8 +39,9 @@ void *SimulateMsg::pack(SimulateMsg *msg)
 {
     size_t boxCnt = msg->roiBoxes.size();
     size_t boxLastCnt = msg->roiBoxesLast.size();
-    size_t size = (sizeof(CkSectionInfo) + sizeof(char) + sizeof(unsigned short) + 
-        sizeof(bool) * 3) + (sizeof(size_t) * 3) + (sizeof(Box3D) * (boxCnt + boxLastCnt));
+    size_t observerCnt = msg->observers.size();
+    size_t size = (sizeof(CkSectionInfo) + sizeof(char) + sizeof(unsigned short) +
+        sizeof(bool) * 3) + (sizeof(size_t) * 4) + (sizeof(Box3D) * (boxCnt + boxLastCnt)) + (sizeof(Observer) * observerCnt);
     char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
 
@@ -75,7 +76,13 @@ void *SimulateMsg::pack(SimulateMsg *msg)
     cur += sizeof(size_t);
 
     std::memcpy(cur, msg->roiBoxesLast.data(), sizeof(Box3D) * boxLastCnt);
-    //cur += sizeof(Box3D) * boxLastCnt;
+    cur += sizeof(Box3D) * boxLastCnt;
+
+    std::memcpy(cur, &observerCnt, sizeof(size_t));
+    cur += sizeof(size_t);
+
+    std::memcpy(cur, msg->observers.data(), sizeof(Observer) * observerCnt);
+    //cur += sizeof(ObserverResult);
 
     delete msg;
     return static_cast<void *>(buf);
@@ -122,7 +129,15 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
 
     msg->roiBoxesLast.resize(boxLastCnt);
     std::memcpy(msg->roiBoxesLast.data(), cur, sizeof(Box3D) * boxLastCnt);
-    //cur += sizeof(Box3D) * boxLastCnt;
+    cur += sizeof(Box3D) * boxLastCnt;
+
+    size_t observerCnt = 0;
+    std::memcpy(&observerCnt, cur, sizeof(size_t));
+    cur += sizeof(size_t);
+
+    msg->observers.resize(observerCnt);
+    std::memcpy(msg->observers.data(), cur, sizeof(Observer) * observerCnt);
+    //cur += sizeof(ObserverResult) * observerCnt;
 
     CkFreeMsg(buf);
     return msg;
@@ -832,6 +847,11 @@ void BrainBase::UpdateRegionOfInterest(Boxes &roiBoxes)
     mRoiBoxes = roiBoxes;
 }
 
+void BrainBase::UpdateObservers(Observers &observers)
+{
+    mObservers = observers;
+}
+
 void BrainBase::UpdateRegionBox(RegionIndex regIdx, Box3D &box)
 {
     mRegionRepositions.push_back(RegionRepositionRequest(regIdx, box));
@@ -1277,6 +1297,7 @@ void BrainBase::SimulateRegionSimulate()
         simulateMsg->doProgress = mDoSimulationProgress;
         simulateMsg->brainStep = mBrainStep;
         simulateMsg->roiBoxes = mRoiBoxes;
+        simulateMsg->observers = mObservers;
 
         gRegions.Simulate(simulateMsg);
     } else {
@@ -1315,6 +1336,10 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
                 &fullViewportUpdateAccumulator : &mViewportUpdateAccumulator;
 
             if (mDoViewportUpdate) {
+                ObserverResults tmpObserverResults; p | tmpObserverResults;
+                accum->observerResults.reserve(accum->observerResults.size() + tmpObserverResults.size());
+                accum->observerResults.insert(accum->observerResults.begin(),
+                    tmpObserverResults.begin(), tmpObserverResults.end());
 
                 if (mDoFullViewportUpdate) {
 

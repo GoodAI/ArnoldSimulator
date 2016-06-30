@@ -66,6 +66,17 @@ inline void operator|(PUP::er &p, Direction &direction)
 
 #define OPPOSITE_DIRECTION(direction) (direction == Direction::Forward ? Direction::Backward : Direction::Forward)
 
+enum class ObserverType : uint8_t
+{
+    Greyscale,
+    Unknown
+};
+
+inline void operator|(PUP::er &p, ObserverType &type)
+{
+    pup_bytes(&p, static_cast<void *>(&type), sizeof(ObserverType));
+}
+
 typedef std::string BrainName;
 typedef std::string BrainType;
 typedef std::string BrainParams;
@@ -83,10 +94,30 @@ typedef std::tuple<float, float, float> Size3D;
 typedef std::pair<Point3D, Size3D> Box3D;
 typedef std::vector<Box3D> Boxes;
 
+typedef std::tuple<NeuronId, ObserverType> Observer;
+typedef std::vector<Observer> Observers;
+
+typedef std::tuple<Observer, std::vector<uint8_t>> ObserverResult;
+typedef std::vector<ObserverResult> ObserverResults;
+
 #define BOX_DEFAULT_MARGIN 10.0f
 #define BOX_DEFAULT_SIZE_X 20.0f
 #define BOX_DEFAULT_SIZE_Y 20.0f
 #define BOX_DEFAULT_SIZE_Z 50.0f
+
+inline ObserverType ParseObserverType(const std::string& type)
+{
+    if (type == "Greyscale") return ObserverType::Greyscale;
+
+    return ObserverType::Unknown;
+}
+
+inline std::string SerializeObserverType(ObserverType type)
+{
+    if (type == ObserverType::Greyscale) return "Greyscale";
+
+    return "Unknown";
+}
 
 inline bool IsAlmostEqualFloat(float a, float b)
 {

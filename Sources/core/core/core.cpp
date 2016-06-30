@@ -452,10 +452,10 @@ void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModel
 
     if (getModelRequest->filter() != nullptr) {
         Boxes roiBoxes;
-        auto size = getModelRequest->filter()->boxes()->size();
-        roiBoxes.reserve(size);
+        auto filterSize = getModelRequest->filter()->boxes()->size();
+        roiBoxes.reserve(filterSize);
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < filterSize; i++) {
             auto box = getModelRequest->filter()->boxes()->Get(i);
             Point3D boxPosition(box->x(), box->y(), box->z());
             Size3D boxSize(box->sizeX(), box->sizeY(), box->sizeZ());
@@ -465,6 +465,23 @@ void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModel
 
         gBrain[0].UpdateRegionOfInterest(roiBoxes);
     }
+
+    if (getModelRequest->observers() != nullptr) {
+        Observers observers;
+        auto observationSize = getModelRequest->observers()->size();
+        observers.reserve(observationSize);
+
+        for (int i = 0; i < observationSize; i++) {
+            auto observer = getModelRequest->observers()->Get(i);
+            NeuronId neuronId = GetNeuronId(observer->neuronId()->region(), observer->neuronId()->neuron());
+            ObserverType observerType = ParseObserverType(observer->type()->str());
+
+            observers.push_back(Observer(neuronId, observerType));
+        }
+
+        gBrain[0].UpdateObservers(observers);
+    }
+
 
     gBrain[0].RequestViewportUpdate(requestId, getModelRequest->full(), true);
 }
@@ -585,7 +602,7 @@ void Core::SendStubModel(const Communication::GetModelRequest *getModelRequest, 
         addedNeuronCount++;
     }
 
-    std::vector<flatbuffers::Offset<Communication::ObserverData>> observersOffsets;
+    std::vector<flatbuffers::Offset<Communication::ObserverResult>> observersOffsets;
 
     auto observers = getModelRequest->observers();
     if (observers != nullptr) {
@@ -617,7 +634,7 @@ void Core::SendStubModel(const Communication::GetModelRequest *getModelRequest, 
             data.push_back(128);
             auto dataVectorOffset = builder.CreateVector(data);
 
-            auto observerDataOffset = Communication::CreateObserverData(builder, observerOffset, dataVectorOffset);
+            auto observerDataOffset = Communication::CreateObserverResult(builder, observerOffset, dataVectorOffset);
             observersOffsets.push_back(observerDataOffset);
         }    
     }
@@ -678,7 +695,7 @@ void Core::SendStubModel(const Communication::GetModelRequest *getModelRequest, 
     responseBuilder.add_removedRegions(removedRegionsVector);
 
     // Observers.
-    responseBuilder.add_observers(observersVector);
+    responseBuilder.add_observerResults(observersVector);
 
     auto modelResponseOffset = responseBuilder.Finish();
 
@@ -922,6 +939,26 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     BuildSynapseOffsets(builder, update.removedSynapses, removedSynapseOffsets);
     auto removedSynapsesVectorOffset = builder.CreateVector(removedSynapseOffsets);
 
+    // Observers.
+
+    std::vector<flatbuffers::Offset<Communication::ObserverResult>> observerResultOffsets;
+    for (auto observerResult : update.observerResults) {
+
+        auto observerDefinition = std::get<0>(observerResult);
+        auto neuronId = std::get<0>(observerDefinition);
+        auto observerType = SerializeObserverType(std::get<1>(observerDefinition));
+        auto observerData = std::get<1>(observerResult);
+
+        auto neuronIdOffset = CommunicationNeuronId(builder, neuronId);
+        auto observerTypeOffset = builder.CreateString(observerType);
+        auto observerOffset = Communication::CreateObserver(builder, neuronIdOffset, observerTypeOffset);
+        auto observerDataOffset = builder.CreateVector(observerData);
+        auto observerResultOffset = Communication::CreateObserverResult(builder, observerOffset, observerDataOffset);
+
+        observerResultOffsets.push_back(observerResultOffset);
+    }
+    auto observerResultsVectorOffset = builder.CreateVector(observerResultOffsets);
+
     Communication::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_isFull(update.isFull);
 
@@ -942,6 +979,8 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     responseBuilder.add_addedSynapses(addedSynapsesVectorOffset);
     responseBuilder.add_spikedSynapses(spikedSynapsesVectorOffset);
     responseBuilder.add_removedSynapses(removedSynapsesVectorOffset);
+
+    responseBuilder.add_observerResults(observerResultsVectorOffset);
 
     auto modelResponseOffset = responseBuilder.Finish();
 

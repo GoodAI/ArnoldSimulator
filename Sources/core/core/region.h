@@ -155,6 +155,8 @@ private:
     Boxes mRoiTransformedBoxes;
     Boxes mRoiTransformedBoxesLast;
 
+    Observers mObservers;
+
     NeuronIndex mNeuronIdxCounter;
     NeuronIndices mNeuronIndices;
 

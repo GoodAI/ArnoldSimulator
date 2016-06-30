@@ -48,6 +48,8 @@ struct ViewportUpdate
     ChildLinks addedChildren;
     ChildLinks removedChildren;
 
+    ObserverResults observerResults;
+
     void pup(PUP::er &p);
 };
 
@@ -64,6 +66,7 @@ public:
     size_t brainStep;
     Boxes roiBoxes;
     Boxes roiBoxesLast;
+    Observers observers;
 
     static void *pack(SimulateMsg *msg);
     static SimulateMsg *unpack(void *buf);
@@ -174,6 +177,7 @@ public:
     void PauseSimulation();
     void SetBrainStepsPerBodyStep(size_t brainSteps);
     void UpdateRegionOfInterest(Boxes &roiBoxes);
+    void UpdateObservers(Observers& observers);
     void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
     void RequestSimulationState(RequestId requestId, bool immediately, bool flushRequests);
     void RequestViewportUpdate(RequestId requestId, bool full, bool flushRequests);
@@ -244,6 +248,7 @@ private:
     RegionBoxes mRegionBoxes;
     Requests mSimulationStateRequests;
     Requests mViewportUpdateRequests;
+    Observers mObservers;
     ViewportUpdate mViewportUpdateAccumulator;
 
     Terminals mTerminals;
