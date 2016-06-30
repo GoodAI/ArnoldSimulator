@@ -365,8 +365,8 @@ namespace GoodAI.Arnold.Visualization
                 GL.Begin(PrimitiveType.Quads);
 
                 GL.Vertex3(0, 0, 0);
-                GL.Vertex3(150, 0, 0);
-                GL.Vertex3(150, 30, 0);
+                GL.Vertex3(100, 0, 0);
+                GL.Vertex3(100, 30, 0);
                 GL.Vertex3(0, 30, 0);
 
                 GL.End();
@@ -376,7 +376,7 @@ namespace GoodAI.Arnold.Visualization
                 GL.Translate(10, 0, 0);
                 GL.Translate(screenPosition);
 
-                m_font.Print($"{neuron.Position}", QFontAlignment.Left);
+                m_font.Print($"{neuron.RegionModel.Index} : {neuron.Index}", QFontAlignment.Left);
 
                 QFont.End();
             }

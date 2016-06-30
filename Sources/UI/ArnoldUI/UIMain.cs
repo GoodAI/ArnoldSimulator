@@ -123,6 +123,7 @@ namespace GoodAI.Arnold
             var observer = new GreyscaleObserver(definition, Conductor.ModelProvider);
             observer.Log = Log;
             var form = new ObserverForm(this, observer);
+            form.Text = $"Neuron {neuron.Index}, region {neuron.RegionModel.Index} - '{definition.Type}'";
 
             var handle = new ObserverHandle(observer, form, scene);
             Observers.Add(handle);

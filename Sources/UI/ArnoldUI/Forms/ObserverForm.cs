@@ -15,6 +15,7 @@ namespace GoodAI.Arnold.Forms
     public partial class ObserverForm : DockContent
     {
         private readonly UIMain m_uiMain;
+        public bool IsClosing { get; private set; }
         public GreyscaleObserver Observer { get; }
 
         public ObserverForm(UIMain uiMain, GreyscaleObserver observer)
@@ -34,8 +35,20 @@ namespace GoodAI.Arnold.Forms
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
+
+            IsClosing = true;
+
             Observer.Updated -= OnObserverUpdated;
             m_uiMain.CloseObserver(Observer.Definition);
+        }
+
+        public void CloseOnce()
+        {
+            if (IsClosing)
+                return;
+
+            IsClosing = true;
+            this.Invoke(Close);
         }
     }
 

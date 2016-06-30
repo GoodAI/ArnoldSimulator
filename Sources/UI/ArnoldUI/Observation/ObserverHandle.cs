@@ -16,6 +16,8 @@ namespace GoodAI.Arnold.Observation
         public ObserverForm Form { get; }
         public ObserverDefinition Definition => Observer.Definition;
 
+        public bool IsDisposing { get; private set; }
+
         public ObserverHandle(IObserver observer, ObserverForm form, Scene scene)
         {
             m_scene = scene;
@@ -25,7 +27,12 @@ namespace GoodAI.Arnold.Observation
 
         public void Dispose()
         {
-            Form.Invoke(() => Form.Close());
+            if (IsDisposing)
+                return;
+
+            IsDisposing = true;
+
+            Form.CloseOnce();
             Observer.Dispose();
             m_scene.DeselectNeuron(Definition.NeuronIndex, Definition.RegionIndex);
         }
