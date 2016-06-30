@@ -17,8 +17,6 @@ namespace GoodAI.Arnold.Visualization.Models
         public InputConnectorModel To { get; }
         public OutputConnectorModel From { get; }
 
-        private uint SlotCount => From.SlotCount;
-
         public ConnectionModel(OutputConnectorModel from, InputConnectorModel to)
         {
             From = from;

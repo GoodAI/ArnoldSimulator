@@ -11,6 +11,37 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GoodAI.Arnold.Visualization.Models
 {
+    public class CompositeNeuronId
+    {
+        public uint RegionIndex { get; }
+        public uint NeuronIndex { get; }
+
+        public CompositeNeuronId(uint regionIndex, uint neuronIndex)
+        {
+            RegionIndex = regionIndex;
+            NeuronIndex = neuronIndex;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as CompositeNeuronId;
+            if (other != null)
+                return GetHashCode() == other.GetHashCode();
+
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = 3;
+
+            hash = hash*7 + RegionIndex.GetHashCode();
+            hash = hash*7 + NeuronIndex.GetHashCode();
+
+            return hash;
+        }
+    }
+
     public class NeuronModel : ModelBase, IPickable
     {
         public static int NeuronTexture;
@@ -29,6 +60,9 @@ namespace GoodAI.Arnold.Visualization.Models
         private float m_alpha = MinAlpha;
 
         public uint Index { get; set; }
+
+        // TODO(HonzaS): Cache this.
+        public CompositeNeuronId NeuronId => new CompositeNeuronId(RegionModel.Index, Index);
 
         public string Type { get; set; }
 

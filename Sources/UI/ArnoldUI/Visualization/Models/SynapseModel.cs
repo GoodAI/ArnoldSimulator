@@ -44,7 +44,7 @@ namespace GoodAI.Arnold.Visualization.Models
         public RegionModel FromRegion { get; }
         public RegionModel ToRegion { get; }
 
-        public Vector3 TargetPosition { get; set; }
+        public Vector3 TargetPosition { get; private set; }
 
         public SynapseModel(RegionModel fromRegion, NeuronModel fromNeuron, RegionModel toRegion, NeuronModel toNeuron)
         {
@@ -58,8 +58,8 @@ namespace GoodAI.Arnold.Visualization.Models
             Translucent = true;
         }
 
-        public NeuronModel FromNeuron { get; private set; }
-        public NeuronModel ToNeuron { get; private set; }
+        public NeuronModel FromNeuron { get; }
+        public NeuronModel ToNeuron { get; }
 
         protected override void RenderModel(float elapsedMs)
         {

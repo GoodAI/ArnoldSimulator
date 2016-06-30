@@ -34,7 +34,7 @@ namespace GoodAI.Arnold.Observation
 
             Form.CloseOnce();
             Observer.Dispose();
-            m_scene.DeselectNeuron(Definition.NeuronIndex, Definition.RegionIndex);
+            m_scene.DeselectNeuron(Definition.RegionIndex, Definition.NeuronIndex);
         }
     }
 }

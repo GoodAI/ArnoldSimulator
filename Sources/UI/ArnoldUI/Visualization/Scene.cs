@@ -39,7 +39,7 @@ namespace GoodAI.Arnold.Visualization
         private int m_modelsDisplayed;
         private float m_fps;
 
-        private readonly ISet<NeuronModel> m_pickedNeurons = new HashSet<NeuronModel>();
+        private readonly ISet<CompositeNeuronId> m_pickedNeurons = new HashSet<CompositeNeuronId>();
         private readonly UIMain m_uiMain;
         private readonly IConductor m_conductor;
 
@@ -68,13 +68,18 @@ namespace GoodAI.Arnold.Visualization
             m_simulationModel = e.Model ?? m_simulationModel;
         }
 
-        private void InjectCamera()
+        private void UpdateNeurons()
         {
             // TODO: Nasty! Change!
             // If (when) neurons are drawn via shaders, they might not actually need the camera position? (no sprites)
             foreach (var region in m_simulationModel.Regions)
-                foreach (NeuronModel neurons in region.Neurons)
-                    neurons.Camera = m_camera;
+            {
+                foreach (NeuronModel neuron in region.Neurons)
+                {
+                    neuron.Camera = m_camera;
+                    neuron.Picked = m_pickedNeurons.Contains(neuron.NeuronId);
+                }
+            }
         }
 
         public void Init()
@@ -155,36 +160,30 @@ namespace GoodAI.Arnold.Visualization
         private void ToggleNeuron(NeuronModel neuron)
         {
             if (neuron.Picked)
-                DeselectNeuron(neuron.Index, neuron.RegionModel.Index);
+                DeselectNeuron(neuron.RegionModel.Index, neuron.Index);
             else
-                SelectNeuron(neuron.Index, neuron.RegionModel.Index);
+                SelectNeuron(neuron.RegionModel.Index, neuron.Index);
         }
 
-        public void SelectNeuron(uint neuronIndex, uint regionIndex)
+        public void SelectNeuron(uint regionIndex, uint neuronIndex)
         {
-            var region = m_simulationModel.Regions[regionIndex];
-            var neuron = region.Neurons[neuronIndex];
+            NeuronModel neuron;
+            if (TryFindNeuron(regionIndex, neuronIndex, out neuron))
+                neuron.Picked = true;
 
-            if (neuron.Picked)
-                return;
-
-            neuron.Picked = true;
-            m_pickedNeurons.Add(neuron);
-
+            m_pickedNeurons.Add(neuron.NeuronId);
             m_uiMain.OpenObserver(neuron, this);
         }
 
-        public void DeselectNeuron(uint neuronIndex, uint regionIndex)
+        public void DeselectNeuron(uint regionIndex, uint neuronIndex)
         {
-            var region = m_simulationModel.Regions[regionIndex];
-            var neuron = region.Neurons[neuronIndex];
+            NeuronModel neuron;
+            if (TryFindNeuron(regionIndex, neuronIndex, out neuron))
+            {
+                neuron.Picked = false;
+            }
 
-            if (!neuron.Picked)
-                return;
-
-            neuron.Picked = false;
-            m_pickedNeurons.Remove(neuron);
-
+            m_pickedNeurons.Remove(neuron.NeuronId);
             m_uiMain.CloseObserver(neuron);
         }
 
@@ -226,7 +225,7 @@ namespace GoodAI.Arnold.Visualization
                 UpdateModelFilter();
 
                 // TODO(HonzaS): When we have incremental updates, optimize this to not go through all neurons.
-                InjectCamera();
+                UpdateNeurons();
             }
 
             m_fps = 1000/elapsedMs;
@@ -339,9 +338,14 @@ namespace GoodAI.Arnold.Visualization
 
         private void RenderPickedInfo()
         {
-            foreach (NeuronModel neuron in m_pickedNeurons)
+            foreach (CompositeNeuronId neuronId in m_pickedNeurons)
             {
                 bool isBehindCamera;
+
+                NeuronModel neuron;
+                if (!TryFindNeuron(neuronId, out neuron))
+                    continue;
+
                 Vector3 screenPosition = ModelToScreenCoordinates(neuron, out isBehindCamera);
 
                 if (isBehindCamera)
@@ -349,6 +353,23 @@ namespace GoodAI.Arnold.Visualization
 
                 RenderNeuronInfo(neuron, screenPosition);
             }
+        }
+
+        private bool TryFindNeuron(CompositeNeuronId neuronId, out NeuronModel neuron)
+        {
+            return TryFindNeuron(neuronId.RegionIndex, neuronId.NeuronIndex, out neuron);
+        }
+
+        private bool TryFindNeuron(uint regionIndex, uint neuronIndex, out NeuronModel neuron)
+        {
+            RegionModel region;
+            if (!m_simulationModel.Regions.TryGetModel(regionIndex, out region))
+            {
+                neuron = null;
+                return false;
+            }
+
+            return region.Neurons.TryGetModel(neuronIndex, out neuron);
         }
 
         private void RenderNeuronInfo(NeuronModel neuron, Vector3 screenPosition)

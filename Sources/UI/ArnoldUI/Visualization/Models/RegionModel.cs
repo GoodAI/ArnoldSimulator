@@ -13,9 +13,9 @@ namespace GoodAI.Arnold.Visualization.Models
         private Vector3 m_size;
         public const float RegionMargin = 2f;
 
-        public uint Index { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public uint Index { get; }
+        public string Name { get; }
+        public string Type { get; }
 
         public Vector3 Size
         {
