@@ -105,7 +105,7 @@ typedef std::vector<ObserverResult> ObserverResults;
 #define BOX_DEFAULT_SIZE_Y 20.0f
 #define BOX_DEFAULT_SIZE_Z 50.0f
 
-inline ObserverType ParseObserverType(const std::string& type)
+inline ObserverType ParseObserverType(const std::string &type)
 {
     if (type == "Greyscale") return ObserverType::Greyscale;
 

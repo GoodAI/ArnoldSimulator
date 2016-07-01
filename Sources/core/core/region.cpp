@@ -1037,7 +1037,7 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
     ChildLinks addedChildren;
     ChildLinks removedChildren;
 
-    std::vector<ObserverResult> observerResults;
+    ObserverResults observerResults;
 
     if (mDoUpdate && !mNeuronRemovals.empty()) {
         std::unordered_set<NeuronId> removedNeuronSet(
