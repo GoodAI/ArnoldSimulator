@@ -89,7 +89,7 @@ obtain_charm()
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
     cat src/arch/util/machine-smp.c | sed 's/return hMutex;/InitializeCriticalSectionAndSpinCount(lk, 2048); return lk;/g' > src/arch/util/machine-smp.c.tmp
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
-    cat src/arch/util/machine-smp.c | sed 's/CloseHandle(lk);/DeleteCriticalSection(lk); free(lk);/g' > src/arch/util/machine-smp.c.tmp
+    cat src/arch/util/machine-smp.c | sed 's/CloseHandle(lk);/if (lk) { DeleteCriticalSection(lk); free(lk); }/g' > src/arch/util/machine-smp.c.tmp
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
     cat src/arch/util/machine-smp.c | sed 's/barrier_mutex = CmiCreateLock();/barrier_mutex = CreateMutex(NULL, FALSE, NULL);/g' > src/arch/util/machine-smp.c.tmp
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
@@ -100,6 +100,8 @@ obtain_charm()
     cat src/arch/util/machine-smp.c | sed 's/CloseHandle(cmiMemoryLock);/CmiDestroyLock(cmiMemoryLock);/g' > src/arch/util/machine-smp.c.tmp
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
     cat src/arch/util/machine-smp.c | sed '/barrier_mutex = CreateMutex(NULL, FALSE, NULL);/i   _smp_mutex = CmiCreateLock();' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed '/CmiDestroyLock(comm_mutex);/i   CmiDestroyLock(_smp_mutex); _smp_mutex = 0;' > src/arch/util/machine-smp.c.tmp
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
     
     ./build charm++ net-win64 smp --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
