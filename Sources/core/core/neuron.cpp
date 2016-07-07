@@ -22,10 +22,11 @@ NeuronMap::NeuronMap(CkMigrateMessage *msg)
 int NeuronMap::procNum(int arrayHdl, const CkArrayIndex &index)
 {
     int regionIndex = index.data()[0];
-    int neuronIndex = index.data()[1];
+    //int neuronIndex = index.data()[1];
 
     int nodeNum = regionIndex % CkNumNodes();
-    int rankNum = neuronIndex % CkNodeSize(nodeNum);
+    int rankNum = regionIndex % CkNodeSize(nodeNum);
+    //int rankNum = neuronIndex % CkNodeSize(nodeNum);
     int peNum = rankNum + CkNodeFirst(nodeNum);
 
     return peNum;
