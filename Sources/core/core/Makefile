@@ -1,7 +1,7 @@
 #
 # Common settings
 #
-CFLAGS = $(OPTS) -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS
+CFLAGS = $(OPTS) -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -D_ITERATOR_DEBUG_LEVEL=0
 LFLAGS = -language charm++ -module CkMulticast -module completion
 CHARM_DIR = ../libs/charm
 TBB_DIR = ../libs/tbb

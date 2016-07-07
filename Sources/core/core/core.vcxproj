@@ -78,7 +78,7 @@ bash -c "make -j4 debug-build"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>bash -c "make debug-clean"
 call "$(VCInstallDir)vcvarsall" amd64
 bash -c "make -j4 debug-build"</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;_ITERATOR_DEBUG_LEVEL=0</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\libs\charm\net-debug\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src;..\libs\flatbuffers\include;.\debug</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)debug</OutDir>
     <IntDir>debug</IntDir>
@@ -93,7 +93,7 @@ bash -c "make -j4 release-build"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>bash -c "make release-clean"
 call "$(VCInstallDir)vcvarsall" amd64
 bash -c "make -j4 release-build"</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;NDEBUG</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;_ITERATOR_DEBUG_LEVEL=0</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\libs\charm\net-release\include;..\libs\tbb\include;..\libs\sparsehash\src;..\libs\json\src;..\libs\flatbuffers\include;.\release</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)release</OutDir>
     <IntDir>release</IntDir>

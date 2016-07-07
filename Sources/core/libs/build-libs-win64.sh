@@ -31,8 +31,77 @@ obtain_charm()
 
     cat src/arch/win64/unix2nt_cc | sed 's/$SDK_DIR\/Lib\/x64/$SDK_DIR\/Lib\/$WindowsSDKLibVersion\/um\/x64/g' > src/arch/win64/unix2nt_cc.tmp
     mv -f src/arch/win64/unix2nt_cc.tmp src/arch/win64/unix2nt_cc
+    
+    cat src/arch/win64/unix2nt_cc | sed 's/\/D_WINDOWS \/DNOMINMAX/\/D_WINDOWS \/DNOMINMAX \/D_ITERATOR_DEBUG_LEVEL=0/g' > src/arch/win64/unix2nt_cc.tmp
+    mv -f src/arch/win64/unix2nt_cc.tmp src/arch/win64/unix2nt_cc
+    
     chmod +x src/arch/win64/unix2nt_cc
-
+    
+    cat src/scripts/Makefile | sed 's/ckloop//g' > src/scripts/Makefile.tmp
+    mv -f src/scripts/Makefile.tmp src/scripts/Makefile
+    
+    (
+    echo '#if defined(_MSC_VER)'
+    echo '#define CmiMemoryAtomicIncrement(someInt)    InterlockedIncrement(&someInt)'
+    echo '#define CmiMemoryAtomicDecrement(someInt)    InterlockedDecrement(&someInt)'
+    echo '#define CmiMemoryAtomicFetchAndInc(input,output)   output = InterlockedIncrement(&input) - 1'
+    ) > msvc_interlocked.tmp
+    
+    (
+    echo '#if defined(_MSC_VER)'
+    echo '#define CmiMemoryReadFence()                 MemoryBarrier()'
+    echo '#define CmiMemoryWriteFence()                MemoryBarrier()'
+    ) > msvc_barrier.tmp
+    
+    cat src/conv-core/converse.h | sed '/#if CMK_C_SYNC_ADD_AND_FETCH_PRIMITIVE/i \/\/MSVC Interlocked' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed '/\/\/MSVC Interlocked/r msvc_interlocked.tmp' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed 's/#if CMK_C_SYNC_ADD_AND_FETCH_PRIMITIVE/#elif CMK_C_SYNC_ADD_AND_FETCH_PRIMITIVE/g' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    
+    cat src/conv-core/converse.h | sed '/#if CMK_C_SYNC_SYNCHRONIZE_PRIMITIVE/i \/\/MSVC Barrier' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed '/\/\/MSVC Barrier/r msvc_barrier.tmp' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed 's/#if CMK_C_SYNC_SYNCHRONIZE_PRIMITIVE/#elif CMK_C_SYNC_SYNCHRONIZE_PRIMITIVE/g' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    
+    rm -f msvc_interlocked.tmp
+    rm -f msvc_barrier.tmp
+    
+    cat src/conv-core/converse.h | sed 's/typedef HANDLE CmiNodeLock;/typedef CRITICAL_SECTION *CmiNodeLock;/g' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed 's/#define CmiLock(lock) (WaitForSingleObject(lock, INFINITE))/#define CmiLock(lock) (EnterCriticalSection(lock))/g' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed 's/#define CmiUnlock(lock) (ReleaseMutex(lock))/#define CmiUnlock(lock) (LeaveCriticalSection(lock))/g' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    cat src/conv-core/converse.h | sed 's/#define CmiTryLock(lock) (WaitForSingleObject(lock, 0))/#define CmiTryLock(lock) (!TryEnterCriticalSection(lock))/g' > src/conv-core/converse.h.tmp
+    mv -f src/conv-core/converse.h.tmp src/conv-core/converse.h
+    
+    cat src/arch/util/machine-smp.c | sed 's/static HANDLE comm_mutex;/static CmiNodeLock comm_mutex;/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/#define CmiCommLock() (WaitForSingleObject(comm_mutex, INFINITE))/#define CmiCommLock() (EnterCriticalSection(comm_mutex))/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/#define CmiCommUnlock() (ReleaseMutex(comm_mutex))/#define CmiCommUnlock() (LeaveCriticalSection(comm_mutex))/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/HANDLE hMutex = CreateMutex(NULL, FALSE, NULL);/CmiNodeLock lk = (CmiNodeLock)malloc(sizeof(CRITICAL_SECTION)); _MEMCHECK(lk);/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/return hMutex;/InitializeCriticalSectionAndSpinCount(lk, 2048); return lk;/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/CloseHandle(lk);/DeleteCriticalSection(lk); free(lk);/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/barrier_mutex = CmiCreateLock();/barrier_mutex = CreateMutex(NULL, FALSE, NULL);/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/CloseHandle(comm_mutex);/CmiDestroyLock(comm_mutex);/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/CloseHandle(CmiMemLock_lock);/CmiDestroyLock(CmiMemLock_lock);/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed 's/CloseHandle(cmiMemoryLock);/CmiDestroyLock(cmiMemoryLock);/g' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    cat src/arch/util/machine-smp.c | sed '/barrier_mutex = CreateMutex(NULL, FALSE, NULL);/i   _smp_mutex = CmiCreateLock();' > src/arch/util/machine-smp.c.tmp
+    mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
+    
     ./build charm++ net-win64 smp --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ net-win64 smp --destination=net-release --with-production -j8 | tee net-release.log
 
