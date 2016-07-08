@@ -19,14 +19,19 @@ enum StateType:byte {
 	Empty,
 	Running,
 	Paused,
-	ShuttingDown
+	ShuttingDown,
+	CommandInProgress
+}
+
+table SimulationStats {
+	brainStep:uint;
+	bodyStep:uint;
+	brainStepsPerBodyStep:uint;
 }
 
 table StateResponse {
 	state:StateType;
-	brainStep:uint;
-	bodyStep:uint;
-	brainStepsPerBodyStep:uint;
+	stats:SimulationStats;
 }
 
 // End of state response.

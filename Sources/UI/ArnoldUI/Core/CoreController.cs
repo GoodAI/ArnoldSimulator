@@ -88,18 +88,6 @@ namespace GoodAI.Arnold.Core
         {
             while (true)
             {
-                try
-                {
-                    await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    if (ex is TaskCanceledException)
-                        return;
-
-                    Log.Warn(ex, "Task.Delay threw an exception");
-                }
-
                 if (IsCommandInProgress)
                     continue;
 
@@ -119,6 +107,18 @@ namespace GoodAI.Arnold.Core
                     // TODO(HonzaS): if this keeps on failing, notify the user.
                     Log.Warn("Periodic state check failed: {message}", ex.Message);
                     m_stateResultAction(new KeepaliveResult(KeepaliveResultTag.RequestFailed));
+                }
+
+                try
+                {
+                    await Task.Delay(repeatMillis, tokenSource.Token).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is TaskCanceledException)
+                        return;
+
+                    Log.Warn(ex, "Task.Delay threw an exception");
                 }
             }
         }

@@ -49,6 +49,12 @@ namespace GoodAI.Arnold
 
         private void UpdateButtons()
         {
+            if (m_uiMain.Conductor.CoreState == CoreState.CommandInProgress)
+            {
+                DisableCommandButtons();
+                return;
+            }
+
             connectButton.Enabled = !m_uiMain.Conductor.IsConnected;
             disconnectButton.Enabled = !connectButton.Enabled;
 

@@ -71,8 +71,9 @@ protected:
     void SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuilder &builder);
 
     void ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId);
-    void ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId);
+    void SendCompleteStateResponse(const Communication::GetStateRequest *getStateRequest, RequestId requestId);
     void ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId);
+    void SendCommandInProgress(RequestId requestId);
 
     bool TryLoadBrain(const std::string &blueprintString);
 
@@ -81,7 +82,7 @@ protected:
     flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
     flatbuffers::Offset<Communication::NeuronId> Core::CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const;
 
-    void BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+    void BuildCompleteStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
 
     void BuildErrorResponse(const std::string &message, flatbuffers::FlatBufferBuilder &builder) const;
@@ -118,7 +119,7 @@ protected:
         const Synapse::Links &synapses,
         std::vector<flatbuffers::Offset<Communication::Synapse>> &synapseOffsets) const;
 
-    void BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
+    void BuildCompleteStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;
 

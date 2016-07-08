@@ -12,7 +12,8 @@ namespace GoodAI.Arnold.Core
         Empty,  // The core is ready, but no blueprint has been loaded.
         Paused,  // There is a blueprint but the simulation is not running.
         Running,
-        ShuttingDown
+        ShuttingDown,
+        CommandInProgress
     }
 
     public class TimeoutActionEventArgs : EventArgs
@@ -255,6 +256,8 @@ namespace GoodAI.Arnold.Core
                     return CoreState.Paused;
                 case StateType.ShuttingDown:
                     return CoreState.ShuttingDown;
+                case StateType.CommandInProgress:
+                    return CoreState.CommandInProgress;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

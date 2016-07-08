@@ -12,6 +12,7 @@ public enum StateType : sbyte
  Running = 1,
  Paused = 2,
  ShuttingDown = 3,
+ CommandInProgress = 4,
 };
 
 public enum Direction : sbyte
@@ -51,34 +52,57 @@ public sealed class ErrorResponse : Table {
   }
 };
 
+public sealed class SimulationStats : Table {
+  public static SimulationStats GetRootAsSimulationStats(ByteBuffer _bb) { return GetRootAsSimulationStats(_bb, new SimulationStats()); }
+  public static SimulationStats GetRootAsSimulationStats(ByteBuffer _bb, SimulationStats obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public SimulationStats __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+
+  public uint BrainStep { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint BodyStep { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public uint BrainStepsPerBodyStep { get { int o = __offset(8); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+
+  public static Offset<SimulationStats> CreateSimulationStats(FlatBufferBuilder builder,
+      uint brainStep = 0,
+      uint bodyStep = 0,
+      uint brainStepsPerBodyStep = 0) {
+    builder.StartObject(3);
+    SimulationStats.AddBrainStepsPerBodyStep(builder, brainStepsPerBodyStep);
+    SimulationStats.AddBodyStep(builder, bodyStep);
+    SimulationStats.AddBrainStep(builder, brainStep);
+    return SimulationStats.EndSimulationStats(builder);
+  }
+
+  public static void StartSimulationStats(FlatBufferBuilder builder) { builder.StartObject(3); }
+  public static void AddBrainStep(FlatBufferBuilder builder, uint brainStep) { builder.AddUint(0, brainStep, 0); }
+  public static void AddBodyStep(FlatBufferBuilder builder, uint bodyStep) { builder.AddUint(1, bodyStep, 0); }
+  public static void AddBrainStepsPerBodyStep(FlatBufferBuilder builder, uint brainStepsPerBodyStep) { builder.AddUint(2, brainStepsPerBodyStep, 0); }
+  public static Offset<SimulationStats> EndSimulationStats(FlatBufferBuilder builder) {
+    int o = builder.EndObject();
+    return new Offset<SimulationStats>(o);
+  }
+};
+
 public sealed class StateResponse : Table {
   public static StateResponse GetRootAsStateResponse(ByteBuffer _bb) { return GetRootAsStateResponse(_bb, new StateResponse()); }
   public static StateResponse GetRootAsStateResponse(ByteBuffer _bb, StateResponse obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public StateResponse __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public StateType State { get { int o = __offset(4); return o != 0 ? (StateType)bb.GetSbyte(o + bb_pos) : StateType.Empty; } }
-  public uint BrainStep { get { int o = __offset(6); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public uint BodyStep { get { int o = __offset(8); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public uint BrainStepsPerBodyStep { get { int o = __offset(10); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
+  public SimulationStats Stats { get { return GetStats(new SimulationStats()); } }
+  public SimulationStats GetStats(SimulationStats obj) { int o = __offset(6); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
 
   public static Offset<StateResponse> CreateStateResponse(FlatBufferBuilder builder,
       StateType state = StateType.Empty,
-      uint brainStep = 0,
-      uint bodyStep = 0,
-      uint brainStepsPerBodyStep = 0) {
-    builder.StartObject(4);
-    StateResponse.AddBrainStepsPerBodyStep(builder, brainStepsPerBodyStep);
-    StateResponse.AddBodyStep(builder, bodyStep);
-    StateResponse.AddBrainStep(builder, brainStep);
+      Offset<SimulationStats> statsOffset = default(Offset<SimulationStats>)) {
+    builder.StartObject(2);
+    StateResponse.AddStats(builder, statsOffset);
     StateResponse.AddState(builder, state);
     return StateResponse.EndStateResponse(builder);
   }
 
-  public static void StartStateResponse(FlatBufferBuilder builder) { builder.StartObject(4); }
+  public static void StartStateResponse(FlatBufferBuilder builder) { builder.StartObject(2); }
   public static void AddState(FlatBufferBuilder builder, StateType state) { builder.AddSbyte(0, (sbyte)state, 0); }
-  public static void AddBrainStep(FlatBufferBuilder builder, uint brainStep) { builder.AddUint(1, brainStep, 0); }
-  public static void AddBodyStep(FlatBufferBuilder builder, uint bodyStep) { builder.AddUint(2, bodyStep, 0); }
-  public static void AddBrainStepsPerBodyStep(FlatBufferBuilder builder, uint brainStepsPerBodyStep) { builder.AddUint(3, brainStepsPerBodyStep, 0); }
+  public static void AddStats(FlatBufferBuilder builder, Offset<SimulationStats> statsOffset) { builder.AddOffset(1, statsOffset.Value, 0); }
   public static Offset<StateResponse> EndStateResponse(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<StateResponse>(o);

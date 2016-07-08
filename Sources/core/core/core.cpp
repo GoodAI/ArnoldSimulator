@@ -250,7 +250,7 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
             case Communication::Request_GetStateRequest:
             {
                 auto getStateRequest = static_cast<const Communication::GetStateRequest*>(requestMessage->request());
-                ProcessGetStateRequest(getStateRequest, requestId);
+                SendCompleteStateResponse(getStateRequest, requestId);
                 break;
             }
             case Communication::Request_GetModelRequest:
@@ -270,7 +270,7 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
             gBrain[0].RequestSimulationState(requestId, true, false);
             UnloadBrain();
         } else {
-            ProcessGetStateRequest(nullptr, requestId);
+            SendCompleteStateResponse(nullptr, requestId);
 
             Exit();
         }
@@ -340,7 +340,7 @@ void Core::SendSimulationState(RequestId requestId, bool isSimulationRunning,
     size_t atBrainStep, size_t atBodyStep, size_t brainStepsPerBodyStep)
 {
     flatbuffers::FlatBufferBuilder builder;
-    BuildStateResponse(isSimulationRunning, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
+    BuildCompleteStateResponse(isSimulationRunning, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
     SendResponseToClient(requestId, builder);
 }
 
@@ -369,6 +369,7 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
 void Core::ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId)
 {
     Communication::CommandType commandType = commandRequest->command();
+    bool sendCommandInProgress = false;
 
     if (commandType == Communication::CommandType_Shutdown)
         throw ShutdownRequestedException("Shutdown requested by the client");
@@ -398,6 +399,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
         uint32_t runSteps = commandRequest->stepsToRun();
         gBrain[0].RunSimulation(runSteps, runSteps == 0);
+        sendCommandInProgress = true;
     } else if (commandType == Communication::CommandType_Pause) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Pause command failed: brain not loaded\n");
@@ -405,6 +407,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         }
 
         gBrain[0].PauseSimulation();
+        sendCommandInProgress = true;
     } else if (commandType == Communication::CommandType_Configure) {
         json configuration;
         try {
@@ -417,18 +420,22 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
     }
 
-    // TODO(HonzaS): Refactor (or at least rename).
-    ProcessGetStateRequest(nullptr, requestId);
+    if (sendCommandInProgress) {
+        SendCommandInProgress(requestId);
+    } else {
+        // TODO(HonzaS): Refactor (or at least rename).
+        SendCompleteStateResponse(nullptr, requestId);
+    }
 }
 
-void Core::ProcessGetStateRequest(const Communication::GetStateRequest *getStateRequest, RequestId requestId)
+void Core::SendCompleteStateResponse(const Communication::GetStateRequest *getStateRequest, RequestId requestId)
 {
     flatbuffers::FlatBufferBuilder builder;
 
     if (IsBrainLoaded()) {
-        gBrain[0].RequestSimulationState(requestId, true, false);
+        gBrain[0].RequestSimulationState(requestId, false, false);
     } else {
-        BuildStateResponse(false, 0, 0, 0, builder);
+        BuildCompleteStateResponse(false, 0, 0, 0, builder);
         SendResponseToClient(requestId, builder);
     }
 }
@@ -438,6 +445,17 @@ void BuildResponseMessage(flatbuffers::FlatBufferBuilder &builder, Communication
 {
     auto responseMessage = Communication::CreateResponseMessage(builder, responseType, responseOffset.Union());
     builder.Finish(responseMessage);
+}
+
+void Core::SendCommandInProgress(RequestId requestId)
+{
+    flatbuffers::FlatBufferBuilder builder;
+
+    Communication::StateResponseBuilder responseBuilder(builder);
+    responseBuilder.add_state(Communication::StateType_CommandInProgress);
+    auto responseOffset = responseBuilder.Finish();
+    BuildResponseMessage(builder, Communication::Response_StateResponse, responseOffset);
+    SendResponseToClient(requestId, builder);
 }
 
 void Core::ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId)
@@ -710,14 +728,15 @@ flatbuffers::Offset<Communication::Position> Core::CreatePosition(flatbuffers::F
     return Communication::CreatePosition(builder, std::get<0>(point), std::get<1>(point), std::get<2>(point));
 }
 
-void Core::BuildStateResponse(const Communication::StateType state, size_t atBrainStep, 
+void Core::BuildCompleteStateResponse(const Communication::StateType state, size_t atBrainStep, 
     size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const
 {
-    auto stateResponseOffset = Communication::CreateStateResponse(builder, state, atBrainStep, atBodyStep, brainStepsPerBodyStep);
+    auto stats = Communication::CreateSimulationStats(builder, atBrainStep, atBodyStep, brainStepsPerBodyStep);
+    auto stateResponseOffset = Communication::CreateStateResponse(builder, state, stats);
     BuildResponseMessage(builder, Communication::Response_StateResponse, stateResponseOffset);
 }
 
-void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep, 
+void Core::BuildCompleteStateResponse(bool isSimulationRunning, size_t atBrainStep, 
     size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const
 {
     Communication::StateType state;
@@ -731,7 +750,7 @@ void Core::BuildStateResponse(bool isSimulationRunning, size_t atBrainStep,
         state = Communication::StateType_Empty;
     }
 
-    BuildStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
+    BuildCompleteStateResponse(state, atBrainStep, atBodyStep, brainStepsPerBodyStep, builder);
 }
 
 void Core::BuildErrorResponse(const std::string &message, flatbuffers::FlatBufferBuilder &builder) const
