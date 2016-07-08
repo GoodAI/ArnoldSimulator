@@ -175,6 +175,7 @@ namespace GoodAI.Arnold.Core
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Request failed");
+                    m_runningCommand = null;
                     RestartStateChecking();
                     throw;
                 }
