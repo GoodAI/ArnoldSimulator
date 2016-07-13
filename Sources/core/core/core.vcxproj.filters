@@ -22,6 +22,15 @@
     <Filter Include="Tests">
       <UniqueIdentifier>{038aa2dc-1c8e-4abc-96ed-06f095bd6354}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bodies">
+      <UniqueIdentifier>{9ce6e3a2-72c8-41ee-880c-ee1d0d43377c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Brains">
+      <UniqueIdentifier>{cf3c8fc2-869d-46dd-86af-d9855ae3c467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Regions">
+      <UniqueIdentifier>{8f94cb5c-d1c1-4332-ad65-09083fdf3727}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -63,6 +72,18 @@
     <ClCompile Include="data_utils_tests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="mnist_reader.cpp">
+      <Filter>Bodies</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_brain.cpp">
+      <Filter>Brains</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_region.cpp">
+      <Filter>Regions</Filter>
+    </ClCompile>
+    <ClCompile Include="mnist_body.cpp">
+      <Filter>Bodies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -100,6 +121,18 @@
     </ClInclude>
     <ClInclude Include="data_utils.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="mnist_reader.h">
+      <Filter>Bodies</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_brain.h">
+      <Filter>Brains</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_region.h">
+      <Filter>Regions</Filter>
+    </ClInclude>
+    <ClInclude Include="mnist_body.h">
+      <Filter>Bodies</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -31,6 +31,7 @@ public:
     virtual const char *GetType() = 0;
 
     virtual void Simulate(
+        size_t bodyStep,
         std::function<void(const std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
         std::function<void(const std::string &, std::vector<uint8_t> &)> pullSensoMotoricData
     ) = 0;
@@ -53,6 +54,7 @@ public:
     virtual const char *GetType() override;
 
     virtual void Simulate(
+        size_t bodyStep,
         std::function<void(const std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
         std::function<void(const std::string &, std::vector<uint8_t> &)> pullSensoMotoricData
     ) override;

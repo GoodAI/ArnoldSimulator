@@ -226,17 +226,19 @@ void BinarySpike::Accept(Direction direction, Neuron &receiver, Spike::Data &dat
     receiver.HandleSpike(direction, *this, data);
 }
 
-void DiscreteSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+void BinarySpike::Initialize(Spike::Data &data)
 {
-    receiver.HandleSpike(direction, *this, data);
+    uint8_t value = 1;
+    data.bits64 = value;
 }
 
-size_t DiscreteSpike::AllBytes(const Spike::Data &data) const
+size_t BinarySpike::AllBytes(const Spike::Data &data) const
 {
-    return sizeof(uint64_t);
+    return 1;
 }
 
-void DiscreteSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
+
+void BinarySpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
     if (size == AllBytes(data)) {
         std::memcpy(buffer, &data.bits64, size);
@@ -254,6 +256,23 @@ void DiscreteSpike::Initialize(Spike::Data &data)
 {
     SetIntensity(data, 1);
     SetDelay(data, 0);
+}
+
+void DiscreteSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+{
+    receiver.HandleSpike(direction, *this, data);
+}
+
+size_t DiscreteSpike::AllBytes(const Spike::Data &data) const
+{
+    return sizeof(uint64_t);
+}
+
+void DiscreteSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
+{
+    if (size == AllBytes(data)) {
+        std::memcpy(buffer, &data.bits64, size);
+    }
 }
 
 uint64_t DiscreteSpike::GetIntensity(const Spike::Data &data) const

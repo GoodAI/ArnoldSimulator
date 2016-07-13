@@ -91,6 +91,11 @@ inline void operator|(PUP::er &p, Spike::Type &spikeType)
 class BinarySpike : public Spike::Editor
 {
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+
+    virtual size_t AllBytes(const Spike::Data &data) const override;
+    virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
+
+    virtual void Initialize(Spike::Data &data) override;
 };
 
 class DiscreteSpike : public Spike::Editor

@@ -17,8 +17,12 @@
     <ClCompile Include="core_tests.cpp" />
     <ClCompile Include="data_utils.cpp" />
     <ClCompile Include="data_utils_tests.cpp" />
+    <ClCompile Include="gen_spec_brain.cpp" />
+    <ClCompile Include="gen_spec_region.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="log_tests.cpp" />
+    <ClCompile Include="mnist_body.cpp" />
+    <ClCompile Include="mnist_reader.cpp" />
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="region.cpp" />
@@ -39,7 +43,11 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="data_utils.h" />
+    <ClInclude Include="gen_spec_brain.h" />
+    <ClInclude Include="gen_spec_region.h" />
     <ClInclude Include="log.h" />
+    <ClInclude Include="mnist_body.h" />
+    <ClInclude Include="mnist_reader.h" />
     <ClInclude Include="neuron.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="region.h" />

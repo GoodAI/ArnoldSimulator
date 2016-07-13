@@ -117,7 +117,7 @@ bool Core::TryLoadBrain(const std::string &blueprintString)
     try {
         blueprint = json::parse(blueprintString);
     } catch (std::invalid_argument &) {
-        CkPrintf("Invalid blueprint.");
+        Log(LogLevel::Warn, "Invalid blueprint");
     }
 
     if (!blueprint.empty()) {

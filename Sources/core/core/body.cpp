@@ -4,11 +4,15 @@
 
 #include "spike.h"
 #include "body.h"
+#include "log.h"
+#include "mnist_body.h"
 
 Body *Body::CreateBody(const std::string &type, json &params)
 {
     if (type == RandomBody::Type) {
         return new RandomBody(params);
+    } else if (type == MnistBody::Type) {
+        return new MnistBody(params);
     } else {
         return nullptr;
     }
@@ -105,6 +109,7 @@ const char *RandomBody::GetType()
 }
 
 void RandomBody::Simulate(
+    size_t bodyStep,
     std::function<void(const std::string &, std::vector<uint8_t> &)> pushSensoMotoricData,
     std::function<void(const std::string &, std::vector<uint8_t> &)> pullSensoMotoricData)
 {

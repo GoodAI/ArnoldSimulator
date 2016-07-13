@@ -1,5 +1,6 @@
 #include "core.h"
 #include "brain.h"
+#include "gen_spec_brain.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -253,6 +254,8 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 {
     if (type == ThresholdBrain::Type) {
         return new ThresholdBrain(base, params);
+    } else if (type == GenSpecBrain::Type) {
+        return new GenSpecBrain(base, params);
     } else {
         return nullptr;
     }
@@ -1200,6 +1203,7 @@ void BrainBase::SimulateBodySimulate()
 
         ++mBodyStep;
         mBody->Simulate(
+            mBodyStep,
             std::bind(&BrainBase::PushSensoMotoricData, this, std::placeholders::_1, std::placeholders::_2),
             std::bind(&BrainBase::PullSensoMotoricData, this, std::placeholders::_1, std::placeholders::_2)
         );

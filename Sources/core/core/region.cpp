@@ -2,6 +2,7 @@
 #include "region.h"
 
 #include "brain.h"
+#include "gen_spec_region.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -59,6 +60,8 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
 {
     if (type == ThresholdRegion::Type) {
         return new ThresholdRegion(base, params);
+    } else if (type == GenSpecRegion::Type) {
+        return new GenSpecRegion(base, params);
     } else {
         return nullptr;
     }
