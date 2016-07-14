@@ -1345,7 +1345,6 @@ void BrainBase::SimulateRegionSimulateDone(CkReductionMsg *msg)
 
                     RegionAdditionReports tmpAddedRegions; p | tmpAddedRegions;
                     accum->addedRegions.reserve(accum->addedRegions.size() + tmpAddedRegions.size());
-                    // TODO(Premek): Insert to the end, it's more efficient (repeats below).
                     accum->addedRegions.insert(accum->addedRegions.end(),
                         tmpAddedRegions.begin(), tmpAddedRegions.end());
 
