@@ -377,13 +377,18 @@ namespace GoodAI.Arnold.UI.Tests
         public void LoadsObserverData()
         {
             var observerDefinition = new ObserverDefinition(1, 1, "foo");
-            var data = new byte[] {1, 2, 3};
-            var observer = new ObserverDataContainer(observerDefinition, data);
+            var plainData = new byte[] {1, 2, 3};
+            var floatData = new float[] {4.5f, 6.7f};
+
+            var observer = new ObserverDataContainer(
+                observerDefinition, new ObserverData(plainData: plainData, floatData: floatData));
 
             ResponseMessage diff = ModelResponseBuilder.Build(observers: new List<ObserverDataContainer> {observer});
             ApplyModelDiff(diff);
 
-            Assert.Equal(data, m_model.Observers.Values.First());
+            var observerData = m_model.Observers.Values.First();
+            Assert.Equal(plainData, observerData.PlainData);
+            Assert.Equal(floatData, observerData.FloatData);
         }
 
         private void SetupRegionWithSynapse(out RegionModel addedRegion, out SynapseModel addedSynapse)

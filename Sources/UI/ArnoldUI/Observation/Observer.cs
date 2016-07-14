@@ -41,7 +41,7 @@ namespace GoodAI.Arnold.Observation
             if (e.Model == null)
                 return;
 
-            byte[] data;
+            ObserverData data;
             if (!e.Model.Observers.TryGetValue(Definition, out data))
             {
                 // This is only a debug message - sometimes it happens that the observer gets a new model
@@ -67,16 +67,17 @@ namespace GoodAI.Arnold.Observation
             }
         }
 
-        private void SetData(byte[] data)
+        private void SetData(ObserverData data)
         {
             try
             {
-                var image = new Bitmap(data.Length, 1);
-                data.EachWithIndex((index, value) =>
+                var image = new Bitmap(data.PlainData.Length, 1);
+                data.PlainData.EachWithIndex((index, value) =>
                 {
                     image.SetPixel(index, 0, Color.FromArgb(255, value, value, value));
                 });
                 Image = image;
+
                 //using (var stream = new MemoryStream(data))
                 //{
                 //    Image = new Bitmap(stream);

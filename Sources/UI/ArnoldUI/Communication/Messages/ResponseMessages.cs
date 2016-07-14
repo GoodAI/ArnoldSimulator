@@ -321,24 +321,32 @@ public sealed class ObserverResult : Table {
 
   public GoodAI.Arnold.Communication.Observer Observer { get { return GetObserver(new GoodAI.Arnold.Communication.Observer()); } }
   public GoodAI.Arnold.Communication.Observer GetObserver(GoodAI.Arnold.Communication.Observer obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
-  public byte GetData(int j) { int o = __offset(6); return o != 0 ? bb.Get(__vector(o) + j * 1) : (byte)0; }
-  public int DataLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
-  public ArraySegment<byte>? GetDataBytes() { return __vector_as_arraysegment(6); }
+  public byte GetPlainData(int j) { int o = __offset(6); return o != 0 ? bb.Get(__vector(o) + j * 1) : (byte)0; }
+  public int PlainDataLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
+  public ArraySegment<byte>? GetPlainDataBytes() { return __vector_as_arraysegment(6); }
+  public float GetFloatData(int j) { int o = __offset(8); return o != 0 ? bb.GetFloat(__vector(o) + j * 4) : (float)0; }
+  public int FloatDataLength { get { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; } }
+  public ArraySegment<byte>? GetFloatDataBytes() { return __vector_as_arraysegment(8); }
 
   public static Offset<ObserverResult> CreateObserverResult(FlatBufferBuilder builder,
       Offset<GoodAI.Arnold.Communication.Observer> observerOffset = default(Offset<GoodAI.Arnold.Communication.Observer>),
-      VectorOffset dataOffset = default(VectorOffset)) {
-    builder.StartObject(2);
-    ObserverResult.AddData(builder, dataOffset);
+      VectorOffset plainDataOffset = default(VectorOffset),
+      VectorOffset floatDataOffset = default(VectorOffset)) {
+    builder.StartObject(3);
+    ObserverResult.AddFloatData(builder, floatDataOffset);
+    ObserverResult.AddPlainData(builder, plainDataOffset);
     ObserverResult.AddObserver(builder, observerOffset);
     return ObserverResult.EndObserverResult(builder);
   }
 
-  public static void StartObserverResult(FlatBufferBuilder builder) { builder.StartObject(2); }
+  public static void StartObserverResult(FlatBufferBuilder builder) { builder.StartObject(3); }
   public static void AddObserver(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Observer> observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
-  public static void AddData(FlatBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(1, dataOffset.Value, 0); }
-  public static VectorOffset CreateDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
-  public static void StartDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
+  public static void AddPlainData(FlatBufferBuilder builder, VectorOffset plainDataOffset) { builder.AddOffset(1, plainDataOffset.Value, 0); }
+  public static VectorOffset CreatePlainDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
+  public static void StartPlainDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
+  public static void AddFloatData(FlatBufferBuilder builder, VectorOffset floatDataOffset) { builder.AddOffset(2, floatDataOffset.Value, 0); }
+  public static VectorOffset CreateFloatDataVector(FlatBufferBuilder builder, float[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddFloat(data[i]); return builder.EndVector(); }
+  public static void StartFloatDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static Offset<ObserverResult> EndObserverResult(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<ObserverResult>(o);

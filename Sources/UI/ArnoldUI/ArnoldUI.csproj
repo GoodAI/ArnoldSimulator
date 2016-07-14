@@ -132,6 +132,7 @@
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Observation\Observer.cs" />
+    <Compile Include="Observation\ObserverData.cs" />
     <Compile Include="Observation\ObserverDefinition.cs" />
     <Compile Include="Observation\ObserverHandle.cs" />
     <Compile Include="Project\Designer.cs" />

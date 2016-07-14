@@ -90,7 +90,7 @@ namespace GoodAI.Arnold.UI.Tests
             var observer = new ObserverDefinition(1, 2, "foo");
             var data = new byte[] {1, 2, 3};
 
-            var observerData = new ObserverDataContainer(observer, data);
+            var observerData = new ObserverDataContainer(observer, new ObserverData(plainData: data, floatData: null));
 
             var addedRegions = new List<RegionModel>
             {
@@ -102,7 +102,7 @@ namespace GoodAI.Arnold.UI.Tests
             ModelResponse modelResponse = message.GetResponse(new ModelResponse());
             Assert.Equal(regionName, modelResponse.GetAddedRegions(0).Name);
             Assert.Equal(observer.Type, modelResponse.GetObserverResults(0).Observer.Type);
-            Assert.Equal(data[0], modelResponse.GetObserverResults(0).GetData(0));
+            Assert.Equal(data[0], modelResponse.GetObserverResults(0).GetPlainData(0));
         }
 
         [Fact]

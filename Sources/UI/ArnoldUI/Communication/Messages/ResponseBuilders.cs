@@ -56,9 +56,9 @@ namespace GoodAI.Arnold.Communication
     public class ObserverDataContainer
     {
         public ObserverDefinition Definition { get; }
-        public byte[] Data { get; }
+        public ObserverData Data { get; }
 
-        public ObserverDataContainer(ObserverDefinition definition, byte[] data)
+        public ObserverDataContainer(ObserverDefinition definition, ObserverData data)
         {
             Definition = definition;
             Data = data;
@@ -363,9 +363,25 @@ namespace GoodAI.Arnold.Communication
 
                     var observerOffset = Observer.CreateObserver(builder, neuronId, observerType);
 
-                    var dataOffset = ObserverResult.CreateDataVector(builder, observer.Data);
+                    VectorOffset? plainDataOffset = null;
+                    if (observer.Data.PlainData != null)
+                        plainDataOffset = ObserverResult.CreatePlainDataVector(builder, observer.Data.PlainData);
 
-                    return ObserverResult.CreateObserverResult(builder, observerOffset, dataOffset);
+                    VectorOffset? floatDataOffset = null;
+                    if (observer.Data.FloatData != null)
+                        floatDataOffset = ObserverResult.CreateFloatDataVector(builder, observer.Data.FloatData);
+
+                    ObserverResult.StartObserverResult(builder);
+                    
+                    ObserverResult.AddObserver(builder, observerOffset);
+
+                    if (plainDataOffset.HasValue)
+                        ObserverResult.AddPlainData(builder, plainDataOffset.Value);
+
+                    if (floatDataOffset.HasValue)
+                        ObserverResult.AddFloatData(builder, floatDataOffset.Value);
+
+                    return ObserverResult.EndObserverResult(builder);
                 });
 
             if (observersOffsets == null)

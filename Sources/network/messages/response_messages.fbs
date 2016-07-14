@@ -85,7 +85,8 @@ table Synapse {
 
 table ObserverResult {
 	observer:Observer;
-	data:[ubyte];
+	plainData:[ubyte];
+	floatData:[float];
 }
 
 table ModelResponse {

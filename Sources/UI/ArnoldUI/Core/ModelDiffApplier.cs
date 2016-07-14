@@ -423,8 +423,25 @@ namespace GoodAI.Arnold.Core
                 NeuronId neuronId = observerData.Observer.NeuronId;
                 var definition = new ObserverDefinition(neuronId.Neuron, neuronId.Region, observerData.Observer.Type);
 
-                model.Observers[definition] = observerData.GetDataBytes()?.ToArray();
+                model.Observers[definition] = new ObserverData(
+                    observerData.GetPlainDataBytes()?.ToArray(),
+                    CopyObserverFloatData(observerData));
             }
+        }
+
+        private static float[] CopyObserverFloatData(ObserverResult observerData)
+        {
+            if (observerData.FloatDataLength <= 0)
+                return null;
+
+            var floatData = new float[observerData.FloatDataLength];
+
+            for (int j = 0; j < observerData.FloatDataLength; j++)
+            {
+                floatData[j] = observerData.GetFloatData(j);
+            }
+
+            return floatData;
         }
     }
 }

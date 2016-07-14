@@ -10,13 +10,13 @@ namespace GoodAI.Arnold.Visualization.Models
         public CompositeModel<ConnectionModel> Connections { get; }
         public CompositeLookupModel<uint, RegionModel> Regions { get; }
 
-        public IDictionary<ObserverDefinition, byte[]> Observers { get; }
+        public IDictionary<ObserverDefinition, ObserverData> Observers { get; }
 
         public SimulationModel()
         {
             Regions = new CompositeLookupModel<uint, RegionModel>();
             Connections = new CompositeModel<ConnectionModel>();
-            Observers = new Dictionary<ObserverDefinition, byte[]>();
+            Observers = new Dictionary<ObserverDefinition, ObserverData>();
 
             AddChild(Regions);
             AddChild(Connections);
