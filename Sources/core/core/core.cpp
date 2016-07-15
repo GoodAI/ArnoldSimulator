@@ -892,6 +892,72 @@ void Core::BuildSynapseOffsets(
     }
 }
 
+// TODO(Premek): Move elsewhere. Unit-test.
+void Core::ConvertByteToFloatVector(std::vector<uint8_t> &byteVector, std::vector<float> &floatVector) const
+{
+    uint8_t *dataBuffer = &byteVector[0];
+    auto floatDataSize = byteVector.size() / sizeof(float);
+
+    if (byteVector.size() != floatDataSize * sizeof(float)) {
+        Log(LogLevel::Warn, "Observer data size not multiple of sizeof(float). Truncating.");
+    }
+
+    if (reinterpret_cast<uint64_t>(dataBuffer) % sizeof(float) == 0) {  // Check alignment.
+        float * floatDataBuffer = reinterpret_cast<float*>(dataBuffer);
+        floatVector.assign(floatDataBuffer, floatDataBuffer + floatDataSize);
+    } else {
+        Log(LogLevel::Warn, "Observer float data not alligned. Extra alloc & copy needed.");  // I doubt this ever happens.
+        std::unique_ptr<float[]> tempFloatBuffer(new float[floatDataSize]);  // NOTE: Allowing clients to provide a buffer would enable its reuse.
+        memcpy(tempFloatBuffer.get(), dataBuffer, floatDataSize * sizeof(float));
+        floatVector.assign(tempFloatBuffer.get(), tempFloatBuffer.get() + floatDataSize);
+    }
+}
+
+void Core::BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder,
+    std::vector<flatbuffers::Offset<Communication::ObserverResult>> &observerResultOffsets) const
+{
+    for (auto observerResult : update.observerResults) {
+
+        auto observerDefinition = std::get<0>(observerResult);
+        auto neuronId = std::get<0>(observerDefinition);
+
+        ObserverType observerType = std::get<1>(observerDefinition);
+        std::vector<uint8_t> observerData = std::get<1>(observerResult);
+
+        auto neuronIdOffset = CommunicationNeuronId(builder, neuronId);
+
+        auto observerStringType = SerializeObserverType(observerType);
+        auto observerTypeOffset = builder.CreateString(observerStringType);
+
+        auto observerOffset = Communication::CreateObserver(builder, neuronIdOffset, observerTypeOffset);
+
+        flatbuffers::Offset<flatbuffers::Vector<uint8_t>> observerPlainDataOffset;
+        flatbuffers::Offset<flatbuffers::Vector<float>> observerFloatDataOffset;
+        
+        if (observerType == ObserverType::Greyscale) {
+            std::vector<float> floatDataVector;
+            ConvertByteToFloatVector(observerData, floatDataVector);
+
+            observerFloatDataOffset = builder.CreateVector(floatDataVector);
+        } else {
+            observerPlainDataOffset = builder.CreateVector(observerData);
+        }
+
+        Communication::ObserverResultBuilder observerResultBuilder(builder);
+        observerResultBuilder.add_observer(observerOffset);
+
+        if (observerType == ObserverType::Greyscale) {
+            observerResultBuilder.add_floatData(observerFloatDataOffset);
+        } else {
+            observerResultBuilder.add_plainData(observerPlainDataOffset);
+        }
+
+        auto observerResultOffset = observerResultBuilder.Finish();
+
+        observerResultOffsets.push_back(observerResultOffset);
+    }
+}
+
 void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const
 {
     // Regions.
@@ -959,25 +1025,11 @@ void Core::BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers
     auto removedSynapsesVectorOffset = builder.CreateVector(removedSynapseOffsets);
 
     // Observers.
-
     std::vector<flatbuffers::Offset<Communication::ObserverResult>> observerResultOffsets;
-    for (auto observerResult : update.observerResults) {
-
-        auto observerDefinition = std::get<0>(observerResult);
-        auto neuronId = std::get<0>(observerDefinition);
-        auto observerType = SerializeObserverType(std::get<1>(observerDefinition));
-        auto observerData = std::get<1>(observerResult);
-
-        auto neuronIdOffset = CommunicationNeuronId(builder, neuronId);
-        auto observerTypeOffset = builder.CreateString(observerType);
-        auto observerOffset = Communication::CreateObserver(builder, neuronIdOffset, observerTypeOffset);
-        auto observerDataOffset = builder.CreateVector(observerData);
-        auto observerResultOffset = Communication::CreateObserverResult(builder, observerOffset, observerDataOffset);
-
-        observerResultOffsets.push_back(observerResultOffset);
-    }
+    BuildObserverResults(update, builder, observerResultOffsets);
     auto observerResultsVectorOffset = builder.CreateVector(observerResultOffsets);
 
+    // Finalize the message.
     Communication::ModelResponseBuilder responseBuilder(builder);
     responseBuilder.add_isFull(update.isFull);
 
