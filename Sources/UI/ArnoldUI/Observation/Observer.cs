@@ -71,10 +71,12 @@ namespace GoodAI.Arnold.Observation
         {
             try
             {
-                var image = new Bitmap(data.PlainData.Length, 1);
-                data.PlainData.EachWithIndex((index, value) =>
+                var image = new Bitmap(data.FloatData.Length, 1);
+                data.FloatData.EachWithIndex((index, value) =>
                 {
-                    image.SetPixel(index, 0, Color.FromArgb(255, value, value, value));
+                    byte byteValue = (byte) (value*255);  // TODO(Premek): More robust conversion.
+
+                    image.SetPixel(index, 0, Color.FromArgb(255, byteValue, byteValue, byteValue));
                 });
                 Image = image;
 
