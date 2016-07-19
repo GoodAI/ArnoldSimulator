@@ -19,7 +19,8 @@ public:
         Weighted = 1,
         Lagging = 2,
         Conductive = 3,
-        Probabilistic = 4
+        Probabilistic = 4,
+        MultiWeighted
     };
 
     static Type ParseType(const std::string &type);
@@ -55,8 +56,8 @@ public:
     public:
         virtual ~Editor() = default;
 
-        virtual size_t ExtraBytes() const;
-        virtual void *AllocateExtra();
+        virtual size_t ExtraBytes(Data &data) const;
+        virtual void *AllocateExtra(Data &data);
 
         virtual void Initialize(Data &data);
         virtual void Clone(const Data &original, Data &data);
@@ -87,6 +88,25 @@ public:
 
     double GetWeight(const Synapse::Data &data) const;
     void SetWeight(Synapse::Data &data, double weight);
+};
+
+class MultiWeightedSynapse : public Synapse::Editor
+{
+public:
+    virtual size_t ExtraBytes(Synapse::Data &data) const override;
+    virtual void *AllocateExtra(Synapse::Data &data) override;
+
+    virtual void Initialize(Synapse::Data &data) override;
+    virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;
+    virtual void Release(Synapse::Data &data) override;
+
+    void GetWeights(const Synapse::Data &data, float *weights, size_t count) const;
+    void SetWeights(Synapse::Data &data, const float *weights, size_t count);
+
+    uint16_t GetWeightCount(const Synapse::Data &data) const;
+    void SetWeightCount(Synapse::Data &data, uint16_t count);
+private:
+    tbb::scalable_allocator<float> mAllocator;
 };
 
 class LaggingSynapse : public Synapse::Editor
@@ -124,8 +144,8 @@ protected:
 class ProbabilisticSynapse : public Synapse::Editor
 {
 public:
-    virtual size_t ExtraBytes() const override;
-    virtual void *AllocateExtra() override;
+    virtual size_t ExtraBytes(Synapse::Data &data) const override;
+    virtual void *AllocateExtra(Synapse::Data &data) override;
 
     virtual void Initialize(Synapse::Data &data) override;
     virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;

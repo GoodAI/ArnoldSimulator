@@ -4,6 +4,8 @@
 #include "random.h"
 #include "data_utils.h"
 
+#include "gen_spec_neuron.h"
+
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
 
@@ -41,6 +43,8 @@ Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json 
 {
     if (type == ThresholdNeuron::Type) {
         return new ThresholdNeuron(base, params);
+    } else if (type == GenSpecNeuron::Type) {
+        return new GenSpecNeuron(base, params);
     } else {
         return nullptr;
     }
@@ -72,6 +76,11 @@ void Neuron::HandleSpike(Direction direction, VisualSpike &spike, Spike::Data &d
 }
 
 void Neuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data)
+{
+    HandleSpikeGeneric(direction, spike, data);
+}
+
+void Neuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &data)
 {
     HandleSpikeGeneric(direction, spike, data);
 }

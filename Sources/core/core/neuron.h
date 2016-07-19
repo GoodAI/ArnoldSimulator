@@ -58,6 +58,7 @@ public:
     virtual void HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data);
     virtual void HandleSpike(Direction direction, VisualSpike &spike, Spike::Data &data);
     virtual void HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data);
+    virtual void HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &data);
 
 protected:
     NeuronBase &mBase;

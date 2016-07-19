@@ -17,6 +17,7 @@
     <ClCompile Include="core_tests.cpp" />
     <ClCompile Include="data_utils.cpp" />
     <ClCompile Include="data_utils_tests.cpp" />
+    <ClCompile Include="gen_spec_neuron.cpp" />
     <ClCompile Include="gen_spec_brain.cpp" />
     <ClCompile Include="gen_spec_region.cpp" />
     <ClCompile Include="log.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="data_utils.h" />
+    <ClInclude Include="gen_spec_neuron.h" />
     <ClInclude Include="gen_spec_brain.h" />
     <ClInclude Include="gen_spec_region.h" />
     <ClInclude Include="log.h" />

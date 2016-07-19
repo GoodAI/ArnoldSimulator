@@ -21,7 +21,8 @@ public:
         Discrete = 1,
         Continuous = 2,
         Visual = 3,
-        Functional = 4
+        Functional = 4,
+        MultiByte = 5
     };
 
     static Type ParseType(const std::string &type);
@@ -162,4 +163,19 @@ public:
     void SetFunction(Spike::Data &data, uint8_t function);
     void GetArguments(const Spike::Data &data, void *arguments, size_t size) const;
     void SetArguments(Spike::Data &data, const void *arguments, size_t size);
+};
+
+class MultiByteSpike : public Spike::Editor
+{
+public:
+    virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
+
+    virtual size_t ExtraBytes(const Spike::Data &data) const override;
+    virtual void *AllocateExtra(Spike::Data &data) override;
+
+    virtual void Initialize(Spike::Data &data) override;
+    virtual void Release(Spike::Data &data) override;
+
+    void GetValues(const Spike::Data &data, uint8_t *values, size_t count) const;
+    void SetValues(Spike::Data &data, const uint8_t *values, size_t count);
 };

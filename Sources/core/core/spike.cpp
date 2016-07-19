@@ -10,6 +10,7 @@ Spike::Spike()
     mEditors[static_cast<size_t>(Type::Continuous)].reset(new ContinuousSpike());
     mEditors[static_cast<size_t>(Type::Visual)].reset(new VisualSpike());
     mEditors[static_cast<size_t>(Type::Functional)].reset(new FunctionalSpike());
+    mEditors[static_cast<size_t>(Type::MultiByte)].reset(new MultiByteSpike());
 }
 
 Spike::Type Spike::ParseType(const std::string &type)
@@ -19,6 +20,7 @@ Spike::Type Spike::ParseType(const std::string &type)
     if (type == "Continuous") return Type::Continuous;
     if (type == "Visual") return Type::Visual;
     if (type == "Functional") return Type::Functional;
+    if (type == "MultiByte") return Type::MultiByte;
 
     return Type::Binary;
 }
@@ -30,6 +32,7 @@ const char *Spike::SerializeType(Type type)
     if (type == Type::Continuous) return "Continuous";
     if (type == Type::Visual) return "Visual";
     if (type == Type::Functional) return "Functional";
+    if (type == Type::MultiByte) return "MultiByte";
 
     return "Binary";
 }
@@ -440,5 +443,55 @@ void FunctionalSpike::SetArguments(Spike::Data &data, const void *arguments, siz
         data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
         void *extra = reinterpret_cast<void *>(data.bits64);
         std::memcpy(extra, arguments, size);
+    }
+}
+
+void MultiByteSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &data)
+{
+    receiver.HandleSpike(direction, *this, data);
+}
+
+size_t MultiByteSpike::ExtraBytes(const Spike::Data &data) const
+{
+    return data.bits16;
+}
+
+void *MultiByteSpike::AllocateExtra(Spike::Data &data)
+{
+    return scalable_malloc(ExtraBytes(data));
+}
+
+void MultiByteSpike::Initialize(Spike::Data &data)
+{
+    data.bits16 = 0;
+}
+
+void MultiByteSpike::Release(Spike::Data &data)
+{
+    if (ExtraBytes(data) > 0 && data.bits64 != 0) {
+        void *extra = reinterpret_cast<void *>(data.bits64);
+        scalable_free(extra);
+        data.bits64 = 0;
+        data.bits16 = 0;
+    }
+}
+
+void MultiByteSpike::GetValues(const Spike::Data &data, uint8_t *values, size_t count) const
+{
+    size_t size = count * sizeof(uint8_t);
+    if (ExtraBytes(data) > 0 && ExtraBytes(data) == size) {
+        void *extra = reinterpret_cast<void *>(data.bits64);
+        std::memcpy(values, extra, size);
+    }
+}
+
+void MultiByteSpike::SetValues(Spike::Data &data, const uint8_t *values, size_t count)
+{
+    size_t size = count * sizeof(uint8_t);
+    if (ExtraBytes(data) == 0 && count > 0) {
+        data.bits16 = size;
+        data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
+        void *extra = reinterpret_cast<void *>(data.bits64);
+        std::memcpy(extra, values, size);
     }
 }

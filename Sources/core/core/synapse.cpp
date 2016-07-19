@@ -8,6 +8,7 @@ Synapse::Synapse()
     mEditors[static_cast<size_t>(Type::Lagging)].reset(new LaggingSynapse());
     mEditors[static_cast<size_t>(Type::Conductive)].reset(new ConductiveSynapse());
     mEditors[static_cast<size_t>(Type::Probabilistic)].reset(new ProbabilisticSynapse());
+    mEditors[static_cast<size_t>(Type::MultiWeighted)].reset(new MultiWeightedSynapse());
 }
 
 Synapse::Type Synapse::ParseType(const std::string &type)
@@ -17,6 +18,7 @@ Synapse::Type Synapse::ParseType(const std::string &type)
     if (type == "Lagging") return Type::Lagging;
     if (type == "Conductive") return Type::Conductive;
     if (type == "Probabilistic") return Type::Probabilistic;
+    if (type == "MultiWeighted") return Type::MultiWeighted;
 
     return Type::Empty;
 }
@@ -28,6 +30,7 @@ const char *Synapse::SerializeType(Type type)
     if (type == Type::Lagging) return "Lagging";
     if (type == Type::Conductive) return "Conductive";
     if (type == Type::Probabilistic) return "Probabilistic";
+    if (type == Type::MultiWeighted) return "MultiWeighted";
 
     return "Empty";
 }
@@ -54,10 +57,10 @@ Synapse::Data::Data(const Data &other)
     bits16 = other.bits16;
 
     Editor *ed = Edit(*this);
-    if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
-        bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra());
+    if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
+        bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         std::memcpy(reinterpret_cast<unsigned char *>(bits64), 
-            reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes());
+            reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
     } else {
         bits64 = other.bits64;
     }
@@ -70,7 +73,7 @@ Synapse::Data::Data(Data &&other)
     bits16 = other.bits16;
     
     Editor *ed = Edit(*this);
-    if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
+    if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = other.bits64;
         other.bits64 = 0;
     } else {
@@ -87,10 +90,10 @@ Synapse::Data &Synapse::Data::operator=(const Data &other)
         bits16 = other.bits16;
         
         Editor *ed = Edit(*this);
-        if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
-            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra());
+        if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
+            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
             std::memcpy(reinterpret_cast<unsigned char *>(bits64),
-                reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes());
+                reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
         } else {
             bits64 = other.bits64;
         }
@@ -107,7 +110,7 @@ Synapse::Data &Synapse::Data::operator=(Data &&other)
         bits16 = other.bits16;
         
         Editor *ed = Edit(*this);
-        if (ed->ExtraBytes() > 0 && other.bits64 != 0) {
+        if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = other.bits64;
             other.bits64 = 0;
         } else {
@@ -132,24 +135,24 @@ void Synapse::Data::pup(PUP::er &p)
 
     Editor *ed = Edit(*this);
 
-    if (ed->ExtraBytes() > 0) {
+    if (ed->ExtraBytes(*this) > 0) {
         if (p.isUnpacking()) {
-            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra());
+            bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         }
         if (bits64 != 0) {
-            p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes());
+            p(reinterpret_cast<unsigned char *>(bits64), ed->ExtraBytes(*this));
         }
     } else {
         p | bits64;
     }
 }
 
-size_t Synapse::Editor::ExtraBytes() const
+size_t Synapse::Editor::ExtraBytes(Data &data) const
 {
     return 0;
 }
 
-void *Synapse::Editor::AllocateExtra()
+void *Synapse::Editor::AllocateExtra(Data &data)
 {
     return nullptr;
 }
@@ -315,12 +318,12 @@ ProbabilisticSynapse::DataExtended::DataExtended() :
 {
 }
 
-size_t ProbabilisticSynapse::ExtraBytes() const
+size_t ProbabilisticSynapse::ExtraBytes(Synapse::Data &data) const
 {
     return sizeof(DataExtended);
 }
 
-void *ProbabilisticSynapse::AllocateExtra()
+void *ProbabilisticSynapse::AllocateExtra(Synapse::Data &data)
 {
     return mAllocator.allocate(1);
 }
@@ -396,4 +399,53 @@ void ProbabilisticSynapse::SetVariance(Synapse::Data &data, float variance)
 {
     DataExtended *ext = reinterpret_cast<DataExtended *>(data.bits64);
     ext->variance = variance;
+}
+
+size_t MultiWeightedSynapse::ExtraBytes(Synapse::Data &data) const
+{
+    return GetWeightCount(data);
+}
+
+void *MultiWeightedSynapse::AllocateExtra(Synapse::Data &data)
+{
+    return mAllocator.allocate(GetWeightCount(data));
+}
+
+void MultiWeightedSynapse::Initialize(Synapse::Data &data)
+{
+    data.bits16 = 0;
+}
+
+void MultiWeightedSynapse::Clone(const Synapse::Data &original, Synapse::Data &data)
+{
+    SetWeightCount(data, GetWeightCount(original));
+
+    float *ext = mAllocator.allocate(GetWeightCount(data));
+    data.bits64 = reinterpret_cast<uintptr_t>(ext);
+}
+
+void MultiWeightedSynapse::Release(Synapse::Data &data)
+{
+    mAllocator.deallocate(reinterpret_cast<float*>(data.bits64), GetWeightCount(data));
+}
+
+
+void MultiWeightedSynapse::GetWeights(const Synapse::Data &data, float *weights, size_t count) const
+{
+    std::memcpy(weights, reinterpret_cast<float*>(data.bits64), count * sizeof(float));
+}
+
+void MultiWeightedSynapse::SetWeights(Synapse::Data &data, const float *weights, size_t count)
+{
+    std::memcpy(reinterpret_cast<float*>(data.bits64), weights, count * sizeof(float));
+}
+
+uint16_t MultiWeightedSynapse::GetWeightCount(const Synapse::Data &data) const
+{
+    return data.bits16;
+}
+
+void MultiWeightedSynapse::SetWeightCount(Synapse::Data &data, uint16_t count)
+{
+    data.bits16 = count;
 }

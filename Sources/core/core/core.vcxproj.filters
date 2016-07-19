@@ -31,6 +31,9 @@
     <Filter Include="Regions">
       <UniqueIdentifier>{8f94cb5c-d1c1-4332-ad65-09083fdf3727}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Neurons">
+      <UniqueIdentifier>{b7733013-5cab-4814-b4da-ec23549d4b4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -84,6 +87,9 @@
     <ClCompile Include="mnist_body.cpp">
       <Filter>Bodies</Filter>
     </ClCompile>
+    <ClCompile Include="gen_spec_neuron.cpp">
+      <Filter>Neurons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -133,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="mnist_body.h">
       <Filter>Bodies</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_neuron.h">
+      <Filter>Neurons</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
