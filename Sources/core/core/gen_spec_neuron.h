@@ -10,18 +10,18 @@ public:
     GenSpecNeuron(NeuronBase &base, json &params);
     virtual ~GenSpecNeuron();
 
-    virtual void pup(PUP::er &p) override;
+    void pup(PUP::er &p) override;
 
-    virtual const char *GetType() const override;
+    const char *GetType() const override;
 
     // Discrete spike for signal propagation (input/result/output).
-    virtual void HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &data) override;
+    void HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &data) override;
     // Functional spike for layer winner determination.
-    virtual void HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data) override;
+    void HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data) override;
     
-    virtual void Control(size_t brainStep) override;
+    void Control(size_t brainStep) override;
 
-    virtual size_t ContributeToRegion(uint8_t *&contribution) override;
+    size_t ContributeToRegion(uint8_t *&contribution) override;
 
     void CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData) override;
 
