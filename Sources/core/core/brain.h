@@ -113,6 +113,7 @@ public:
         TerminalId id;
         ConnectorName name;
         Spike::Type spikeType;
+        size_t spikeAllocCount;
         NeuronId firstNeuron;
         size_t neuronCount;
         std::vector<uint8_t> data;
@@ -152,7 +153,7 @@ public:
     Box3D GetBoxForRegion(RegionIndex regIdx);
 
     const Terminals &GetTerminals() const;
-    void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount, bool isSensor);
+    void CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t spikeAllocCount, size_t neuronCount, bool isSensor);
     NeuronId ConnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
     NeuronId DisconnectTerminal(const ConnectorName &name, const RemoteConnector &destination);
 

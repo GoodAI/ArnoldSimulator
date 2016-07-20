@@ -32,21 +32,23 @@ Body::Body(json &params)
 
         for (auto itSensor = sensors.begin(); itSensor != sensors.end(); ++itSensor) {
             if (itSensor->is_object()) {
+                const json &sensor = itSensor.value();
 
-                std::string sensorName;
+                std::string sensorName, spikeType;
                 size_t elementSize = 0;
                 size_t elementCount = 0;
-                for (auto it = itSensor->begin(); it != itSensor->end(); ++it) {
-                    if (it.key() == "name" && it.value().is_string()) {
-                        sensorName = it.value().get<std::string>();
-                    } else if (it.key() == "spikeType" && it.value().is_string()) {
-                        Spike::Data dummySpike;
-                        Spike::Initialize(Spike::ParseType(it.value().get<std::string>()), 0, dummySpike);
-                        elementSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
-                    } else if (it.key() == "size" && it.value().is_number_integer()) {
-                        elementCount = it.value().get<size_t>();
-                    }
+                size_t spikeAllocCount = 0;
+
+                sensorName = sensor["name"].get<std::string>();
+                spikeType = sensor["spikeType"].get<std::string>();
+                if (sensor.find("spikeAllocCount") != sensor.end()) {
+                    spikeAllocCount = sensor["spikeAllocCount"].get<size_t>();
                 }
+                elementCount = sensor["size"].get<size_t>();
+
+                Spike::Data dummySpike;
+                Spike::Initialize(Spike::ParseType(spikeType), 0, dummySpike, spikeAllocCount);
+                elementSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
 
                 if (!sensorName.empty()) {
                     mSensorsInfo.insert(std::make_pair(sensorName,
@@ -57,21 +59,23 @@ Body::Body(json &params)
 
         for (auto itActuator = actuators.begin(); itActuator != actuators.end(); ++itActuator) {
             if (itActuator->is_object()) {
+                const json &actuator = itActuator.value();
 
-                std::string actuatorName;
+                std::string actuatorName, spikeType;
                 size_t elementSize = 0;
                 size_t elementCount = 0;
-                for (auto it = itActuator->begin(); it != itActuator->end(); ++it) {
-                    if (it.key() == "name" && it.value().is_string()) {
-                        actuatorName = it.value().get<std::string>();
-                    } else if (it.key() == "spikeType" && it.value().is_string()) {
-                        Spike::Data dummySpike;
-                        Spike::Initialize(Spike::ParseType(it.value().get<std::string>()), 0, dummySpike);
-                        elementSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
-                    } else if (it.key() == "size" && it.value().is_number_integer()) {
-                        elementCount = it.value().get<size_t>();
-                    }
+                size_t spikeAllocCount = 0;
+
+                actuatorName = actuator["name"].get<std::string>();
+                spikeType = actuator["spikeType"].get<std::string>();
+                if (actuator.find("spikeAllocCount") != actuator.end()) {
+                    spikeAllocCount = actuator["spikeAllocCount"].get<size_t>();
                 }
+                elementCount = actuator["size"].get<size_t>();
+
+                Spike::Data dummySpike;
+                Spike::Initialize(Spike::ParseType(spikeType), 0, dummySpike, spikeAllocCount);
+                elementSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
 
                 if (!actuatorName.empty()) {
                     mActuatorsInfo.insert(std::make_pair(actuatorName,

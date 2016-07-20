@@ -27,13 +27,6 @@ MnistBody::MnistBody(json &params) : Body(params)
     }
 
     mDigitReader.Load(images, labels);
-
-    size_t sensorNeuronCount = mSensorsInfo["Digit"].second;
-    size_t digitSize = mDigitReader.GetDigitSize();
-    if (digitSize != sensorNeuronCount) {
-        Log(LogLevel::Error, "Sensor neuron count (%d) is different from the MNIST digit size (%d)", sensorNeuronCount, digitSize);
-        return;
-    }
 }
 
 MnistBody::~MnistBody()
@@ -75,23 +68,24 @@ void MnistBody::Simulate(
 
     const std::string sensorName("Digit");
     ExpectedDataInfo digitInfo = mSensorsInfo[sensorName];
-    size_t digitElemCount = digitInfo.second;
+    size_t digitSize = digitInfo.first;
 
-    std::vector<uint8_t> sensorData;
-    sensorData.resize(digitElemCount);
 
-    uint8_t* dataPtr = sensorData.data();
-    if (!mDigitReader.TryReadDigit(dataPtr)) {
+    std::unique_ptr<uint8_t[]> dataPtr(new uint8_t[digitSize]);
+
+    if (!mDigitReader.TryReadDigit(dataPtr.get())) {
         Log(LogLevel::Warn, "There are no digits available in the images file");
         return;
     }
 
-    for (int y = 0; y < 28; y++) {
+    std::vector<uint8_t> sensorData(dataPtr.get(), dataPtr.get() + digitSize);
+
+    /*for (int y = 0; y < 28; y++) {
         for (int x = 0; x < 28; x++) {
             CkPrintf("%03d ", sensorData[y * 28 + x]);
         }
         CkPrintf("\n");
-    }
+    }*/
 
     pushSensoMotoricData(sensorName, sensorData);
 }

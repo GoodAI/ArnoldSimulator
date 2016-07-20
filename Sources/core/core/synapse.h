@@ -59,13 +59,13 @@ public:
         virtual size_t ExtraBytes(Data &data) const;
         virtual void *AllocateExtra(Data &data);
 
-        virtual void Initialize(Data &data);
+        virtual void Initialize(Data &data, size_t allocSize = 0);
         virtual void Clone(const Data &original, Data &data);
         virtual void Release(Data &data);
     };
 
     static Type GetType(const Data &data);
-    static void Initialize(Type type, Data &data);
+    static void Initialize(Type type, Data &data, size_t allocSize = 0);
     static void Clone(const Data &original, Data &data);
     static Editor *Edit(Data &data);
     static void Release(Data &data);
@@ -83,7 +83,7 @@ private:
 class WeightedSynapse : public Synapse::Editor
 {
 public:
-    virtual void Initialize(Synapse::Data &data) override;
+    virtual void Initialize(Synapse::Data &data, size_t allocSize = 0) override;
     virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;
 
     double GetWeight(const Synapse::Data &data) const;
@@ -96,7 +96,7 @@ public:
     virtual size_t ExtraBytes(Synapse::Data &data) const override;
     virtual void *AllocateExtra(Synapse::Data &data) override;
 
-    virtual void Initialize(Synapse::Data &data) override;
+    virtual void Initialize(Synapse::Data &data, size_t allocSize = 0) override;
     virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;
     virtual void Release(Synapse::Data &data) override;
 
@@ -104,7 +104,6 @@ public:
     void SetWeights(Synapse::Data &data, const float *weights, size_t count);
 
     uint16_t GetWeightCount(const Synapse::Data &data) const;
-    void SetWeightCount(Synapse::Data &data, uint16_t count);
 private:
     tbb::scalable_allocator<float> mAllocator;
 };
@@ -112,7 +111,7 @@ private:
 class LaggingSynapse : public Synapse::Editor
 {
 public:
-    virtual void Initialize(Synapse::Data &data) override;
+    virtual void Initialize(Synapse::Data &data, size_t allocCount = 0) override;
     virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;
 
     double GetWeight(const Synapse::Data &data) const;
@@ -124,7 +123,7 @@ public:
 class ConductiveSynapse : public Synapse::Editor
 {
 public:
-    virtual void Initialize(Synapse::Data &data) override;
+    virtual void Initialize(Synapse::Data &data, size_t allocCount = 0) override;
     virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;
 
     float GetWeight(const Synapse::Data &data) const;
@@ -147,7 +146,7 @@ public:
     virtual size_t ExtraBytes(Synapse::Data &data) const override;
     virtual void *AllocateExtra(Synapse::Data &data) override;
 
-    virtual void Initialize(Synapse::Data &data) override;
+    virtual void Initialize(Synapse::Data &data, size_t allocCount = 0) override;
     virtual void Clone(const Synapse::Data &original, Synapse::Data &data) override;
     virtual void Release(Synapse::Data &data) override;
 

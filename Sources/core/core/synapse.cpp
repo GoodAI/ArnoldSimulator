@@ -157,7 +157,7 @@ void *Synapse::Editor::AllocateExtra(Data &data)
     return nullptr;
 }
 
-void Synapse::Editor::Initialize(Data &data)
+void Synapse::Editor::Initialize(Data &data, size_t allocCount)
 {
     // do nothing
 }
@@ -177,13 +177,13 @@ Synapse::Type Synapse::GetType(const Data &data)
     return data.type;
 }
 
-void Synapse::Initialize(Type type, Data &data)
+void Synapse::Initialize(Type type, Data &data, size_t allocCount)
 {
     if (type == Type::Empty) return;
 
     data.type = type;
 
-    Edit(data)->Initialize(data);
+    Edit(data)->Initialize(data, allocCount);
 }
 
 void Synapse::Clone(const Data &original, Data &data)
@@ -213,7 +213,7 @@ void Synapse::Release(Data &data)
     Edit(data)->Release(data);
 }
 
-void WeightedSynapse::Initialize(Synapse::Data &data)
+void WeightedSynapse::Initialize(Synapse::Data &data, size_t allocSize)
 {
     SetWeight(data, 1.0);
 }
@@ -233,7 +233,7 @@ void WeightedSynapse::SetWeight(Synapse::Data &data, double weight)
     data.bits64 = *reinterpret_cast<uint64_t *>(&weight);
 }
 
-void LaggingSynapse::Initialize(Synapse::Data &data)
+void LaggingSynapse::Initialize(Synapse::Data &data, size_t allocSize)
 {
     SetWeight(data, 1.0);
     SetDelay(data, 0);
@@ -265,7 +265,7 @@ void LaggingSynapse::SetDelay(Synapse::Data &data, uint16_t delay)
     data.bits16 = delay;
 }
 
-void ConductiveSynapse::Initialize(Synapse::Data &data)
+void ConductiveSynapse::Initialize(Synapse::Data &data, size_t allocSize)
 {
     SetWeight(data, 1.0f);
     SetDelay(data, 0);
@@ -328,7 +328,7 @@ void *ProbabilisticSynapse::AllocateExtra(Synapse::Data &data)
     return mAllocator.allocate(1);
 }
 
-void ProbabilisticSynapse::Initialize(Synapse::Data &data)
+void ProbabilisticSynapse::Initialize(Synapse::Data &data, size_t allocSize)
 {
     SetDelay(data, 0);
 
@@ -403,7 +403,7 @@ void ProbabilisticSynapse::SetVariance(Synapse::Data &data, float variance)
 
 size_t MultiWeightedSynapse::ExtraBytes(Synapse::Data &data) const
 {
-    return GetWeightCount(data);
+    return GetWeightCount(data) * sizeof(float);
 }
 
 void *MultiWeightedSynapse::AllocateExtra(Synapse::Data &data)
@@ -411,17 +411,20 @@ void *MultiWeightedSynapse::AllocateExtra(Synapse::Data &data)
     return mAllocator.allocate(GetWeightCount(data));
 }
 
-void MultiWeightedSynapse::Initialize(Synapse::Data &data)
+void MultiWeightedSynapse::Initialize(Synapse::Data &data, size_t allocCount)
 {
-    data.bits16 = 0;
+    data.bits16 = allocCount;
+
+    float* ext = mAllocator.allocate(GetWeightCount(data));
+    mAllocator.construct(ext);
+    data.bits64 = reinterpret_cast<uintptr_t>(ext);
 }
 
 void MultiWeightedSynapse::Clone(const Synapse::Data &original, Synapse::Data &data)
 {
-    SetWeightCount(data, GetWeightCount(original));
+    data.bits16 = GetWeightCount(original);
 
-    float *ext = mAllocator.allocate(GetWeightCount(data));
-    data.bits64 = reinterpret_cast<uintptr_t>(ext);
+    data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
 }
 
 void MultiWeightedSynapse::Release(Synapse::Data &data)
@@ -443,9 +446,4 @@ void MultiWeightedSynapse::SetWeights(Synapse::Data &data, const float *weights,
 uint16_t MultiWeightedSynapse::GetWeightCount(const Synapse::Data &data) const
 {
     return data.bits16;
-}
-
-void MultiWeightedSynapse::SetWeightCount(Synapse::Data &data, uint16_t count)
-{
-    data.bits16 = count;
 }

@@ -181,7 +181,7 @@ void Spike::Editor::ImportAll(Data &data, const void *buffer, size_t size)
     // do nothing
 }
 
-void Spike::Editor::Initialize(Data &data)
+void Spike::Editor::Initialize(Data &data, size_t allocCount)
 {
     // do nothing
 }
@@ -201,12 +201,12 @@ NeuronId Spike::GetSender(const Data &data)
     return data.sender;
 }
 
-void Spike::Initialize(Type type, NeuronId sender, Data &data)
+void Spike::Initialize(Type type, NeuronId sender, Data &data, size_t allocCount)
 {
     data.type = type;
     data.sender = sender;
 
-    Edit(data)->Initialize(data);
+    Edit(data)->Initialize(data, allocCount);
 }
 
 Spike::Editor *Spike::Edit(Data &data)
@@ -229,7 +229,7 @@ void BinarySpike::Accept(Direction direction, Neuron &receiver, Spike::Data &dat
     receiver.HandleSpike(direction, *this, data);
 }
 
-void BinarySpike::Initialize(Spike::Data &data)
+void BinarySpike::Initialize(Spike::Data &data, size_t allocCount)
 {
     uint8_t value = 1;
     data.bits64 = value;
@@ -255,7 +255,7 @@ void DiscreteSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size
     }
 }
 
-void DiscreteSpike::Initialize(Spike::Data &data)
+void DiscreteSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
     SetIntensity(data, 1);
     SetDelay(data, 0);
@@ -322,7 +322,7 @@ void ContinuousSpike::ImportAll(Spike::Data &data, const void *buffer, size_t si
     }
 }
 
-void ContinuousSpike::Initialize(Spike::Data &data)
+void ContinuousSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
     SetIntensity(data, 1.0);
     SetDelay(data, 0);
@@ -372,7 +372,7 @@ void VisualSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
     }
 }
 
-void VisualSpike::Initialize(Spike::Data &data)
+void VisualSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
     SetPixel(data, 0xFFFFFFFF);
 }
@@ -402,7 +402,7 @@ void *FunctionalSpike::AllocateExtra(Spike::Data &data)
     return scalable_malloc(ExtraBytes(data));
 }
 
-void FunctionalSpike::Initialize(Spike::Data &data)
+void FunctionalSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
     data.bits16 = 0;
     SetFunction(data, 0);
@@ -453,26 +453,51 @@ void MultiByteSpike::Accept(Direction direction, Neuron &receiver, Spike::Data &
 
 size_t MultiByteSpike::ExtraBytes(const Spike::Data &data) const
 {
-    return data.bits16;
+    return data.bits16; // The spike contains a byte array of size == data.bits16.
 }
 
 void *MultiByteSpike::AllocateExtra(Spike::Data &data)
 {
-    return scalable_malloc(ExtraBytes(data));
+    return mAllocator.allocate(data.bits16);
 }
 
-void MultiByteSpike::Initialize(Spike::Data &data)
+void MultiByteSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
-    data.bits16 = 0;
+    data.bits16 = allocCount;
+
+    uint8_t * ext = mAllocator.allocate(data.bits16);
+    mAllocator.construct(ext);
+    data.bits64 = reinterpret_cast<uintptr_t>(ext);
 }
 
 void MultiByteSpike::Release(Spike::Data &data)
 {
-    if (ExtraBytes(data) > 0 && data.bits64 != 0) {
-        void *extra = reinterpret_cast<void *>(data.bits64);
-        scalable_free(extra);
+    if (GetValueCount(data) > 0 && data.bits64 != 0) {
+        uint8_t *extra = reinterpret_cast<uint8_t*>(data.bits64);
+        mAllocator.deallocate(extra, data.bits16);
         data.bits64 = 0;
         data.bits16 = 0;
+    }
+}
+
+size_t MultiByteSpike::AllBytes(const Spike::Data &data) const
+{
+    return GetValueCount(data);
+}
+
+void MultiByteSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
+{
+    if (size == AllBytes(data)) {
+        uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
+        std::memcpy(buffer, values, size);
+    }
+}
+
+void MultiByteSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
+{
+    if (size == AllBytes(data)) {
+        uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
+        std::memcpy(values, buffer, size);
     }
 }
 
@@ -494,4 +519,9 @@ void MultiByteSpike::SetValues(Spike::Data &data, const uint8_t *values, size_t 
         void *extra = reinterpret_cast<void *>(data.bits64);
         std::memcpy(extra, values, size);
     }
+}
+
+size_t MultiByteSpike::GetValueCount(const Spike::Data &data) const
+{
+    return data.bits16;
 }

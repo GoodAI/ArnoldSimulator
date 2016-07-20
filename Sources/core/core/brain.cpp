@@ -167,6 +167,7 @@ void BrainBase::Terminal::pup(PUP::er &p)
     p | id;
     p | name;
     p | spikeType;
+    p | spikeAllocCount;
     p | firstNeuron;
     p | neuronCount;
     p | data;
@@ -206,42 +207,42 @@ Body *BrainBase::CreateBody(const std::string &type, const std::string &params)
 
         for (auto itSensor = sensors.begin(); itSensor != sensors.end(); ++itSensor) {
             if (itSensor->is_object()) {
+                const json &sensor = itSensor.value();
 
                 std::string sensorName, spikeType;
                 size_t sensorSize = 0;
-                for (auto it = itSensor->begin(); it != itSensor->end(); ++it) {
-                    if (it.key() == "name" && it.value().is_string()) {
-                        sensorName = it.value().get<std::string>();
-                    } else if (it.key() == "spikeType" && it.value().is_string()) {
-                        spikeType = it.value().get<std::string>();
-                    } else if (it.key() == "size" && it.value().is_number_integer()) {
-                        sensorSize = it.value().get<size_t>();
-                    }
+                size_t spikeAllocCount = 0;
+
+                sensorName = sensor["name"].get<std::string>();
+                spikeType = sensor["spikeType"].get<std::string>();
+                sensorSize = sensor["size"].get<size_t>();
+                if (sensor.find("spikeAllocCount") != sensor.end()) {
+                    spikeAllocCount = sensor["spikeAllocCount"].get<size_t>();
                 }
 
                 if (!sensorName.empty()) {
-                    CreateTerminal(sensorName, Spike::ParseType(spikeType), sensorSize, true);
+                    CreateTerminal(sensorName, Spike::ParseType(spikeType), spikeAllocCount, sensorSize, true);
                 }
             }
         }
 
         for (auto itActuator = actuators.begin(); itActuator != actuators.end(); ++itActuator) {
             if (itActuator->is_object()) {
+                const json &actuator = itActuator.value();
 
                 std::string actuatorName, spikeType;
                 size_t actuatorSize = 0;
-                for (auto it = itActuator->begin(); it != itActuator->end(); ++it) {
-                    if (it.key() == "name" && it.value().is_string()) {
-                        actuatorName = it.value().get<std::string>();
-                    } else if (it.key() == "spikeType" && it.value().is_string()) {
-                        spikeType = it.value().get<std::string>();
-                    } else if (it.key() == "size" && it.value().is_number_integer()) {
-                        actuatorSize = it.value().get<size_t>();
-                    }
+                size_t spikeAllocCount = 0;
+
+                actuatorName = actuator["name"].get<std::string>();
+                spikeType = actuator["spikeType"].get<std::string>();
+                actuatorSize = actuator["size"].get<size_t>();
+                if (actuator.find("spikeAllocCount") != actuator.end()) {
+                    spikeAllocCount = actuator["spikeAllocCount"].get<size_t>();
                 }
 
                 if (!actuatorName.empty()) {
-                    CreateTerminal(actuatorName, Spike::ParseType(spikeType), actuatorSize, false);
+                    CreateTerminal(actuatorName, Spike::ParseType(spikeType), spikeAllocCount, actuatorSize, false);
                 }
             }
         }
@@ -694,13 +695,14 @@ const BrainBase::Terminals &BrainBase::GetTerminals() const
     return mTerminals;
 }
 
-void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t neuronCount, bool isSensor)
+void BrainBase::CreateTerminal(const ConnectorName &name, Spike::Type spikeType, size_t spikeAllocCount, size_t neuronCount, bool isSensor)
 {
     Terminal terminal;
     terminal.isSensor = isSensor;
     terminal.id = mTerminalIdCounter++;
     terminal.name = name;
     terminal.spikeType = spikeType;
+    terminal.spikeAllocCount = spikeAllocCount;
     terminal.firstNeuron = GetNeuronId(BRAIN_REGION_INDEX, mNeuronIdxCounter);
     terminal.neuronCount = neuronCount;
 
@@ -782,7 +784,7 @@ void BrainBase::PushSensoMotoricData(const std::string &terminalName, std::vecto
 
     Spike::Data dummySpike;
     Terminal &terminal = mTerminals.find(itTerm->second)->second;
-    Spike::Initialize(terminal.spikeType, 0, dummySpike);
+    Spike::Initialize(terminal.spikeType, 0, dummySpike, terminal.spikeAllocCount);
     size_t spikeSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
 
     terminal.data.clear();
@@ -797,7 +799,7 @@ void BrainBase::PullSensoMotoricData(const std::string &terminalName, std::vecto
 
     Spike::Data dummySpike;
     Terminal &terminal = mTerminals.find(itTerm->second)->second;
-    Spike::Initialize(terminal.spikeType, 0, dummySpike);
+    Spike::Initialize(terminal.spikeType, 0, dummySpike, terminal.spikeAllocCount);
     size_t spikeSize = Spike::Edit(dummySpike)->AllBytes(dummySpike);
     
     if (!terminal.data.empty()) {
@@ -1233,7 +1235,7 @@ void BrainBase::SimulateBodySimulate()
                 spikes.reserve(terminal.neuronCount);
                 for (size_t i = 0; i < terminal.neuronCount; ++i) {
                     Spike::Data spike;
-                    Spike::Initialize(terminal.spikeType, terminal.firstNeuron + i, spike);
+                    Spike::Initialize(terminal.spikeType, terminal.firstNeuron + i, spike, terminal.spikeAllocCount);
                     size_t spikeByteCount = Spike::Edit(spike)->AllBytes(spike);
                     if (dataIdx + spikeByteCount <= terminal.data.size()) {
                         Spike::Edit(spike)->ImportAll(spike, terminal.data.data() + dataIdx, spikeByteCount);

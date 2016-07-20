@@ -64,13 +64,13 @@ public:
         virtual void ExportAll(Data &data, void *buffer, size_t size) const;
         virtual void ImportAll(Data &data, const void *buffer, size_t size);
 
-        virtual void Initialize(Data &data);
+        virtual void Initialize(Data &data, size_t allocCount = 0);
         virtual void Release(Data &data);
     };
 
     static Type GetType(const Data &data);
     static NeuronId GetSender(const Data &data);
-    static void Initialize(Type type, NeuronId sender, Data &data);
+    static void Initialize(Type type, NeuronId sender, Data &data, size_t allocCount = 0);
     static Editor *Edit(Data &data);
     static void Release(Data &data);
 
@@ -96,7 +96,7 @@ class BinarySpike : public Spike::Editor
     virtual size_t AllBytes(const Spike::Data &data) const override;
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
 
-    virtual void Initialize(Spike::Data &data) override;
+    virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
 };
 
 class DiscreteSpike : public Spike::Editor
@@ -108,7 +108,7 @@ public:
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
     virtual void ImportAll(Spike::Data &data, const void *buffer, size_t size) override;
 
-    virtual void Initialize(Spike::Data &data) override;
+    virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
 
     uint64_t GetIntensity(const Spike::Data &data) const;
     void SetIntensity(Spike::Data &data, uint64_t intensity);
@@ -125,7 +125,7 @@ public:
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
     virtual void ImportAll(Spike::Data &data, const void *buffer, size_t size) override;
 
-    virtual void Initialize(Spike::Data &data) override;
+    virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
 
     double GetIntensity(const Spike::Data &data) const;
     void SetIntensity(Spike::Data &data, double intensity);
@@ -142,7 +142,7 @@ public:
     virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
     virtual void ImportAll(Spike::Data &data, const void *buffer, size_t size) override;
 
-    virtual void Initialize(Spike::Data &data) override;
+    virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
 
     uint32_t GetPixel(const Spike::Data &data) const;
     void SetPixel(Spike::Data &data, uint32_t pixel);
@@ -156,7 +156,7 @@ public:
     virtual size_t ExtraBytes(const Spike::Data &data) const override;
     virtual void *AllocateExtra(Spike::Data &data) override;
 
-    virtual void Initialize(Spike::Data &data) override;
+    virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
     virtual void Release(Spike::Data &data) override;
 
     uint8_t GetFunction(const Spike::Data &data) const;
@@ -173,9 +173,17 @@ public:
     virtual size_t ExtraBytes(const Spike::Data &data) const override;
     virtual void *AllocateExtra(Spike::Data &data) override;
 
-    virtual void Initialize(Spike::Data &data) override;
+    virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
     virtual void Release(Spike::Data &data) override;
+
+    virtual size_t AllBytes(const Spike::Data &data) const override;
+    virtual void ExportAll(Spike::Data &data, void *buffer, size_t size) const override;
+    virtual void ImportAll(Spike::Data &data, const void *buffer, size_t size) override;
 
     void GetValues(const Spike::Data &data, uint8_t *values, size_t count) const;
     void SetValues(Spike::Data &data, const uint8_t *values, size_t count);
+
+    size_t GetValueCount(const Spike::Data &data) const;
+private:
+    tbb::scalable_allocator<uint8_t> mAllocator;
 };

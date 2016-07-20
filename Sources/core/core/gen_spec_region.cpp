@@ -23,7 +23,7 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     // Place the parent/controller of the first layer.
     NeuronId parent = base.RequestNeuronAddition("GenSpecNeuron", neuronParams);
 
-    NeuronId accumulator = base.RequestNeuronAddition("GenSpecAccNeuron", nullptr);
+    NeuronId accumulator = base.RequestNeuronAddition("GenSpecAccNeuron", "");
 
     NeuronId inputNeuron = mBase.GetInput("Input").neurons[0];
 
@@ -40,9 +40,8 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
             // This is the only difference between the first layer and the other ones.
             // Specialists get the input from their parent neuron.
             Synapse::Data inputSynapseData;
-            Synapse::Initialize(Synapse::Type::MultiWeighted, inputSynapseData);
+            Synapse::Initialize(Synapse::Type::MultiWeighted, inputSynapseData, inputSize);
             MultiWeightedSynapse* inputSynapse = reinterpret_cast<MultiWeightedSynapse*>(Synapse::Edit(inputSynapseData));
-            inputSynapse->SetWeightCount(inputSynapseData, inputSize);
 
             std::unique_ptr<float> inputWeights(new float[inputSize]);
             for (int i = 0; i < inputSize; i++) {
