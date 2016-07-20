@@ -2,6 +2,7 @@
 
 #include "brain.h"
 #include "random.h"
+#include "data_utils.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -778,10 +779,7 @@ void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> 
             activationRatio = mAccumulatedActivation / mThresholdActivation;
         }
 
-        uint8_t *observationBytes = reinterpret_cast<uint8_t *>(&activationRatio);
-
-        for (int i = 0; i < sizeof(float); ++i)
-            observerData.push_back(observationBytes[i]);
+        PutFloatToByteVector(observerData, activationRatio);
     }
 }
 

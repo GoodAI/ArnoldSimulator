@@ -118,8 +118,8 @@ protected:
         flatbuffers::FlatBufferBuilder &builder,
         const Synapse::Links &synapses,
         std::vector<flatbuffers::Offset<Communication::Synapse>> &synapseOffsets) const;
-    void ConvertByteToFloatVector(std::vector<uint8_t> &byteVector, std::vector<float> &floatVector) const;
-    void BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder, std::vector<flatbuffers::Offset<Communication::ObserverResult>> &observerResultOffsets) const;
+    void BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder,
+        std::vector<flatbuffers::Offset<Communication::ObserverResult>> &observerResultOffsets) const;
     void BuildCompleteStateResponse(const Communication::StateType state, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
     void BuildViewportUpdateResponse(const ViewportUpdate &update, flatbuffers::FlatBufferBuilder &builder) const;

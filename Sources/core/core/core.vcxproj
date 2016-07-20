@@ -15,6 +15,8 @@
     <ClCompile Include="brain.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="core_tests.cpp" />
+    <ClCompile Include="data_utils.cpp" />
+    <ClCompile Include="data_utils_tests.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="log_tests.cpp" />
     <ClCompile Include="neuron.cpp" />
@@ -36,6 +38,7 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="core_tests.h" />
+    <ClInclude Include="data_utils.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="neuron.h" />
     <ClInclude Include="random.h" />

@@ -57,6 +57,12 @@
     <ClCompile Include="log_tests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="data_utils.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="data_utils_tests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -90,6 +96,9 @@
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="log.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="data_utils.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -17,6 +17,7 @@ TEST_CASE("Simple logging test", "[logging]")
         Log(LogLevel::Debug, "Test debug message.");
         Log(LogLevel::Verbose, "Test verbose message. With extra empty line.\n");
     }
+
     SECTION("Set lower log level")
     {
         SetLogLevel(LogLevel::Warn);

@@ -5,6 +5,7 @@
 #include "core.h"
 #include "brain.h"
 #include "log.h"
+#include "data_utils.h"
 
 #define CATCH_IMPL  // Unofficial macro that does not add the main() function.
 #include "catch.hpp"
@@ -889,27 +890,6 @@ void Core::BuildSynapseOffsets(
         auto synapseOffset = Communication::CreateSynapse(builder, fromOffset, toOffset);
 
         synapseOffsets.push_back(synapseOffset);
-    }
-}
-
-// TODO(Premek): Move elsewhere. Unit-test.
-void Core::ConvertByteToFloatVector(std::vector<uint8_t> &byteVector, std::vector<float> &floatVector) const
-{
-    uint8_t *dataBuffer = &byteVector[0];
-    auto floatDataSize = byteVector.size() / sizeof(float);
-
-    if (byteVector.size() != floatDataSize * sizeof(float)) {
-        Log(LogLevel::Warn, "Observer data size not multiple of sizeof(float). Truncating.");
-    }
-
-    if (reinterpret_cast<uint64_t>(dataBuffer) % sizeof(float) == 0) {  // Check alignment.
-        float * floatDataBuffer = reinterpret_cast<float*>(dataBuffer);
-        floatVector.assign(floatDataBuffer, floatDataBuffer + floatDataSize);
-    } else {
-        Log(LogLevel::Warn, "Observer float data not alligned. Extra alloc & copy needed.");  // I doubt this ever happens.
-        std::unique_ptr<float[]> tempFloatBuffer(new float[floatDataSize]);  // NOTE: Allowing clients to provide a buffer would enable its reuse.
-        memcpy(tempFloatBuffer.get(), dataBuffer, floatDataSize * sizeof(float));
-        floatVector.assign(tempFloatBuffer.get(), tempFloatBuffer.get() + floatDataSize);
     }
 }
 
