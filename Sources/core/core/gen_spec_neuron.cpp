@@ -1,16 +1,26 @@
 #include "gen_spec_neuron.h"
+#include "log.h"
 
 GenSpecNeuron::GenSpecNeuron(NeuronBase &base, json &params) : Neuron(base, params),
     mResult(0), mPreviousResult(0), mSynapseThreshold(0.5), mIsWinner(false),
     mChildrenAnswered(0), mBestChild(0), mBestChildResult(0)
 {
-    if (!params.empty()) {
-        for (auto itParams = params.begin(); itParams != params.end(); ++itParams) {
-            if (itParams.key() == "synapseThreshold" && itParams->is_number()) {
-                mSynapseThreshold = itParams.value().get<double>();
-            }
-        }
-    }
+	if (params.empty()) {
+		Log(LogLevel::Error, "GenSpecNeuron: Parameters not received");
+		return;
+	}
+
+	mSynapseThreshold = params["synapseThreshold"].get<double>();
+	auto inputSizeX = params["inputSizeX"].get<size_t>();
+	auto inputSizeY = params["inputSizeY"].get<size_t>();
+	mInputSize = inputSizeX * inputSizeY;
+
+	mLastInputPtr = std::unique_ptr<uint8_t[]>(new uint8_t[mInputSize]);
+
+	const json &accumulatorId = params["accumulatorId"];
+	// accumulatorId would be empty for the generalist that is parent of the first layer.
+	if (!accumulatorId.empty())
+		mAccumulatorId = params["accumulatorId"].get<NeuronId>();
 }
 
 GenSpecNeuron::~GenSpecNeuron()
@@ -33,6 +43,7 @@ const char *GenSpecNeuron::GetType() const
 void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &spikeData)
 {
     // Forward pass - propagation of output->input.
+	Log(LogLevel::Info, "Neuron #%d received input", mBase.GetIndex());
 
     NeuronId sender = Spike::GetSender(spikeData);
 
@@ -45,8 +56,8 @@ void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spik
     std::unique_ptr<float[]> weights(new float[weightCount]);
     synapse->GetWeights(*synapseData, weights.get(), weightCount);
 
-    std::unique_ptr<uint8_t[]> values(new uint8_t[weightCount]);
-    spike.GetValues(spikeData, values.get(), weightCount);
+	uint8_t *values = mLastInputPtr.get();
+    spike.GetValues(spikeData, values, weightCount);
 
     for (int i = 0; i < weightCount; i++) {
         mResult += ((weights[i] > mSynapseThreshold) ? values[i] : 0);
@@ -57,18 +68,19 @@ void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spik
     SendFunctionalSpike(Direction::Backward, mBase.GetParent(), Function::Result, args);
 }
 
-void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data)
+void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &spikeData)
 {
-    switch (static_cast<Function>(spike.GetFunction(data))) {
+    switch (static_cast<Function>(spike.GetFunction(spikeData))) {
     case Function::Result:
     {
+		Log(LogLevel::Info, "Neuron #%d received child results", mBase.GetIndex());
         // A child has sent it's result for winner determination.
         ResultArgs args;
-        spike.GetArguments(data, &args, sizeof(ResultArgs));
+        spike.GetArguments(spikeData, &args, sizeof(ResultArgs));
 
         if (args.result > mBestChildResult) {
             mBestChildResult = args.result;
-            mBestChild = Spike::GetSender(data);
+            mBestChild = Spike::GetSender(spikeData);
         }
 
         mChildrenAnswered++;
@@ -79,7 +91,10 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
             // Received results from all children, select winner and notify him.
 
             WinnerSelectedArgs winnerArgs;
-            SendFunctionalSpike(Direction::Forward, mBestChild, Function::WinnerSelected, winnerArgs);
+			winnerArgs.winner = mBestChild;
+			for (auto child : mBase.GetChildren()) {
+				SendFunctionalSpike(Direction::Forward, child, Function::WinnerSelected, winnerArgs);
+			}
 
             mBestChildResult = 0;
             mChildrenAnswered = 0;
@@ -90,14 +105,38 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
     }
     case Function::WinnerSelected:
     {
-        // This neuron has been selected as the winner of the last input signal.
+		Log(LogLevel::Info, "Neuron #%d received winner info", mBase.GetIndex());
 
-        mIsWinner = true;
+		WinnerSelectedArgs winnerArgs;
+		spike.GetArguments(spikeData, &winnerArgs, sizeof(WinnerSelectedArgs));
+
+		size_t result = 0;
+
+		if (winnerArgs.winner == mBase.GetId()) {
+			Log(LogLevel::Info, "Neuron #%d is winner", mBase.GetIndex());
+			// This neuron is "activated".
+			result = 1;
+
+			mIsWinner = true;
+			UpdateWeights();
+
+			for (const NeuronId &child : mBase.GetChildren()) {
+				SendMultiByteSpike(Direction::Forward, child, mLastInputPtr.get(), mInputSize);
+			}
+
+		}
+
+		SendDiscreteSpike(Direction::Forward, mAccumulatorId, result);
+
         break;
     }
     default:
         break;
     }
+}
+
+void GenSpecNeuron::UpdateWeights()
+{
 }
 
 void GenSpecNeuron::CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData)
@@ -126,6 +165,16 @@ void GenSpecNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, u
     Spike::Initialize(Spike::Type::MultiByte, mBase.GetId(), data);
     MultiByteSpike *spike = static_cast<MultiByteSpike *>(Spike::Edit(data));
     spike->SetValues(data, values, count);
+
+    mBase.SendSpike(receiver, direction, data);
+}
+
+void GenSpecNeuron::SendDiscreteSpike(Direction direction, NeuronId receiver, uint64_t value)
+{
+    Spike::Data data;
+    Spike::Initialize(Spike::Type::Discrete, mBase.GetId(), data);
+    DiscreteSpike *spike = static_cast<DiscreteSpike *>(Spike::Edit(data));
+	spike->SetIntensity(data, value);
 
     mBase.SendSpike(receiver, direction, data);
 }

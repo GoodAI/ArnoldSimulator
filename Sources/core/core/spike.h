@@ -181,6 +181,7 @@ public:
     virtual void ImportAll(Spike::Data &data, const void *buffer, size_t size) override;
 
     void GetValues(const Spike::Data &data, uint8_t *values, size_t count) const;
+	const uint8_t * GetValues(const Spike::Data &data) const;
     void SetValues(Spike::Data &data, const uint8_t *values, size_t count);
 
     size_t GetValueCount(const Spike::Data &data) const;

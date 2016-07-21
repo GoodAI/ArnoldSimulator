@@ -13,15 +13,11 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     inputSizeX = generalists["inputSizeX"].get<size_t>();
     inputSizeY = generalists["inputSizeY"].get<size_t>();
     inputSize = inputSizeX * inputSizeY;
-    inputStrideX = generalists["inputStrideX"].get<size_t>();
-    inputStrideY = generalists["inputStrideY"].get<size_t>();
 
-
-
-    std::string neuronParams = params["neuronParams"].dump();
+	json neuronParams = generalists["neuronParams"];
 
     // Place the parent/controller of the first layer.
-    NeuronId parent = base.RequestNeuronAddition("GenSpecNeuron", neuronParams);
+    NeuronId parent = base.RequestNeuronAddition("GenSpecNeuron", neuronParams.dump());
 
     NeuronId accumulator = base.RequestNeuronAddition("GenSpecAccNeuron", "");
 
@@ -33,7 +29,8 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     for (int y = 0; y < neuronCountY; y++) {
         for (int x = 0; x < neuronCountX; x++) {
             // Create the first layer neuron and register it as a child for the uber-parent.
-            NeuronId child = base.RequestNeuronAddition("GenSpecNeuron", neuronParams);
+			neuronParams["accumulatorId"] = accumulator;
+            NeuronId child = base.RequestNeuronAddition("GenSpecNeuron", neuronParams.dump());
             base.RequestChildAddition(parent, child);
 
             // Connect the neuron to the input.

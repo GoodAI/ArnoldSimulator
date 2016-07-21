@@ -5,6 +5,7 @@
 #include "data_utils.h"
 
 #include "gen_spec_neuron.h"
+#include "gen_spec_input_neuron.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -45,6 +46,8 @@ Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json 
         return new ThresholdNeuron(base, params);
     } else if (type == GenSpecNeuron::Type) {
         return new GenSpecNeuron(base, params);
+    } else if (type == GenSpecInputNeuron::Type) {
+        return new GenSpecInputNeuron(base, params);
     } else {
         return nullptr;
     }

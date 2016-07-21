@@ -34,6 +34,9 @@
     <Filter Include="Neurons">
       <UniqueIdentifier>{b7733013-5cab-4814-b4da-ec23549d4b4f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Synapses">
+      <UniqueIdentifier>{46fa33fd-2316-40c6-97f1-a643f067e0e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -90,6 +93,12 @@
     <ClCompile Include="gen_spec_neuron.cpp">
       <Filter>Neurons</Filter>
     </ClCompile>
+    <ClCompile Include="gen_spec_input_synapse.cpp">
+      <Filter>Synapses</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_input_neuron.cpp">
+      <Filter>Neurons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -141,6 +150,12 @@
       <Filter>Bodies</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_neuron.h">
+      <Filter>Neurons</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_input_synapse.h">
+      <Filter>Synapses</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_input_neuron.h">
       <Filter>Neurons</Filter>
     </ClInclude>
   </ItemGroup>

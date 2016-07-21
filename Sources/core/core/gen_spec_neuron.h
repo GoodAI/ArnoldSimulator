@@ -38,12 +38,15 @@ public:
 
     struct WinnerSelectedArgs
     {
+		NeuronId winner;
     };
 
     template<typename Arguments>
     void SendFunctionalSpike(Direction direction, NeuronId receiver, Function function, Arguments &args);
 
     void SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count);
+
+    void SendDiscreteSpike(Direction direction, NeuronId receiver, uint64_t value);
 
 protected:
     uint64_t mResult;
@@ -53,6 +56,12 @@ protected:
     size_t mChildrenAnswered;
     NeuronId mBestChild;
     uint64_t mBestChildResult;
+
+	size_t mInputSize;
+	std::unique_ptr<uint8_t[]> mLastInputPtr;
+	NeuronId mAccumulatorId;
+
+	void UpdateWeights();
 };
 
 template<typename Arguments>
