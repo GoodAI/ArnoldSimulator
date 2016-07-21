@@ -110,6 +110,24 @@ obtain_charm()
     cd ..
 }
 
+obtain_charmdebug()
+{
+    echo "Building Charm Debug"
+    local CHARMDEBUG_VERSION=6.5.1
+    local CHARMDEBUG_LINK="http://charm.cs.illinois.edu/distrib/binaries/charmdebug/charmdebug_${CHARMDEBUG_VERSION}.tar.gz"
+
+    download_and_unpack "$CHARMDEBUG_LINK" "charmdebug" "$CHARMDEBUG_VERSION" "charmdebug"
+}
+
+obtain_projections()
+{
+    echo "Building Projections"
+    local PROJECTIONS_VERSION=6.7.0
+    local PROJECTIONS_LINK="http://charm.cs.illinois.edu/distrib/binaries/projections/projections_${PROJECTIONS_VERSION}.tar.gz"
+
+    download_and_unpack "$PROJECTIONS_LINK" "projections" "$PROJECTIONS_VERSION" "projections_${PROJECTIONS_VERSION}"
+}
+
 obtain_tbb()
 {
     echo "Building TBB"
@@ -315,6 +333,12 @@ do
         charm)
             obtain_charm
         ;;
+        charmdebug)
+            obtain_charmdebug
+        ;;
+        projections)
+            obtain_projections
+        ;;
         tbb)
             obtain_tbb
         ;;
@@ -332,6 +356,8 @@ do
         ;;
         all)
             obtain_charm
+            obtain_charmdebug
+            obtain_projections
             obtain_tbb
             obtain_sparsehash
             obtain_json
