@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.Observation
     }
 
     // TODO(HonzaS): Add a base class requiring IModelProvider in constructor as a hint at how to get the data.
-    public class GreyscaleObserver : IObserver
+    public class CanvasObserver : IObserver
     {
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
@@ -29,7 +29,7 @@ namespace GoodAI.Arnold.Observation
 
         private readonly IModelProvider m_modelProvider;
 
-        public GreyscaleObserver(ObserverDefinition observerDefinition, IModelProvider modelProvider)
+        public CanvasObserver(ObserverDefinition observerDefinition, IModelProvider modelProvider)
         {
             Definition = observerDefinition;
             m_modelProvider = modelProvider;

@@ -16,9 +16,9 @@ namespace GoodAI.Arnold.Forms
     {
         private readonly UIMain m_uiMain;
         public bool IsClosing { get; private set; }
-        public GreyscaleObserver Observer { get; }
+        public CanvasObserver Observer { get; }
 
-        public ObserverForm(UIMain uiMain, GreyscaleObserver observer)
+        public ObserverForm(UIMain uiMain, CanvasObserver observer)
         {
             m_uiMain = uiMain;
             Observer = observer;

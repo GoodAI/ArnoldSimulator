@@ -120,7 +120,7 @@ namespace GoodAI.Arnold
         {
             ObserverDefinition definition = CreateObserverDefinition(neuron);
             // TODO(HonzaS): Factory + injection.
-            var observer = new GreyscaleObserver(definition, Conductor.ModelProvider);
+            var observer = new CanvasObserver(definition, Conductor.ModelProvider);
             observer.Log = Log;
             var form = new ObserverForm(this, observer);
             form.Text = $"Neuron {neuron.Index}, region {neuron.RegionModel.Index} - '{definition.Type}'";
