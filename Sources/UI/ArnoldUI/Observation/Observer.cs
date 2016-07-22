@@ -29,6 +29,8 @@ namespace GoodAI.Arnold.Observation
 
         private readonly IModelProvider m_modelProvider;
 
+        private IPainter m_painter = new RedGreenPainter(new AutoValueScaler());
+
         public CanvasObserver(ObserverDefinition observerDefinition, IModelProvider modelProvider)
         {
             Definition = observerDefinition;
@@ -71,19 +73,7 @@ namespace GoodAI.Arnold.Observation
         {
             try
             {
-                var image = new Bitmap(data.FloatData.Length, 1);
-                data.FloatData.EachWithIndex((index, value) =>
-                {
-                    byte byteValue = (byte) (value*255);  // TODO(Premek): More robust conversion.
-
-                    image.SetPixel(index, 0, Color.FromArgb(255, byteValue, byteValue, byteValue));
-                });
-                Image = image;
-
-                //using (var stream = new MemoryStream(data))
-                //{
-                //    Image = new Bitmap(stream);
-                //}
+                Image = m_painter.Paint(data);
             }
             catch (Exception ex)
             {

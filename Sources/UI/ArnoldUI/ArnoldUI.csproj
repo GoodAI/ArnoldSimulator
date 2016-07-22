@@ -131,10 +131,12 @@
     <Compile Include="Forms\VisualizationForm.Designer.cs">
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Observation\ValueScaler.cs" />
     <Compile Include="Observation\Observer.cs" />
     <Compile Include="Observation\ObserverData.cs" />
     <Compile Include="Observation\ObserverDefinition.cs" />
     <Compile Include="Observation\ObserverHandle.cs" />
+    <Compile Include="Observation\Painter.cs" />
     <Compile Include="Project\Designer.cs" />
     <Compile Include="Visualization\Blender.cs" />
     <Compile Include="Visualization\Camera.cs" />
