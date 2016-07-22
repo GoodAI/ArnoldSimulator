@@ -69,7 +69,11 @@ Core::Core(CkArgMsg *msg) :
         CkPrintf("Setting up Catch tests...\n");
         SetupCharmTests();
 
-        thisProxy.RunTests();
+        std::vector<std::string> testArguments;
+        for (auto i = 2; i < msg->argc; i++)
+            testArguments.push_back(std::string(msg->argv[i]));
+
+        thisProxy.RunTests(testArguments);
 
         delete msg;
         return;
@@ -278,12 +282,24 @@ void Core::HandleRequestFromClient(CkCcsRequestMsg *msg)
     }
 }
 
-void Core::RunTests()
+void Core::RunTests(std::vector<std::string> &args)
 {
     CkPrintf("Running Catch tests...\n");
 
-    char *arg = "tests";
-    Catch::Session().run(1, &arg);
+    std::unique_ptr<const char*[]> argvWrapper(new const char*[args.size() + 10]);
+    auto argv = argvWrapper.get();
+    int argc = 0;
+
+    argv[argc++] = "tests";  // Process name.
+
+    for (const auto &arg : args) {
+        argv[argc++] = arg.c_str();
+    }
+
+    //argv[argc++] = "--success";  // Show also successful tests.
+    //argv[argc++] = "--list-tests";  // Only list tests and exit.
+    
+    Catch::Session().run(argc, argv);
 
     CkPrintf("Testing done. Exiting.\n");
     Exit();

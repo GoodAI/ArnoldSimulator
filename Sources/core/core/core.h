@@ -55,7 +55,7 @@ public:
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
     
-    void RunTests();
+    void RunTests(std::vector<std::string> &args);
 
     void LoadBrain(const BrainName &name, const BrainType &type, const BrainParams &params);
     bool IsBrainLoaded() const;
