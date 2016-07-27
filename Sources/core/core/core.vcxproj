@@ -17,10 +17,13 @@
     <ClCompile Include="core_tests.cpp" />
     <ClCompile Include="data_utils.cpp" />
     <ClCompile Include="data_utils_tests.cpp" />
+    <ClCompile Include="gen_spec_acc_neuron.cpp" />
     <ClCompile Include="gen_spec_input_neuron.cpp" />
     <ClCompile Include="gen_spec_input_synapse.cpp" />
     <ClCompile Include="gen_spec_neuron.cpp" />
     <ClCompile Include="gen_spec_brain.cpp" />
+    <ClCompile Include="gen_spec_next_digit_neuron.cpp" />
+    <ClCompile Include="gen_spec_output_neuron.cpp" />
     <ClCompile Include="gen_spec_region.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="log_tests.cpp" />
@@ -46,10 +49,13 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="data_utils.h" />
+    <ClInclude Include="gen_spec_acc_neuron.h" />
     <ClInclude Include="gen_spec_input_neuron.h" />
     <ClInclude Include="gen_spec_input_synapse.h" />
     <ClInclude Include="gen_spec_neuron.h" />
     <ClInclude Include="gen_spec_brain.h" />
+    <ClInclude Include="gen_spec_next_digit_neuron.h" />
+    <ClInclude Include="gen_spec_output_neuron.h" />
     <ClInclude Include="gen_spec_region.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="mnist_body.h" />

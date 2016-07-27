@@ -99,6 +99,15 @@
     <ClCompile Include="gen_spec_input_neuron.cpp">
       <Filter>Neurons</Filter>
     </ClCompile>
+    <ClCompile Include="gen_spec_acc_neuron.cpp">
+      <Filter>Neurons</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_output_neuron.cpp">
+      <Filter>Neurons</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_next_digit_neuron.cpp">
+      <Filter>Neurons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -156,6 +165,15 @@
       <Filter>Synapses</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_input_neuron.h">
+      <Filter>Neurons</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_acc_neuron.h">
+      <Filter>Neurons</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_output_neuron.h">
+      <Filter>Neurons</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_next_digit_neuron.h">
       <Filter>Neurons</Filter>
     </ClInclude>
   </ItemGroup>

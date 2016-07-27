@@ -19,7 +19,19 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     // Place the parent/controller of the first layer.
     NeuronId parent = base.RequestNeuronAddition("GenSpecNeuron", neuronParams.dump());
 
-    NeuronId accumulator = base.RequestNeuronAddition("GenSpecAccNeuron", "");
+	NeuronId outputNeuron = mBase.GetOutput("Output").neurons[0];
+	NeuronId nextDigitNeuron = mBase.GetOutput("NextDigit").neurons[0];
+
+	json accParams;
+	accParams["output"] = outputNeuron;
+	accParams["nextDigit"] = nextDigitNeuron;
+
+    NeuronId accumulator = base.RequestNeuronAddition("GenSpecAccNeuron", accParams.dump());
+	Synapse::Data outputSynapseData;
+	base.RequestSynapseAddition(Direction::Forward, accumulator, outputNeuron, outputSynapseData);
+
+	Synapse::Data nextDigitSynapseData;
+	base.RequestSynapseAddition(Direction::Forward, accumulator, nextDigitNeuron, outputSynapseData);
 
     NeuronId inputNeuron = mBase.GetInput("Input").neurons[0];
 

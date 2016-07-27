@@ -6,6 +6,9 @@
 
 #include "gen_spec_neuron.h"
 #include "gen_spec_input_neuron.h"
+#include "gen_spec_acc_neuron.h"
+#include "gen_spec_output_neuron.h"
+#include "gen_spec_next_digit_neuron.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -48,6 +51,12 @@ Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json 
         return new GenSpecNeuron(base, params);
     } else if (type == GenSpecInputNeuron::Type) {
         return new GenSpecInputNeuron(base, params);
+    } else if (type == GenSpecAccNeuron::Type) {
+        return new GenSpecAccNeuron(base, params);
+    } else if (type == GenSpecOutputNeuron::Type) {
+        return new GenSpecOutputNeuron(base, params);
+    } else if (type == GenSpecNextDigitNeuron::Type) {
+        return new GenSpecNextDigitNeuron(base, params);
     } else {
         return nullptr;
     }
