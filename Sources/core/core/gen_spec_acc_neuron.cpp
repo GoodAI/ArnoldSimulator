@@ -1,4 +1,5 @@
 ﻿#include "gen_spec_acc_neuron.h"
+#include "gen_spec_neuron.h"
 #include "log.h"
 
 GenSpecAccNeuron::GenSpecAccNeuron(NeuronBase &base, json &params) : Neuron(base, params)
@@ -22,40 +23,63 @@ const char *GenSpecAccNeuron::GetType() const
     return Type;
 }
 
-void GenSpecAccNeuron::HandleSpike(Direction direction, DiscreteSpike &spike, Spike::Data &spikeData)
+void GenSpecAccNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &spikeData)
 {
-	uint8_t value = spike.GetIntensity(spikeData);
-	mAccumulatedResults.push_back(NeuronResult(spikeData.sender, value));
+    Functions::Function function = static_cast<Functions::Function>(spike.GetFunction(spikeData));
 
-	if (mAccumulatedResults.size() > 0 && mAccumulatedResults.size() == mBase.GetInputSynapses().size()) {
-		// We got all the results, send spikes to output connectors.
-		Log(LogLevel::Info, "Accumulator received info from all neurons, sending info to outputs");
+    switch (function) {
+        case Functions::Function::Result:
+        {
+            Functions::ResultArgs args;
+            spike.GetArguments(spikeData, &args, sizeof(Functions::ResultArgs));
 
-		// First, sort the results by NeuronId, so that neurons keep their position in the output.
+            uint8_t value = args.result;
+            mAccumulatedResults[spikeData.sender] = value;
 
-		std::sort(mAccumulatedResults.begin(), mAccumulatedResults.end(), [](const NeuronResult &a, const NeuronResult &b) -> bool {
-			return a.first < b.first;
-		});
+            if (args.isLeaf == true) {
+                // The leaf node is definitely the last one to arrive, because the ones before him
+                // would have arrived in the previous time steps.
+                Log(LogLevel::Info, "Accumulator received info from all active neurons, sending info to outputs");
 
-		std::unique_ptr<uint8_t[]> outputPtr(new uint8_t[mAccumulatedResults.size()]);
-		uint8_t *output = outputPtr.get();
 
-		size_t i = 0;
-		for (const auto &resultPair : mAccumulatedResults) {
-			output[i] = resultPair.second;
-			i++;
-		}
+                // Fill in the neurons that didn't send a result (inactive).
+                for (const std::pair<NeuronId, Synapse::Data> &inputSynapse : mBase.GetInputSynapses()) {
+                    NeuronId input = inputSynapse.first;
+                    if (mAccumulatedResults.find(input) == mAccumulatedResults.end()) {
+                        mAccumulatedResults[input] = 0;
+                    }
+                }
 
-		// Send the data to output.
-		SendMultiByteSpike(Direction::Forward, mOutputNeuron, output, mAccumulatedResults.size());
+                // First, sort the results by NeuronId, so that neurons keep their position in the output.
 
-		// Send the next digit signal.
-		Spike::Data data;
-		Spike::Initialize(Spike::Type::Binary, mBase.GetId(), data);
-		mBase.SendSpike(mNextDigitNeuron, Direction::Forward, data);
+                std::vector<NeuronResult> results(mAccumulatedResults.begin(), mAccumulatedResults.end());
+                mAccumulatedResults.clear();
 
-		mAccumulatedResults.clear();
-	}
+                std::sort(results.begin(), results.end(), [](const NeuronResult &a, const NeuronResult &b) -> bool {
+                    return a.first < b.first;
+                });
+
+                std::unique_ptr<uint8_t[]> outputPtr(new uint8_t[results.size()]);
+                uint8_t *output = outputPtr.get();
+
+                size_t i = 0;
+                for (const auto &resultPair : results) {
+                    output[i] = resultPair.second;
+                    i++;
+                }
+
+                // Send the data to output.
+                SendMultiByteSpike(Direction::Forward, mOutputNeuron, output, results.size());
+
+                // Send the next digit signal.
+                Spike::Data data;
+                Spike::Initialize(Spike::Type::Binary, mBase.GetId(), data);
+                mBase.SendSpike(mNextDigitNeuron, Direction::Forward, data);
+            }
+            break;
+        }
+        default: break;
+    }
 }
 
 void GenSpecAccNeuron::Control(size_t brainStep)

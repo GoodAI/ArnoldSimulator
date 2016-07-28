@@ -15,7 +15,7 @@ public:
 
 	const char *GetType() const override;
 
-	void HandleSpike(Direction direction, DiscreteSpike &spike, Spike::Data &data) override;
+	void HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &data) override;
 
 	void Control(size_t brainStep) override;
 
@@ -23,7 +23,7 @@ public:
 
 	void SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count);
 protected:
-	std::vector<NeuronResult> mAccumulatedResults;
+	std::map<NeuronId, uint8_t> mAccumulatedResults;
 	NeuronId mOutputNeuron;
 	NeuronId mNextDigitNeuron;
 };
