@@ -68,7 +68,7 @@ inline void operator|(PUP::er &p, Direction &direction)
 
 enum class ObserverType : uint8_t
 {
-    Greyscale,
+    FloatTensor,
     Unknown
 };
 
@@ -107,14 +107,14 @@ typedef std::vector<ObserverResult> ObserverResults;
 
 inline ObserverType ParseObserverType(const std::string &type)
 {
-    if (type == "Greyscale") return ObserverType::Greyscale;
+    if (type == "FloatTensor") return ObserverType::FloatTensor;
 
     return ObserverType::Unknown;
 }
 
 inline std::string SerializeObserverType(ObserverType type)
 {
-    if (type == ObserverType::Greyscale) return "Greyscale";
+    if (type == ObserverType::FloatTensor) return "FloatTensor";
 
     return "Unknown";
 }

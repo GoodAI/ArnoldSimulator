@@ -930,7 +930,7 @@ void Core::BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatB
         flatbuffers::Offset<flatbuffers::Vector<uint8_t>> observerPlainDataOffset;
         flatbuffers::Offset<flatbuffers::Vector<float>> observerFloatDataOffset;
         
-        if (observerType == ObserverType::Greyscale) {
+        if (observerType == ObserverType::FloatTensor) {
             std::vector<float> floatDataVector;
             ConvertByteToFloatVector(observerData, floatDataVector);
 
@@ -942,7 +942,7 @@ void Core::BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatB
         Communication::ObserverResultBuilder observerResultBuilder(builder);
         observerResultBuilder.add_observer(observerOffset);
 
-        if (observerType == ObserverType::Greyscale) {
+        if (observerType == ObserverType::FloatTensor) {
             observerResultBuilder.add_floatData(observerFloatDataOffset);
         } else {
             observerResultBuilder.add_plainData(observerPlainDataOffset);

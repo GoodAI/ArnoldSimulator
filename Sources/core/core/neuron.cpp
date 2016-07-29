@@ -772,7 +772,7 @@ void ThresholdNeuron::HandleSpike(Direction direction, ContinuousSpike &spike, S
 void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData)
 {
     // TODO(HonzaS): Use composition here, provide observer classes.
-    if (type == ObserverType::Greyscale) {
+    if (type == ObserverType::FloatTensor) {
         
         float activationRatio = 0.0f;
         if (mThresholdActivation != 0.0f) {

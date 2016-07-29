@@ -20,7 +20,8 @@ namespace GoodAI.Arnold
     // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
     public class UIMain : IDisposable
     {
-        private string m_observerType = "Greyscale";
+        private string m_observerType = "FloatTensor";
+
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
