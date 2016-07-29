@@ -49,7 +49,7 @@ void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spik
     spike.GetValues(spikeData, values.get(), weightCount);
 
     for (int i = 0; i < weightCount; i++) {
-        mResult += weights[i] > mSynapseThreshold ? values[i] : 0;
+        mResult += ((weights[i] > mSynapseThreshold) ? values[i] : 0);
     }
 
     ResultArgs args;

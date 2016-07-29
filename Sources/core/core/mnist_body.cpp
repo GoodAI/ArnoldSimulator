@@ -58,10 +58,10 @@ void MnistBody::Simulate(
     pullSensoMotoricData(actuatorName, actuatorData);
 
     // Check if a digit should be shown.
-    bool firstStep = bodyStep == 1;
-    bool isActuatorDataPresent = actuatorData.size() == nextDigitElemSize * nextDigitElemCount;
-    bool nextDigitRequested = isActuatorDataPresent && actuatorData[0] == 1;
-    bool nextDigit = firstStep || nextDigitRequested;
+    bool firstStep = (bodyStep == 1);
+    bool isActuatorDataPresent = (actuatorData.size() == nextDigitElemSize * nextDigitElemCount);
+    bool nextDigitRequested = (isActuatorDataPresent && (actuatorData[0] == 1));
+    bool nextDigit = (firstStep || nextDigitRequested);
 
     if (!nextDigit)
         return;

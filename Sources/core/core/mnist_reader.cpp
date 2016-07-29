@@ -31,7 +31,7 @@ void MnistReader::Load(std::istream &images, std::istream &labels)
     images.read(bufferPtr, 4);
     mColumnCount = swap_endian(buffer);
 
-    uint32_t expectedMagicNumber = 2051;
+    const uint32_t expectedMagicNumber = 2051;
     if (magicNumber != expectedMagicNumber) {
         Log(LogLevel::Error, "Magic number %d doesn't match expected value %d",
             magicNumber, expectedMagicNumber);
