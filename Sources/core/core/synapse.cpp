@@ -1,4 +1,5 @@
 #include "synapse.h"
+#include "log.h"
 
 Synapse::Synapse()
 {
@@ -437,15 +438,25 @@ void MultiWeightedSynapse::Release(Synapse::Data &data)
 
 void MultiWeightedSynapse::GetWeights(const Synapse::Data &data, float *weights, size_t count) const
 {
+    if (count > GetWeightCount(data)) {
+        Log(LogLevel::Error, "%s: invalid count %d", __func__, count);
+        return;
+    }
+
     std::memcpy(weights, reinterpret_cast<float*>(data.bits64), count * sizeof(float));
 }
 
 void MultiWeightedSynapse::SetWeights(Synapse::Data &data, const float *weights, size_t count)
 {
+    if (count > GetWeightCount(data)) {
+        Log(LogLevel::Error, "%s: invalid count %d", __func__, count);
+        return;
+    }
+
     std::memcpy(reinterpret_cast<float*>(data.bits64), weights, count * sizeof(float));
 }
 
-uint16_t MultiWeightedSynapse::GetWeightCount(const Synapse::Data &data) const
+size_t MultiWeightedSynapse::GetWeightCount(const Synapse::Data &data) const
 {
     return data.bits16;
 }

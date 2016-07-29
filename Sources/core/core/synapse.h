@@ -103,7 +103,7 @@ public:
     void GetWeights(const Synapse::Data &data, float *weights, size_t count) const;
     void SetWeights(Synapse::Data &data, const float *weights, size_t count);
 
-    uint16_t GetWeightCount(const Synapse::Data &data) const;
+    size_t GetWeightCount(const Synapse::Data &data) const;
 private:
     tbb::scalable_allocator<float> mAllocator;
 };

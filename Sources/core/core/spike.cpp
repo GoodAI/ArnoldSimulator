@@ -1,4 +1,5 @@
 #include "neuron.h"
+#include "log.h"
 
 #include "spike.h"
 
@@ -463,6 +464,11 @@ void *MultiByteSpike::AllocateExtra(Spike::Data &data)
 
 void MultiByteSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
+    if (allocCount > std::numeric_limits<uint16_t>::max()) {
+        Log(LogLevel::Error, "%s: allocCount argument (%d) does not fit into uint16_t", __func__, allocCount);
+        return;
+    }
+
     data.bits16 = allocCount;
 
     uint8_t * ext = mAllocator.allocate(data.bits16);
@@ -487,18 +493,24 @@ size_t MultiByteSpike::AllBytes(const Spike::Data &data) const
 
 void MultiByteSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
-    if (size == AllBytes(data)) {
-        uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
-        std::memcpy(buffer, values, size);
+    if (size != AllBytes(data)) {
+        Log(LogLevel::Warn, "s: invalid size argument (%d)", __func__, size);
+        return;
     }
+
+    uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
+    std::memcpy(buffer, values, size);
 }
 
 void MultiByteSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
 {
-    if (size == AllBytes(data)) {
-        uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
-        std::memcpy(values, buffer, size);
+    if (size != AllBytes(data)) {
+        Log(LogLevel::Warn, "s: invalid size argument (%d)", __func__, size);
+        return;
     }
+
+    uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
+    std::memcpy(values, buffer, size);
 }
 
 void MultiByteSpike::GetValues(const Spike::Data &data, uint8_t *values, size_t count) const
@@ -513,6 +525,11 @@ void MultiByteSpike::GetValues(const Spike::Data &data, uint8_t *values, size_t 
 void MultiByteSpike::SetValues(Spike::Data &data, const uint8_t *values, size_t count)
 {
     size_t size = count * sizeof(uint8_t);
+    if (size > std::numeric_limits<uint16_t>::max()) {
+        Log(LogLevel::Error, "%s: size %d does not fit into uint16_t", __func__, size);
+        return;
+    }
+
     if (ExtraBytes(data) == 0 && count > 0) {
         data.bits16 = size;
         data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
