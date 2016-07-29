@@ -425,6 +425,8 @@ void MultiWeightedSynapse::Clone(const Synapse::Data &original, Synapse::Data &d
     data.bits16 = GetWeightCount(original);
 
     data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
+
+    SetWeights(data, reinterpret_cast<float*>(original.bits64), GetWeightCount(data));
 }
 
 void MultiWeightedSynapse::Release(Synapse::Data &data)
