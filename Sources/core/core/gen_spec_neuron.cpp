@@ -103,7 +103,7 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
 void GenSpecNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData)
 {
     // TODO(HonzaS): Use composition here, provide observer classes.
-    if (type == ObserverType::Greyscale) {
+    if (type == ObserverType::FloatTensor) {
         //observerData.push_back(mAccumulatedActivation * 255 / (100 * mGeneralistActivation));
     }
 }
