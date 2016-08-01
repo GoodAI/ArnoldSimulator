@@ -673,7 +673,7 @@ void Core::SendStubModel(const Communication::GetModelRequest *getModelRequest, 
             data.push_back(128);
             auto dataVectorOffset = builder.CreateVector(data);
 
-            auto observerDataOffset = Communication::CreateObserverResult(builder, observerOffset, dataVectorOffset);
+            auto observerDataOffset = Communication::CreateObserverResult(builder, observerOffset, 0 /* dimensions */, dataVectorOffset);
             observersOffsets.push_back(observerDataOffset);
         }    
     }
