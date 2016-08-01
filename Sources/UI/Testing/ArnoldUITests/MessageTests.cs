@@ -116,7 +116,8 @@ namespace GoodAI.Arnold.UI.Tests
             var observer = new ObserverDefinition(1, 2, "foo");
             var data = new byte[] {1, 2, 3};
 
-            var observerData = new ObserverDataContainer(observer, new ObserverData(plainData: data, floatData: null));
+            var observerData = new ObserverDataContainer(observer,
+                new ObserverData(metadata: null, plainData: data, floatData: null));
 
             var addedRegions = new List<RegionModel>
             {

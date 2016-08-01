@@ -377,16 +377,18 @@ namespace GoodAI.Arnold.UI.Tests
         public void LoadsObserverData()
         {
             var observerDefinition = new ObserverDefinition(1, 1, "foo");
+            var metadata = new int[] {28, 28, 3};
             var plainData = new byte[] {1, 2, 3};
             var floatData = new float[] {4.5f, 6.7f};
 
             var observer = new ObserverDataContainer(
-                observerDefinition, new ObserverData(plainData: plainData, floatData: floatData));
+                observerDefinition, new ObserverData(metadata: metadata, plainData: plainData, floatData: floatData));
 
             ResponseMessage diff = ModelResponseBuilder.Build(observers: new List<ObserverDataContainer> {observer});
             ApplyModelDiff(diff);
 
             var observerData = m_model.Observers.Values.First();
+            Assert.Equal(metadata, observerData.Metadata);
             Assert.Equal(plainData, observerData.PlainData);
             Assert.Equal(floatData, observerData.FloatData);
         }

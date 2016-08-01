@@ -321,7 +321,7 @@ public sealed class ObserverResult : Table {
 
   public GoodAI.Arnold.Communication.Observer Observer { get { return GetObserver(new GoodAI.Arnold.Communication.Observer()); } }
   public GoodAI.Arnold.Communication.Observer GetObserver(GoodAI.Arnold.Communication.Observer obj) { int o = __offset(4); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
-  public uint GetMetadata(int j) { int o = __offset(6); return o != 0 ? bb.GetUint(__vector(o) + j * 4) : (uint)0; }
+  public int GetMetadata(int j) { int o = __offset(6); return o != 0 ? bb.GetInt(__vector(o) + j * 4) : (int)0; }
   public int MetadataLength { get { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; } }
   public ArraySegment<byte>? GetMetadataBytes() { return __vector_as_arraysegment(6); }
   public byte GetPlainData(int j) { int o = __offset(8); return o != 0 ? bb.Get(__vector(o) + j * 1) : (byte)0; }
@@ -347,7 +347,7 @@ public sealed class ObserverResult : Table {
   public static void StartObserverResult(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddObserver(FlatBufferBuilder builder, Offset<GoodAI.Arnold.Communication.Observer> observerOffset) { builder.AddOffset(0, observerOffset.Value, 0); }
   public static void AddMetadata(FlatBufferBuilder builder, VectorOffset metadataOffset) { builder.AddOffset(1, metadataOffset.Value, 0); }
-  public static VectorOffset CreateMetadataVector(FlatBufferBuilder builder, uint[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddUint(data[i]); return builder.EndVector(); }
+  public static VectorOffset CreateMetadataVector(FlatBufferBuilder builder, int[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddInt(data[i]); return builder.EndVector(); }
   public static void StartMetadataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddPlainData(FlatBufferBuilder builder, VectorOffset plainDataOffset) { builder.AddOffset(2, plainDataOffset.Value, 0); }
   public static VectorOffset CreatePlainDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }

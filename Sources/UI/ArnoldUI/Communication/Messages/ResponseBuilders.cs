@@ -355,39 +355,48 @@ namespace GoodAI.Arnold.Communication
         private static VectorOffset? BuildObservers(IList<ObserverDataContainer> observers, FlatBufferBuilder builder)
         {
             Offset<ObserverResult>[] observersOffsets = BuildOffsets(observers,
-                observer =>
-                {
-                    var neuronId = NeuronId.CreateNeuronId(builder, observer.Definition.NeuronIndex,
-                        observer.Definition.RegionIndex);
-                    var observerType = builder.CreateString(observer.Definition.Type);
-
-                    var observerOffset = Observer.CreateObserver(builder, neuronId, observerType);
-
-                    VectorOffset? plainDataOffset = null;
-                    if (observer.Data.PlainData != null)
-                        plainDataOffset = ObserverResult.CreatePlainDataVector(builder, observer.Data.PlainData);
-
-                    VectorOffset? floatDataOffset = null;
-                    if (observer.Data.FloatData != null)
-                        floatDataOffset = ObserverResult.CreateFloatDataVector(builder, observer.Data.FloatData);
-
-                    ObserverResult.StartObserverResult(builder);
-                    
-                    ObserverResult.AddObserver(builder, observerOffset);
-
-                    if (plainDataOffset.HasValue)
-                        ObserverResult.AddPlainData(builder, plainDataOffset.Value);
-
-                    if (floatDataOffset.HasValue)
-                        ObserverResult.AddFloatData(builder, floatDataOffset.Value);
-
-                    return ObserverResult.EndObserverResult(builder);
-                });
+                observer => BuildObserverOffset(builder, observer));
 
             if (observersOffsets == null)
                 return null;
 
             return ModelResponse.CreateObserverResultsVector(builder, observersOffsets);
+        }
+
+        private static Offset<ObserverResult> BuildObserverOffset(FlatBufferBuilder builder, ObserverDataContainer observer)
+        {
+            var neuronId = NeuronId.CreateNeuronId(builder, observer.Definition.NeuronIndex,
+                observer.Definition.RegionIndex);
+            var observerType = builder.CreateString(observer.Definition.Type);
+
+            var observerOffset = Observer.CreateObserver(builder, neuronId, observerType);
+
+            VectorOffset? metadataOffset = null;
+            if (observer.Data.Metadata != null)
+                metadataOffset = ObserverResult.CreateMetadataVector(builder, observer.Data.Metadata);
+
+            VectorOffset? plainDataOffset = null;
+            if (observer.Data.PlainData != null)
+                plainDataOffset = ObserverResult.CreatePlainDataVector(builder, observer.Data.PlainData);
+
+            VectorOffset? floatDataOffset = null;
+            if (observer.Data.FloatData != null)
+                floatDataOffset = ObserverResult.CreateFloatDataVector(builder, observer.Data.FloatData);
+
+            ObserverResult.StartObserverResult(builder);
+
+            ObserverResult.AddObserver(builder, observerOffset);
+
+            if (metadataOffset.HasValue)
+                ObserverResult.AddMetadata(builder, metadataOffset.Value);
+
+            if (plainDataOffset.HasValue)
+                ObserverResult.AddPlainData(builder, plainDataOffset.Value);
+
+            if (floatDataOffset.HasValue)
+                ObserverResult.AddFloatData(builder, floatDataOffset.Value);
+
+            return ObserverResult.EndObserverResult(builder);
         }
 
         private static Offset<TMessageEntity>[] BuildOffsets<TModel, TMessageEntity>(IList<TModel> models,

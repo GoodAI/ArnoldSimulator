@@ -424,24 +424,26 @@ namespace GoodAI.Arnold.Core
                 var definition = new ObserverDefinition(neuronId.Neuron, neuronId.Region, observerData.Observer.Type);
 
                 model.Observers[definition] = new ObserverData(
+                    CopyObserverArrayData(observerData.MetadataLength, (n => observerData.GetMetadata(n))),
                     observerData.GetPlainDataBytes()?.ToArray(),
-                    CopyObserverFloatData(observerData));
+                    CopyObserverArrayData(observerData.FloatDataLength, (n => observerData.GetFloatData(n))));
             }
         }
 
-        private static float[] CopyObserverFloatData(ObserverResult observerData)
+        private static TNumber[] CopyObserverArrayData<TNumber>(int count, Func<int, TNumber> getItem)
+            where TNumber : struct
         {
-            if (observerData.FloatDataLength <= 0)
+            if (count <= 0)
                 return null;
 
-            var floatData = new float[observerData.FloatDataLength];
+            var numberArray = new TNumber[count];
 
-            for (int j = 0; j < observerData.FloatDataLength; j++)
+            for (var n = 0; n < count; n++)
             {
-                floatData[j] = observerData.GetFloatData(j);
+                numberArray[n] = getItem(n);
             }
 
-            return floatData;
+            return numberArray;
         }
     }
 }

@@ -8,11 +8,13 @@ namespace GoodAI.Arnold.Observation
 {
     public class ObserverData
     {
+        public int[] Metadata { get; }
         public byte[] PlainData { get; }
         public float[] FloatData { get; }
 
-        public ObserverData(byte[] plainData, float[] floatData)
+        public ObserverData(int[] metadata, byte[] plainData, float[] floatData)
         {
+            Metadata = metadata;
             PlainData = plainData;
             FloatData = floatData;
         }
