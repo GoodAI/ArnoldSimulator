@@ -612,8 +612,8 @@ void NeuronBase::Simulate(SimulateMsg *msg)
 
             for (auto observer : observers) {
                 if (std::get<0>(observer) == neuronId) {
-                    ObserverResult currentResult(observer, std::vector<uint8_t>());
-                    mNeuron->CalculateObserver(std::get<1>(observer), std::get<1>(currentResult));
+                    ObserverResult currentResult(observer, std::vector<int32_t>(), std::vector<uint8_t>());
+                    mNeuron->CalculateObserver(std::get<1>(observer), std::get<1>(currentResult), std::get<2>(currentResult));
                     observerResults.push_back(currentResult);
                 }
             }
@@ -778,10 +778,13 @@ void ThresholdNeuron::HandleSpike(Direction direction, ContinuousSpike &spike, S
     }
 }
 
-void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData)
+void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData)
 {
     // TODO(HonzaS): Use composition here, provide observer classes.
     if (type == ObserverType::FloatTensor) {
+
+        metadata.push_back(3);  // First dimension (width).
+        metadata.push_back(2);  // Second dimension (height).
         
         float activationRatio = 0.0f;
         if (mThresholdActivation != 0.0f) {
@@ -789,6 +792,12 @@ void ThresholdNeuron::CalculateObserver(ObserverType type, std::vector<uint8_t> 
         }
 
         PutFloatToByteVector(observerData, activationRatio);
+        PutFloatToByteVector(observerData, activationRatio/2.0f);
+        PutFloatToByteVector(observerData, activationRatio/3.0f);
+
+        PutFloatToByteVector(observerData, -activationRatio);
+        PutFloatToByteVector(observerData, -activationRatio/2.0f);
+        PutFloatToByteVector(observerData, -activationRatio/3.0f);
     }
 }
 

@@ -922,7 +922,9 @@ void Core::BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatB
         auto neuronId = std::get<0>(observerDefinition);
 
         ObserverType observerType = std::get<1>(observerDefinition);
-        std::vector<uint8_t> observerData = std::get<1>(observerResult);
+
+        std::vector<int32_t> observerMetadata = std::get<1>(observerResult);
+        std::vector<uint8_t> observerData = std::get<2>(observerResult);
 
         auto neuronIdOffset = CommunicationNeuronId(builder, neuronId);
 
@@ -930,6 +932,8 @@ void Core::BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatB
         auto observerTypeOffset = builder.CreateString(observerStringType);
 
         auto observerOffset = Communication::CreateObserver(builder, neuronIdOffset, observerTypeOffset);
+
+        auto observerMetadataOffset = builder.CreateVector(observerMetadata);
 
         flatbuffers::Offset<flatbuffers::Vector<uint8_t>> observerPlainDataOffset;
         flatbuffers::Offset<flatbuffers::Vector<float>> observerFloatDataOffset;
@@ -945,6 +949,7 @@ void Core::BuildObserverResults(const ViewportUpdate &update, flatbuffers::FlatB
 
         Communication::ObserverResultBuilder observerResultBuilder(builder);
         observerResultBuilder.add_observer(observerOffset);
+        observerResultBuilder.add_metadata(observerMetadataOffset);
 
         if (observerType == ObserverType::FloatTensor) {
             observerResultBuilder.add_floatData(observerFloatDataOffset);

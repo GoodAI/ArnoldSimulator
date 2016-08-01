@@ -23,7 +23,7 @@ public:
 
     size_t ContributeToRegion(uint8_t *&contribution) override;
 
-    void CalculateObserver(ObserverType type, std::vector<uint8_t> &observerData) override;
+    void CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData) override;
 
     enum class Function : uint8_t
     {

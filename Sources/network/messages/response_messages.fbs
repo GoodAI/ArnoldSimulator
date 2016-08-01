@@ -85,7 +85,7 @@ table Synapse {
 
 table ObserverResult {
 	observer:Observer;
-	metadata:[uint];
+	metadata:[int];
 	plainData:[ubyte];
 	floatData:[float];
 }

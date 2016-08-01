@@ -97,7 +97,7 @@ typedef std::vector<Box3D> Boxes;
 typedef std::tuple<NeuronId, ObserverType> Observer;
 typedef std::vector<Observer> Observers;
 
-typedef std::tuple<Observer, std::vector<uint8_t>> ObserverResult;
+typedef std::tuple<Observer, std::vector<int32_t>, std::vector<uint8_t>> ObserverResult;
 typedef std::vector<ObserverResult> ObserverResults;
 
 #define BOX_DEFAULT_MARGIN 10.0f
