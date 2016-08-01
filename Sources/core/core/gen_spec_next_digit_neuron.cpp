@@ -22,13 +22,13 @@ const char *GenSpecNextDigitNeuron::GetType() const
 
 void GenSpecNextDigitNeuron::HandleSpike(Direction direction, BinarySpike &spike, Spike::Data &spikeData)
 {
-	CkPrintf("NextDigit neuron got spike, forwarding\n");
+    CkPrintf("NextDigit neuron got spike, forwarding\n");
 
-	for (const auto &outputPair : mBase.GetOutputSynapses()) {
-		Spike::Data data;
-		Spike::Initialize(Spike::Type::Binary, mBase.GetId(), data);
-		mBase.SendSpike(outputPair.first, Direction::Forward, data);
-	}
+    for (const auto &outputPair : mBase.GetOutputSynapses()) {
+        Spike::Data data;
+        Spike::Initialize(Spike::Type::Binary, mBase.GetId(), data);
+        mBase.SendSpike(outputPair.first, Direction::Forward, data);
+    }
 }
 
 void GenSpecNextDigitNeuron::Control(size_t brainStep)

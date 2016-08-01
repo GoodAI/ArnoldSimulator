@@ -24,11 +24,11 @@ protected:
     NeuronId mAccumulatorNeuron;
     json mNeuronParams;
 
-	size_t mBrainStepCounter;
-	size_t mBrainStepsPerEvolution;
-	size_t mSpecialistCount;
-	size_t mSpecializingGeneralistCount;
-	google::sparse_hash_map<NeuronId, float> mGenValues;
+    size_t mBrainStepCounter;
+    size_t mBrainStepsPerEvolution;
+    size_t mSpecialistCount;
+    size_t mSpecializingGeneralistCount;
+    google::sparse_hash_map<NeuronId, float> mGenValues;
 
     // parent: the neuron that decides who wins among his children.
     // inputProvider: where the input data comes from.

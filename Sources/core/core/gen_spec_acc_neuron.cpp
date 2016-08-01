@@ -4,8 +4,8 @@
 
 GenSpecAccNeuron::GenSpecAccNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
-	mOutputNeuron = params["output"].get<NeuronId>();
-	mNextDigitNeuron = params["nextDigit"].get<NeuronId>();
+    mOutputNeuron = params["output"].get<NeuronId>();
+    mNextDigitNeuron = params["nextDigit"].get<NeuronId>();
 }
 
 GenSpecAccNeuron::~GenSpecAccNeuron()

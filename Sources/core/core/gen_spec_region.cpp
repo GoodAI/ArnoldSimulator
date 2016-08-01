@@ -5,23 +5,23 @@
 const char *GenSpecRegion::Type = "GenSpecRegion";
 
 GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, params),
-	mBrainStepCounter(0), mBrainStepsPerEvolution(10), mSpecialistCount(1), mSpecializingGeneralistCount(0)
+    mBrainStepCounter(0), mBrainStepsPerEvolution(10), mSpecialistCount(1), mSpecializingGeneralistCount(0)
 {
     // This is necessary if we want to remove items from the map.
     // It's specific to the google sparse implementation, remove this if we go for a normal map.
     mGenValues.set_deleted_key(0);
 
-	if (params.find("brainStepsPerEvolution") != params.end()) {
-		mBrainStepsPerEvolution = params["brainStepsPerEvolution"].get<size_t>();
-	}
+    if (params.find("brainStepsPerEvolution") != params.end()) {
+        mBrainStepsPerEvolution = params["brainStepsPerEvolution"].get<size_t>();
+    }
 
-	if (params.find("specializingGeneralistCount") != params.end()) {
-		mSpecializingGeneralistCount = params["specializingGeneralistCount"].get<size_t>();
-	}
+    if (params.find("specializingGeneralistCount") != params.end()) {
+        mSpecializingGeneralistCount = params["specializingGeneralistCount"].get<size_t>();
+    }
 
-	if (params.find("specialistCount") != params.end()) {
-		mSpecialistCount = params["specialistCount"].get<size_t>();
-	}
+    if (params.find("specialistCount") != params.end()) {
+        mSpecialistCount = params["specialistCount"].get<size_t>();
+    }
 
     json generalists = params["generalists"];
 
@@ -32,24 +32,24 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     inputSizeY = generalists["inputSizeY"].get<size_t>();
     mInputSize = inputSizeX * inputSizeY;
 
-	mNeuronParams = generalists["neuronParams"];
+    mNeuronParams = generalists["neuronParams"];
 
     // Place the parent/controller of the first layer.
     NeuronId parent = mBase.RequestNeuronAddition("GenSpecNeuron", mNeuronParams.dump());
 
-	NeuronId outputNeuron = mBase.GetOutput("Output").neurons[0];
-	NeuronId nextDigitNeuron = mBase.GetOutput("NextDigit").neurons[0];
+    NeuronId outputNeuron = mBase.GetOutput("Output").neurons[0];
+    NeuronId nextDigitNeuron = mBase.GetOutput("NextDigit").neurons[0];
 
-	json accParams;
-	accParams["output"] = outputNeuron;
-	accParams["nextDigit"] = nextDigitNeuron;
+    json accParams;
+    accParams["output"] = outputNeuron;
+    accParams["nextDigit"] = nextDigitNeuron;
 
     mAccumulatorNeuron = mBase.RequestNeuronAddition("GenSpecAccNeuron", accParams.dump());
-	Synapse::Data outputSynapseData;
-	mBase.RequestSynapseAddition(Direction::Forward, mAccumulatorNeuron, outputNeuron, outputSynapseData);
+    Synapse::Data outputSynapseData;
+    mBase.RequestSynapseAddition(Direction::Forward, mAccumulatorNeuron, outputNeuron, outputSynapseData);
 
-	Synapse::Data nextDigitSynapseData;
-	mBase.RequestSynapseAddition(Direction::Forward, mAccumulatorNeuron, nextDigitNeuron, outputSynapseData);
+    Synapse::Data nextDigitSynapseData;
+    mBase.RequestSynapseAddition(Direction::Forward, mAccumulatorNeuron, nextDigitNeuron, outputSynapseData);
 
     NeuronId inputNeuron = mBase.GetInput("Input").neurons[0];
 
@@ -68,7 +68,7 @@ GenSpecRegion::~GenSpecRegion()
 
 void GenSpecRegion::pup(PUP::er &p)
 {
-	// TODO
+    // TODO
 }
 
 const char *GenSpecRegion::GetType() const
@@ -79,49 +79,49 @@ const char *GenSpecRegion::GetType() const
 void GenSpecRegion::Control(size_t brainStep)
 {
     CkPrintf("\nstep\n");
-	if (mBrainStepCounter % mBrainStepsPerEvolution == 0) {
-		// Generate specialists.
+    if (mBrainStepCounter % mBrainStepsPerEvolution == 0) {
+        // Generate specialists.
 
-		typedef std::pair<NeuronId, float> GenPair;
+        typedef std::pair<NeuronId, float> GenPair;
 
-		std::vector<GenPair> sortingBin(mGenValues.begin(), mGenValues.end());
-		std::sort(sortingBin.begin(), sortingBin.end(), [](const GenPair &a, const GenPair &b) -> bool {
-			return a.second > b.second;
-		});
+        std::vector<GenPair> sortingBin(mGenValues.begin(), mGenValues.end());
+        std::sort(sortingBin.begin(), sortingBin.end(), [](const GenPair &a, const GenPair &b) -> bool {
+            return a.second > b.second;
+        });
 
         CkPrintf("\nGeneralization values: \n\n");
         for (const GenPair &genValue : mGenValues) {
             CkPrintf("Neuron %d: %f\n", GetNeuronIndex(genValue.first), genValue.second);
         }
 
-		for (int i = 0; i < mSpecializingGeneralistCount && i < sortingBin.size(); i++) {
+        for (int i = 0; i < mSpecializingGeneralistCount && i < sortingBin.size(); i++) {
             NeuronId parent = sortingBin[i].first;
             Log(LogLevel::Info, "Neuron %d is spawning %d children", GetNeuronIndex(parent), mSpecialistCount);
             for (int j = 0; j < mSpecialistCount; j++) {
                 CreateSpecialists(parent, parent);
             }
-		}
-	}
+        }
+    }
 
-	mBrainStepCounter++;
+    mBrainStepCounter++;
 }
 
 void GenSpecRegion::AcceptContributionFromNeuron(NeuronId neuronId, const uint8_t *contribution, size_t size)
 {
-	if (size == sizeof(float) + 1) {
-		bool isLeaf = contribution[size - 1];
+    if (size == sizeof(float) + 1) {
+        bool isLeaf = contribution[size - 1];
 
-		if (isLeaf) {
-			float value;
-			std::memcpy(&value, contribution, size-1);
-			mGenValues[neuronId] = value;
-		} else {
-			// If the neuron stopped being a leaf node, discard his previous values.
+        if (isLeaf) {
+            float value;
+            std::memcpy(&value, contribution, size-1);
+            mGenValues[neuronId] = value;
+        } else {
+            // If the neuron stopped being a leaf node, discard his previous values.
             if (mGenValues.find(neuronId) != mGenValues.end()) {
                 mGenValues.erase(neuronId);
             }
-		}
-	}
+        }
+    }
 }
 
 size_t GenSpecRegion::ContributeToBrain(uint8_t *&contribution)

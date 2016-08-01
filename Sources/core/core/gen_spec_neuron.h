@@ -19,7 +19,7 @@ namespace Functions
 
     struct WinnerSelectedArgs
     {
-		NeuronId winner;
+        NeuronId winner;
     };
 };
 
@@ -62,22 +62,22 @@ protected:
     NeuronId mBestChild;
     uint64_t mBestChildResult;
 
-	size_t mInputSize;
+    size_t mInputSize;
 
-	// If this neuron wins, it needs to forward the input to the children.
-	std::unique_ptr<uint8_t[]> mLastInputPtr;
-	NeuronId mAccumulatorId;
+    // If this neuron wins, it needs to forward the input to the children.
+    std::unique_ptr<uint8_t[]> mLastInputPtr;
+    NeuronId mAccumulatorId;
 
-	size_t mGenValueLimit;
-	float mActiveInputsVsRegisteredInputs;
-	std::deque<float> mGeneralizationValues;
+    size_t mGenValueLimit;
+    float mActiveInputsVsRegisteredInputs;
+    std::deque<float> mGeneralizationValues;
 
-	// How much is this neuron generalizing?
-	float mGenFactor;
+    // How much is this neuron generalizing?
+    float mGenFactor;
 
-	void UpdateWeights();
+    void UpdateWeights();
 
-	float GetInputDifference(uint8_t *oldInput, uint8_t *newInput);
+    float GetInputDifference(uint8_t *oldInput, uint8_t *newInput);
 };
 
 template<typename Arguments>

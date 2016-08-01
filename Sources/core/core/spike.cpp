@@ -524,7 +524,7 @@ void MultiByteSpike::GetValues(const Spike::Data &data, uint8_t *values, size_t 
 
 const uint8_t * MultiByteSpike::GetValues(const Spike::Data &data) const
 {
-	return reinterpret_cast<uint8_t*>(data.bits64);
+    return reinterpret_cast<uint8_t*>(data.bits64);
 }
 
 void MultiByteSpike::SetValues(Spike::Data &data, const uint8_t *values, size_t count)

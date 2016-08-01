@@ -22,11 +22,11 @@ const char *GenSpecOutputNeuron::GetType() const
 
 void GenSpecOutputNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &spikeData)
 {
-	CkPrintf("Output neuron got spike, forwarding\n");
+    CkPrintf("Output neuron got spike, forwarding\n");
 
-	for (const auto &outputPair : mBase.GetOutputSynapses()) {
-		SendMultiByteSpike(Direction::Forward, outputPair.first, spike.GetValues(spikeData), spike.GetValueCount(spikeData));
-	}
+    for (const auto &outputPair : mBase.GetOutputSynapses()) {
+        SendMultiByteSpike(Direction::Forward, outputPair.first, spike.GetValues(spikeData), spike.GetValueCount(spikeData));
+    }
 }
 
 void GenSpecOutputNeuron::Control(size_t brainStep)

@@ -6,7 +6,7 @@ class GenSpecInputNeuron : public Neuron
 {
 public:
     static const char *Type;
-	GenSpecInputNeuron(NeuronBase &base, json &params);
+    GenSpecInputNeuron(NeuronBase &base, json &params);
     virtual ~GenSpecInputNeuron();
 
     void pup(PUP::er &p) override;
@@ -21,12 +21,12 @@ public:
 
     void SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count);
 protected:
-	size_t mNeuronCountX;
-	size_t mNeuronCountY;
-	size_t mInputSizeX;
-	size_t mInputSizeY;
-	size_t mNeuronInputSizeX;
-	size_t mNeuronInputSizeY;
-	size_t mNeuronInputStrideX;
-	size_t mNeuronInputStrideY;
+    size_t mNeuronCountX;
+    size_t mNeuronCountY;
+    size_t mInputSizeX;
+    size_t mInputSizeY;
+    size_t mNeuronInputSizeX;
+    size_t mNeuronInputSizeY;
+    size_t mNeuronInputStrideX;
+    size_t mNeuronInputStrideY;
 };
