@@ -41,7 +41,7 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
 
     // Layers + input, output, accumulator.
     size_t maxLayers = 3 + mLayerCountLimit;
-    mLayerSpacing = 1.0 / float(maxLayers);
+    mLayerSpacing = 1.0 / float(maxLayers-1);
 
     // Place the parent/controller of the first layer.
     Point3D position(0, 1, 0.5);
@@ -112,14 +112,30 @@ void GenSpecRegion::Control(size_t brainStep)
         });
 
         CkPrintf("\nGeneralization values: \n\n");
-        for (const GenPair &genValue : mGenValues) {
+        for (const GenPair &genValue : sortingBin) {
             CkPrintf("Neuron %d: %f\n", GetNeuronIndex(genValue.first), genValue.second);
         }
 
-        for (int i = 0; i < mSpecializingGeneralistCount && i < sortingBin.size(); i++) {
-            NeuronId parent = sortingBin[i].first;
-            
+        int index = 0;
+        for (int i = 0; i < mSpecializingGeneralistCount; i++) {
+            if (index >= sortingBin.size())
+                break;
+
+            if (sortingBin[index].second <= 0) {
+                Log(LogLevel::Info, "No generalists need to specialize");
+                break;
+            }
+
+            NeuronId parent = sortingBin[index].first;
+            index++;
+
             const std::pair<size_t, Point3D> &parentTopology = mTopology[parent];
+
+            if (parentTopology.first >= mLayerCountLimit) {
+                i--;
+                continue;
+            }
+
             size_t layer = parentTopology.first + 1;
             const Point3D &parentPosition = parentTopology.second;
 

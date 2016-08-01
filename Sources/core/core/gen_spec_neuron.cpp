@@ -69,7 +69,7 @@ void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spik
     size_t activatedInputs = 0;
     for (int i = 0; i < weightCount; i++) {
         mResult += ((weights[i] > mSynapseThreshold) ? values[i] : 0);
-        activatedInputs += weights[i];
+        activatedInputs += values[i];
     }
 
     // Get generalization factor.
