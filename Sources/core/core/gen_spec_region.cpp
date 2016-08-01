@@ -5,12 +5,9 @@
 const char *GenSpecRegion::Type = "GenSpecRegion";
 
 GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, params),
-    mBrainStepCounter(0), mBrainStepsPerEvolution(10), mSpecialistCount(1), mSpecializingGeneralistCount(0)
+    mBrainStepCounter(0), mBrainStepsPerEvolution(10), mSpecialistCount(1),
+    mSpecializingGeneralistCount(0)
 {
-    // This is necessary if we want to remove items from the map.
-    // It's specific to the google sparse implementation, remove this if we go for a normal map.
-    mGenValues.set_deleted_key(0);
-
     if (params.find("brainStepsPerEvolution") != params.end()) {
         mBrainStepsPerEvolution = params["brainStepsPerEvolution"].get<size_t>();
     }
@@ -23,26 +20,39 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
         mSpecialistCount = params["specialistCount"].get<size_t>();
     }
 
+    if (params.find("layerCountLimit") != params.end()) {
+        mLayerCountLimit = params["layerCountLimit"].get<size_t>();
+    }
+
     json generalists = params["generalists"];
 
-    size_t neuronCountX, neuronCountY, inputSizeX, inputSizeY, inputStrideX, inputStrideY;
-    neuronCountX = generalists["neuronCountX"].get<size_t>();
-    neuronCountY = generalists["neuronCountY"].get<size_t>();
+    size_t inputSizeX, inputSizeY;
+    mNeuronCountX = generalists["neuronCountX"].get<size_t>();
+    mNeuronCountY = generalists["neuronCountY"].get<size_t>();
     inputSizeX = generalists["inputSizeX"].get<size_t>();
     inputSizeY = generalists["inputSizeY"].get<size_t>();
     mInputSize = inputSizeX * inputSizeY;
 
     mNeuronParams = generalists["neuronParams"];
 
-    // Place the parent/controller of the first layer.
-    NeuronId parent = mBase.RequestNeuronAddition("GenSpecNeuron", mNeuronParams.dump());
-
+    NeuronId inputNeuron = mBase.GetInput("Input").neurons[0];
     NeuronId outputNeuron = mBase.GetOutput("Output").neurons[0];
     NeuronId nextDigitNeuron = mBase.GetOutput("NextDigit").neurons[0];
+
+    // Layers + input, output, accumulator.
+    size_t maxLayers = 3 + mLayerCountLimit;
+    mLayerSpacing = 1.0 / float(maxLayers);
+
+    // Place the parent/controller of the first layer.
+    Point3D position(0, 1, 0.5);
+    NeuronId parent = RequestNeuronWithPosition("GenSpecNeuron", 0, position);
 
     json accParams;
     accParams["output"] = outputNeuron;
     accParams["nextDigit"] = nextDigitNeuron;
+    accParams["position"]["x"] = 1.0 - mLayerSpacing;
+    accParams["position"]["y"] = 0.5;
+    accParams["position"]["z"] = 0.5;
 
     mAccumulatorNeuron = mBase.RequestNeuronAddition("GenSpecAccNeuron", accParams.dump());
     Synapse::Data outputSynapseData;
@@ -51,15 +61,27 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     Synapse::Data nextDigitSynapseData;
     mBase.RequestSynapseAddition(Direction::Forward, mAccumulatorNeuron, nextDigitNeuron, outputSynapseData);
 
-    NeuronId inputNeuron = mBase.GetInput("Input").neurons[0];
-
     mNeuronParams["accumulatorId"] = mAccumulatorNeuron;
 
-    for (int y = 0; y < neuronCountY; y++) {
-        for (int x = 0; x < neuronCountX; x++) {
-            CreateSpecialists(parent, inputNeuron);
+    float marginX = (1.0 / float(mNeuronCountX)) / 2.0;
+    float marginY = (1.0 / float(mNeuronCountY)) / 2.0;
+
+    for (int y = 0; y < mNeuronCountY; y++) {
+        for (int x = 0; x < mNeuronCountX; x++) {
+            // Swap X and Z in 3D, position the first layer of generalist neurons in a grid.
+            Point3D genPosition(mLayerSpacing, marginY + (float(y) / float(mNeuronCountY)), marginX + (float(x) / float(mNeuronCountX)));
+            CreateSpecialist(parent, inputNeuron, 1, genPosition);
         }
     }
+}
+
+NeuronId GenSpecRegion::RequestNeuronWithPosition(const char* neuronType, size_t layer, const Point3D &position)
+{
+    SetParamsPosition(mNeuronParams, position);
+    NeuronId neuron = mBase.RequestNeuronAddition(neuronType, mNeuronParams.dump());
+    mTopology[neuron] = std::pair<size_t, Point3D>(layer, position);
+
+    return neuron;
 }
 
 GenSpecRegion::~GenSpecRegion()
@@ -96,9 +118,34 @@ void GenSpecRegion::Control(size_t brainStep)
 
         for (int i = 0; i < mSpecializingGeneralistCount && i < sortingBin.size(); i++) {
             NeuronId parent = sortingBin[i].first;
+            
+            const std::pair<size_t, Point3D> &parentTopology = mTopology[parent];
+            size_t layer = parentTopology.first + 1;
+            const Point3D &parentPosition = parentTopology.second;
+
+            const float neuronSpace = (1.0 / mNeuronCountX) / std::pow(mSpecialistCount, layer - 1);
+            const float neuronSpaceMargin = neuronSpace / 2.0;
+            const float previousLayerSpaceMargin = (1.0 / mNeuronCountX) / std::pow(mSpecialistCount, layer - 2) / 2.0;
+
             Log(LogLevel::Info, "Neuron %d is spawning %d children", GetNeuronIndex(parent), mSpecialistCount);
             for (int j = 0; j < mSpecialistCount; j++) {
-                CreateSpecialists(parent, parent);
+
+                // X: move to the right of the parent.
+                float x = std::get<0>(parentPosition) + mLayerSpacing;
+
+                // Y: the same as the parent.
+                float y = std::get<1>(parentPosition);
+
+                // Z: divide the space of the parent by mSpecialistCount and use it for the specialists.
+                float z = std::get<2>(parentPosition) - previousLayerSpaceMargin + neuronSpaceMargin + (j * neuronSpace);
+
+                if (x > 1 || y > 1 || z > 1) {
+                    CkPrintf("jou\n");
+                }
+
+                Point3D position(x, y, z);
+
+                CreateSpecialist(parent, parent, layer, position);
             }
         }
     }
@@ -129,13 +176,18 @@ size_t GenSpecRegion::ContributeToBrain(uint8_t *&contribution)
     return 0;
 }
 
-void GenSpecRegion::CreateSpecialists(NeuronId parent, NeuronId inputProvider)
+void GenSpecRegion::CreateSpecialist(NeuronId parent, NeuronId inputProvider, size_t layer, const Point3D &position)
 {
+    CkPrintf("CREATING layer %d, position %f:%f:%f\n", layer, std::get<0>(position), std::get<1>(position), std::get<2>(position));
     Random::Engines::reference engine = Random::GetThreadEngine();
     std::uniform_real_distribution<float> randWeight(0.0f, 1.0f);
 
+    SetParamsPosition(mNeuronParams, position);
+
     NeuronId child = mBase.RequestNeuronAddition("GenSpecNeuron", mNeuronParams.dump());
     mBase.RequestChildAddition(parent, child);
+
+    mTopology[child] = std::pair<size_t, Point3D>(layer, position);
 
     // Connect the neuron to the input.
     // This is the only difference between the first layer and the other ones.
@@ -156,4 +208,11 @@ void GenSpecRegion::CreateSpecialists(NeuronId parent, NeuronId inputProvider)
     Synapse::Data resultSynapse;
     Synapse::Initialize(Synapse::Type::Empty, resultSynapse);
     mBase.RequestSynapseAddition(Direction::Forward, child, mAccumulatorNeuron, resultSynapse);
+}
+
+void GenSpecRegion::SetParamsPosition(json &params, const Point3D &position)
+{
+    params["position"]["x"] = std::get<0>(position);
+    params["position"]["y"] = std::get<1>(position);
+    params["position"]["z"] = std::get<2>(position);
 }

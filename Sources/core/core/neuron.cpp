@@ -109,7 +109,16 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
 
     mNeverSimulated = true;
     mTempIdCounter = GetNeuronId(TEMP_REGION_INDEX, NEURON_INDEX_MIN);
-    mPosition = Point3D(randFloat(engine), randFloat(engine), randFloat(engine));
+
+    if (p.find("position") != p.end()) {
+        mPosition = Point3D(
+            p["position"]["x"].get<float>(),
+            p["position"]["y"].get<float>(),
+            p["position"]["z"].get<float>());
+    } else {
+        mPosition = Point3D(randFloat(engine), randFloat(engine), randFloat(engine));
+    }
+
     mNeuron = CreateNeuron(type, *this, p);
     mParent = DELETED_NEURON_ID;
     mChildren.set_deleted_key(DELETED_NEURON_ID);

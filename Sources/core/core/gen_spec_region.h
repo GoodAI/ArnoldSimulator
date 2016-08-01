@@ -20,7 +20,7 @@ public:
         NeuronId neuronId, const uint8_t *contribution, size_t size) override;
     virtual size_t ContributeToBrain(uint8_t *&contribution) override;
 protected:
-    size_t mInputSize;
+    size_t mInputSize, mNeuronCountX, mNeuronCountY;
     NeuronId mAccumulatorNeuron;
     json mNeuronParams;
 
@@ -28,11 +28,21 @@ protected:
     size_t mBrainStepsPerEvolution;
     size_t mSpecialistCount;
     size_t mSpecializingGeneralistCount;
-    google::sparse_hash_map<NeuronId, float> mGenValues;
+
+    std::map<NeuronId, float> mGenValues;
+    // Map neurons to their layer number and position.
+    std::map<NeuronId, std::pair<size_t, Point3D>> mTopology;
+
+    size_t mLayerCountLimit;
+
+    float mLayerSpacing;
 
     // parent: the neuron that decides who wins among his children.
     // inputProvider: where the input data comes from.
     // The distinction is there because for the first layer of neurons, the input comes
     // from the connector, but their parent is a "dummy" generalist.
-    void CreateSpecialists(NeuronId parent, NeuronId inputProvider);
+    void CreateSpecialist(NeuronId parent, NeuronId inputProvider, size_t layer, const Point3D &position);
+
+    NeuronId RequestNeuronWithPosition(const char* neuronType, size_t layer, const Point3D &position);
+    void SetParamsPosition(json &params, const Point3D &position);
 };
