@@ -132,6 +132,7 @@
       <DependentUpon>VisualizationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Observation\Dimensions.cs" />
+    <Compile Include="Observation\MetadataReader.cs" />
     <Compile Include="Observation\ValueScaler.cs" />
     <Compile Include="Observation\Observer.cs" />
     <Compile Include="Observation\ObserverData.cs" />

@@ -91,6 +91,7 @@
     <Compile Include="ModelTests.cs" />
     <Compile Include="ModelUpdaterTests.cs" />
     <Compile Include="Observation\DimensionsTests.cs" />
+    <Compile Include="Observation\MetadataReaderTests.cs" />
     <Compile Include="Observation\ValueScalerTests.cs" />
     <Compile Include="Observation\PainterTests.cs" />
     <Compile Include="PickRayTests.cs" />

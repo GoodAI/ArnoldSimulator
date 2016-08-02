@@ -97,6 +97,12 @@ namespace GoodAI.Arnold.Observation
             }
         }
 
+        public int Width => (m_dims.Count >= 1) ? m_dims[0] : 0;
+
+        public int Height => (m_dims.Count >= 2) ? m_dims[1] : 0;
+
+        #region Private
+
         private static IndexOutOfRangeException GetIndexOutOfRangeException(int index, int maxIndex)
         {
             return new IndexOutOfRangeException($"Index {index} is greater than max index {maxIndex}.");
@@ -119,5 +125,7 @@ namespace GoodAI.Arnold.Observation
 
             return newDimensionsBuilder.ToImmutable();
         }
+
+        #endregion  
     }
 }
