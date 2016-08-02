@@ -832,11 +832,9 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped, bool runToBo
     mDoSimulationProgressNext = true;
     if (runToBodyStep) {
         mBrainStepsToRun = mBrainStepsPerBodyStep - (mBrainStep % mBrainStepsPerBodyStep);
-    }
-    else if (untilStopped) {
+    } else if (untilStopped) {
         mBrainStepsToRun = SIZE_MAX;
-    }
-    else {
+    } else {
         mBrainStepsToRun = brainSteps;
     }
 

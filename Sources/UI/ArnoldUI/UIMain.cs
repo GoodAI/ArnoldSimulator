@@ -71,14 +71,9 @@ namespace GoodAI.Arnold
         public async Task StartSimulationAsync()
         {
             if (Conductor.CoreState == CoreState.Empty)
-                await LoadBlueprint();
+                await LoadBlueprintAsync();
 
             await Conductor.StartSimulationAsync();
-        }
-
-        public async Task LoadBlueprintAsync()
-        {
-            await LoadBlueprint();
         }
 
         public async Task ClearBlueprintAsync()
@@ -86,7 +81,7 @@ namespace GoodAI.Arnold
             await Conductor.ClearBlueprintAsync();
         }
 
-        private async Task LoadBlueprint()
+        public async Task LoadBlueprintAsync()
         {
             var configuration = new JObject {{"brainStepsPerBodyStep", 10}};
             try
@@ -106,14 +101,14 @@ namespace GoodAI.Arnold
             await Conductor.PauseSimulationAsync();
         }
 
-        public async Task PerformBrainStep()
+        public async Task PerformBrainStepAsync()
         {
-            await Conductor.PerformBrainStep();
+            await Conductor.PerformBrainStepAsync();
         }
 
-        public async Task RunToBodyStep()
+        public async Task RunToBodyStepAsync()
         {
-            await Conductor.RunToBodyStep();
+            await Conductor.RunToBodyStepAsync();
         }
 
         public void Disconnect()

@@ -59,16 +59,16 @@ namespace GoodAI.Arnold
             disconnectButton.Enabled = !connectButton.Enabled;
 
             loadBlueprintButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Empty;
-            clearBlueprintButton.Enabled = m_uiMain.Conductor.IsConnected && m_uiMain.Conductor.CoreState != CoreState.Empty;
+            clearBlueprintButton.Enabled = m_uiMain.Conductor.IsConnected && (m_uiMain.Conductor.CoreState != CoreState.Empty);
 
-            runButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Paused || m_uiMain.Conductor.CoreState == CoreState.Empty;
+            runButton.Enabled = (m_uiMain.Conductor.CoreState == CoreState.Paused) || (m_uiMain.Conductor.CoreState == CoreState.Empty);
             pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
 
             brainStepButton.Enabled = runButton.Enabled;
             bodyStepButton.Enabled = runButton.Enabled;
 
             showVisualizationButton.Enabled = m_uiMain.Conductor.CoreState != CoreState.Disconnected;
-            showVisualizationButton.Checked = VisualizationForm != null && !VisualizationForm.IsDisposed;
+            showVisualizationButton.Checked = (VisualizationForm != null) && !VisualizationForm.IsDisposed;
         }
 
         private void DisableCommandButtons()
@@ -166,7 +166,7 @@ namespace GoodAI.Arnold
 
         private async void brainStepButton_Click(object sender, EventArgs e)
         {
-            await m_uiMain.PerformBrainStep();
+            await m_uiMain.PerformBrainStepAsync();
         }
 
         private void showVisualizationButton_CheckedChanged(object sender, EventArgs e)
@@ -189,7 +189,7 @@ namespace GoodAI.Arnold
 
         private async void bodyStepButton_Click(object sender, EventArgs e)
         {
-            await RunButtonActionAsync(() => m_uiMain.RunToBodyStep());
+            await RunButtonActionAsync(() => m_uiMain.RunToBodyStepAsync());
         }
     }
 }

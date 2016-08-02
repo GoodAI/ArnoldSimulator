@@ -24,8 +24,8 @@ namespace GoodAI.Arnold.Core
         Task StartSimulationAsync(uint stepsToRun = 0);
         Task PauseSimulationAsync();
         Task ClearBlueprintAsync();
-        Task PerformBrainStep();
-        Task RunToBodyStep();
+        Task PerformBrainStepAsync();
+        Task RunToBodyStepAsync();
 
         bool IsConnected { get; }
 
@@ -240,7 +240,7 @@ namespace GoodAI.Arnold.Core
             await CoreProxy.PauseAsync();
         }
 
-        public async Task RunToBodyStep()
+        public async Task RunToBodyStepAsync()
         {
             Log.Info("Running to next body step");
             await CoreProxy.RunAsync(runToBodyStep: true);
@@ -256,7 +256,7 @@ namespace GoodAI.Arnold.Core
 
         public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
 
-        public async Task PerformBrainStep()
+        public async Task PerformBrainStepAsync()
         {
             if (CoreProxy == null)
             {

@@ -28,7 +28,7 @@ namespace GoodAI.Arnold.Communication
     {
         public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, bool runToBodyStep = false, string blueprint = null, CoreConfiguration configuration = null)
         {
-            if (stepsToRun > 0 && runToBodyStep)
+            if ((stepsToRun > 0) && runToBodyStep)
                 throw new InvalidOperationException("Cannot combine stepsToRun with runToBodyStep");
 
             var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);

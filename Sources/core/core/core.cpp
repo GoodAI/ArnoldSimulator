@@ -408,8 +408,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
             SendErrorResponse(requestId, "Load command failed: invalid blueprint\n");
             return;
         }
-    }
-    else if (commandType == Communication::CommandType_Run) {
+    } else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Run command failed: brain not loaded\n");
             return;
@@ -419,8 +418,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
         gBrain[0].RunSimulation(runSteps, runSteps == 0, commandRequest->runToBodyStep());
         sendCommandInProgress = true;
-    }
-    else if (commandType == Communication::CommandType_Pause) {
+    } else if (commandType == Communication::CommandType_Pause) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Pause command failed: brain not loaded\n");
             return;
@@ -428,8 +426,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
         gBrain[0].PauseSimulation();
         sendCommandInProgress = true;
-    }
-    else if (commandType == Communication::CommandType_Configure) {
+    } else if (commandType == Communication::CommandType_Configure) {
         json configuration;
         try {
             configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
@@ -440,8 +437,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
         uint32_t brainStepsPerBodyStep = configuration["brainStepsPerBodyStep"].get<uint32_t>();
         gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
-    }
-    else if (commandType == Communication::CommandType_Clear) {
+    } else if (commandType == Communication::CommandType_Clear) {
         UnloadBrain();
     }
 
