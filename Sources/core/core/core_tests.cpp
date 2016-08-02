@@ -6,6 +6,7 @@
 
 #include "core_tests.h"
 #include "mnist_reader.h"
+#include "data_utils.h"
 
 TEST_CASE("NeuronId packing is correct", "[common]")
 {
@@ -27,6 +28,12 @@ bool fileExists(const std::string& fileName)
     return stream.good();
 }
 
+const uint32_t DIGIT_1 = 0x0000FFFF;
+const uint32_t DIGIT_2 = 0x00FFFF00;
+
+const char LABEL_1 = 1;
+const char LABEL_2 = 2;
+
 void fillImageStream(std::ostream &images)
 {
     // Fill in the temporary file.
@@ -38,13 +45,13 @@ void fillImageStream(std::ostream &images)
     std::vector<uint32_t> data;
     data.reserve(6);
 
-    data.push_back(swap_endian(magicNumber));
-    data.push_back(swap_endian(digitCount));
-    data.push_back(swap_endian(rows));
-    data.push_back(swap_endian(cols));
+    data.push_back(SwapEndian(magicNumber));
+    data.push_back(SwapEndian(digitCount));
+    data.push_back(SwapEndian(rows));
+    data.push_back(SwapEndian(cols));
 
-    data.push_back(swap_endian(0x0000FFFF));
-    data.push_back(swap_endian(0x00FFFF00));
+    data.push_back(SwapEndian(DIGIT_1));
+    data.push_back(SwapEndian(DIGIT_2));
 
     size_t dataSize = data.size() * sizeof(uint32_t);
 
@@ -52,6 +59,28 @@ void fillImageStream(std::ostream &images)
     images.write(dataBytes, dataSize);
 
     images.seekp(0);
+}
+
+void fillLabelStream(std::ostream &labels)
+{
+    // Fill in the temporary file.
+    uint32_t magicNumber = 0x00000801;
+    uint32_t labelCount = 2;
+
+    magicNumber = SwapEndian(magicNumber);
+    labelCount = SwapEndian(labelCount);
+
+    std::unique_ptr<uint8_t[]> dataPtr(new uint8_t[10]);
+    uint8_t *data = dataPtr.get();
+
+    std::memcpy(data, &magicNumber, 4);
+    std::memcpy(data + 4, &labelCount, 4);
+    data[8] = LABEL_1;
+    data[9] = LABEL_2;
+
+    labels.write(reinterpret_cast<char*>(data), 10);
+
+    labels.seekp(0);
 }
 
 TEST_CASE("MNISTReader reads digits", "[bodies]")
@@ -64,7 +93,11 @@ TEST_CASE("MNISTReader reads digits", "[bodies]")
 
         REQUIRE(images.str().size() == 24);
 
-        std::stringstream labels;
+        std::stringstream labels(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+
+        fillLabelStream(labels);
+
+        REQUIRE(labels.str().size() == 10);
 
         MnistReader reader;
 
@@ -83,6 +116,7 @@ TEST_CASE("MNISTReader reads digits", "[bodies]")
             }
             AND_THEN("Two digits can be retrieved")
             {
+                uint8_t label1, label2;
                 std::vector<uint8_t> digit1, digit2, digit3;
                 size_t digitSize = reader.GetDigitSize();
                 digit1.reserve(digitSize);
@@ -90,24 +124,46 @@ TEST_CASE("MNISTReader reads digits", "[bodies]")
                 digit3.reserve(digitSize);
 
                 bool success;
-                success = reader.TryReadDigit(digit1.data());
-                REQUIRE(success);
-                REQUIRE(digit1[0] == 0);
-                REQUIRE(digit1[1] == 0);
-                REQUIRE(digit1[2] == (uint8_t)255);
-                REQUIRE(digit1[3] == (uint8_t)255);
-                success = reader.TryReadDigit(digit2.data());
-                REQUIRE(success);
-                REQUIRE(digit2[0] == 0);
-                REQUIRE(digit2[1] == (uint8_t)255);
-                REQUIRE(digit2[2] == (uint8_t)255);
-                REQUIRE(digit2[3] == 0);
-                success = reader.TryReadDigit(digit3.data());
+                success = reader.TryReadDigit(digit1.data(), label1);
                 REQUIRE(success);
 
-                for (int i = 0; i < reader.GetDigitSize(); i++) {
-                    REQUIRE(digit1[i] == digit3[i]);
-                }
+                uint32_t digitData1;
+                std::memcpy(&digitData1, &digit1[0], 4);
+                REQUIRE(SwapEndian(digitData1) == DIGIT_1);
+                REQUIRE(label1 == LABEL_1);
+
+                success = reader.TryReadDigit(digit2.data(), label2);
+                REQUIRE(success);
+
+                uint32_t digitData2;
+                std::memcpy(&digitData2, &digit2[0], 4);
+                REQUIRE(SwapEndian(digitData2) == DIGIT_2);
+                REQUIRE(label2 == LABEL_2);
+            }
+            AND_THEN("The reader restarts when it reaches end")
+            {
+                uint8_t label1, label2, label3;
+                std::vector<uint8_t> digit1, digit2, digit3;
+                size_t digitSize = reader.GetDigitSize();
+                digit1.reserve(digitSize);
+                digit2.reserve(digitSize);
+                digit3.reserve(digitSize);
+
+                bool success;
+                success = reader.TryReadDigit(digit1.data(), label1);
+                REQUIRE(success);
+                success = reader.TryReadDigit(digit2.data(), label2);
+                REQUIRE(success);
+                success = reader.TryReadDigit(digit3.data(), label3);
+                REQUIRE(success);
+
+                uint32_t digitData1;
+                std::memcpy(&digitData1, &digit1[0], 4);
+                uint32_t digitData3;
+                std::memcpy(&digitData3, &digit3[0], 4);
+
+                REQUIRE(digitData1 == digitData3);
+                REQUIRE(label1 == label3);
             }
         }
     }

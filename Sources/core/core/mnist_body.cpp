@@ -73,12 +73,16 @@ void MnistBody::Simulate(
 
     std::unique_ptr<uint8_t[]> dataPtr(new uint8_t[digitSize]);
 
-    if (!mDigitReader.TryReadDigit(dataPtr.get())) {
+    uint8_t label;
+
+    if (!mDigitReader.TryReadDigit(dataPtr.get(), label)) {
         Log(LogLevel::Warn, "There are no digits available in the images file");
         return;
     }
 
     std::vector<uint8_t> sensorData(dataPtr.get(), dataPtr.get() + digitSize);
+
+    Log(LogLevel::Info, "Providing digit '%d'", label);
 
     /*for (int y = 0; y < 28; y++) {
         for (int x = 0; x < 28; x++) {
