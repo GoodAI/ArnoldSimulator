@@ -23,15 +23,15 @@ namespace GoodAI.Arnold.Core
         Task SendConfigurationAsync(CoreConfiguration coreConfiguration);
         Task StartSimulationAsync(uint stepsToRun = 0);
         Task PauseSimulationAsync();
-        Task ClearSimulationAsync();
+        Task ClearBlueprintAsync();
+        Task PerformBrainStep();
+        Task RunToBodyStep();
 
         bool IsConnected { get; }
 
         CoreState CoreState { get; }
 
         IModelProvider ModelProvider { get; }
-
-        void PerformBrainStep();
     }
 
     public class Conductor : IConductor
@@ -140,6 +140,12 @@ namespace GoodAI.Arnold.Core
 
         public async Task ShutdownAsync()
         {
+            if (!IsConnected)
+            {
+                Log.Warn("Cannot shut down, not connected.");
+                return;
+            }
+
             if (CoreProxy != null)
             {
                 Log.Info("Shutting down the core");
@@ -234,16 +240,23 @@ namespace GoodAI.Arnold.Core
             await CoreProxy.PauseAsync();
         }
 
-        public async Task ClearSimulationAsync()
+        public async Task RunToBodyStep()
         {
-            throw new NotImplementedException();
+            Log.Info("Running to next body step");
+            await CoreProxy.RunAsync(runToBodyStep: true);
+        }
+
+        public async Task ClearBlueprintAsync()
+        {
+            Log.Info("Clearing blueprint");
+            await CoreProxy.ClearAsync();
         }
 
         public bool IsConnected => CoreProxy != null;
 
         public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
 
-        public void PerformBrainStep()
+        public async Task PerformBrainStep()
         {
             if (CoreProxy == null)
             {
@@ -252,7 +265,7 @@ namespace GoodAI.Arnold.Core
             }
 
             Log.Info("Performing brain step");
-            CoreProxy.RunAsync(1);
+            await CoreProxy.RunAsync(1);
         }
 
         public async void Dispose()

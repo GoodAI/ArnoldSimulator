@@ -26,8 +26,11 @@ namespace GoodAI.Arnold.Communication
 
     public static class CommandRequestBuilder
     {
-        public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, string blueprint = null, CoreConfiguration configuration = null)
+        public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, bool runToBodyStep = false, string blueprint = null, CoreConfiguration configuration = null)
         {
+            if (stepsToRun > 0 && runToBodyStep)
+                throw new InvalidOperationException("Cannot combine stepsToRun with runToBodyStep");
+
             var builder = new FlatBufferBuilder(RequestMessageBuilder.BufferInitialSize);
 
             StringOffset? blueprintOffset = null;
@@ -45,6 +48,7 @@ namespace GoodAI.Arnold.Communication
 
             CommandRequest.AddCommand(builder, commandType);
             CommandRequest.AddStepsToRun(builder, stepsToRun);
+            CommandRequest.AddRunToBodyStep(builder, runToBodyStep);
 
             if (blueprintOffset.HasValue)
                 CommandRequest.AddBlueprint(builder, blueprintOffset.Value);

@@ -25,6 +25,22 @@ namespace GoodAI.Arnold.UI.Tests
             var coreLinkMock = new Mock<ICoreLink>();
 
             m_coreProxyMock = new Mock<ICoreProxy>();
+            m_coreProxyMock.Setup(coreProxy => coreProxy.LoadBlueprintAsync(It.IsAny<string>()))
+                .Returns(Task.CompletedTask)
+                .Raises(coreProxy => coreProxy.StateChanged += null,
+                    new StateChangedEventArgs(CoreState.Empty, CoreState.Paused));
+            m_coreProxyMock.Setup(coreProxy => coreProxy.RunAsync(It.IsAny<uint>(), It.IsAny<bool>()))
+                .Returns(Task.CompletedTask)
+                .Raises(coreProxy => coreProxy.StateChanged += null,
+                    new StateChangedEventArgs(CoreState.Paused, CoreState.Running));
+            m_coreProxyMock.Setup(coreProxy => coreProxy.PauseAsync())
+                .Returns(Task.CompletedTask)
+                .Raises(coreProxy => coreProxy.StateChanged += null,
+                    new StateChangedEventArgs(CoreState.Running, CoreState.Paused));
+            m_coreProxyMock.Setup(coreProxy => coreProxy.ClearAsync())
+                .Returns(Task.CompletedTask)
+                .Raises(coreProxy => coreProxy.StateChanged += null,
+                    new StateChangedEventArgs(CoreState.Paused, CoreState.Empty));
             m_coreProxyMock.Setup(coreProxy => coreProxy.ShutdownAsync())
                 .Returns(Task.CompletedTask)
                 .Raises(coreProxy => coreProxy.StateChanged += null,
@@ -78,35 +94,6 @@ namespace GoodAI.Arnold.UI.Tests
             await m_conductor.ConnectToCoreAsync();
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync());
-        }
-
-        [Fact(Skip = "When we have the logic in conductor done, enable and fix this")]
-        public async void StartsAndStopsSimulation()
-        {
-            await m_conductor.ConnectToCoreAsync();
-
-            await m_conductor.LoadBlueprintAsync("{}");
-            m_coreProxyMock.Verify(coreProxy => coreProxy.LoadBlueprintAsync(It.IsAny<string>()));
-
-            await m_conductor.StartSimulationAsync();
-            m_coreProxyMock.Verify(coreProxy => coreProxy.RunAsync(It.IsAny<uint>()));
-
-            await m_conductor.PauseSimulationAsync();
-            m_coreProxyMock.Verify(coreProxy => coreProxy.PauseAsync());
-
-            m_coreProxyMock.Setup(coreProxy => coreProxy.ClearAsync())
-                .Callback(() =>
-                {
-                    m_coreProxyMock.Raise(coreProxy => coreProxy.StateChanged += null,
-                        new StateChangedEventArgs(CoreState.Paused, CoreState.Empty));
-                });
-
-
-            await m_conductor.ClearSimulationAsync();
-            m_coreProxyMock.Verify(coreProxy => coreProxy.ClearAsync());
-
-            // This checks that the CleanupSimulation method completed. The conductor must emit the Null state.
-            Assert.Equal(CoreState.Empty, m_conductor.CoreState);
         }
 
         [Fact]

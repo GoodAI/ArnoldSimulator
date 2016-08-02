@@ -164,9 +164,9 @@ namespace GoodAI.Arnold
             m_uiMain.Dispose();
         }
 
-        private void brainStepButton_Click(object sender, EventArgs e)
+        private async void brainStepButton_Click(object sender, EventArgs e)
         {
-            m_uiMain.PerformBrainStep();
+            await m_uiMain.PerformBrainStep();
         }
 
         private void showVisualizationButton_CheckedChanged(object sender, EventArgs e)
@@ -177,19 +177,19 @@ namespace GoodAI.Arnold
                 VisualizationForm?.Close();
         }
 
-        private void loadBlueprintButton_Click(object sender, EventArgs e)
+        private async void loadBlueprintButton_Click(object sender, EventArgs e)
         {
-
+            await RunButtonActionAsync(() => m_uiMain.LoadBlueprintAsync());
         }
 
-        private void clearBlueprintButton_Click(object sender, EventArgs e)
+        private async void clearBlueprintButton_Click(object sender, EventArgs e)
         {
-
+            await RunButtonActionAsync(() => m_uiMain.ClearBlueprintAsync());
         }
 
-        private void bodyStepButton_Click(object sender, EventArgs e)
+        private async void bodyStepButton_Click(object sender, EventArgs e)
         {
-
+            await RunButtonActionAsync(() => m_uiMain.RunToBodyStep());
         }
     }
 }

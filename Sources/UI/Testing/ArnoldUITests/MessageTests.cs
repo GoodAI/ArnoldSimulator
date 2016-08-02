@@ -24,6 +24,32 @@ namespace GoodAI.Arnold.UI.Tests
         }
 
         [Fact]
+        public void WritesReadsRunStepsCommand()
+        {
+            var message = CommandRequestBuilder.Build(CommandType.Run, stepsToRun: 1);
+
+            var commandRequest = message.GetRequest(new CommandRequest());
+            Assert.Equal(CommandType.Run, commandRequest.Command);
+            Assert.Equal((uint) 1, commandRequest.StepsToRun);
+        }
+
+        [Fact]
+        public void WritesReadsRunToBodyStepCommand()
+        {
+            var message = CommandRequestBuilder.Build(CommandType.Run, runToBodyStep: true);
+
+            var commandRequest = message.GetRequest(new CommandRequest());
+            Assert.Equal(CommandType.Run, commandRequest.Command);
+            Assert.True(commandRequest.RunToBodyStep);
+        }
+
+        [Fact]
+        public void StepsToRunWithRunToBodyStepFails()
+        {
+            Assert.Throws<InvalidOperationException>(() => CommandRequestBuilder.Build(CommandType.Run, stepsToRun: 10, runToBodyStep: true));
+        }
+
+        [Fact]
         public void WritesReadsConfigurationCommand()
         {
             var configContent = "foo";

@@ -21,6 +21,7 @@ table Configuration {
 table CommandRequest {
 	command:CommandType;
 	stepsToRun:uint;
+	runToBodyStep:bool;
 	blueprint:string;
 	configuration:Configuration;
 }

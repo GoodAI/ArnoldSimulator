@@ -54,7 +54,7 @@ namespace GoodAI.Arnold.Core
         /// of steps are performed, moves to state Paused.
         /// </summary>
         /// <param name="brainStepsToRun">The number of steps to run. 0 is infinity.</param>
-        Task RunAsync(uint brainStepsToRun = 0);
+        Task RunAsync(uint brainStepsToRun = 0, bool runToBodyStep = false);
 
         /// <summary>
         /// Pauses the running simulation. If the simulation is not running, this does nothing.
@@ -164,7 +164,7 @@ namespace GoodAI.Arnold.Core
             await SendCommandAsync(new CommandConversation(CommandType.Shutdown), stopCheckingCoreState: true);
         }
 
-        public async Task RunAsync(uint brainStepsToRun = 0)
+        public async Task RunAsync(uint brainStepsToRun = 0, bool runToBodyStep = false)
         {
             if (State != CoreState.Paused && State != CoreState.Running)
             {
@@ -175,7 +175,7 @@ namespace GoodAI.Arnold.Core
             if (State == CoreState.Running)
                 return;
 
-            await SendCommandAsync(new CommandConversation(CommandType.Run, brainStepsToRun));
+            await SendCommandAsync(new CommandConversation(CommandType.Run, brainStepsToRun, runToBodyStep));
         }
 
         public async Task PauseAsync()

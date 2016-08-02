@@ -827,10 +827,19 @@ void BrainBase::ReceiveTerminalData(Spike::BrainSink &data)
     }
 }
 
-void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped)
+void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped, bool runToBodyStep)
 {
     mDoSimulationProgressNext = true;
-    mBrainStepsToRun = untilStopped ? SIZE_MAX : brainSteps;
+    if (runToBodyStep) {
+        mBrainStepsToRun = mBrainStepsPerBodyStep - (mBrainStep % mBrainStepsPerBodyStep);
+    }
+    else if (untilStopped) {
+        mBrainStepsToRun = SIZE_MAX;
+    }
+    else {
+        mBrainStepsToRun = brainSteps;
+    }
+
     if (!mIsSimulationLoopActive) {
         mSimulationWallTime = CmiWallTimer();
         thisProxy[thisIndex].Simulate();

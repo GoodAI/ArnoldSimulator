@@ -190,11 +190,11 @@ void Core::DetectKeyPress()
         char c = getchar();
         if (c == 'b') {
             if (IsBrainLoaded()) {
-                gBrain[0].RunSimulation(10, false);
+                gBrain[0].RunSimulation(10, false, true);
             }
         } else if (c == 'r') {
             if (IsBrainLoaded()) {
-                gBrain[0].RunSimulation(1, true);
+                gBrain[0].RunSimulation(1, true, false);
             }
         } else if (c == 'p') {
             if (IsBrainLoaded()) {
@@ -202,7 +202,7 @@ void Core::DetectKeyPress()
             }
         } else if (c == 's') {
             if (IsBrainLoaded()) {
-                gBrain[0].RunSimulation(1, false);
+                gBrain[0].RunSimulation(1, false, false);
             }
         } else if (c == 'i') {
             if (IsBrainLoaded()) {
@@ -408,16 +408,19 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
             SendErrorResponse(requestId, "Load command failed: invalid blueprint\n");
             return;
         }
-    } else if (commandType == Communication::CommandType_Run) {
+    }
+    else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Run command failed: brain not loaded\n");
             return;
         }
 
         uint32_t runSteps = commandRequest->stepsToRun();
-        gBrain[0].RunSimulation(runSteps, runSteps == 0);
+
+        gBrain[0].RunSimulation(runSteps, runSteps == 0, commandRequest->runToBodyStep());
         sendCommandInProgress = true;
-    } else if (commandType == Communication::CommandType_Pause) {
+    }
+    else if (commandType == Communication::CommandType_Pause) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Pause command failed: brain not loaded\n");
             return;
@@ -425,16 +428,21 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
         gBrain[0].PauseSimulation();
         sendCommandInProgress = true;
-    } else if (commandType == Communication::CommandType_Configure) {
+    }
+    else if (commandType == Communication::CommandType_Configure) {
         json configuration;
         try {
             configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
-        } catch (std::invalid_argument &) {
+        }
+        catch (std::invalid_argument &) {
             CkPrintf("Invalid configuration.");
         }
 
         uint32_t brainStepsPerBodyStep = configuration["brainStepsPerBodyStep"].get<uint32_t>();
         gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
+    }
+    else if (commandType == Communication::CommandType_Clear) {
+        UnloadBrain();
     }
 
     if (sendCommandInProgress) {

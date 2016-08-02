@@ -11,9 +11,9 @@ namespace GoodAI.Arnold.Communication
     public sealed class CommandConversation : Conversation<CommandRequest, StateResponse>
     {
         // TODO(HonzaS): Unify the parameters - either configuration -> json string, or blueprint -> AgentBlueprint (or similar).
-        public CommandConversation(CommandType commandType, uint stepsToRun = 0, string blueprint = null, CoreConfiguration configuration = null)
+        public CommandConversation(CommandType commandType, uint stepsToRun = 0, bool runToBodyStep = false,string blueprint = null, CoreConfiguration configuration = null)
         {
-            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun, blueprint, configuration);
+            RequestMessage = CommandRequestBuilder.Build(commandType, stepsToRun, runToBodyStep, blueprint, configuration);
         }
     }
 }

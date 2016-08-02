@@ -71,21 +71,34 @@ namespace GoodAI.Arnold
         public async Task StartSimulationAsync()
         {
             if (Conductor.CoreState == CoreState.Empty)
-            {
-                var configuration = new JObject {{"brainStepsPerBodyStep", 10}};
-                try
-                {
-                    await Conductor.LoadBlueprintAsync(Designer.Blueprint);
-                    await Conductor.SendConfigurationAsync(new CoreConfiguration(configuration.ToString()));
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Blueprint loading failed.");
-                    throw;
-                }
-            }
+                await LoadBlueprint();
 
             await Conductor.StartSimulationAsync();
+        }
+
+        public async Task LoadBlueprintAsync()
+        {
+            await LoadBlueprint();
+        }
+
+        public async Task ClearBlueprintAsync()
+        {
+            await Conductor.ClearBlueprintAsync();
+        }
+
+        private async Task LoadBlueprint()
+        {
+            var configuration = new JObject {{"brainStepsPerBodyStep", 10}};
+            try
+            {
+                await Conductor.LoadBlueprintAsync(Designer.Blueprint);
+                await Conductor.SendConfigurationAsync(new CoreConfiguration(configuration.ToString()));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Blueprint loading failed.");
+                throw;
+            }
         }
 
         public async Task PauseSimulationAsync()
@@ -93,13 +106,15 @@ namespace GoodAI.Arnold
             await Conductor.PauseSimulationAsync();
         }
 
-        //public void KillSimulation()
-        //{
-        //    if (Conductor.CoreProxy == null)
-        //        return;
+        public async Task PerformBrainStep()
+        {
+            await Conductor.PerformBrainStep();
+        }
 
-        //    Conductor.KillSimulation();
-        //}
+        public async Task RunToBodyStep()
+        {
+            await Conductor.RunToBodyStep();
+        }
 
         public void Disconnect()
         {
@@ -110,11 +125,6 @@ namespace GoodAI.Arnold
         public void Dispose()
         {
             Conductor.Dispose();
-        }
-
-        public void PerformBrainStep()
-        {
-            Conductor.PerformBrainStep();
         }
 
         public void OpenObserver(NeuronModel neuron, Scene scene)
