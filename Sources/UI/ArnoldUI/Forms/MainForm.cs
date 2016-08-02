@@ -58,9 +58,14 @@ namespace GoodAI.Arnold
             connectButton.Enabled = !m_uiMain.Conductor.IsConnected;
             disconnectButton.Enabled = !connectButton.Enabled;
 
+            loadBlueprintButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Empty;
+            clearBlueprintButton.Enabled = m_uiMain.Conductor.IsConnected && m_uiMain.Conductor.CoreState != CoreState.Empty;
+
             runButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Paused || m_uiMain.Conductor.CoreState == CoreState.Empty;
-            brainStepButton.Enabled = runButton.Enabled;
             pauseButton.Enabled = m_uiMain.Conductor.CoreState == CoreState.Running;
+
+            brainStepButton.Enabled = runButton.Enabled;
+            bodyStepButton.Enabled = runButton.Enabled;
 
             showVisualizationButton.Enabled = m_uiMain.Conductor.CoreState != CoreState.Disconnected;
             showVisualizationButton.Checked = VisualizationForm != null && !VisualizationForm.IsDisposed;
@@ -71,9 +76,14 @@ namespace GoodAI.Arnold
             connectButton.Enabled = false;
             disconnectButton.Enabled = false;
 
+            loadBlueprintButton.Enabled = false;
+            clearBlueprintButton.Enabled = false;
+
             runButton.Enabled = false;
-            brainStepButton.Enabled = false;
             pauseButton.Enabled = false;
+
+            brainStepButton.Enabled = false;
+            bodyStepButton.Enabled = false;
 
             showVisualizationButton.Enabled = false;
         }
@@ -165,6 +175,21 @@ namespace GoodAI.Arnold
                 StartVisualization();
             else
                 VisualizationForm?.Close();
+        }
+
+        private void loadBlueprintButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void clearBlueprintButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void bodyStepButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

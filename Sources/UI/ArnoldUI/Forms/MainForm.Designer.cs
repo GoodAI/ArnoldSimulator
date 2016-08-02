@@ -205,6 +205,7 @@
             this.loadBlueprintButton.Name = "loadBlueprintButton";
             this.loadBlueprintButton.Size = new System.Drawing.Size(23, 22);
             this.loadBlueprintButton.Text = "Load blueprint to core";
+            this.loadBlueprintButton.Click += new System.EventHandler(this.loadBlueprintButton_Click);
             // 
             // clearBlueprintButton
             // 
@@ -214,6 +215,7 @@
             this.clearBlueprintButton.Name = "clearBlueprintButton";
             this.clearBlueprintButton.Size = new System.Drawing.Size(23, 22);
             this.clearBlueprintButton.Text = "Clear blueprint from core";
+            this.clearBlueprintButton.Click += new System.EventHandler(this.clearBlueprintButton_Click);
             // 
             // toolStripSeparator3
             // 
@@ -263,6 +265,7 @@
             this.bodyStepButton.Name = "bodyStepButton";
             this.bodyStepButton.Size = new System.Drawing.Size(23, 22);
             this.bodyStepButton.Text = "Run to next body step";
+            this.bodyStepButton.Click += new System.EventHandler(this.bodyStepButton_Click);
             // 
             // toolStripSeparator2
             // 

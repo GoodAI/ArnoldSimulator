@@ -296,11 +296,6 @@
     <None Include="Resources\ScriptError_16x.png" />
     <None Include="Resources\Script_16x.png" />
     <None Include="Resources\observer_icon.png" />
-    <None Include="Resources\StepOver_6328.png" />
-    <None Include="Resources\StatusAnnotations_Play_16xLG_color.png" />
-    <None Include="Resources\StatusAnnotations_Pause_16xLG_color.png" />
-    <None Include="Resources\hardware_16xLG.png" />
-    <None Include="Resources\action_Cancel_16xMD.png" />
     <Content Include="Resources\BasicNeuron.png" />
     <None Include="Resources\Disconnect_16x.png" />
     <None Include="Resources\Connect_16x.png" />
