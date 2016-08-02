@@ -198,6 +198,8 @@ namespace GoodAI.Arnold.Core
                         Log.Error(exception, "Model retrieval failed");
                     }
 
+                    m_model = null;
+                    m_isNewModelReady = true;
                     m_getFullModel = true;
                 }
             }
