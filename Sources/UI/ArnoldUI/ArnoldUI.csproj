@@ -289,6 +289,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\StepOver_16x.png" />
+    <None Include="Resources\Run_16x.png" />
+    <None Include="Resources\Pause_16x.png" />
+    <None Include="Resources\StepIn_16x.png" />
+    <None Include="Resources\ScriptError_16x.png" />
+    <None Include="Resources\Script_16x.png" />
     <None Include="Resources\observer_icon.png" />
     <None Include="Resources\StepOver_6328.png" />
     <None Include="Resources\StatusAnnotations_Play_16xLG_color.png" />
@@ -296,6 +302,9 @@
     <None Include="Resources\hardware_16xLG.png" />
     <None Include="Resources\action_Cancel_16xMD.png" />
     <Content Include="Resources\BasicNeuron.png" />
+    <None Include="Resources\Disconnect_16x.png" />
+    <None Include="Resources\Connect_16x.png" />
+    <None Include="Resources\Cancel_grey_16x.png" />
     <Content Include="Resources\EmptyCursor.ico" />
   </ItemGroup>
   <ItemGroup>

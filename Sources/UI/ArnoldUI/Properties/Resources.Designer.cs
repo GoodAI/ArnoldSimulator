@@ -63,9 +63,9 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap action_Cancel_16xMD {
+        internal static System.Drawing.Bitmap BasicNeuron {
             get {
-                object obj = ResourceManager.GetObject("action_Cancel_16xMD", resourceCulture);
+                object obj = ResourceManager.GetObject("BasicNeuron", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,19 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap BasicNeuron {
+        internal static System.Drawing.Bitmap Cancel_grey_16x {
             get {
-                object obj = ResourceManager.GetObject("BasicNeuron", resourceCulture);
+                object obj = ResourceManager.GetObject("Cancel_grey_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Connect_16x {
+            get {
+                object obj = ResourceManager.GetObject("Connect_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -106,22 +116,22 @@ namespace GoodAI.Arnold.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Disconnect_16x {
+            get {
+                object obj = ResourceManager.GetObject("Disconnect_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
         internal static System.Drawing.Icon EmptyCursor {
             get {
                 object obj = ResourceManager.GetObject("EmptyCursor", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap hardware_16xLG {
-            get {
-                object obj = ResourceManager.GetObject("hardware_16xLG", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -138,9 +148,9 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StatusAnnotations_Pause_16xLG_color {
+        internal static System.Drawing.Bitmap Pause_16x {
             get {
-                object obj = ResourceManager.GetObject("StatusAnnotations_Pause_16xLG_color", resourceCulture);
+                object obj = ResourceManager.GetObject("Pause_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -148,9 +158,9 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StatusAnnotations_Play_16xLG_color {
+        internal static System.Drawing.Bitmap Run_16x {
             get {
-                object obj = ResourceManager.GetObject("StatusAnnotations_Play_16xLG_color", resourceCulture);
+                object obj = ResourceManager.GetObject("Run_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -158,9 +168,39 @@ namespace GoodAI.Arnold.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StepOver_6328 {
+        internal static System.Drawing.Bitmap Script_16x {
             get {
-                object obj = ResourceManager.GetObject("StepOver_6328", resourceCulture);
+                object obj = ResourceManager.GetObject("Script_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ScriptError_16x {
+            get {
+                object obj = ResourceManager.GetObject("ScriptError_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StepIn_16x {
+            get {
+                object obj = ResourceManager.GetObject("StepIn_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StepOver_16x {
+            get {
+                object obj = ResourceManager.GetObject("StepOver_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

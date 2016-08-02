@@ -49,7 +49,7 @@
             // clearButton
             // 
             this.clearButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.clearButton.Image = global::GoodAI.Arnold.Properties.Resources.action_Cancel_16xMD;
+            this.clearButton.Image = global::GoodAI.Arnold.Properties.Resources.Cancel_grey_16x;
             this.clearButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.clearButton.Name = "clearButton";
             this.clearButton.Size = new System.Drawing.Size(23, 22);

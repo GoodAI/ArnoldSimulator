@@ -52,14 +52,17 @@
             this.connectButton = new System.Windows.Forms.ToolStripButton();
             this.disconnectButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.loadBlueprintButton = new System.Windows.Forms.ToolStripButton();
+            this.clearBlueprintButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.runButton = new System.Windows.Forms.ToolStripButton();
             this.pauseButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.brainStepButton = new System.Windows.Forms.ToolStripButton();
-            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.bodyStepButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.testButton = new System.Windows.Forms.ToolStripButton();
             this.showVisualizationButton = new System.Windows.Forms.ToolStripButton();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -153,12 +156,15 @@
             this.connectButton,
             this.disconnectButton,
             this.toolStripSeparator1,
+            this.loadBlueprintButton,
+            this.clearBlueprintButton,
+            this.toolStripSeparator3,
             this.runButton,
             this.pauseButton,
             this.toolStripSeparator4,
             this.brainStepButton,
+            this.bodyStepButton,
             this.toolStripSeparator2,
-            this.testButton,
             this.showVisualizationButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
@@ -169,21 +175,21 @@
             // connectButton
             // 
             this.connectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.connectButton.Image = global::GoodAI.Arnold.Properties.Resources.hardware_16xLG;
+            this.connectButton.Image = global::GoodAI.Arnold.Properties.Resources.Connect_16x;
             this.connectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.connectButton.Name = "connectButton";
             this.connectButton.Size = new System.Drawing.Size(23, 22);
-            this.connectButton.Text = "toolStripButton1";
+            this.connectButton.Text = "Connect to core";
             this.connectButton.Click += new System.EventHandler(this.connectButton_Click);
             // 
             // disconnectButton
             // 
             this.disconnectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.disconnectButton.Image = global::GoodAI.Arnold.Properties.Resources.action_Cancel_16xMD;
+            this.disconnectButton.Image = global::GoodAI.Arnold.Properties.Resources.Disconnect_16x;
             this.disconnectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.disconnectButton.Name = "disconnectButton";
             this.disconnectButton.Size = new System.Drawing.Size(23, 22);
-            this.disconnectButton.Text = "toolStripButton3";
+            this.disconnectButton.Text = "Disconnect from core";
             this.disconnectButton.Click += new System.EventHandler(this.disconnectButton_Click);
             // 
             // toolStripSeparator1
@@ -191,24 +197,47 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
+            // loadBlueprintButton
+            // 
+            this.loadBlueprintButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.loadBlueprintButton.Image = global::GoodAI.Arnold.Properties.Resources.Script_16x;
+            this.loadBlueprintButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.loadBlueprintButton.Name = "loadBlueprintButton";
+            this.loadBlueprintButton.Size = new System.Drawing.Size(23, 22);
+            this.loadBlueprintButton.Text = "Load blueprint to core";
+            // 
+            // clearBlueprintButton
+            // 
+            this.clearBlueprintButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.clearBlueprintButton.Image = global::GoodAI.Arnold.Properties.Resources.ScriptError_16x;
+            this.clearBlueprintButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.clearBlueprintButton.Name = "clearBlueprintButton";
+            this.clearBlueprintButton.Size = new System.Drawing.Size(23, 22);
+            this.clearBlueprintButton.Text = "Clear blueprint from core";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
             // runButton
             // 
             this.runButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.runButton.Image = global::GoodAI.Arnold.Properties.Resources.StatusAnnotations_Play_16xLG_color;
+            this.runButton.Image = global::GoodAI.Arnold.Properties.Resources.Run_16x;
             this.runButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.runButton.Name = "runButton";
             this.runButton.Size = new System.Drawing.Size(23, 22);
-            this.runButton.Text = "toolStripButton1";
+            this.runButton.Text = "Run simulation";
             this.runButton.Click += new System.EventHandler(this.runButton_Click);
             // 
             // pauseButton
             // 
             this.pauseButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.pauseButton.Image = global::GoodAI.Arnold.Properties.Resources.StatusAnnotations_Pause_16xLG_color;
+            this.pauseButton.Image = global::GoodAI.Arnold.Properties.Resources.Pause_16x;
             this.pauseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.pauseButton.Name = "pauseButton";
             this.pauseButton.Size = new System.Drawing.Size(23, 22);
-            this.pauseButton.Text = "toolStripButton2";
+            this.pauseButton.Text = "Pause simulation";
             this.pauseButton.Click += new System.EventHandler(this.pauseButton_Click);
             // 
             // toolStripSeparator4
@@ -219,12 +248,21 @@
             // brainStepButton
             // 
             this.brainStepButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.brainStepButton.Image = global::GoodAI.Arnold.Properties.Resources.StepOver_6328;
+            this.brainStepButton.Image = global::GoodAI.Arnold.Properties.Resources.StepIn_16x;
             this.brainStepButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.brainStepButton.Name = "brainStepButton";
             this.brainStepButton.Size = new System.Drawing.Size(23, 22);
             this.brainStepButton.Text = "Perform brain step";
             this.brainStepButton.Click += new System.EventHandler(this.brainStepButton_Click);
+            // 
+            // bodyStepButton
+            // 
+            this.bodyStepButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.bodyStepButton.Image = global::GoodAI.Arnold.Properties.Resources.StepOver_16x;
+            this.bodyStepButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.bodyStepButton.Name = "bodyStepButton";
+            this.bodyStepButton.Size = new System.Drawing.Size(23, 22);
+            this.bodyStepButton.Text = "Run to next body step";
             // 
             // toolStripSeparator2
             // 
@@ -249,15 +287,6 @@
             this.statusStrip.Size = new System.Drawing.Size(963, 22);
             this.statusStrip.TabIndex = 3;
             this.statusStrip.Text = "statusStrip1";
-            // 
-            // testButton
-            // 
-            this.testButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.testButton.Image = global::GoodAI.Arnold.Properties.Resources.BasicNeuron;
-            this.testButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.testButton.Name = "testButton";
-            this.testButton.Size = new System.Drawing.Size(23, 22);
-            this.testButton.Text = "toolStripButton1";
             // 
             // MainForm
             // 
@@ -298,8 +327,11 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripButton brainStepButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton testButton;
         private System.Windows.Forms.ToolStripButton showVisualizationButton;
+        private System.Windows.Forms.ToolStripButton loadBlueprintButton;
+        private System.Windows.Forms.ToolStripButton clearBlueprintButton;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton bodyStepButton;
     }
 }
 
