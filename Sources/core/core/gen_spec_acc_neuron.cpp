@@ -25,13 +25,13 @@ const char *GenSpecAccNeuron::GetType() const
 
 void GenSpecAccNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &spikeData)
 {
-    Functions::Function function = static_cast<Functions::Function>(spike.GetFunction(spikeData));
+    GenSpecFunctions::Function function = static_cast<GenSpecFunctions::Function>(spike.GetFunction(spikeData));
 
     switch (function) {
-        case Functions::Function::Result:
+        case GenSpecFunctions::Function::Result:
         {
-            Functions::ResultArgs args;
-            spike.GetArguments(spikeData, &args, sizeof(Functions::ResultArgs));
+            GenSpecFunctions::ResultArgs args;
+            spike.GetArguments(spikeData, &args, sizeof(GenSpecFunctions::ResultArgs));
 
             uint8_t value = args.result;
             mAccumulatedResults[spikeData.sender] = value;

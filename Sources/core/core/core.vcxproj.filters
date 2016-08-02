@@ -25,17 +25,11 @@
     <Filter Include="Bodies">
       <UniqueIdentifier>{9ce6e3a2-72c8-41ee-880c-ee1d0d43377c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Brains">
-      <UniqueIdentifier>{cf3c8fc2-869d-46dd-86af-d9855ae3c467}</UniqueIdentifier>
+    <Filter Include="GenSpecModel">
+      <UniqueIdentifier>{b21f9a1c-b9f9-41e5-b915-a77eba6f6f04}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Regions">
-      <UniqueIdentifier>{8f94cb5c-d1c1-4332-ad65-09083fdf3727}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Neurons">
+    <Filter Include="GenSpecModel\Neurons">
       <UniqueIdentifier>{b7733013-5cab-4814-b4da-ec23549d4b4f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Synapses">
-      <UniqueIdentifier>{46fa33fd-2316-40c6-97f1-a643f067e0e6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -81,32 +75,29 @@
     <ClCompile Include="mnist_reader.cpp">
       <Filter>Bodies</Filter>
     </ClCompile>
-    <ClCompile Include="gen_spec_brain.cpp">
-      <Filter>Brains</Filter>
-    </ClCompile>
-    <ClCompile Include="gen_spec_region.cpp">
-      <Filter>Regions</Filter>
-    </ClCompile>
     <ClCompile Include="mnist_body.cpp">
       <Filter>Bodies</Filter>
     </ClCompile>
     <ClCompile Include="gen_spec_neuron.cpp">
-      <Filter>Neurons</Filter>
-    </ClCompile>
-    <ClCompile Include="gen_spec_input_synapse.cpp">
-      <Filter>Synapses</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClCompile>
     <ClCompile Include="gen_spec_input_neuron.cpp">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClCompile>
     <ClCompile Include="gen_spec_acc_neuron.cpp">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClCompile>
     <ClCompile Include="gen_spec_output_neuron.cpp">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClCompile>
     <ClCompile Include="gen_spec_next_digit_neuron.cpp">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_region.cpp">
+      <Filter>GenSpecModel</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_brain.cpp">
+      <Filter>GenSpecModel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,32 +140,29 @@
     <ClInclude Include="mnist_reader.h">
       <Filter>Bodies</Filter>
     </ClInclude>
-    <ClInclude Include="gen_spec_brain.h">
-      <Filter>Brains</Filter>
-    </ClInclude>
-    <ClInclude Include="gen_spec_region.h">
-      <Filter>Regions</Filter>
-    </ClInclude>
     <ClInclude Include="mnist_body.h">
       <Filter>Bodies</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_neuron.h">
-      <Filter>Neurons</Filter>
-    </ClInclude>
-    <ClInclude Include="gen_spec_input_synapse.h">
-      <Filter>Synapses</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_input_neuron.h">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_acc_neuron.h">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_output_neuron.h">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
     </ClInclude>
     <ClInclude Include="gen_spec_next_digit_neuron.h">
-      <Filter>Neurons</Filter>
+      <Filter>GenSpecModel\Neurons</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_region.h">
+      <Filter>GenSpecModel</Filter>
+    </ClInclude>
+    <ClInclude Include="gen_spec_brain.h">
+      <Filter>GenSpecModel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

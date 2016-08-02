@@ -446,6 +446,11 @@ void MultiWeightedSynapse::GetWeights(const Synapse::Data &data, float *weights,
     std::memcpy(weights, reinterpret_cast<float*>(data.bits64), count * sizeof(float));
 }
 
+float * MultiWeightedSynapse::GetWeights(const Synapse::Data &data) const
+{
+    return reinterpret_cast<float*>(data.bits64);
+}
+
 void MultiWeightedSynapse::SetWeights(Synapse::Data &data, const float *weights, size_t count)
 {
     if (count > GetWeightCount(data)) {

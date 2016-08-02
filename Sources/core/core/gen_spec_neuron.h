@@ -3,7 +3,7 @@
 #include "neuron.h"
 #include <queue>
 
-namespace Functions
+namespace GenSpecFunctions
 {
     enum class Function : uint8_t
     {
@@ -47,7 +47,7 @@ public:
     void CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData) override;
 
     template<typename Arguments>
-    void SendFunctionalSpike(Direction direction, NeuronId receiver, Functions::Function function, Arguments &args);
+    void SendFunctionalSpike(Direction direction, NeuronId receiver, GenSpecFunctions::Function function, Arguments &args);
 
     void SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count);
 
@@ -81,7 +81,7 @@ protected:
 };
 
 template<typename Arguments>
-inline void GenSpecNeuron::SendFunctionalSpike(Direction direction, NeuronId receiver, Functions::Function function, Arguments &args)
+inline void GenSpecNeuron::SendFunctionalSpike(Direction direction, NeuronId receiver, GenSpecFunctions::Function function, Arguments &args)
 {
     Spike::Data data;
     Spike::Initialize(Spike::Type::Functional, mBase.GetId(), data);

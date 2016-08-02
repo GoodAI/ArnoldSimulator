@@ -50,8 +50,6 @@ const char *GenSpecNeuron::GetType() const
 void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &spikeData)
 {
     // Forward pass - propagation of output->input.
-    Log(LogLevel::Info, "Neuron #%d received input", mBase.GetIndex());
-
     NeuronId sender = Spike::GetSender(spikeData);
 
     Synapse::Data *synapseData;
@@ -73,22 +71,28 @@ void GenSpecNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spik
     }
 
     // Get generalization factor.
-    mActiveInputsVsRegisteredInputs = float(activatedInputs) / float(mResult);
+    if (mResult == 0) {
+        mActiveInputsVsRegisteredInputs = 0;
+    } else {
+        mActiveInputsVsRegisteredInputs = float(activatedInputs) / float(mResult);
+    }
 
-    Functions::ResultArgs args;
+    GenSpecFunctions::ResultArgs args;
     args.result = mResult;
-    SendFunctionalSpike(Direction::Backward, mBase.GetParent(), Functions::Function::Result, args);
+    SendFunctionalSpike(Direction::Backward, mBase.GetParent(), GenSpecFunctions::Function::Result, args);
+
+    Log(LogLevel::Info, "Neuron #%d received data, activated inputs: %d, gen. factor: %f",
+        mBase.GetIndex(), activatedInputs, mActiveInputsVsRegisteredInputs);
 }
 
 void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spike::Data &spikeData)
 {
-    switch (static_cast<Functions::Function>(spike.GetFunction(spikeData))) {
-    case Functions::Function::Result:
+    switch (static_cast<GenSpecFunctions::Function>(spike.GetFunction(spikeData))) {
+    case GenSpecFunctions::Function::Result:
     {
-        Log(LogLevel::Info, "Neuron #%d received child results", mBase.GetIndex());
         // A child has sent it's result for winner determination.
-        Functions::ResultArgs args;
-        spike.GetArguments(spikeData, &args, sizeof(Functions::ResultArgs));
+        GenSpecFunctions::ResultArgs args;
+        spike.GetArguments(spikeData, &args, sizeof(GenSpecFunctions::ResultArgs));
 
         if (args.result > mBestChildResult) {
             mBestChildResult = args.result;
@@ -102,10 +106,10 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
         if (childrenCount > 0 && mChildrenAnswered == childrenCount && mBestChild != 0) {
             // Received results from all children, select winner and notify him.
 
-            Functions::WinnerSelectedArgs winnerArgs;
+            GenSpecFunctions::WinnerSelectedArgs winnerArgs;
             winnerArgs.winner = mBestChild;
             for (auto child : mBase.GetChildren()) {
-                SendFunctionalSpike(Direction::Forward, child, Functions::Function::WinnerSelected, winnerArgs);
+                SendFunctionalSpike(Direction::Forward, child, GenSpecFunctions::Function::WinnerSelected, winnerArgs);
             }
 
             mBestChildResult = 0;
@@ -115,12 +119,12 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
 
         break;
     }
-    case Functions::Function::WinnerSelected:
+    case GenSpecFunctions::Function::WinnerSelected:
     {
         Log(LogLevel::Info, "Neuron #%d received winner info", mBase.GetIndex());
 
-        Functions::WinnerSelectedArgs winnerArgs;
-        spike.GetArguments(spikeData, &winnerArgs, sizeof(Functions::WinnerSelectedArgs));
+        GenSpecFunctions::WinnerSelectedArgs winnerArgs;
+        spike.GetArguments(spikeData, &winnerArgs, sizeof(GenSpecFunctions::WinnerSelectedArgs));
 
         size_t result = 0;
 
@@ -137,10 +141,10 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
             }
 
             // Send activation data to the accumulator.
-            Functions::ResultArgs args;
+            GenSpecFunctions::ResultArgs args;
             args.result = result;
             args.isLeaf = mBase.GetChildren().empty();
-            SendFunctionalSpike(Direction::Forward, mAccumulatorId, Functions::Function::Result, args);
+            SendFunctionalSpike(Direction::Forward, mAccumulatorId, GenSpecFunctions::Function::Result, args);
         }
 
         // The name was too long for the following lines.
@@ -164,6 +168,22 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
 
 void GenSpecNeuron::UpdateWeights()
 {
+    for (auto &synapsePair: mBase.GetInputSynapses()) {
+        NeuronId neuron = synapsePair.first;
+
+        Synapse::Data *synapseData = mBase.AccessInputSynapse(neuron);
+        if (Synapse::GetType(*synapseData) == Synapse::Type::MultiWeighted) {
+            MultiWeightedSynapse *synapse = static_cast<MultiWeightedSynapse *>(Synapse::Edit(*synapseData));
+
+            size_t weightCount = synapse->GetWeightCount(*synapseData);
+            float *weights = synapse->GetWeights(*synapseData);
+            for (int i = 0; i < weightCount; i++) {
+                if (weights[i] > mSynapseThreshold) {
+                    weights[i] += (1.0 - weights[i]) / 3;
+                }
+            }
+        }
+    }
 }
 
 float GenSpecNeuron::GetInputDifference(uint8_t *oldInput, uint8_t *newInput)
@@ -196,10 +216,11 @@ size_t GenSpecNeuron::ContributeToRegion(uint8_t *&contribution)
     size_t size = sizeof(float) + 1;
     contribution = new uint8_t[size];
     std::memcpy(contribution, &mGenFactor, sizeof(float));
+
     const auto &children = mBase.GetChildren();
-    size_t sz = children.size();
-    bool empty = children.empty();
-    contribution[size - 1] = (mBase.GetChildren().empty()) ? 1 : 0;
+    bool hasNoChildren = children.empty();
+
+    contribution[size - 1] = hasNoChildren ? 1 : 0;
 
     return size;
 }
