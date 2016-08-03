@@ -19,6 +19,8 @@ public:
 
     size_t ContributeToRegion(uint8_t *&contribution) override;
 
+    void CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData) override;
+
     void SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count);
 protected:
     size_t mNeuronCountX;
@@ -29,4 +31,6 @@ protected:
     size_t mNeuronInputSizeY;
     size_t mNeuronInputStrideX;
     size_t mNeuronInputStrideY;
+
+    std::unique_ptr<uint8_t[]> mLastInput;
 };

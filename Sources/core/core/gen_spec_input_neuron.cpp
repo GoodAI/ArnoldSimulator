@@ -1,4 +1,5 @@
 ﻿#include "gen_spec_input_neuron.h"
+#include "data_utils.h"
 
 GenSpecInputNeuron::GenSpecInputNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
@@ -10,6 +11,8 @@ GenSpecInputNeuron::GenSpecInputNeuron(NeuronBase &base, json &params) : Neuron(
     mNeuronInputStrideY = params["neuronInputStrideY"].get<size_t>();
     mNeuronCountX = params["neuronCountX"].get<size_t>();
     mNeuronCountY = params["neuronCountY"].get<size_t>();
+
+    mLastInput = std::unique_ptr<uint8_t[]>(new uint8_t[mInputSizeX * mInputSizeY]);
 }
 
 GenSpecInputNeuron::~GenSpecInputNeuron()
@@ -29,11 +32,12 @@ const char *GenSpecInputNeuron::GetType() const
 
 void GenSpecInputNeuron::HandleSpike(Direction direction, MultiByteSpike &spike, Spike::Data &spikeData)
 {
-    int i = 0;
     const NeuronBase::Synapses &outputSynapses = mBase.GetOutputSynapses();
 
     const uint8_t *spikeValues = spike.GetValues(spikeData);
+    std::memcpy(mLastInput.get(), spikeValues, spike.GetValueCount(spikeData));
 
+    int i = 0;
     for (const auto &entry : outputSynapses) {
         NeuronId generalist = entry.first;
 
@@ -77,6 +81,20 @@ void GenSpecInputNeuron::Control(size_t brainStep)
 size_t GenSpecInputNeuron::ContributeToRegion(uint8_t *&contribution)
 {
     return 0;
+}
+
+void GenSpecInputNeuron::CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData)
+{
+    if (type == ObserverType::FloatTensor) {
+        metadata.push_back(mInputSizeX);
+        metadata.push_back(mInputSizeY);
+
+        size_t inputSize = mInputSizeX * mInputSizeY;
+
+        for (int i = 0; i < inputSize; i++) {
+            PutFloatToByteVector(observerData, float(mLastInput[i]));
+        }
+    }
 }
 
 void GenSpecInputNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count)

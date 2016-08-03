@@ -62,7 +62,7 @@ protected:
     NeuronId mBestChild;
     uint64_t mBestChildResult;
 
-    size_t mInputSize;
+    size_t mInputSize, mInputSizeX, mInputSizeY;
 
     // If this neuron wins, it needs to forward the input to the children.
     std::unique_ptr<uint8_t[]> mLastInputPtr;

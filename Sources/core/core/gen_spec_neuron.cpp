@@ -1,6 +1,7 @@
 #include "gen_spec_neuron.h"
 #include "log.h"
 #include <numeric>
+#include "data_utils.h"
 
 GenSpecNeuron::GenSpecNeuron(NeuronBase &base, json &params) : Neuron(base, params),
     mResult(0), mPreviousResult(0), mSynapseThreshold(0.5), mIsWinner(false),
@@ -13,9 +14,9 @@ GenSpecNeuron::GenSpecNeuron(NeuronBase &base, json &params) : Neuron(base, para
     }
 
     mSynapseThreshold = params["synapseThreshold"].get<double>();
-    auto inputSizeX = params["inputSizeX"].get<size_t>();
-    auto inputSizeY = params["inputSizeY"].get<size_t>();
-    mInputSize = inputSizeX * inputSizeY;
+    mInputSizeX = params["inputSizeX"].get<size_t>();
+    mInputSizeY = params["inputSizeY"].get<size_t>();
+    mInputSize = mInputSizeX * mInputSizeY;
 
     mLastInputPtr = std::unique_ptr<uint8_t[]>(new uint8_t[mInputSize]);
     // Fill with zeros for input difference calculation.
@@ -198,9 +199,21 @@ float GenSpecNeuron::GetInputDifference(uint8_t *oldInput, uint8_t *newInput)
 
 void GenSpecNeuron::CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &observerData)
 {
-    // TODO(HonzaS): Use composition here, provide observer classes.
     if (type == ObserverType::FloatTensor) {
-        //observerData.push_back(mAccumulatedActivation * 255 / (100 * mGeneralistActivation));
+        metadata.push_back(mInputSizeX);
+        metadata.push_back(mInputSizeY);
+
+        for (const auto &synapsePair : mBase.GetInputSynapses()) {
+            Synapse::Data synapseData = synapsePair.second;
+            if (synapseData.type == Synapse::Type::MultiWeighted) {
+                MultiWeightedSynapse *synapse = static_cast<MultiWeightedSynapse*>(Synapse::Edit(synapseData));
+                const float *weights = synapse->GetWeights(synapseData);
+                for (int i = 0; i < synapse->GetWeightCount(synapseData); i++) {
+                    PutFloatToByteVector(observerData, weights[i]);
+                }
+                break;
+            }
+        }
     }
 }
 
