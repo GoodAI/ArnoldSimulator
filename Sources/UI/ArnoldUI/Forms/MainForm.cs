@@ -146,7 +146,7 @@ namespace GoodAI.Arnold
         private void disconnectButton_Click(object sender, EventArgs e)
         {
             DisableCommandButtons();
-            VisualizationForm.Close();
+            VisualizationForm?.Close();
             m_uiMain.Disconnect();
         }
 
