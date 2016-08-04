@@ -1,5 +1,8 @@
 #include "gen_spec_brain.h"
 
+namespace GenSpecModel
+{
+
 const char *GenSpecBrain::Type = "GenSpecBrain";
 
 GenSpecBrain::GenSpecBrain(BrainBase &base, json &params) : Brain(base, params)
@@ -27,3 +30,5 @@ void GenSpecBrain::AcceptContributionFromRegion(
     RegionIndex regIdx, const uint8_t *contribution, size_t size)
 {
 }
+
+} // namespace GenSpecModel;

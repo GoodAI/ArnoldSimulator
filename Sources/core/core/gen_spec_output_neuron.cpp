@@ -1,6 +1,9 @@
 ﻿#include "gen_spec_output_neuron.h"
 #include "log.h"
 
+namespace GenSpecModel
+{
+
 GenSpecOutputNeuron::GenSpecOutputNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
 }
@@ -47,3 +50,5 @@ void GenSpecOutputNeuron::SendMultiByteSpike(Direction direction, NeuronId recei
 
     mBase.SendSpike(receiver, direction, data);
 }
+
+} // namespace GenSpecModel;

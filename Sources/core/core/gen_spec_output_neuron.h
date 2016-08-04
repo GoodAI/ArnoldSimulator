@@ -2,6 +2,9 @@
 
 #include "neuron.h"
 
+namespace GenSpecModel
+{
+
 class GenSpecOutputNeuron : public Neuron
 {
 public:
@@ -23,3 +26,5 @@ public:
 
     void SendMultiByteSpike(Direction direction, NeuronId receiver, const uint8_t *values, size_t count);
 };
+
+} // namespace GenSpecModel;

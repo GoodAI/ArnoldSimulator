@@ -27,6 +27,7 @@
     <ClCompile Include="log.cpp" />
     <ClCompile Include="log_tests.cpp" />
     <ClCompile Include="mnist_body.cpp" />
+    <ClCompile Include="mnist_body_tests.cpp" />
     <ClCompile Include="mnist_reader.cpp" />
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="random.cpp" />

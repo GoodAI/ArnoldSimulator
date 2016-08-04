@@ -3,6 +3,9 @@
 #include <numeric>
 #include "data_utils.h"
 
+namespace GenSpecModel
+{
+
 GenSpecNeuron::GenSpecNeuron(NeuronBase &base, json &params) : Neuron(base, params),
     mResult(0), mPreviousResult(0), mSynapseThreshold(0.5), mIsWinner(false),
     mChildrenAnswered(0), mBestChild(0), mBestChildResult(0), mGenValueLimit(1),
@@ -258,3 +261,4 @@ void GenSpecNeuron::SendDiscreteSpike(Direction direction, NeuronId receiver, ui
     mBase.SendSpike(receiver, direction, data);
 }
 
+} // namespace GenSpecModel;

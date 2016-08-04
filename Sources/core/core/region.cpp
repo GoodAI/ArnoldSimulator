@@ -60,8 +60,8 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
 {
     if (type == ThresholdRegion::Type) {
         return new ThresholdRegion(base, params);
-    } else if (type == GenSpecRegion::Type) {
-        return new GenSpecRegion(base, params);
+    } else if (type == GenSpecModel::GenSpecRegion::Type) {
+        return new GenSpecModel::GenSpecRegion(base, params);
     } else {
         return nullptr;
     }

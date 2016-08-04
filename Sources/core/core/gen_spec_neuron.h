@@ -3,6 +3,9 @@
 #include "neuron.h"
 #include <queue>
 
+namespace GenSpecModel
+{
+
 namespace GenSpecFunctions
 {
     enum class Function : uint8_t
@@ -91,3 +94,5 @@ inline void GenSpecNeuron::SendFunctionalSpike(Direction direction, NeuronId rec
 
     mBase.SendSpike(receiver, direction, data);
 }
+
+} // namespace GenSpecModel;

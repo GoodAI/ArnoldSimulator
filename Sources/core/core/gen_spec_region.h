@@ -2,6 +2,9 @@
 #include "region.h"
 #include "google/sparse_hash_map"
 
+namespace GenSpecModel
+{
+
 class GenSpecRegion : public Region
 {
 public:
@@ -46,3 +49,5 @@ protected:
     NeuronId RequestNeuronWithPosition(const char* neuronType, size_t layer, const Point3D &position);
     void SetParamsPosition(json &params, const Point3D &position);
 };
+
+} // namespace GenSpecModel;

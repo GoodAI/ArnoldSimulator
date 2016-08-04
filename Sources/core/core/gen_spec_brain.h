@@ -1,6 +1,9 @@
 #pragma once
 #include "brain.h"
 
+namespace GenSpecModel
+{
+
 class GenSpecBrain : public Brain
 {
 public:
@@ -19,3 +22,5 @@ public:
         RegionIndex regIdx, const uint8_t *contribution, size_t size) override;
 private:
 };
+
+} // namespace GenSpecModel;

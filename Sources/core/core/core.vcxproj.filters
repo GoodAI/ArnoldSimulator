@@ -99,6 +99,9 @@
     <ClCompile Include="gen_spec_brain.cpp">
       <Filter>GenSpecModel</Filter>
     </ClCompile>
+    <ClCompile Include="mnist_body_tests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">

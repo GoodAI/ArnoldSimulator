@@ -1,6 +1,9 @@
 ﻿#include "gen_spec_next_digit_neuron.h"
 #include "log.h"
 
+namespace GenSpecModel
+{
+
 GenSpecNextDigitNeuron::GenSpecNextDigitNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
 }
@@ -39,3 +42,5 @@ size_t GenSpecNextDigitNeuron::ContributeToRegion(uint8_t *&contribution)
 {
     return 0;
 }
+
+} // namespace GenSpecModel;

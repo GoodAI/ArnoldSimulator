@@ -1,6 +1,8 @@
 ﻿#pragma once
-
 #include "neuron.h"
+
+namespace GenSpecModel
+{
 
 class GenSpecAccNeuron : public Neuron
 {
@@ -27,3 +29,5 @@ protected:
     NeuronId mOutputNeuron;
     NeuronId mNextDigitNeuron;
 };
+
+} // namespace GenSpecModel;

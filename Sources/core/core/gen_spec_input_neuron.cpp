@@ -1,6 +1,9 @@
 ﻿#include "gen_spec_input_neuron.h"
 #include "data_utils.h"
 
+namespace GenSpecModel
+{
+
 GenSpecInputNeuron::GenSpecInputNeuron(NeuronBase &base, json &params) : Neuron(base, params)
 {
     mInputSizeX = params["inputSizeX"].get<size_t>();
@@ -107,3 +110,4 @@ void GenSpecInputNeuron::SendMultiByteSpike(Direction direction, NeuronId receiv
     mBase.SendSpike(receiver, direction, data);
 }
 
+} // namespace GenSpecModel;

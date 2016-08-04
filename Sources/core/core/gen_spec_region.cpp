@@ -2,6 +2,9 @@
 #include "random.h"
 #include "log.h"
 
+namespace GenSpecModel
+{
+
 const char *GenSpecRegion::Type = "GenSpecRegion";
 
 GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, params),
@@ -232,3 +235,5 @@ void GenSpecRegion::SetParamsPosition(json &params, const Point3D &position)
     params["position"]["y"] = std::get<1>(position);
     params["position"]["z"] = std::get<2>(position);
 }
+
+} // namespace GenSpecModel;

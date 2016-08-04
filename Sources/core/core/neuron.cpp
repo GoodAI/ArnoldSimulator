@@ -47,16 +47,16 @@ Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json 
 {
     if (type == ThresholdNeuron::Type) {
         return new ThresholdNeuron(base, params);
-    } else if (type == GenSpecNeuron::Type) {
-        return new GenSpecNeuron(base, params);
-    } else if (type == GenSpecInputNeuron::Type) {
-        return new GenSpecInputNeuron(base, params);
-    } else if (type == GenSpecAccNeuron::Type) {
-        return new GenSpecAccNeuron(base, params);
-    } else if (type == GenSpecOutputNeuron::Type) {
-        return new GenSpecOutputNeuron(base, params);
-    } else if (type == GenSpecNextDigitNeuron::Type) {
-        return new GenSpecNextDigitNeuron(base, params);
+    } else if (type == GenSpecModel::GenSpecNeuron::Type) {
+        return new GenSpecModel::GenSpecNeuron(base, params);
+    } else if (type == GenSpecModel::GenSpecInputNeuron::Type) {
+        return new GenSpecModel::GenSpecInputNeuron(base, params);
+    } else if (type == GenSpecModel::GenSpecAccNeuron::Type) {
+        return new GenSpecModel::GenSpecAccNeuron(base, params);
+    } else if (type == GenSpecModel::GenSpecOutputNeuron::Type) {
+        return new GenSpecModel::GenSpecOutputNeuron(base, params);
+    } else if (type == GenSpecModel::GenSpecNextDigitNeuron::Type) {
+        return new GenSpecModel::GenSpecNextDigitNeuron(base, params);
     } else {
         return nullptr;
     }

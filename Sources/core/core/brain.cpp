@@ -255,8 +255,8 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 {
     if (type == ThresholdBrain::Type) {
         return new ThresholdBrain(base, params);
-    } else if (type == GenSpecBrain::Type) {
-        return new GenSpecBrain(base, params);
+    } else if (type == GenSpecModel::GenSpecBrain::Type) {
+        return new GenSpecModel::GenSpecBrain(base, params);
     } else {
         return nullptr;
     }

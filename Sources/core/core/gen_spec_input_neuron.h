@@ -2,6 +2,9 @@
 
 #include "neuron.h"
 
+namespace GenSpecModel
+{
+
 class GenSpecInputNeuron : public Neuron
 {
 public:
@@ -34,3 +37,5 @@ protected:
 
     std::unique_ptr<uint8_t[]> mLastInput;
 };
+
+} // namespace GenSpecModel;

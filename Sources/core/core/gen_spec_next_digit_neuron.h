@@ -2,6 +2,9 @@
 
 #include "neuron.h"
 
+namespace GenSpecModel
+{
+
 class GenSpecNextDigitNeuron : public Neuron
 {
 public:
@@ -21,3 +24,5 @@ public:
 
     size_t ContributeToRegion(uint8_t *&contribution) override;
 };
+
+} // namespace GenSpecModel;
