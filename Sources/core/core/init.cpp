@@ -5,12 +5,10 @@
 
 void initializeComponents()
 {
-    GenSpecModel::init(
-        NeuronFactory::GetInstance(),
-        RegionFactory::GetInstance(),
-        BrainFactory::GetInstance());
-    ThresholdModel::init(
-        NeuronFactory::GetInstance(),
-        RegionFactory::GetInstance(),
-        BrainFactory::GetInstance());
+    NeuronFactory *neuronFactory = NeuronFactory::GetInstance();
+    RegionFactory *regionFactory = RegionFactory::GetInstance();
+    BrainFactory *brainFactory = BrainFactory::GetInstance();
+
+    GenSpecModel::init(neuronFactory, regionFactory, brainFactory);
+    ThresholdModel::init(neuronFactory, regionFactory, brainFactory);
 }
