@@ -47,7 +47,7 @@ GenSpecRegion::GenSpecRegion(RegionBase &base, json &params) : Region(base, para
     mLayerSpacing = 1.0 / float(maxLayers-1);
 
     // Place the parent/controller of the first layer.
-    Point3D position(0, 1, 0.5);
+    Point3D position(0.0f, 1.0f, 0.5f);
     NeuronId parent = RequestNeuronWithPosition("GenSpecNeuron", 0, position);
 
     json accParams;

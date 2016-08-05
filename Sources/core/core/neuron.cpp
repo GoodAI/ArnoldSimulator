@@ -1,8 +1,6 @@
 #include "neuron.h"
-
 #include "brain.h"
 #include "random.h"
-
 #include "components.h"
 
 extern CkGroupID gMulticastGroupId;

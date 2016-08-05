@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "neuron.h"
 
+namespace ThresholdModel
+{
+
 class ThresholdNeuron : public Neuron
 {
 public:
@@ -69,4 +72,6 @@ inline void ThresholdNeuron::SendFunctionalSpike(Direction direction, NeuronId r
     spike->SetArguments(data, &args, sizeof(Arguments));
 
     mBase.SendSpike(receiver, direction, data);
+}
+
 }

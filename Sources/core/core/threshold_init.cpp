@@ -1,5 +1,7 @@
 ﻿#include "threshold_init.h"
 #include "threshold_neuron.h"
+#include "threshold_region.h"
+#include "threshold_brain.h"
 #include "region.h"
 #include "brain.h"
 

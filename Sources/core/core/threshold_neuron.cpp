@@ -1,6 +1,9 @@
 ﻿#include "threshold_neuron.h"
 #include "data_utils.h"
 
+namespace ThresholdModel
+{
+
 ThresholdNeuron::ThresholdNeuron(NeuronBase &base, json &params) : Neuron(base, params), 
     mThresholdActivation(0.0), mAccumulatedActivation(0.0),
     mReceivedSpikeCount(0), mSentSpikeCount(0)
@@ -235,3 +238,4 @@ void ThresholdNeuron::SendContinuousSpike(Direction direction, NeuronId receiver
     mBase.SendSpike(receiver, direction, data);
 }
 
+}

@@ -37,8 +37,10 @@
     <ClCompile Include="region.cpp" />
     <ClCompile Include="spike.cpp" />
     <ClCompile Include="synapse.cpp" />
+    <ClCompile Include="threshold_brain.cpp" />
     <ClCompile Include="threshold_init.cpp" />
     <ClCompile Include="threshold_neuron.cpp" />
+    <ClCompile Include="threshold_region.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="brain.ci" />
@@ -74,8 +76,10 @@
     <ClInclude Include="instance_cache.h" />
     <ClInclude Include="spike.h" />
     <ClInclude Include="synapse.h" />
+    <ClInclude Include="threshold_brain.h" />
     <ClInclude Include="threshold_init.h" />
     <ClInclude Include="threshold_neuron.h" />
+    <ClInclude Include="threshold_region.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4639FCAB-E0E1-4F5E-9BAE-B320A03FEB10}</ProjectGuid>

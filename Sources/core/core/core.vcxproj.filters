@@ -120,6 +120,12 @@
     <ClCompile Include="threshold_init.cpp">
       <Filter>ThresholdModel</Filter>
     </ClCompile>
+    <ClCompile Include="threshold_region.cpp">
+      <Filter>ThresholdModel</Filter>
+    </ClCompile>
+    <ClCompile Include="threshold_brain.cpp">
+      <Filter>ThresholdModel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -205,6 +211,12 @@
     </ClInclude>
     <ClInclude Include="instance_cache.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="threshold_region.h">
+      <Filter>ThresholdModel</Filter>
+    </ClInclude>
+    <ClInclude Include="threshold_brain.h">
+      <Filter>ThresholdModel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
