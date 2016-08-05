@@ -102,6 +102,15 @@
     <ClCompile Include="synapse.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="init.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_init.h">
+      <Filter>GenSpecModel</Filter>
+    </ClCompile>
+    <ClCompile Include="gen_spec_init.cpp">
+      <Filter>GenSpecModel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -173,7 +182,13 @@
     <ClInclude Include="component_registry.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="registration.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="components.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="init.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

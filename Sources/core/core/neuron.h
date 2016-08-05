@@ -17,6 +17,8 @@
 #include "spike.h"
 #include "synapse.h"
 
+#include "components.h"
+
 #include "core.decl.h"
 
 using namespace nlohmann;

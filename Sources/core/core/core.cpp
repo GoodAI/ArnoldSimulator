@@ -11,6 +11,7 @@
 #include "catch.hpp"
 
 #include "core_tests.h"
+#include "init.h"
 
 CkGroupID gMulticastGroupId;
 CProxy_CompletionDetector gCompletionDetector;
@@ -41,6 +42,8 @@ Core::Core(CkArgMsg *msg) :
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
+
+    initializeComponents();
 
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 

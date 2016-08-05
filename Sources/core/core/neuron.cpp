@@ -4,12 +4,6 @@
 #include "random.h"
 #include "data_utils.h"
 
-#include "gen_spec_neuron.h"
-#include "gen_spec_input_neuron.h"
-#include "gen_spec_acc_neuron.h"
-#include "gen_spec_output_neuron.h"
-#include "gen_spec_next_digit_neuron.h"
-
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
 
@@ -45,21 +39,9 @@ Neuron::Neuron(NeuronBase &base, json &params) : mBase(base)
 
 Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json &params)
 {
-    if (type == ThresholdNeuron::Type) {
-        return new ThresholdNeuron(base, params);
-    } else if (type == GenSpecModel::GenSpecNeuron::Type) {
-        return new GenSpecModel::GenSpecNeuron(base, params);
-    } else if (type == GenSpecModel::GenSpecInputNeuron::Type) {
-        return new GenSpecModel::GenSpecInputNeuron(base, params);
-    } else if (type == GenSpecModel::GenSpecAccNeuron::Type) {
-        return new GenSpecModel::GenSpecAccNeuron(base, params);
-    } else if (type == GenSpecModel::GenSpecOutputNeuron::Type) {
-        return new GenSpecModel::GenSpecOutputNeuron(base, params);
-    } else if (type == GenSpecModel::GenSpecNextDigitNeuron::Type) {
-        return new GenSpecModel::GenSpecNextDigitNeuron(base, params);
-    } else {
-        return nullptr;
-    }
+    ComponentFactory<Neuron, NeuronBase> *neuronFactory = NeuronFactory::GetInstance();
+
+    return neuronFactory->Create(neuronFactory->GetToken(type), base, params);
 }
 
 void Neuron::HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data)
