@@ -2,7 +2,8 @@
 #include "region.h"
 
 #include "brain.h"
-#include "gen_spec_region.h"
+
+#include "components.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -58,13 +59,8 @@ void RegionBase::Connector::pup(PUP::er &p)
 
 Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json &params)
 {
-    if (type == ThresholdRegion::Type) {
-        return new ThresholdRegion(base, params);
-    } else if (type == GenSpecModel::GenSpecRegion::Type) {
-        return new GenSpecModel::GenSpecRegion(base, params);
-    } else {
-        return nullptr;
-    }
+    RegionFactory *regionFactory = RegionFactory::GetInstance();
+    return regionFactory->Create(type, base, params);
 }
 
 RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box3D &box, const RegionParams &params) :

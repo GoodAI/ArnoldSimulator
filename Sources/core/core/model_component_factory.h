@@ -19,9 +19,14 @@ public:
         return token;
     }
 
-    TComponent *Create(Token token, TBase &base, nlohmann::json params) const
+    TComponent *Create(Token token, TBase &base, nlohmann::json &params) const
     {
         return mFactoryFunctions.at(token)(base, params);
+    }
+
+    TComponent *Create(const std::string &name, TBase &base, nlohmann::json &params) const
+    {
+        return Create(Registration<ModelComponentFactory<TComponent, TBase>>::GetToken(name), base, params);
     }
 
 private:

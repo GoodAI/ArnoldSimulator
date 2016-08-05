@@ -3,6 +3,8 @@
 #include "brain.h"
 #include "random.h"
 
+#include "components.h"
+
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
 
@@ -39,8 +41,7 @@ Neuron::Neuron(NeuronBase &base, json &params) : mBase(base)
 Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json &params)
 {
     NeuronFactory *neuronFactory = NeuronFactory::GetInstance();
-
-    return neuronFactory->Create(neuronFactory->GetToken(type), base, params);
+    return neuronFactory->Create(type, base, params);
 }
 
 void Neuron::HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data)

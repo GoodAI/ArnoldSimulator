@@ -4,6 +4,8 @@
 #include "gen_spec_neuron.h"
 #include "gen_spec_next_digit_neuron.h"
 #include "gen_spec_output_neuron.h"
+#include "gen_spec_region.h"
+#include "gen_spec_brain.h"
 
 namespace GenSpecModel
 {
@@ -13,7 +15,7 @@ Neuron *CreateGenSpecAccNeuron(NeuronBase &base, json &params)
     return new GenSpecAccNeuron(base, params);
 }
 
-void init(NeuronFactory *neuronFactory)
+void init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory)
 {
     // Shown are three ways of neuron registration.
 
@@ -33,6 +35,12 @@ void init(NeuronFactory *neuronFactory)
         NeuronBuilder<GenSpecNextDigitNeuron>);
     neuronFactory->Register("GenSpecOutputNeuron",
         NeuronBuilder<GenSpecOutputNeuron>);
+
+    regionFactory->Register("GenSpecRegion",
+        RegionBuilder<GenSpecRegion>);
+
+    brainFactory->Register("GenSpecBrain",
+        BrainBuilder<GenSpecBrain>);
 }
 
 }

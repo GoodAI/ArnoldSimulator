@@ -1,6 +1,6 @@
 #include "core.h"
 #include "brain.h"
-#include "gen_spec_brain.h"
+#include "components.h"
 
 extern CkGroupID gMulticastGroupId;
 extern CProxy_CompletionDetector gCompletionDetector;
@@ -253,13 +253,8 @@ Body *BrainBase::CreateBody(const std::string &type, const std::string &params)
 
 Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &params)
 {
-    if (type == ThresholdBrain::Type) {
-        return new ThresholdBrain(base, params);
-    } else if (type == GenSpecModel::GenSpecBrain::Type) {
-        return new GenSpecModel::GenSpecBrain(base, params);
-    } else {
-        return nullptr;
-    }
+    BrainFactory *brainFactory = BrainFactory::GetInstance();
+    return brainFactory->Create(type, base, params);
 }
 
 BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params) :
