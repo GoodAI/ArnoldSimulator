@@ -31,6 +31,9 @@
     <Filter Include="GenSpecModel\Neurons">
       <UniqueIdentifier>{b7733013-5cab-4814-b4da-ec23549d4b4f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThresholdModel">
+      <UniqueIdentifier>{254262d0-e5c4-4693-a2f8-3090687dd712}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -111,6 +114,12 @@
     <ClCompile Include="gen_spec_init.cpp">
       <Filter>GenSpecModel</Filter>
     </ClCompile>
+    <ClCompile Include="threshold_neuron.cpp">
+      <Filter>ThresholdModel</Filter>
+    </ClCompile>
+    <ClCompile Include="threshold_init.cpp">
+      <Filter>ThresholdModel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
@@ -176,12 +185,6 @@
     <ClInclude Include="gen_spec_brain.h">
       <Filter>GenSpecModel</Filter>
     </ClInclude>
-    <ClInclude Include="component_factory.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="component_registry.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="registration.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -189,6 +192,18 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="init.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="threshold_neuron.h">
+      <Filter>ThresholdModel</Filter>
+    </ClInclude>
+    <ClInclude Include="threshold_init.h">
+      <Filter>ThresholdModel</Filter>
+    </ClInclude>
+    <ClInclude Include="model_component_factory.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="instance_cache.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

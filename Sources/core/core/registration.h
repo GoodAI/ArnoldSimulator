@@ -1,10 +1,11 @@
 #pragma once
 #include <cstdint>
 #include <map>
+#include "log.h"
 
 typedef uint64_t Token;
 
-template<typename Type>
+template<typename T>
 class Registration
 {
 public:
@@ -12,6 +13,11 @@ public:
 
     Token GetNewToken(const std::string &name)
     {
+        if (mTokens.find(name) != mTokens.end()) {
+            Log(LogLevel::Error, "Name '%s' is already registered", name);
+            throw std::invalid_argument("Name already registered");
+        }
+
         Token token = mNextToken++;
         mTokens[name] = token;
         return token;
@@ -27,7 +33,7 @@ public:
         return mNames.at(token);
     }
 
-    static Type * GetInstance()
+    static T * GetInstance()
     {
         return &mInstance;
     }
@@ -36,8 +42,8 @@ private:
     std::map<std::string, Token> mTokens;
     std::map<Token, std::string> mNames;
 
-    static Type mInstance;
+    static T mInstance;
 };
 
-template<typename Type>
-Type Registration<Type>::mInstance;
+template<typename T>
+T Registration<T>::mInstance;

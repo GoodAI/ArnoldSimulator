@@ -37,6 +37,8 @@
     <ClCompile Include="region.cpp" />
     <ClCompile Include="spike.cpp" />
     <ClCompile Include="synapse.cpp" />
+    <ClCompile Include="threshold_init.cpp" />
+    <ClCompile Include="threshold_neuron.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="brain.ci" />
@@ -52,7 +54,7 @@
     <ClInclude Include="components.h" />
     <ClInclude Include="init.h" />
     <ClInclude Include="registration.h" />
-    <ClInclude Include="component_factory.h" />
+    <ClInclude Include="model_component_factory.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="data_utils.h" />
@@ -69,9 +71,11 @@
     <ClInclude Include="neuron.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="region.h" />
-    <ClInclude Include="component_registry.h" />
+    <ClInclude Include="instance_cache.h" />
     <ClInclude Include="spike.h" />
     <ClInclude Include="synapse.h" />
+    <ClInclude Include="threshold_init.h" />
+    <ClInclude Include="threshold_neuron.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4639FCAB-E0E1-4F5E-9BAE-B320A03FEB10}</ProjectGuid>

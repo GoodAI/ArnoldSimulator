@@ -15,6 +15,8 @@ Neuron *CreateGenSpecAccNeuron(NeuronBase &base, json &params)
 
 void init(NeuronFactory *neuronFactory)
 {
+    // Shown are three ways of neuron registration.
+
     // Example of a function pointer use.
     neuronFactory->Register("GenSpecAccNeuron", CreateGenSpecAccNeuron);
 

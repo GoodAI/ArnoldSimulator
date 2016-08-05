@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "components.h"
 
-namespace GenSpecModel
+namespace ThresholdModel
 {
 
 // This function is called from the core init code.
