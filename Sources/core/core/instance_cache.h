@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <map>
+#include <memory>
 #include "registration.h"
 
 // A template registry that registers an instance for a given name.
@@ -8,6 +9,7 @@
 template<typename TInstance>
 class InstanceCache : Registration<InstanceCache<TInstance>>
 {
+    using Base = Registration<InstanceCache<TInstance>>;
 public:
     ~InstanceCache()
     {
@@ -20,16 +22,16 @@ public:
     Token Register(const std::string &name, TInstance * component)
     {
         Token token = Registration<InstanceCache<TInstance>>::GetNewToken(name);
-        mInstances[token] = component;
+        mInstances[token].reset(component);
 
         return token;
     }
 
     TInstance *Get(Token token) const
     {
-        return mInstances.at(token);
+        return mInstances.at(token).get();
     }
 
 private:
-    std::map<Token, TInstance*> mInstances;
+    std::map<Token, std::unique_ptr<TInstance>> mInstances;
 };

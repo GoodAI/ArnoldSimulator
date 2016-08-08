@@ -61,7 +61,7 @@ Spike::Data::Data(const Data &other)
     bits16 = other.bits16;
     sender = other.sender;
 
-    Editor *ed = Edit(*this);
+    SpikeEditor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         std::memcpy(reinterpret_cast<unsigned char *>(bits64),
@@ -78,7 +78,7 @@ Spike::Data::Data(Data &&other)
     bits16 = other.bits16;
     sender = other.sender;
 
-    Editor *ed = Edit(*this);
+    SpikeEditor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = other.bits64;
         other.bits64 = 0;
@@ -96,7 +96,7 @@ Spike::Data &Spike::Data::operator=(const Data &other)
         bits16 = other.bits16;
         sender = other.sender;
 
-        Editor *ed = Edit(*this);
+        SpikeEditor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
             std::memcpy(reinterpret_cast<unsigned char *>(bits64),
@@ -117,7 +117,7 @@ Spike::Data &Spike::Data::operator=(Data &&other)
         bits16 = other.bits16;
         sender = other.sender;
 
-        Editor *ed = Edit(*this);
+        SpikeEditor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = other.bits64;
             other.bits64 = 0;
@@ -143,7 +143,7 @@ void Spike::Data::pup(PUP::er &p)
     p | bits16;
     p | sender;
 
-    Editor *ed = Edit(*this);
+    SpikeEditor *ed = Edit(*this);
 
     if (ed->ExtraBytes(*this) > 0) {
         if (p.isUnpacking()) {
@@ -157,37 +157,37 @@ void Spike::Data::pup(PUP::er &p)
     }
 }
 
-size_t Spike::Editor::ExtraBytes(const Data &data) const
+size_t SpikeEditor::ExtraBytes(const Data &data) const
 {
     return 0;
 }
 
-void *Spike::Editor::AllocateExtra(Data &data)
+void *SpikeEditor::AllocateExtra(Data &data)
 {
     return nullptr;
 }
 
-size_t Spike::Editor::AllBytes(const Data &data) const
+size_t SpikeEditor::AllBytes(const Data &data) const
 {
     return 0;
 }
 
-void Spike::Editor::ExportAll(Data &data, void *buffer, size_t size) const
+void SpikeEditor::ExportAll(Data &data, void *buffer, size_t size) const
 {
     // do nothing
 }
 
-void Spike::Editor::ImportAll(Data &data, const void *buffer, size_t size)
+void SpikeEditor::ImportAll(Data &data, const void *buffer, size_t size)
 {
     // do nothing
 }
 
-void Spike::Editor::Initialize(Data &data, size_t allocCount)
+void SpikeEditor::Initialize(Data &data, size_t allocCount)
 {
     // do nothing
 }
 
-void Spike::Editor::Release(Data &data)
+void SpikeEditor::Release(Data &data)
 {
     // do nothing
 }
@@ -210,9 +210,9 @@ void Spike::Initialize(Type type, NeuronId sender, Data &data, size_t allocCount
     Edit(data)->Initialize(data, allocCount);
 }
 
-Spike::Editor *Spike::Edit(Data &data)
+SpikeEditor *Spike::Edit(Data &data)
 {
-    Editor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
+    SpikeEditor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
     if (editor == nullptr) {
         editor = instance.mEditors[static_cast<size_t>(Type::Binary)].get();
     }

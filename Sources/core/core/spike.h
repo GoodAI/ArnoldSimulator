@@ -11,6 +11,7 @@
 #include "common.h"
 
 class Neuron;
+class SpikeEditor;
 
 class Spike
 {
@@ -50,28 +51,10 @@ public:
     typedef std::vector<DataWithReceiver> BrainSink;
     typedef std::vector<Data> BrainSource;
 
-    class Editor
-    {
-    public:
-        virtual ~Editor() = default;
-        
-        virtual void Accept(Direction direction, Neuron &receiver, Data &data) = 0;
-
-        virtual size_t ExtraBytes(const Data &data) const;
-        virtual void *AllocateExtra(Data &data);
-
-        virtual size_t AllBytes(const Data &data) const;
-        virtual void ExportAll(Data &data, void *buffer, size_t size) const;
-        virtual void ImportAll(Data &data, const void *buffer, size_t size);
-
-        virtual void Initialize(Data &data, size_t allocCount = 0);
-        virtual void Release(Data &data);
-    };
-
     static Type GetType(const Data &data);
     static NeuronId GetSender(const Data &data);
     static void Initialize(Type type, NeuronId sender, Data &data, size_t allocCount = 0);
-    static Editor *Edit(Data &data);
+    static SpikeEditor *Edit(Data &data);
     static void Release(Data &data);
 
 private:
@@ -81,7 +64,26 @@ private:
 
     static Spike instance;
 
-    std::vector<std::unique_ptr<Editor>> mEditors;
+    std::vector<std::unique_ptr<SpikeEditor>> mEditors;
+};
+
+class SpikeEditor
+{
+    using Data = Spike::Data;
+public:
+    virtual ~SpikeEditor() = default;
+    
+    virtual void Accept(Direction direction, Neuron &receiver, Data &data) = 0;
+
+    virtual size_t ExtraBytes(const Data &data) const;
+    virtual void *AllocateExtra(Data &data);
+
+    virtual size_t AllBytes(const Data &data) const;
+    virtual void ExportAll(Data &data, void *buffer, size_t size) const;
+    virtual void ImportAll(Data &data, const void *buffer, size_t size);
+
+    virtual void Initialize(Data &data, size_t allocCount = 0);
+    virtual void Release(Data &data);
 };
 
 inline void operator|(PUP::er &p, Spike::Type &spikeType)
@@ -89,7 +91,7 @@ inline void operator|(PUP::er &p, Spike::Type &spikeType)
     pup_bytes(&p, static_cast<void *>(&spikeType), sizeof(Spike::Type));
 }
 
-class BinarySpike : public Spike::Editor
+class BinarySpike : public SpikeEditor
 {
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
 
@@ -99,7 +101,7 @@ class BinarySpike : public Spike::Editor
     virtual void Initialize(Spike::Data &data, size_t allocCount = 0) override;
 };
 
-class DiscreteSpike : public Spike::Editor
+class DiscreteSpike : public SpikeEditor
 {
 public:
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
@@ -116,7 +118,7 @@ public:
     void SetDelay(Spike::Data &data, uint16_t delay);
 };
 
-class ContinuousSpike : public Spike::Editor
+class ContinuousSpike : public SpikeEditor
 {
 public:
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
@@ -133,7 +135,7 @@ public:
     void SetDelay(Spike::Data &data, uint16_t delay);
 };
 
-class VisualSpike : public Spike::Editor
+class VisualSpike : public SpikeEditor
 {
 public:
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
@@ -148,7 +150,7 @@ public:
     void SetPixel(Spike::Data &data, uint32_t pixel);
 };
 
-class FunctionalSpike : public Spike::Editor
+class FunctionalSpike : public SpikeEditor
 {
 public:
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;
@@ -165,7 +167,7 @@ public:
     void SetArguments(Spike::Data &data, const void *arguments, size_t size);
 };
 
-class MultiByteSpike : public Spike::Editor
+class MultiByteSpike : public SpikeEditor
 {
 public:
     virtual void Accept(Direction direction, Neuron &receiver, Spike::Data &data) override;

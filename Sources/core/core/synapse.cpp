@@ -4,7 +4,7 @@
 Synapse::Synapse()
 {
     mEditors.resize((static_cast<size_t>(UINT8_MAX)) + 1);
-    mEditors[static_cast<size_t>(Type::Empty)].reset(new Editor());
+    mEditors[static_cast<size_t>(Type::Empty)].reset(new SynapseEditor());
     mEditors[static_cast<size_t>(Type::Weighted)].reset(new WeightedSynapse());
     mEditors[static_cast<size_t>(Type::Lagging)].reset(new LaggingSynapse());
     mEditors[static_cast<size_t>(Type::Conductive)].reset(new ConductiveSynapse());
@@ -57,7 +57,7 @@ Synapse::Data::Data(const Data &other)
     bits8 = other.bits8;
     bits16 = other.bits16;
 
-    Editor *ed = Edit(*this);
+    SynapseEditor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         std::memcpy(reinterpret_cast<unsigned char *>(bits64), 
@@ -73,7 +73,7 @@ Synapse::Data::Data(Data &&other)
     bits8 = other.bits8;
     bits16 = other.bits16;
     
-    Editor *ed = Edit(*this);
+    SynapseEditor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = other.bits64;
         other.bits64 = 0;
@@ -90,7 +90,7 @@ Synapse::Data &Synapse::Data::operator=(const Data &other)
         bits8 = other.bits8;
         bits16 = other.bits16;
         
-        Editor *ed = Edit(*this);
+        SynapseEditor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
             std::memcpy(reinterpret_cast<unsigned char *>(bits64),
@@ -110,7 +110,7 @@ Synapse::Data &Synapse::Data::operator=(Data &&other)
         bits8 = other.bits8;
         bits16 = other.bits16;
         
-        Editor *ed = Edit(*this);
+        SynapseEditor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = other.bits64;
             other.bits64 = 0;
@@ -134,7 +134,7 @@ void Synapse::Data::pup(PUP::er &p)
 
     p | bits16;
 
-    Editor *ed = Edit(*this);
+    SynapseEditor *ed = Edit(*this);
 
     if (ed->ExtraBytes(*this) > 0) {
         if (p.isUnpacking()) {
@@ -148,27 +148,27 @@ void Synapse::Data::pup(PUP::er &p)
     }
 }
 
-size_t Synapse::Editor::ExtraBytes(Data &data) const
+size_t SynapseEditor::ExtraBytes(Data &data) const
 {
     return 0;
 }
 
-void *Synapse::Editor::AllocateExtra(Data &data)
+void *SynapseEditor::AllocateExtra(Data &data)
 {
     return nullptr;
 }
 
-void Synapse::Editor::Initialize(Data &data, size_t allocCount)
+void SynapseEditor::Initialize(Data &data, size_t allocCount)
 {
     // do nothing
 }
 
-void Synapse::Editor::Clone(const Data &original, Data &data)
+void SynapseEditor::Clone(const Data &original, Data &data)
 {
     // do nothing
 }
 
-void Synapse::Editor::Release(Data &data)
+void SynapseEditor::Release(Data &data)
 {
     // do nothing
 }
@@ -197,9 +197,9 @@ void Synapse::Clone(const Data &original, Data &data)
     Edit(data)->Clone(original, data);
 }
 
-Synapse::Editor *Synapse::Edit(Data &data)
+SynapseEditor *Synapse::Edit(Data &data)
 {
-    Editor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
+    SynapseEditor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
     if (editor == nullptr) {
         editor = instance.mEditors[static_cast<size_t>(Type::Empty)].get();
     }

@@ -42,7 +42,7 @@ Neuron *NeuronBase::CreateNeuron(const NeuronType &type, NeuronBase &base, json 
     return neuronFactory->Create(type, base, params);
 }
 
-void Neuron::HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data)
+void Neuron::HandleSpikeGeneric(Direction direction, SpikeEditor &spike, Spike::Data &data)
 {
     return;
 }

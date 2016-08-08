@@ -11,10 +11,11 @@ using FactoryMethod = TComponent *(*)(TBase &, nlohmann::json &);
 template<typename TComponent, typename TBase>
 class ModelComponentFactory : public Registration<ModelComponentFactory<TComponent, TBase>>
 {
+    using Base = Registration<ModelComponentFactory<TComponent, TBase>>;
 public:
     Token Register(const std::string &name, FactoryMethod<TComponent, TBase> create)
     {
-        Token token = Registration<ModelComponentFactory<TComponent, TBase>>::GetNewToken(name);
+        Token token = Base::GetNewToken(name);
         mFactoryFunctions[token] = create;
         return token;
     }
@@ -26,7 +27,7 @@ public:
 
     TComponent *Create(const std::string &name, TBase &base, nlohmann::json &params) const
     {
-        return Create(Registration<ModelComponentFactory<TComponent, TBase>>::GetToken(name), base, params);
+        return Create(Base::GetToken(name), base, params);
     }
 
 private:

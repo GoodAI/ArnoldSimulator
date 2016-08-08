@@ -34,3 +34,8 @@ Brain* BrainBuilder(BrainBase &base, nlohmann::json &params)
 typedef ModelComponentFactory<Neuron, NeuronBase> NeuronFactory;
 typedef ModelComponentFactory<Region, RegionBase> RegionFactory;
 typedef ModelComponentFactory<Brain, BrainBase> BrainFactory;
+
+class SynapseEditor;
+
+typedef InstanceCache<SynapseEditor> SynapseEditorCache;
+//typedef InstanceCache<Spike::Editor> SpikeEditorCache;

@@ -54,7 +54,7 @@ public:
     virtual size_t ContributeToRegion(uint8_t *&contribution) = 0;
     virtual void CalculateObserver(ObserverType type, std::vector<int32_t> &metadata, std::vector<uint8_t> &data) {};
 
-    virtual void HandleSpikeGeneric(Direction direction, Spike::Editor &spike, Spike::Data &data);
+    virtual void HandleSpikeGeneric(Direction direction, SpikeEditor &spike, Spike::Data &data);
     virtual void HandleSpike(Direction direction, BinarySpike &spike, Spike::Data &data);
     virtual void HandleSpike(Direction direction, DiscreteSpike &spike, Spike::Data &data);
     virtual void HandleSpike(Direction direction, ContinuousSpike &spike, Spike::Data &data);
