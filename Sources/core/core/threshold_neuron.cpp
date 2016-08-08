@@ -1,5 +1,6 @@
 ﻿#include "threshold_neuron.h"
 #include "data_utils.h"
+#include "components.h"
 
 namespace ThresholdModel
 {

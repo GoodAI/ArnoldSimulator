@@ -1,6 +1,6 @@
 #include "synapse.h"
 #include "log.h"
-#include "gen_spec_acc_neuron.h"
+#include "components.h"
 
 Synapse::Type Synapse::ParseType(const std::string &type)
 {
@@ -33,7 +33,7 @@ Synapse::Data::Data(const Data &other)
     bits8 = other.bits8;
     bits16 = other.bits16;
 
-    SynapseEditor *ed = Edit(*this);
+    Editor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
         std::memcpy(reinterpret_cast<unsigned char *>(bits64), 
@@ -49,7 +49,7 @@ Synapse::Data::Data(Data &&other)
     bits8 = other.bits8;
     bits16 = other.bits16;
     
-    SynapseEditor *ed = Edit(*this);
+    Editor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = other.bits64;
         other.bits64 = 0;
@@ -66,7 +66,7 @@ Synapse::Data &Synapse::Data::operator=(const Data &other)
         bits8 = other.bits8;
         bits16 = other.bits16;
         
-        SynapseEditor *ed = Edit(*this);
+        Editor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
             std::memcpy(reinterpret_cast<unsigned char *>(bits64),
@@ -86,7 +86,7 @@ Synapse::Data &Synapse::Data::operator=(Data &&other)
         bits8 = other.bits8;
         bits16 = other.bits16;
         
-        SynapseEditor *ed = Edit(*this);
+        Editor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = other.bits64;
             other.bits64 = 0;
@@ -110,7 +110,7 @@ void Synapse::Data::pup(PUP::er &p)
 
     p | bits16;
 
-    SynapseEditor *ed = Edit(*this);
+    Editor *ed = Edit(*this);
 
     if (ed->ExtraBytes(*this) > 0) {
         if (p.isUnpacking()) {
@@ -126,27 +126,27 @@ void Synapse::Data::pup(PUP::er &p)
 
 Synapse::Type Synapse::DefaultType;
 
-size_t SynapseEditor::ExtraBytes(Data &data) const
+size_t Synapse::Editor::ExtraBytes(Data &data) const
 {
     return 0;
 }
 
-void *SynapseEditor::AllocateExtra(Data &data)
+void *Synapse::Editor::AllocateExtra(Data &data)
 {
     return nullptr;
 }
 
-void SynapseEditor::Initialize(Data &data, size_t allocCount)
+void Synapse::Editor::Initialize(Data &data, size_t allocCount)
 {
     // do nothing
 }
 
-void SynapseEditor::Clone(const Data &original, Data &data)
+void Synapse::Editor::Clone(const Data &original, Data &data)
 {
     // do nothing
 }
 
-void SynapseEditor::Release(Data &data)
+void Synapse::Editor::Release(Data &data)
 {
     // do nothing
 }
@@ -175,7 +175,7 @@ void Synapse::Clone(const Data &original, Data &data)
     Edit(data)->Clone(original, data);
 }
 
-SynapseEditor *Synapse::Edit(Data &data)
+Synapse::Editor *Synapse::Edit(Data &data)
 {
     SynapseEditorCache *editorCache = SynapseEditorCache::GetInstance();
     return editorCache->Get(data.type);

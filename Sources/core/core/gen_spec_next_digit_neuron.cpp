@@ -1,5 +1,6 @@
 ﻿#include "gen_spec_next_digit_neuron.h"
 #include "log.h"
+#include "components.h"
 
 namespace GenSpecModel
 {

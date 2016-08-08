@@ -1,5 +1,6 @@
 ﻿#include "gen_spec_acc_neuron.h"
 #include "gen_spec_neuron.h"
+#include "components.h"
 #include "log.h"
 
 namespace GenSpecModel

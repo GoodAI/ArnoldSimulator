@@ -2,6 +2,7 @@
 #include "log.h"
 #include <numeric>
 #include "data_utils.h"
+#include "components.h"
 
 namespace GenSpecModel
 {

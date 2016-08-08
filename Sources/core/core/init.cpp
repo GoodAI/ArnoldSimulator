@@ -7,7 +7,7 @@
 
 void registerCoreSynapseEditors(SynapseEditorCache *editorCache)
 {
-    Synapse::DefaultType = editorCache->Register("Empty", new SynapseEditor());
+    Synapse::DefaultType = editorCache->Register("Empty", new Synapse::Editor());
 
     editorCache->Register("Weighted", new WeightedSynapse());
     editorCache->Register("Lagging", new LaggingSynapse());

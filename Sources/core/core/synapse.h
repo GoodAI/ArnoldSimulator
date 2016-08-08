@@ -11,8 +11,6 @@
 #include "common.h"
 #include "registration.h"
 
-class SynapseEditor;
-
 class Synapse
 {
 public:
@@ -49,30 +47,29 @@ public:
     typedef std::vector<Removal> Removals;
     typedef std::vector<Link> Links;
 
+    class Editor
+    {
+    public:
+        virtual ~Editor() = default;
+
+        virtual size_t ExtraBytes(Data &data) const;
+        virtual void *AllocateExtra(Data &data);
+
+        virtual void Initialize(Data &data, size_t allocSize = 0);
+        virtual void Clone(const Data &original, Data &data);
+        virtual void Release(Data &data);
+    };
+
     static Type GetType(const Data &data);
     static void Initialize(Type type, Data &data, size_t allocSize = 0);
     static void Clone(const Data &original, Data &data);
-    static SynapseEditor *Edit(Data &data);
+    static Editor *Edit(Data &data);
     static void Release(Data &data);
 
     static Type DefaultType;
 };
 
-class SynapseEditor
-{
-    using Data = Synapse::Data;
-public:
-    virtual ~SynapseEditor() = default;
-
-    virtual size_t ExtraBytes(Data &data) const;
-    virtual void *AllocateExtra(Data &data);
-
-    virtual void Initialize(Data &data, size_t allocSize = 0);
-    virtual void Clone(const Data &original, Data &data);
-    virtual void Release(Data &data);
-};
-
-class WeightedSynapse : public SynapseEditor
+class WeightedSynapse : public Synapse::Editor
 {
 public:
     virtual void Initialize(Synapse::Data &data, size_t allocSize = 0) override;
@@ -82,7 +79,7 @@ public:
     void SetWeight(Synapse::Data &data, double weight);
 };
 
-class MultiWeightedSynapse : public SynapseEditor
+class MultiWeightedSynapse : public Synapse::Editor
 {
 public:
     virtual size_t ExtraBytes(Synapse::Data &data) const override;
@@ -101,7 +98,7 @@ private:
     tbb::scalable_allocator<float> mAllocator;
 };
 
-class LaggingSynapse : public SynapseEditor
+class LaggingSynapse : public Synapse::Editor
 {
 public:
     virtual void Initialize(Synapse::Data &data, size_t allocCount = 0) override;
@@ -113,7 +110,7 @@ public:
     void SetDelay(Synapse::Data &data, uint16_t delay);
 };
 
-class ConductiveSynapse : public SynapseEditor
+class ConductiveSynapse : public Synapse::Editor
 {
 public:
     virtual void Initialize(Synapse::Data &data, size_t allocCount = 0) override;
@@ -133,7 +130,7 @@ protected:
     static const uint64_t ConductanceMask = 0xFFFFFFFF00000000;
 };
 
-class ProbabilisticSynapse : public SynapseEditor
+class ProbabilisticSynapse : public Synapse::Editor
 {
 public:
     virtual size_t ExtraBytes(Synapse::Data &data) const override;
