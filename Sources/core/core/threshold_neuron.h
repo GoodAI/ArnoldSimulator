@@ -66,7 +66,7 @@ template<typename Arguments>
 inline void ThresholdNeuron::SendFunctionalSpike(Direction direction, NeuronId receiver, Function function, Arguments &args)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::Functional, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("Functional"), mBase.GetId(), data);
     FunctionalSpike *spike = static_cast<FunctionalSpike *>(Spike::Edit(data));
     spike->SetFunction(data, static_cast<uint8_t>(function));
     spike->SetArguments(data, &args, sizeof(Arguments));

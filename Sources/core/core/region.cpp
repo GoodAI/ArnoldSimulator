@@ -567,7 +567,7 @@ void RegionBase::ConnectInputNeurons(const ConnectorName &name, NeuronId destFir
     if (itConn != mInputConnectors.end()) {
         Connector &connector = itConn->second;
         Synapse::Data synapse;
-        Synapse::Initialize(Synapse::Type::Weighted, synapse);
+        Synapse::Initialize(SynapseEditorCache::GetInstance()->GetToken("Weighted"), synapse);
         NeuronId destNeuronId = destFirstNeuron;
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
             RequestSynapseAddition(Direction::Forward, destNeuronId++, *it, synapse);
@@ -683,7 +683,7 @@ void RegionBase::ConnectOutputNeurons(const ConnectorName &name, NeuronId destFi
     if (itConn != mOutputConnectors.end()) {
         Connector &connector = itConn->second;
         Synapse::Data synapse;
-        Synapse::Initialize(Synapse::Type::Weighted, synapse);
+        Synapse::Initialize(SynapseEditorCache::GetInstance()->GetToken("Weighted"), synapse);
         NeuronId destNeuronId = destFirstNeuron;
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
             RequestSynapseAddition(Direction::Forward, *it, destNeuronId++, synapse);

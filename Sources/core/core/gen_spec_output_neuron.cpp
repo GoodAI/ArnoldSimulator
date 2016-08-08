@@ -44,7 +44,7 @@ size_t GenSpecOutputNeuron::ContributeToRegion(uint8_t *&contribution)
 void GenSpecOutputNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, const uint8_t *values, size_t count)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::MultiByte, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("MultiByte"), mBase.GetId(), data);
     MultiByteSpike *spike = static_cast<MultiByteSpike *>(Spike::Edit(data));
     spike->SetValues(data, values, count);
 

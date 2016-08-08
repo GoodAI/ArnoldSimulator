@@ -176,7 +176,7 @@ void GenSpecNeuron::UpdateWeights()
         NeuronId neuron = synapsePair.first;
 
         Synapse::Data *synapseData = mBase.AccessInputSynapse(neuron);
-        if (Synapse::GetType(*synapseData) == Synapse::Type::MultiWeighted) {
+        if (Synapse::GetType(*synapseData) == SynapseEditorCache::GetInstance()->GetToken("MultiWeighted")) {
             MultiWeightedSynapse *synapse = static_cast<MultiWeightedSynapse *>(Synapse::Edit(*synapseData));
 
             size_t weightCount = synapse->GetWeightCount(*synapseData);
@@ -208,7 +208,7 @@ void GenSpecNeuron::CalculateObserver(ObserverType type, std::vector<int32_t> &m
 
         for (const auto &synapsePair : mBase.GetInputSynapses()) {
             Synapse::Data synapseData = synapsePair.second;
-            if (synapseData.type == Synapse::Type::MultiWeighted) {
+            if (synapseData.type == SynapseEditorCache::GetInstance()->GetToken("MultiWeighted")) {
                 MultiWeightedSynapse *synapse = static_cast<MultiWeightedSynapse*>(Synapse::Edit(synapseData));
                 const float *weights = synapse->GetWeights(synapseData);
                 for (int i = 0; i < synapse->GetWeightCount(synapseData); i++) {
@@ -244,7 +244,7 @@ size_t GenSpecNeuron::ContributeToRegion(uint8_t *&contribution)
 void GenSpecNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::MultiByte, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("MultiByte"), mBase.GetId(), data);
     MultiByteSpike *spike = static_cast<MultiByteSpike *>(Spike::Edit(data));
     spike->SetValues(data, values, count);
 
@@ -254,7 +254,7 @@ void GenSpecNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, u
 void GenSpecNeuron::SendDiscreteSpike(Direction direction, NeuronId receiver, uint64_t value)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::Discrete, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("Discrete"), mBase.GetId(), data);
     DiscreteSpike *spike = static_cast<DiscreteSpike *>(Spike::Edit(data));
     spike->SetIntensity(data, value);
 

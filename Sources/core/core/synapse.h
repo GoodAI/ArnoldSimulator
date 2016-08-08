@@ -9,21 +9,17 @@
 #include <pup.h>
 
 #include "common.h"
+#include "registration.h"
 
 class SynapseEditor;
 
 class Synapse
 {
 public:
-    enum class Type : std::uint8_t
-    {
-        Empty = 0,
-        Weighted = 1,
-        Lagging = 2,
-        Conductive = 3,
-        Probabilistic = 4,
-        MultiWeighted
-    };
+    Synapse(const Synapse &other) = delete;
+    Synapse &operator=(const Synapse &other) = delete;
+
+    using Type = Token8;
 
     static Type ParseType(const std::string &type);
     static const char *SerializeType(Type type);
@@ -59,14 +55,7 @@ public:
     static SynapseEditor *Edit(Data &data);
     static void Release(Data &data);
 
-private:
-    Synapse();
-    Synapse(const Synapse &other) = delete;
-    Synapse &operator=(const Synapse &other) = delete;
-
-    static Synapse instance;
-
-    std::vector<std::unique_ptr<SynapseEditor>> mEditors;
+    static Type DefaultType;
 };
 
 class SynapseEditor

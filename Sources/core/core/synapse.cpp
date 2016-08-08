@@ -1,46 +1,22 @@
 #include "synapse.h"
 #include "log.h"
-
-Synapse::Synapse()
-{
-    mEditors.resize((static_cast<size_t>(UINT8_MAX)) + 1);
-    mEditors[static_cast<size_t>(Type::Empty)].reset(new SynapseEditor());
-    mEditors[static_cast<size_t>(Type::Weighted)].reset(new WeightedSynapse());
-    mEditors[static_cast<size_t>(Type::Lagging)].reset(new LaggingSynapse());
-    mEditors[static_cast<size_t>(Type::Conductive)].reset(new ConductiveSynapse());
-    mEditors[static_cast<size_t>(Type::Probabilistic)].reset(new ProbabilisticSynapse());
-    mEditors[static_cast<size_t>(Type::MultiWeighted)].reset(new MultiWeightedSynapse());
-}
+#include "gen_spec_acc_neuron.h"
 
 Synapse::Type Synapse::ParseType(const std::string &type)
 {
-    if (type == "Empty") return Type::Empty;
-    if (type == "Weighted") return Type::Weighted;
-    if (type == "Lagging") return Type::Lagging;
-    if (type == "Conductive") return Type::Conductive;
-    if (type == "Probabilistic") return Type::Probabilistic;
-    if (type == "MultiWeighted") return Type::MultiWeighted;
-
-    return Type::Empty;
+    SynapseEditorCache *editorCache = SynapseEditorCache::GetInstance();
+    return editorCache->GetToken(type);
 }
 
-const char *Synapse::SerializeType(Type type)
+const char *Synapse::SerializeType(Synapse::Type type)
 {
-    if (type == Type::Empty) return "Empty";
-    if (type == Type::Weighted) return "Weighted";
-    if (type == Type::Lagging) return "Lagging";
-    if (type == Type::Conductive) return "Conductive";
-    if (type == Type::Probabilistic) return "Probabilistic";
-    if (type == Type::MultiWeighted) return "MultiWeighted";
-
-    return "Empty";
+    SynapseEditorCache *editorCache = SynapseEditorCache::GetInstance();
+    return editorCache->GetName(type).c_str();
 }
-
-Synapse Synapse::instance;
 
 Synapse::Data::Data()
 {
-    type = Type::Empty;
+    type = DefaultType;
     bits8 = 0;
     bits16 = 0;
     bits64 = 0;
@@ -123,12 +99,12 @@ Synapse::Data &Synapse::Data::operator=(Data &&other)
 
 void Synapse::Data::pup(PUP::er &p)
 {
-    uint8_t temp;
+    Type temp;
     if (p.isUnpacking()) {
         p | temp;
         type = static_cast<Type>(temp);
     } else {
-        temp = static_cast<uint8_t>(type);
+        temp = static_cast<Type>(type);
         p | temp;
     }
 
@@ -147,6 +123,8 @@ void Synapse::Data::pup(PUP::er &p)
         p | bits64;
     }
 }
+
+Synapse::Type Synapse::DefaultType;
 
 size_t SynapseEditor::ExtraBytes(Data &data) const
 {
@@ -180,7 +158,7 @@ Synapse::Type Synapse::GetType(const Data &data)
 
 void Synapse::Initialize(Type type, Data &data, size_t allocCount)
 {
-    if (type == Type::Empty) return;
+    if (type == DefaultType) return;
 
     data.type = type;
 
@@ -190,7 +168,7 @@ void Synapse::Initialize(Type type, Data &data, size_t allocCount)
 void Synapse::Clone(const Data &original, Data &data)
 {
     Type type = Synapse::GetType(original);
-    if (type == Type::Empty) return;
+    if (type == DefaultType) return;
 
     data.type = type;
 
@@ -199,17 +177,13 @@ void Synapse::Clone(const Data &original, Data &data)
 
 SynapseEditor *Synapse::Edit(Data &data)
 {
-    SynapseEditor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
-    if (editor == nullptr) {
-        editor = instance.mEditors[static_cast<size_t>(Type::Empty)].get();
-    }
-
-    return editor;
+    SynapseEditorCache *editorCache = SynapseEditorCache::GetInstance();
+    return editorCache->Get(data.type);
 }
 
 void Synapse::Release(Data &data)
 {
-    if (data.type == Type::Empty) return;
+    if (data.type == DefaultType) return;
     
     Edit(data)->Release(data);
 }

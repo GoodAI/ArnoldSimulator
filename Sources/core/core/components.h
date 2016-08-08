@@ -2,6 +2,8 @@
 
 #include "instance_cache.h"
 #include "model_component_factory.h"
+#include "synapse.h"
+#include "spike.h"
 
 class Neuron;
 class NeuronBase;
@@ -31,11 +33,12 @@ Brain* BrainBuilder(BrainBase &base, nlohmann::json &params)
     return new TBrain(base, params);
 }
 
-typedef ModelComponentFactory<Neuron, NeuronBase> NeuronFactory;
-typedef ModelComponentFactory<Region, RegionBase> RegionFactory;
-typedef ModelComponentFactory<Brain, BrainBase> BrainFactory;
+typedef ModelComponentFactory<Neuron, NeuronBase, Token64> NeuronFactory;
+typedef ModelComponentFactory<Region, RegionBase, Token64> RegionFactory;
+typedef ModelComponentFactory<Brain, BrainBase, Token64> BrainFactory;
 
 class SynapseEditor;
+class SpikeEditor;
 
-typedef InstanceCache<SynapseEditor> SynapseEditorCache;
-//typedef InstanceCache<Spike::Editor> SpikeEditorCache;
+typedef InstanceCache<SynapseEditor, Synapse::Type> SynapseEditorCache;
+typedef InstanceCache<SpikeEditor, Spike::Type> SpikeEditorCache;

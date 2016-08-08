@@ -3,46 +3,21 @@
 
 #include "spike.h"
 
-Spike::Spike()
-{
-    mEditors.resize((static_cast<size_t>(UINT8_MAX)) + 1);
-    mEditors[static_cast<size_t>(Type::Binary)].reset(new BinarySpike());
-    mEditors[static_cast<size_t>(Type::Discrete)].reset(new DiscreteSpike());
-    mEditors[static_cast<size_t>(Type::Continuous)].reset(new ContinuousSpike());
-    mEditors[static_cast<size_t>(Type::Visual)].reset(new VisualSpike());
-    mEditors[static_cast<size_t>(Type::Functional)].reset(new FunctionalSpike());
-    mEditors[static_cast<size_t>(Type::MultiByte)].reset(new MultiByteSpike());
-}
-
 Spike::Type Spike::ParseType(const std::string &type)
 {
-    if (type == "Binary") return Type::Binary;
-    if (type == "Discrete") return Type::Discrete;
-    if (type == "Continuous") return Type::Continuous;
-    if (type == "Visual") return Type::Visual;
-    if (type == "Functional") return Type::Functional;
-    if (type == "MultiByte") return Type::MultiByte;
-
-    return Type::Binary;
+    SpikeEditorCache *editorCache = SpikeEditorCache::GetInstance();
+    return editorCache->GetToken(type);
 }
 
 const char *Spike::SerializeType(Type type)
 {
-    if (type == Type::Binary) return "Binary";
-    if (type == Type::Discrete) return "Discrete";
-    if (type == Type::Continuous) return "Continuous";
-    if (type == Type::Visual) return "Visual";
-    if (type == Type::Functional) return "Functional";
-    if (type == Type::MultiByte) return "MultiByte";
-
-    return "Binary";
+    SpikeEditorCache *editorCache = SpikeEditorCache::GetInstance();
+    return editorCache->GetName(type).c_str();
 }
-
-Spike Spike::instance;
 
 Spike::Data::Data()
 {
-    type = Type::Binary;
+    type = DefaultType;
     bits8 = 0;
     bits16 = 0;
     sender = 0;
@@ -157,6 +132,8 @@ void Spike::Data::pup(PUP::er &p)
     }
 }
 
+Spike::Type Spike::DefaultType;
+
 size_t SpikeEditor::ExtraBytes(const Data &data) const
 {
     return 0;
@@ -212,12 +189,8 @@ void Spike::Initialize(Type type, NeuronId sender, Data &data, size_t allocCount
 
 SpikeEditor *Spike::Edit(Data &data)
 {
-    SpikeEditor *editor = instance.mEditors[static_cast<size_t>(data.type)].get();
-    if (editor == nullptr) {
-        editor = instance.mEditors[static_cast<size_t>(Type::Binary)].get();
-    }
-
-    return editor;
+    SpikeEditorCache *editorCache = SpikeEditorCache::GetInstance();
+    return editorCache->Get(data.type);
 }
 
 void Spike::Release(Data &data)
@@ -464,7 +437,7 @@ void *MultiByteSpike::AllocateExtra(Spike::Data &data)
 
 void MultiByteSpike::Initialize(Spike::Data &data, size_t allocCount)
 {
-    if (allocCount > std::numeric_limits<uint16_t>::max()) {
+    if (allocCount > (std::numeric_limits<uint16_t>::max)()) {
         Log(LogLevel::Error, "%s: allocCount argument (%d) does not fit into uint16_t", __func__, allocCount);
         return;
     }
@@ -530,7 +503,7 @@ const uint8_t * MultiByteSpike::GetValues(const Spike::Data &data) const
 void MultiByteSpike::SetValues(Spike::Data &data, const uint8_t *values, size_t count)
 {
     size_t size = count * sizeof(uint8_t);
-    if (size > std::numeric_limits<uint16_t>::max()) {
+    if (size > (std::numeric_limits<uint16_t>::max)()) {
         Log(LogLevel::Error, "%s: size %d does not fit into uint16_t", __func__, size);
         return;
     }

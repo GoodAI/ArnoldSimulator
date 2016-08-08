@@ -76,7 +76,7 @@ void GenSpecAccNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, 
 
                 // Send the next digit signal.
                 Spike::Data data;
-                Spike::Initialize(Spike::Type::Binary, mBase.GetId(), data);
+                Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("Binary"), mBase.GetId(), data);
                 mBase.SendSpike(mNextDigitNeuron, Direction::Forward, data);
             }
             break;
@@ -97,7 +97,7 @@ size_t GenSpecAccNeuron::ContributeToRegion(uint8_t *&contribution)
 void GenSpecAccNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::MultiByte, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("MultiByte"), mBase.GetId(), data);
     MultiByteSpike *spike = static_cast<MultiByteSpike *>(Spike::Edit(data));
     spike->SetValues(data, values, count);
 

@@ -1,6 +1,7 @@
 #include "gen_spec_region.h"
 #include "random.h"
 #include "log.h"
+#include "components.h"
 
 namespace GenSpecModel
 {
@@ -212,7 +213,7 @@ void GenSpecRegion::CreateSpecialist(NeuronId parent, NeuronId inputProvider, si
     // This is the only difference between the first layer and the other ones.
     // Specialists get the input from their parent neuron.
     Synapse::Data inputSynapseData;
-    Synapse::Initialize(Synapse::Type::MultiWeighted, inputSynapseData, mInputSize);
+    Synapse::Initialize(SynapseEditorCache::GetInstance()->GetToken("MultiWeighted"), inputSynapseData, mInputSize);
     MultiWeightedSynapse* inputSynapse = reinterpret_cast<MultiWeightedSynapse*>(Synapse::Edit(inputSynapseData));
 
     std::unique_ptr<float> inputWeights(new float[mInputSize]);
@@ -225,7 +226,7 @@ void GenSpecRegion::CreateSpecialist(NeuronId parent, NeuronId inputProvider, si
 
     // Connect the neuron to the mAccumulatorNeuron.
     Synapse::Data resultSynapse;
-    Synapse::Initialize(Synapse::Type::Empty, resultSynapse);
+    Synapse::Initialize(SynapseEditorCache::GetInstance()->GetToken("Empty"), resultSynapse);
     mBase.RequestSynapseAddition(Direction::Forward, child, mAccumulatorNeuron, resultSynapse);
 }
 

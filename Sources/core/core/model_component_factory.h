@@ -5,22 +5,22 @@
 
 // A template for factories of neurons, regions and brains.
 // The factory functions must receive parameters (TBase &base, json &params).
-template<typename TComponent, typename TBase>
+template<typename TComponent, typename TBase, typename TToken>
 using FactoryMethod = TComponent *(*)(TBase &, nlohmann::json &);
 
-template<typename TComponent, typename TBase>
-class ModelComponentFactory : public Registration<ModelComponentFactory<TComponent, TBase>>
+template<typename TComponent, typename TBase, typename TToken>
+class ModelComponentFactory : public Registration<ModelComponentFactory<TComponent, TBase, TToken>, TToken>
 {
-    using Base = Registration<ModelComponentFactory<TComponent, TBase>>;
+    using Base = Registration<ModelComponentFactory<TComponent, TBase, TToken>, TToken>;
 public:
-    Token Register(const std::string &name, FactoryMethod<TComponent, TBase> create)
+    TToken Register(const std::string &name, FactoryMethod<TComponent, TBase, TToken> create)
     {
-        Token token = Base::GetNewToken(name);
+        TToken token = Base::GetNewToken(name);
         mFactoryFunctions[token] = create;
         return token;
     }
 
-    TComponent *Create(Token token, TBase &base, nlohmann::json &params) const
+    TComponent *Create(TToken token, TBase &base, nlohmann::json &params) const
     {
         return mFactoryFunctions.at(token)(base, params);
     }
@@ -31,5 +31,5 @@ public:
     }
 
 private:
-    std::map<Token, FactoryMethod<TComponent, TBase>> mFactoryFunctions;
+    std::map<TToken, FactoryMethod<TComponent, TBase, TToken>> mFactoryFunctions;
 };

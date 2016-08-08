@@ -103,7 +103,7 @@ void GenSpecInputNeuron::CalculateObserver(ObserverType type, std::vector<int32_
 void GenSpecInputNeuron::SendMultiByteSpike(Direction direction, NeuronId receiver, uint8_t *values, size_t count)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::MultiByte, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("MultiByte"), mBase.GetId(), data);
     MultiByteSpike *spike = static_cast<MultiByteSpike *>(Spike::Edit(data));
     spike->SetValues(data, values, count);
 

@@ -9,6 +9,7 @@
 #include <pup.h>
 
 #include "common.h"
+#include "registration.h"
 
 class Neuron;
 class SpikeEditor;
@@ -16,15 +17,7 @@ class SpikeEditor;
 class Spike
 {
 public:
-    enum class Type : std::uint8_t
-    {
-        Binary = 0,
-        Discrete = 1,
-        Continuous = 2,
-        Visual = 3,
-        Functional = 4,
-        MultiByte = 5
-    };
+    using Type = Token8;
 
     static Type ParseType(const std::string &type);
     static const char *SerializeType(Type type);
@@ -57,12 +50,11 @@ public:
     static SpikeEditor *Edit(Data &data);
     static void Release(Data &data);
 
+    static Type DefaultType;
+
 private:
-    Spike();
     Spike(const Spike &other) = delete;
     Spike &operator=(const Spike &other) = delete;
-
-    static Spike instance;
 
     std::vector<std::unique_ptr<SpikeEditor>> mEditors;
 };
@@ -85,11 +77,6 @@ public:
     virtual void Initialize(Data &data, size_t allocCount = 0);
     virtual void Release(Data &data);
 };
-
-inline void operator|(PUP::er &p, Spike::Type &spikeType)
-{
-    pup_bytes(&p, static_cast<void *>(&spikeType), sizeof(Spike::Type));
-}
 
 class BinarySpike : public SpikeEditor
 {

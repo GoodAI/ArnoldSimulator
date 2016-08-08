@@ -29,7 +29,7 @@ void GenSpecNextDigitNeuron::HandleSpike(Direction direction, BinarySpike &spike
 
     for (const auto &outputPair : mBase.GetOutputSynapses()) {
         Spike::Data data;
-        Spike::Initialize(Spike::Type::Binary, mBase.GetId(), data);
+        Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("Binary"), mBase.GetId(), data);
         mBase.SendSpike(outputPair.first, Direction::Forward, data);
     }
 }

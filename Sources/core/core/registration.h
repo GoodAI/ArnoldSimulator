@@ -3,32 +3,27 @@
 #include <map>
 #include "log.h"
 
-typedef uint64_t Token;
+typedef uint64_t Token64;
+typedef uint8_t Token8;
 
-template<typename T>
+template<typename T, typename TToken>
 class Registration
 {
 public:
-    Registration() : mNextToken(1) {}
-
-    Token GetNewToken(const std::string &name)
+    Registration() : mNextToken(1)
     {
-        if (mTokens.find(name) != mTokens.end()) {
-            Log(LogLevel::Error, "Name '%s' is already registered", name);
-            throw std::invalid_argument("Name already registered");
+        if (std::numeric_limits<TToken>::is_signed) {
+            Log(LogLevel::Error, "Token type is signed (%s)", typeid(mNextToken).name());
+            throw std::invalid_argument("Token type must be unsigned");
         }
-
-        Token token = mNextToken++;
-        mTokens[name] = token;
-        return token;
     }
 
-    Token GetToken(const std::string &name) const
+    TToken GetToken(const std::string &name) const
     {
         return mTokens.at(name);
     }
 
-    std::string GetName(Token token) const
+    std::string GetName(TToken token) const
     {
         return mNames.at(token);
     }
@@ -37,13 +32,30 @@ public:
     {
         return &mInstance;
     }
+protected:
+    TToken GetNewToken(const std::string &name)
+    {
+        if (mTokens.find(name) != mTokens.end()) {
+            Log(LogLevel::Error, "Name '%s' is already registered", name);
+            throw std::invalid_argument("Name already registered");
+        }
+
+        if (mNextToken == 0) {
+            Log(LogLevel::Error, "Token pool has been exhausted");
+            throw std::overflow_error("Token pool has been exhausted");
+        }
+
+        TToken token = mNextToken++;
+        mTokens[name] = token;
+        return token;
+    }
 private:
-    Token mNextToken;
-    std::map<std::string, Token> mTokens;
-    std::map<Token, std::string> mNames;
+    TToken mNextToken;
+    std::map<std::string, TToken> mTokens;
+    std::map<TToken, std::string> mNames;
 
     static T mInstance;
 };
 
-template<typename T>
-T Registration<T>::mInstance;
+template<typename T, typename TToken>
+T Registration<T, TToken>::mInstance;

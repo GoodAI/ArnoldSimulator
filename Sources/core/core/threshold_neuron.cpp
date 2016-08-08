@@ -51,7 +51,7 @@ void ThresholdNeuron::HandleSpike(Direction direction, ContinuousSpike &spike, S
         }
 
         double synapseWeight = 1.0;
-        if (Synapse::GetType(*synapseData) == Synapse::Type::Weighted) {
+        if (Synapse::GetType(*synapseData) == SynapseEditorCache::GetInstance()->GetToken("Weighted")) {
             WeightedSynapse *synapse = static_cast<WeightedSynapse *>(Synapse::Edit(*synapseData));
             synapseWeight = synapse->GetWeight(*synapseData);
         }
@@ -129,7 +129,7 @@ void ThresholdNeuron::Control(size_t brainStep)
                 uint16_t delay = 0;
                 Synapse::Data *synapseData;
                 synapseData = mBase.AccessOutputSynapse(it->first);
-                if (Synapse::GetType(*synapseData) == Synapse::Type::Lagging) {
+                if (Synapse::GetType(*synapseData) == SynapseEditorCache::GetInstance()->GetToken("Lagging")) {
                     LaggingSynapse *synapse = static_cast<LaggingSynapse *>(Synapse::Edit(*synapseData));
                     delay = synapse->GetDelay(*synapseData);
                 }
@@ -230,7 +230,7 @@ void ThresholdNeuron::ChangeThreshold(Direction direction, NeuronId sender, cons
 void ThresholdNeuron::SendContinuousSpike(Direction direction, NeuronId receiver, uint16_t delay, double intensity)
 {
     Spike::Data data;
-    Spike::Initialize(Spike::Type::Continuous, mBase.GetId(), data);
+    Spike::Initialize(SpikeEditorCache::GetInstance()->GetToken("Continuous"), mBase.GetId(), data);
     ContinuousSpike *spike = static_cast<ContinuousSpike *>(Spike::Edit(data));
     spike->SetDelay(data, delay);
     spike->SetIntensity(data, mThresholdActivation);
