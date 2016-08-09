@@ -60,7 +60,7 @@ TEST_CASE("Component system registers factory functions")
 
         WHEN("Factory functions are added")
         {
-            factory.Register("component1", [](ModelComponentBase &base, nlohmann::json &params) -> ModelComponent* {
+            Token64 oneToken = factory.Register("component1", [](ModelComponentBase &base, nlohmann::json &params) -> ModelComponent* {
                 return new ModelComponent("1");
             });
             Token64 lastToken = factory.Register("component2", [](ModelComponentBase &base, nlohmann::json &params) -> ModelComponent* {
@@ -72,7 +72,7 @@ TEST_CASE("Component system registers factory functions")
 
             THEN("A correct instance can be created")
             {
-                ModelComponent *component = factory.Create(1, base, params);
+                ModelComponent *component = factory.Create(oneToken, base, params);
 
                 REQUIRE(component != nullptr);
                 REQUIRE(component->Name.compare("1") == 0);
