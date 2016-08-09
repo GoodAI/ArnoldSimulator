@@ -22,6 +22,10 @@ public:
 
     TComponent *Create(TToken token, TBase &base, nlohmann::json &params) const
     {
+        if (mFactoryFunctions.find(token) == mFactoryFunctions.end()) {
+            Log(LogLevel::Error, "Item with token %d was not registered", token);
+            throw std::invalid_argument("Token not registered");
+        }
         return mFactoryFunctions.at(token)(base, params);
     }
 

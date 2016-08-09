@@ -8,6 +8,8 @@
 #include "mnist_reader.h"
 #include "data_utils.h"
 
+#include "components.h"
+
 TEST_CASE("NeuronId packing is correct", "[common]")
 {
     const NeuronIndex neuronIndex = 500000;
@@ -25,13 +27,37 @@ TEST_CASE("NeuronId packing is correct", "[common]")
 
 extern CProxy_RegionBase gRegions;
 
+const std::string coreTestRegionType("CORE-TEST-Region");
+
+class RogerRegion : public Region
+{
+public:
+    RogerRegion(RegionBase &base, json &params)
+        : Region(base, params)
+    {
+    }
+
+    void pup(PUP::er &p) override {}
+    const char * GetType() const override { return coreTestRegionType.c_str(); }
+    void Control(size_t brainStep) override {}
+    void AcceptContributionFromNeuron(NeuronId neuronId, const uint8_t *contribution, size_t size) override {}
+    size_t ContributeToBrain(uint8_t *&contribution) override {
+        return 0;
+    }
+};
+
 void SetupCharmTests()
 {
     Box3D box;
     box.first = Point3D(0.0f, 0.0f, 0.0f);
     box.second = Size3D(BOX_DEFAULT_SIZE_X, BOX_DEFAULT_SIZE_Y, BOX_DEFAULT_SIZE_Z);
 
-    gRegions[0].insert("Roger", "type", box, "{}");
+    RegionFactory *regionFactory = RegionFactory::GetInstance();
+    regionFactory->Register(coreTestRegionType, [](RegionBase &base, nlohmann::json &params) -> Region* {
+        return new RogerRegion(base, params);
+    });
+
+    gRegions[0].insert("Roger", coreTestRegionType, box, "{}");
     gRegions.doneInserting();
 }
 

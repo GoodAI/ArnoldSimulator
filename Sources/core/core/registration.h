@@ -20,11 +20,19 @@ public:
 
     TToken GetToken(const std::string &name) const
     {
+        if (mTokens.find(name) == mTokens.end()) {
+            Log(LogLevel::Error, "Item with name %s was not registered", name);
+            throw std::invalid_argument("Name not registered");
+        }
         return mTokens.at(name);
     }
 
     std::string GetName(TToken token) const
     {
+        if (mNames.find(token) == mNames.end()) {
+            Log(LogLevel::Error, "Token %d does not exist", token);
+            throw std::invalid_argument("Token does not exist");
+        }
         return mNames.at(token);
     }
 
