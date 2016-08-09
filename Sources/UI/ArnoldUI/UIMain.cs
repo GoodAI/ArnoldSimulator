@@ -59,7 +59,8 @@ namespace GoodAI.Arnold
 
         public void VisualizationClosed()
         {
-            //Simulation.Clear();
+            foreach (var handle in Observers.ToList())
+                CloseObserver(handle.Definition);
         }
 
         public async Task ConnectToCoreAsync()
