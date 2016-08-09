@@ -74,6 +74,7 @@ void ThresholdRegion::AcceptContributionFromNeuron(
         std::memcpy(&outputSynapseCount, cur, sizeof(size_t));
         //cur += sizeof(size_t);
 
+        /*
         if (receivedSpikeCount > inputSynapseCount && sentSpikeCount == 0) {
             if (inputSynapseCount < 10 * outputSynapseCount) {
                 mConnectMore.push_back(neuronId);
@@ -81,6 +82,7 @@ void ThresholdRegion::AcceptContributionFromNeuron(
                 mPruneAway.push_back(neuronId);
             }
         }
+        */
     }
 }
 
