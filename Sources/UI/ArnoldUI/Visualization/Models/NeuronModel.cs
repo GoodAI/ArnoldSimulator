@@ -13,6 +13,8 @@ namespace GoodAI.Arnold.Visualization.Models
 {
     public class CompositeNeuronId
     {
+        private const int RegionIndexOffset = 22;
+
         public uint RegionIndex { get; }
         public uint NeuronIndex { get; }
 
@@ -33,12 +35,8 @@ namespace GoodAI.Arnold.Visualization.Models
 
         public override int GetHashCode()
         {
-            var hash = 3;
-
-            hash = hash*7 + RegionIndex.GetHashCode();
-            hash = hash*7 + NeuronIndex.GetHashCode();
-
-            return hash;
+            // Based on the way indexes are stored in core.
+            return (int) ((RegionIndex << RegionIndexOffset) | NeuronIndex);
         }
     }
 
