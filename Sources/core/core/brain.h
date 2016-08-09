@@ -60,6 +60,9 @@ class EmptyMsg : public CkMcastBaseMsg, public CMessage_EmptyMsg
 class SimulateMsg : public CkMcastBaseMsg, public CMessage_SimulateMsg
 {
 public:
+    SimulateMsg();
+
+    bool dtorsCalled;
     bool doUpdate;
     bool doFullUpdate;
     bool doProgress;
@@ -70,6 +73,8 @@ public:
 
     static void *pack(SimulateMsg *msg);
     static SimulateMsg *unpack(void *buf);
+
+    static void dealloc(void *p);
 };
 
 class BrainBase;

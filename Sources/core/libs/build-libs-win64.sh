@@ -104,6 +104,15 @@ obtain_charm()
     cat src/arch/util/machine-smp.c | sed '/CmiDestroyLock(comm_mutex);/i   CmiDestroyLock(_smp_mutex); _smp_mutex = 0;' > src/arch/util/machine-smp.c.tmp
     mv -f src/arch/util/machine-smp.c.tmp src/arch/util/machine-smp.c
     
+    cat src/xlat-i/xi-Entry.C | sed 's/!(sdagCon || isWhenEntry)/true/g' > src/xlat-i/xi-Entry.C.tmp
+    mv -f src/xlat-i/xi-Entry.C.tmp src/xlat-i/xi-Entry.C
+    cat src/xlat-i/xi-Message.C | sed 's/CkUnpackFnPtr unpack) {/CkUnpackFnPtr unpack, CkDeallocFnPtr dealloc) {/g' > src/xlat-i/xi-Message.C.tmp
+    mv -f src/xlat-i/xi-Message.C.tmp src/xlat-i/xi-Message.C
+    cat src/xlat-i/xi-Message.C | sed 's/::unpack);/::unpack,(CkDeallocFnPtr) " << type << "::dealloc);/g' > src/xlat-i/xi-Message.C.tmp
+    mv -f src/xlat-i/xi-Message.C.tmp src/xlat-i/xi-Message.C
+    cat src/ck-core/charm++.h | sed '/void operator delete(void\* ptr) { CkFreeMsg(ptr); }/i    static void dealloc(void *ptr) { CkFreeMsg(ptr); }' > src/ck-core/charm++.h.tmp
+    mv -f src/ck-core/charm++.h.tmp src/ck-core/charm++.h
+    
     ./build charm++ net-win64 smp --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ net-win64 smp --destination=net-release --with-production -j8 | tee net-release.log
 

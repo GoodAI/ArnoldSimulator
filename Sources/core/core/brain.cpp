@@ -36,13 +36,18 @@ void ViewportUpdate::pup(PUP::er &p)
     p | removedChildren;
 }
 
+SimulateMsg::SimulateMsg() :
+    dtorsCalled(false), doUpdate(false), doFullUpdate(false), doProgress(false), brainStep(0)
+{
+}
+
 void *SimulateMsg::pack(SimulateMsg *msg)
 {
     size_t boxCnt = msg->roiBoxes.size();
     size_t boxLastCnt = msg->roiBoxesLast.size();
     size_t observerCnt = msg->observers.size();
     size_t size = (sizeof(CkSectionInfo) + sizeof(char) + sizeof(unsigned short) +
-        sizeof(bool) * 3) + (sizeof(size_t) * 4) + (sizeof(Box3D) * (boxCnt + boxLastCnt)) + (sizeof(Observer) * observerCnt);
+        sizeof(bool) * 4) + (sizeof(size_t) * 4) + (sizeof(Box3D) * (boxCnt + boxLastCnt)) + (sizeof(Observer) * observerCnt);
     char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
 
@@ -54,6 +59,9 @@ void *SimulateMsg::pack(SimulateMsg *msg)
 
     std::memcpy(cur, &msg->ep, sizeof(unsigned short));
     cur += sizeof(unsigned short);
+
+    std::memcpy(cur, &msg->dtorsCalled, sizeof(bool));
+    cur += sizeof(bool);
 
     std::memcpy(cur, &msg->doUpdate, sizeof(bool));
     cur += sizeof(bool);
@@ -104,6 +112,9 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
     std::memcpy(&msg->ep, cur, sizeof(unsigned short));
     cur += sizeof(unsigned short);
 
+    std::memcpy(&msg->dtorsCalled, cur, sizeof(bool));
+    cur += sizeof(bool);
+
     std::memcpy(&msg->doUpdate, cur, sizeof(bool));
     cur += sizeof(bool);
 
@@ -142,6 +153,18 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
 
     CkFreeMsg(buf);
     return msg;
+}
+
+void SimulateMsg::dealloc(void *p)
+{
+    SimulateMsg *msg = reinterpret_cast<SimulateMsg *>(p);
+    if (!msg->dtorsCalled) {
+        msg->dtorsCalled = true;
+        msg->roiBoxes.~vector();
+        msg->roiBoxesLast.~vector();
+        msg->observers.~vector();
+    }
+    CkFreeMsg(p);
 }
 
 BrainMap::BrainMap()
