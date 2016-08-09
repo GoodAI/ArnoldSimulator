@@ -979,6 +979,8 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
 {
     if (mNeuronSectionFilled) {
         mNeuronSectionFilled = false;
+        CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch()->freeup(mNeuronSection.ckGetSectionInfo());
+        mNeuronSection.~CProxySection_NeuronBase();
         mNeuronSection = CProxySection_NeuronBase();
     }
 

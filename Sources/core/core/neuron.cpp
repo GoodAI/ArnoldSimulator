@@ -108,6 +108,7 @@ NeuronBase::NeuronBase(const NeuronType &type, const NeuronParams &params)
     mBackwardSpikesNext = new Spikes();
     mForwardSpikesCurrent = new Spikes();
     mForwardSpikesNext = new Spikes();
+    mSectionInfo = CkSectionInfo();
 }
 
 NeuronBase::NeuronBase(CkMigrateMessage *msg) :
@@ -119,6 +120,7 @@ NeuronBase::NeuronBase(CkMigrateMessage *msg) :
     mChildren.set_deleted_key(DELETED_NEURON_ID);
     mInputSynapses.set_deleted_key(DELETED_NEURON_ID);
     mOutputSynapses.set_deleted_key(DELETED_NEURON_ID);
+    mSectionInfo = CkSectionInfo();
 }
 
 NeuronBase::~NeuronBase()
