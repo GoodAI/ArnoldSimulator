@@ -23,6 +23,7 @@ CProxy_NeuronBase gNeurons;
 
 void CoreNodeInit()
 {
+    InitializeComponents();
 }
 
 void CoreProcInit()
@@ -42,8 +43,6 @@ Core::Core(CkArgMsg *msg) :
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
-
-    initializeComponents();
 
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 

@@ -5,7 +5,7 @@
 #include "synapse.h"
 #include "spike.h"
 
-void registerCoreSynapseEditors(SynapseEditorCache *editorCache)
+void RegisterCoreSynapseEditors(SynapseEditorCache *editorCache)
 {
     Synapse::DefaultType = editorCache->Register("Empty", new Synapse::Editor());
 
@@ -16,7 +16,7 @@ void registerCoreSynapseEditors(SynapseEditorCache *editorCache)
     editorCache->Register("MultiWeighted", new MultiWeightedSynapse());
 }
 
-void registerCoreSpikeEditors(SpikeEditorCache *editorCache)
+void RegisterCoreSpikeEditors(SpikeEditorCache *editorCache)
 {
     Spike::DefaultType = editorCache->Register("Binary", new BinarySpike());
 
@@ -27,7 +27,7 @@ void registerCoreSpikeEditors(SpikeEditorCache *editorCache)
     editorCache->Register("MultiByte", new MultiByteSpike());
 }
 
-void initializeComponents()
+void InitializeComponents()
 {
     NeuronFactory *neuronFactory = NeuronFactory::GetInstance();
     RegionFactory *regionFactory = RegionFactory::GetInstance();
@@ -36,9 +36,9 @@ void initializeComponents()
     SynapseEditorCache *synapseEditorCache = SynapseEditorCache::GetInstance();
     SpikeEditorCache *spikeEditorCache = SpikeEditorCache::GetInstance();
 
-    registerCoreSynapseEditors(synapseEditorCache);
-    registerCoreSpikeEditors(spikeEditorCache);
+    RegisterCoreSynapseEditors(synapseEditorCache);
+    RegisterCoreSpikeEditors(spikeEditorCache);
 
-    GenSpecModel::init(neuronFactory, regionFactory, brainFactory);
-    ThresholdModel::init(neuronFactory, regionFactory, brainFactory);
+    GenSpecModel::Init(neuronFactory, regionFactory, brainFactory);
+    ThresholdModel::Init(neuronFactory, regionFactory, brainFactory);
 }

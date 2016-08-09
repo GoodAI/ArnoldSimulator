@@ -15,7 +15,7 @@ Neuron *CreateGenSpecAccNeuron(NeuronBase &base, json &params)
     return new GenSpecAccNeuron(base, params);
 }
 
-void init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory)
+void Init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory)
 {
     // Shown are three ways of neuron registration.
 

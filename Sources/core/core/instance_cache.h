@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include "registration.h"
 
@@ -13,7 +13,7 @@ class InstanceCache : public Registration<InstanceCache<TInstance, TToken>, TTok
 public:
     TToken Register(const std::string &name, TInstance * component)
     {
-        TToken token = Registration<InstanceCache<TInstance, TToken>, TToken>::GetNewToken(name);
+        TToken token = Base::GetNewToken(name);
         mInstances[token].reset(component);
 
         return token;
@@ -24,6 +24,11 @@ public:
         return mInstances.at(token).get();
     }
 
+    TInstance *Get(const std::string &name) const
+    {
+        return Get(Base::GetToken(name));
+    }
+
 private:
-    std::map<TToken, std::unique_ptr<TInstance>> mInstances;
+    std::unordered_map<TToken, std::unique_ptr<TInstance>> mInstances;
 };

@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="body.cpp" />
     <ClCompile Include="brain.cpp" />
+    <ClCompile Include="component_system_tests.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="core_tests.cpp" />
     <ClCompile Include="data_utils.cpp" />

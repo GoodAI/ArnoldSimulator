@@ -106,12 +106,12 @@ Spike::Data &Spike::Data::operator=(Data &&other)
 
 void Spike::Data::pup(PUP::er &p)
 {
-    uint8_t temp;
+    Type temp;
     if (p.isUnpacking()) {
         p | temp;
         type = static_cast<Type>(temp);
     } else {
-        temp = static_cast<uint8_t>(type);
+        temp = static_cast<Type>(type);
         p | temp;
     }
 

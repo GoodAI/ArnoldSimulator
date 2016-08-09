@@ -1,19 +1,20 @@
 #pragma once
-#include <map>
+#include <unordered_map>
 #include "registration.h"
 #include <json.hpp>
 
 // A template for factories of neurons, regions and brains.
 // The factory functions must receive parameters (TBase &base, json &params).
 template<typename TComponent, typename TBase, typename TToken>
-using FactoryMethod = TComponent *(*)(TBase &, nlohmann::json &);
+using FactoryFunction = TComponent *(*)(TBase &, nlohmann::json &);
 
 template<typename TComponent, typename TBase, typename TToken>
 class ModelComponentFactory : public Registration<ModelComponentFactory<TComponent, TBase, TToken>, TToken>
 {
     using Base = Registration<ModelComponentFactory<TComponent, TBase, TToken>, TToken>;
+    using Function = FactoryFunction<TComponent, TBase, TToken>;
 public:
-    TToken Register(const std::string &name, FactoryMethod<TComponent, TBase, TToken> create)
+    TToken Register(const std::string &name, Function create)
     {
         TToken token = Base::GetNewToken(name);
         mFactoryFunctions[token] = create;
@@ -22,11 +23,12 @@ public:
 
     TComponent *Create(TToken token, TBase &base, nlohmann::json &params) const
     {
-        if (mFactoryFunctions.find(token) == mFactoryFunctions.end()) {
+        auto functionIt = mFactoryFunctions.find(token);
+        if (functionIt == mFactoryFunctions.end()) {
             Log(LogLevel::Error, "Item with token %d was not registered", token);
             throw std::invalid_argument("Token not registered");
         }
-        return mFactoryFunctions.at(token)(base, params);
+        return (functionIt->second)(base, params);
     }
 
     TComponent *Create(const std::string &name, TBase &base, nlohmann::json &params) const
@@ -35,5 +37,5 @@ public:
     }
 
 private:
-    std::map<TToken, FactoryMethod<TComponent, TBase, TToken>> mFactoryFunctions;
+    std::unordered_map<TToken, Function> mFactoryFunctions;
 };

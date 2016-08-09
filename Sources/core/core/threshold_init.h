@@ -6,6 +6,6 @@ namespace ThresholdModel
 {
 
 // This function is called from the core init code.
-void init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory);
+void Init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory);
 
 }

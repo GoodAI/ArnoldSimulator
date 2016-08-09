@@ -8,7 +8,7 @@
 namespace ThresholdModel
 {
 
-void init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory)
+void Init(NeuronFactory *neuronFactory, RegionFactory *regionFactory, BrainFactory *brainFactory)
 {
     neuronFactory->Register("ThresholdNeuron",
         NeuronBuilder<ThresholdNeuron>);

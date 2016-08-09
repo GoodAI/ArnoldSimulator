@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include "log.h"
 
 typedef uint64_t Token64;
@@ -20,20 +20,22 @@ public:
 
     TToken GetToken(const std::string &name) const
     {
-        if (mTokens.find(name) == mTokens.end()) {
+        auto tokenIt = mTokens.find(name);
+        if (tokenIt == mTokens.end()) {
             Log(LogLevel::Error, "Item with name %s was not registered", name);
             throw std::invalid_argument("Name not registered");
         }
-        return mTokens.at(name);
+        return tokenIt->second;
     }
 
     std::string GetName(TToken token) const
     {
-        if (mNames.find(token) == mNames.end()) {
+        auto nameIt = mNames.find(token);
+        if (nameIt == mNames.end()) {
             Log(LogLevel::Error, "Token %d does not exist", token);
             throw std::invalid_argument("Token does not exist");
         }
-        return mNames.at(token);
+        return nameIt->second;
     }
 
     static T * GetInstance()
@@ -55,12 +57,13 @@ protected:
 
         TToken token = mNextToken++;
         mTokens[name] = token;
+        mNames[token] = name;
         return token;
     }
 private:
     TToken mNextToken;
-    std::map<std::string, TToken> mTokens;
-    std::map<TToken, std::string> mNames;
+    std::unordered_map<std::string, TToken> mTokens;
+    std::unordered_map<TToken, std::string> mNames;
 
     static T mInstance;
 };

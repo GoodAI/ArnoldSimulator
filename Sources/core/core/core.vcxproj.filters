@@ -126,6 +126,9 @@
     <ClCompile Include="threshold_brain.cpp">
       <Filter>ThresholdModel</Filter>
     </ClCompile>
+    <ClCompile Include="component_system_tests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brain.h">
