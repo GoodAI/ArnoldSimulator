@@ -214,7 +214,7 @@ void Core::DetectKeyPress()
                     brainStepsPerBodyStep += 5;
                 }
                 CkPrintf("SetBrainStepsPerBodyStep: %u\n", brainStepsPerBodyStep);
-                gBrain[0].SetBrainStepsPerBodyStep(10);
+                gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
             }
         } else if (c == 'd') {
             if (IsBrainLoaded()) {
@@ -224,7 +224,7 @@ void Core::DetectKeyPress()
                     brainStepsPerBodyStep -= 5;
                 }
                 CkPrintf("SetBrainStepsPerBodyStep: %u\n", brainStepsPerBodyStep);
-                gBrain[0].SetBrainStepsPerBodyStep(1);
+                gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
             }
         } else if (c == 'q') {
             mIsShuttingDown = true;
