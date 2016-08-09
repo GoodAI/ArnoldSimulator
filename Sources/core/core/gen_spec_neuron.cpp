@@ -173,6 +173,8 @@ void GenSpecNeuron::HandleSpike(Direction direction, FunctionalSpike &spike, Spi
 
 void GenSpecNeuron::UpdateWeights()
 {
+    const static float alpha = 0.05f;
+
     for (auto &synapsePair: mBase.GetInputSynapses()) {
         NeuronId neuron = synapsePair.first;
 
@@ -183,8 +185,14 @@ void GenSpecNeuron::UpdateWeights()
             size_t weightCount = synapse->GetWeightCount(*synapseData);
             float *weights = synapse->GetWeights(*synapseData);
             for (int i = 0; i < weightCount; i++) {
-                if (weights[i] > mSynapseThreshold) {
-                    weights[i] += (1.0 - weights[i]) / 3;
+                if(mLastInputPtr.get()[i] > 0) {
+                    weights[i] += alpha;
+                    if (weights[i] > 1)
+                        weights[i] = 1.0f;
+                } else {
+                    weights[i] -= alpha;
+                    if (weights[i] < 0)
+                        weights[i] = 0.0f;
                 }
             }
         }

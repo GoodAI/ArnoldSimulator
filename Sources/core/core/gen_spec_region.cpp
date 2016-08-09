@@ -200,7 +200,7 @@ void GenSpecRegion::CreateSpecialist(NeuronId parent, NeuronId inputProvider, si
 {
     CkPrintf("CREATING layer %d, position %f:%f:%f\n", layer, std::get<0>(position), std::get<1>(position), std::get<2>(position));
     Random::Engines::reference engine = Random::GetThreadEngine();
-    std::uniform_real_distribution<float> randWeight(0.0f, 1.0f);
+    std::uniform_real_distribution<float> randWeight(0.45f, 0.55f);
 
     SetParamsPosition(mNeuronParams, position);
 

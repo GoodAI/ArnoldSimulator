@@ -90,7 +90,7 @@ bool MnistReader::TryReadDigit(uint8_t* dataPtr, uint8_t &label)
     if (mDigitCount == 0)
         return false;
 
-    if (mNextDigitIndex >= mDigitValues.size())
+    if (mNextDigitIndex >= mDigitValues.size() || mNextDigitIndex > 9)
         mNextDigitIndex = 0;
 
     std::memcpy(dataPtr, mDigitValues[mNextDigitIndex], mDigitSize);
