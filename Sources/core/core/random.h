@@ -2,18 +2,16 @@
 
 #include <cstdint>
 #include <random>
-
-#include <tbb/spin_mutex.h>
-#include <tbb/enumerable_thread_specific.h>
+#include <atomic>
 
 #include "common.h"
 
 class Random
 {
 public:
-    typedef tbb::enumerable_thread_specific<std::mt19937_64> Engines;
+    typedef std::mt19937_64 Engine;
 
-    static Engines::reference GetThreadEngine();
+    static Engine &GetThreadEngine();
 
 private:
     Random();
@@ -22,9 +20,10 @@ private:
 
     static Random instance;
 
-    tbb::spin_mutex mSeedGuard;
-    std::mt19937_64 mSeedEngine;
+    Engine mSeedEngine;
+    std::atomic_flag mSeedGuard = ATOMIC_FLAG_INIT;
     std::uniform_int_distribution<uint64_t> mSeedDistribution;
 
-    Engines mEngines;
+    static thread_local bool mTlsAlreadyInitialized;
+    static thread_local Engine mTlsEngine;
 };

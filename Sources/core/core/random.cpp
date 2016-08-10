@@ -13,15 +13,17 @@ Random::Random()
 
 Random Random::instance;
 
-Random::Engines::reference Random::GetThreadEngine()
-{
-    bool alreadyInitializedEngine = false;
-    Engines::reference engine = instance.mEngines.local(alreadyInitializedEngine);
+thread_local bool Random::mTlsAlreadyInitialized = false;
+thread_local Random::Engine Random::mTlsEngine;
 
-    if (!alreadyInitializedEngine) {
-        tbb::spin_mutex::scoped_lock lock(instance.mSeedGuard);
-        engine.seed(instance.mSeedDistribution(instance.mSeedEngine));
+Random::Engine &Random::GetThreadEngine()
+{
+    if (!mTlsAlreadyInitialized) {
+        mTlsAlreadyInitialized = true;
+        while (instance.mSeedGuard.test_and_set(std::memory_order_acquire)) { ; }
+        mTlsEngine.seed(instance.mSeedDistribution(instance.mSeedEngine));
+        instance.mSeedGuard.clear(std::memory_order_release);
     }
 
-    return engine;
+    return mTlsEngine;
 }

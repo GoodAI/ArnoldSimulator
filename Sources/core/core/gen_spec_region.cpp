@@ -199,7 +199,7 @@ size_t GenSpecRegion::ContributeToBrain(uint8_t *&contribution)
 void GenSpecRegion::CreateSpecialist(NeuronId parent, NeuronId inputProvider, size_t layer, const Point3D &position)
 {
     CkPrintf("CREATING layer %d, position %f:%f:%f\n", layer, std::get<0>(position), std::get<1>(position), std::get<2>(position));
-    Random::Engines::reference engine = Random::GetThreadEngine();
+    Random::Engine &engine = Random::GetThreadEngine();
     std::uniform_real_distribution<float> randWeight(0.45f, 0.55f);
 
     SetParamsPosition(mNeuronParams, position);

@@ -71,7 +71,7 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
         p = json::parse(params);
     } catch (std::invalid_argument &) { }
 
-    Random::Engines::reference engine = Random::GetThreadEngine();
+    Random::Engine &engine = Random::GetThreadEngine();
     std::unordered_map<std::string, std::vector<NeuronId>> clusterContent;
 
     if (!p.empty()) {
