@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,8 @@ namespace GoodAI.Arnold
         public IConductor Conductor { get; }
         public IDesigner Designer { get; }
         public ISet<ObserverHandle> Observers { get; set; }
+
+        public string FileName { get; set; }
 
         public UIMain(IConductor conductor, IDesigner designer)
         {
@@ -170,6 +173,20 @@ namespace GoodAI.Arnold
         {
             Conductor.ModelProvider.ObserverRequests =
                 Observers.Select(observerHandle => observerHandle.Definition).ToList();
+        }
+
+        public void OpenBlueprint(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                Log.Warn($"File '{fileName}' not found");
+                return;
+            }
+            var fileContent = File.ReadAllText(fileName);
+
+            // Blueprint validity should be checked inside the Designed.
+            Designer.Blueprint = fileContent;
+            FileName = fileName;
         }
     }
 }

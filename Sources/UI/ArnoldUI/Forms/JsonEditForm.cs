@@ -22,6 +22,7 @@ namespace GoodAI.Arnold.Forms
         public JsonEditForm(IDesigner designer)
         {
             m_designer = designer;
+            m_designer.BlueprintChanged += DesignerOnBlueprintChanged;
 
             InitializeComponent();
 
@@ -50,15 +51,24 @@ namespace GoodAI.Arnold.Forms
             content.Styles[Style.Cpp.Word2].ForeColor = Color.Blue;
         }
 
-        protected override void OnFormClosed(FormClosedEventArgs e)
+        private void DesignerOnBlueprintChanged(object sender, BlueprintChangedArgs blueprintChangedArgs)
         {
-            base.OnFormClosed(e);
-            content.TextChanged -= OnTextChanged;
+            content.Text = blueprintChangedArgs.Blueprint;
         }
 
         private void OnTextChanged(object sender, EventArgs e)
         {
+            // Avoid getting informed about the change.
+            m_designer.BlueprintChanged -= DesignerOnBlueprintChanged;
             m_designer.Blueprint = content.Text;
+            m_designer.BlueprintChanged += DesignerOnBlueprintChanged;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            content.TextChanged -= OnTextChanged;
+            m_designer.BlueprintChanged -= DesignerOnBlueprintChanged;
         }
     }
 }

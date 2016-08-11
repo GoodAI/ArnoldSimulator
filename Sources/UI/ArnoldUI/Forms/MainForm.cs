@@ -192,5 +192,26 @@ namespace GoodAI.Arnold
         {
             await RunButtonActionAsync(() => m_uiMain.RunToBodyStepAsync());
         }
+
+        private void newBlueprintButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void openBlueprintButton_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog(this) == DialogResult.OK)
+                m_uiMain.OpenBlueprint(openFileDialog.FileName);
+        }
+
+        private void saveBlueprintButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saveAsBlueprintButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

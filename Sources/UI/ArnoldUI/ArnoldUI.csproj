@@ -291,6 +291,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\SaveAs_16x.png" />
+    <None Include="Resources\Save_16x.png" />
+    <None Include="Resources\OpenFolder_16x.png" />
+    <None Include="Resources\NewFile_16x.png" />
     <None Include="Resources\StepOver_16x.png" />
     <None Include="Resources\Run_16x.png" />
     <None Include="Resources\Pause_16x.png" />
