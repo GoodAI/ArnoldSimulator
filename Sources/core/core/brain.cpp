@@ -232,13 +232,11 @@ Body *BrainBase::CreateBody(const std::string &type, const std::string &params)
             if (itSensor->is_object()) {
                 const json &sensor = itSensor.value();
 
-                std::string sensorName, spikeType;
-                size_t sensorSize = 0;
-                size_t spikeAllocCount = 0;
+                std::string sensorName = sensor["name"].get<std::string>();
+                std::string spikeType = sensor["spikeType"].get<std::string>();
+                size_t sensorSize = sensor["size"].get<size_t>();
 
-                sensorName = sensor["name"].get<std::string>();
-                spikeType = sensor["spikeType"].get<std::string>();
-                sensorSize = sensor["size"].get<size_t>();
+                size_t spikeAllocCount = 0;
                 if (sensor.find("spikeAllocCount") != sensor.end()) {
                     spikeAllocCount = sensor["spikeAllocCount"].get<size_t>();
                 }
@@ -253,13 +251,11 @@ Body *BrainBase::CreateBody(const std::string &type, const std::string &params)
             if (itActuator->is_object()) {
                 const json &actuator = itActuator.value();
 
-                std::string actuatorName, spikeType;
-                size_t actuatorSize = 0;
-                size_t spikeAllocCount = 0;
+                std::string actuatorName = actuator["name"].get<std::string>();
+                std::string spikeType = actuator["spikeType"].get<std::string>();
+                size_t actuatorSize = actuator["size"].get<size_t>();
 
-                actuatorName = actuator["name"].get<std::string>();
-                spikeType = actuator["spikeType"].get<std::string>();
-                actuatorSize = actuator["size"].get<size_t>();
+                size_t spikeAllocCount = 0;
                 if (actuator.find("spikeAllocCount") != actuator.end()) {
                     spikeAllocCount = actuator["spikeAllocCount"].get<size_t>();
                 }

@@ -70,7 +70,6 @@ void MnistReader::Load(std::istream &images, std::istream &labels)
     mDigitValues.reserve(mDigitCount);
     mDigitLabels.reserve(mDigitCount);
 
-    size_t count = mDigitCount;
     for(int i = 0; i < mDigitCount; i++) {
         uint8_t label;
         labels.read(reinterpret_cast<char*>(&label), 1);
