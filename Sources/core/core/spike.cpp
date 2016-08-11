@@ -374,7 +374,7 @@ size_t FunctionalSpike::ExtraBytes(const Spike::Data &data) const
 
 void *FunctionalSpike::AllocateExtra(Spike::Data &data)
 {
-    return scalable_malloc(ExtraBytes(data));
+    return std::malloc(ExtraBytes(data));
 }
 
 void FunctionalSpike::Initialize(Spike::Data &data, size_t allocCount)
@@ -387,7 +387,7 @@ void FunctionalSpike::Release(Spike::Data &data)
 {
     if (ExtraBytes(data) > 0 && data.bits64 != 0) {
         void *extra = reinterpret_cast<void *>(data.bits64);
-        scalable_free(extra);
+        std::free(extra);
         data.bits64 = 0;
         data.bits16 = 0;
     }

@@ -9,12 +9,21 @@
 #include <limits>
 #include <unordered_set>
 
-#include <tbb/tbbmalloc_proxy.h>
-
 #include <pup.h>
 #include <pup_stl.h>
 
+//#define USE_TBB_MALLOC
+
 //#define REPRODUCIBLE_EXECUTION
+
+#ifdef USE_TBB_MALLOC
+#include <tbb/tbbmalloc_proxy.h>
+#include <tbb/scalable_allocator.h>
+#define CUSTOM_ALLOCATOR tbb::scalable_allocator
+#else
+#include <memory>
+#define CUSTOM_ALLOCATOR std::allocator
+#endif
 
 #define DEFAULT_BRAIN_STEPS_PER_BODY_STEP 10
 

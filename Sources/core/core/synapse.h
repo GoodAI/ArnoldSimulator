@@ -4,8 +4,6 @@
 #include <tuple>
 #include <vector>
 
-#include <tbb/scalable_allocator.h>
-
 #include <pup.h>
 
 #include "common.h"
@@ -95,7 +93,7 @@ public:
 
     size_t GetWeightCount(const Synapse::Data &data) const;
 private:
-    tbb::scalable_allocator<float> mAllocator;
+    CUSTOM_ALLOCATOR<float> mAllocator;
 };
 
 class LaggingSynapse : public Synapse::Editor
@@ -160,5 +158,5 @@ protected:
     };
 
 private:
-    tbb::scalable_allocator<DataExtended> mAllocator;
+    CUSTOM_ALLOCATOR<DataExtended> mAllocator;
 };

@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include <tbb/scalable_allocator.h>
-
 #include <pup.h>
 
 #include "common.h"
@@ -172,5 +170,5 @@ public:
 
     size_t GetValueCount(const Spike::Data &data) const;
 private:
-    tbb::scalable_allocator<uint8_t> mAllocator;
+    CUSTOM_ALLOCATOR<uint8_t> mAllocator;
 };
