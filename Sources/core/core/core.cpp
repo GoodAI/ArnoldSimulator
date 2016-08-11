@@ -192,7 +192,7 @@ void Core::DetectKeyPress()
         char c = getchar();
         if (c == 'b') {
             if (IsBrainLoaded()) {
-                gBrain[0].RunSimulation(10, false, true);
+                gBrain[0].RunSimulation(10, false, false);
             }
         } else if (c == 'r') {
             if (IsBrainLoaded()) {
