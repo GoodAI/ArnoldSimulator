@@ -140,6 +140,7 @@
     <Compile Include="Observation\ObserverHandle.cs" />
     <Compile Include="Observation\Painter.cs" />
     <Compile Include="Project\Designer.cs" />
+    <Compile Include="Project\FileStatus.cs" />
     <Compile Include="UserSettings\AppSettings.cs" />
     <Compile Include="Visualization\Blender.cs" />
     <Compile Include="Visualization\Camera.cs" />

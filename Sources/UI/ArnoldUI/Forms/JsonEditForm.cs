@@ -51,14 +51,20 @@ namespace GoodAI.Arnold.Forms
 
         private void DesignerOnBlueprintChanged(object sender, BlueprintChangedArgs blueprintChangedArgs)
         {
+            var changesMade = blueprintChangedArgs.ChangesMade;
+
+            if (!changesMade)
+                content.TextChanged -= OnTextChanged;
             content.Text = blueprintChangedArgs.Blueprint;
+            if (!changesMade)
+                content.TextChanged += OnTextChanged;
         }
 
         private void OnTextChanged(object sender, EventArgs e)
         {
             // Avoid getting informed about the change.
             m_designer.BlueprintChanged -= DesignerOnBlueprintChanged;
-            m_designer.Blueprint = content.Text;
+            m_designer.SetBlueprint(content.Text);
             m_designer.BlueprintChanged += DesignerOnBlueprintChanged;
         }
 

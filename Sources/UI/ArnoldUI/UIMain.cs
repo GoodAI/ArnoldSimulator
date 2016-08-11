@@ -20,7 +20,6 @@ using Region = GoodAI.Arnold.Project.Region;
 
 namespace GoodAI.Arnold
 {
-    // TODO(HonzaS): This class will only start making real sense once there's also Designer besides Conductor.
     public class UIMain : IDisposable
     {
         private string m_observerType = "FloatTensor";
@@ -40,15 +39,15 @@ namespace GoodAI.Arnold
             remove { Conductor.StateChangeFailed -= value; }
         }
 
+        public event EventHandler<FileStatusChangedArgs> FileStatusChanged;
+
         public AgentBlueprint AgentBlueprint { get; }
 
         public IConductor Conductor { get; }
         public IDesigner Designer { get; }
         public ISet<ObserverHandle> Observers { get; set; }
 
-        public string FileName { get; set; }
-
-        public bool IsFileOpen => FileName != null;
+        public FileStatus FileStatus { get; }
 
         public UIMain(IConductor conductor, IDesigner designer)
         {
@@ -59,9 +58,18 @@ namespace GoodAI.Arnold
                 Location = new PointF(100, 100)
             });
 
+            FileStatus = new FileStatus();
             Conductor = conductor;
             Designer = designer;
             Observers = new HashSet<ObserverHandle>();
+
+            Designer.BlueprintChanged += DesignerOnBlueprintChanged;
+        }
+
+        private void DesignerOnBlueprintChanged(object sender, BlueprintChangedArgs blueprintChangedArgs)
+        {
+            FileStatus.IsSaveNeeded = blueprintChangedArgs.ChangesMade;
+            FileStatusChanged?.Invoke(this, new FileStatusChangedArgs(FileStatus));
         }
 
         public void Initialize()
@@ -70,7 +78,7 @@ namespace GoodAI.Arnold
             if (!string.IsNullOrEmpty(lastOpenedFile))
                 OpenBlueprint(lastOpenedFile);
             else
-                Designer.Blueprint = Resources.DefaultBlueprint;
+                Designer.SetBlueprint(Resources.DefaultBlueprint);
         }
 
         public void VisualizationClosed()
@@ -193,27 +201,26 @@ namespace GoodAI.Arnold
             if (!File.Exists(fileName))
             {
                 Log.Warn($"File '{fileName}' not found");
-                Designer.Blueprint = Resources.DefaultBlueprint;
-                FileOpened(null);
+                Designer.SetBlueprint(Resources.DefaultBlueprint);
                 return;
             }
             var fileContent = File.ReadAllText(fileName);
 
-            // Blueprint validity should be checked inside the Designed.
-            Designer.Blueprint = fileContent;
-            FileOpened(fileName);
+            OpenedFileChanged(fileName);
+            // Blueprint validity should be checked inside the Designer.
+            Designer.SetBlueprint(fileContent, reset: true);
         }
 
         public void SaveBlueprint(string fileName = null)
         {
             if (fileName == null)
             {
-                if (FileName == null)
+                if (FileStatus.FileName == null)
                 {
                     Log.Warn("Cannot save: {reason}", "No file name was given.");
                     return;
                 }
-                fileName = FileName;
+                fileName = FileStatus.FileName;
             }
 
             try
@@ -226,19 +233,23 @@ namespace GoodAI.Arnold
                 return;
             }
 
-            FileOpened(fileName);
+            OpenedFileChanged(fileName);
         }
 
-        private void FileOpened(string fileName)
+        private void OpenedFileChanged(string fileName)
         {
-            FileName = fileName;
+            FileStatus.FileName = fileName;
+            // If fileName is null, it's a new file, which is not saved.
+            // Otherwise, a file was opened and doesn't need immediate saving.
+            FileStatus.IsSaveNeeded = fileName == null;
+            FileStatusChanged?.Invoke(this, new FileStatusChangedArgs(FileStatus));
             AppSettings.SaveSettings(settings => settings.LastOpenedFile = fileName);
         }
 
         public void NewBlueprint()
         {
-            Designer.Blueprint = "";
-            FileName = null;
+            Designer.SetBlueprint("");
+            OpenedFileChanged(null);
         }
     }
 }

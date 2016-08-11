@@ -2,23 +2,26 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
+using GoodAI.Arnold.Project;
 using GoodAI.Logging;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace GoodAI.Arnold
 {
-    public partial class MainForm : Form
+    public sealed partial class MainForm : Form
     {
         // Injected.
         public ILog Log { get; set; } = NullLogger.Instance;
 
         private readonly UIMain m_uiMain;
+        private string m_originalTitle;
         public LogForm LogForm { get; }
         public GraphForm GraphForm { get; }
         public VisualizationForm VisualizationForm { get; set; }
@@ -27,6 +30,8 @@ namespace GoodAI.Arnold
         public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm, JsonEditForm jsonEditForm)
         {
             InitializeComponent();
+
+            m_originalTitle = Text;
 
             m_uiMain = uiMain;
 
@@ -41,10 +46,25 @@ namespace GoodAI.Arnold
             JsonEditForm = jsonEditForm;
             JsonEditForm.Show(dockPanel, DockState.Document);
 
-            m_uiMain.SimulationStateChanged += SimulationOnStateChanged;
-            m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
+            SubscribeToUiMain();
 
             UpdateButtons();
+        }
+
+        private void SubscribeToUiMain()
+        {
+            m_uiMain.SimulationStateChanged += SimulationOnStateChanged;
+            m_uiMain.SimulationStateChangeFailed += SimulationOnStateChangeFailed;
+            m_uiMain.FileStatusChanged += UiMainOnFileStatusChanged;
+        }
+
+        private void UiMainOnFileStatusChanged(object sender, FileStatusChangedArgs fileStatusChangedArgs)
+        {
+            var projectName = Path.GetFileName(fileStatusChangedArgs.FileStatus.FileName);
+
+            var projectNamePart = string.IsNullOrEmpty(projectName) ? "" : $" - {projectName}";
+            var contentChangedPart = fileStatusChangedArgs.FileStatus.IsSaveNeeded ? " *" : "";
+            Text = m_originalTitle + projectNamePart + contentChangedPart;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -211,7 +231,7 @@ namespace GoodAI.Arnold
 
         private void saveBlueprintButton_Click(object sender, EventArgs e)
         {
-            if (m_uiMain.IsFileOpen)
+            if (m_uiMain.FileStatus.IsFileOpen)
             {
                 m_uiMain.SaveBlueprint();
             }
