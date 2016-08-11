@@ -46,6 +46,8 @@ namespace GoodAI.Arnold
 
         public string FileName { get; set; }
 
+        public bool IsFileOpen => FileName != null;
+
         public UIMain(IConductor conductor, IDesigner designer)
         {
             // TODO: This should move into the Designer.
@@ -186,6 +188,31 @@ namespace GoodAI.Arnold
 
             // Blueprint validity should be checked inside the Designed.
             Designer.Blueprint = fileContent;
+            FileName = fileName;
+        }
+
+        public void SaveBlueprint(string fileName = null)
+        {
+            if (fileName == null)
+            {
+                if (FileName == null)
+                {
+                    Log.Warn("Cannot save: {reason}", "No file name was given.");
+                    return;
+                }
+                fileName = FileName;
+            }
+
+            try
+            {
+                File.WriteAllText(fileName, Designer.Blueprint);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(ex, "Cannot save: {reason}", ex.Message);
+                return;
+            }
+
             FileName = fileName;
         }
     }

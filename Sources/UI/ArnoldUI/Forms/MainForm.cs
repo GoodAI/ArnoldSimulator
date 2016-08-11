@@ -206,12 +206,25 @@ namespace GoodAI.Arnold
 
         private void saveBlueprintButton_Click(object sender, EventArgs e)
         {
-
+            if (m_uiMain.IsFileOpen)
+            {
+                m_uiMain.SaveBlueprint();
+            }
+            else
+            {
+                SaveAs();
+            }
         }
 
         private void saveAsBlueprintButton_Click(object sender, EventArgs e)
         {
+            SaveAs();
+        }
 
+        private void SaveAs()
+        {
+            if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
+                m_uiMain.SaveBlueprint(saveFileDialog.FileName);
         }
     }
 }
