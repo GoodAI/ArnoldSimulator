@@ -195,7 +195,7 @@ namespace GoodAI.Arnold
 
         private void newBlueprintButton_Click(object sender, EventArgs e)
         {
-
+            m_uiMain.NewBlueprint();
         }
 
         private void openBlueprintButton_Click(object sender, EventArgs e)

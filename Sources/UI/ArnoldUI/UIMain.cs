@@ -215,5 +215,11 @@ namespace GoodAI.Arnold
 
             FileName = fileName;
         }
+
+        public void NewBlueprint()
+        {
+            Designer.Blueprint = "";
+            FileName = null;
+        }
     }
 }
