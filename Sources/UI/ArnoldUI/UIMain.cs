@@ -10,6 +10,8 @@ using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Observation;
 using GoodAI.Arnold.Project;
+using GoodAI.Arnold.Properties;
+using GoodAI.Arnold.UserSettings;
 using GoodAI.Arnold.Visualization;
 using GoodAI.Arnold.Visualization.Models;
 using GoodAI.Logging;
@@ -60,6 +62,15 @@ namespace GoodAI.Arnold
             Conductor = conductor;
             Designer = designer;
             Observers = new HashSet<ObserverHandle>();
+        }
+
+        public void Initialize()
+        {
+            var lastOpenedFile = Settings.Default.LastOpenedFile;
+            if (!string.IsNullOrEmpty(lastOpenedFile))
+                OpenBlueprint(lastOpenedFile);
+            else
+                Designer.Blueprint = Resources.DefaultBlueprint;
         }
 
         public void VisualizationClosed()
@@ -182,13 +193,15 @@ namespace GoodAI.Arnold
             if (!File.Exists(fileName))
             {
                 Log.Warn($"File '{fileName}' not found");
+                Designer.Blueprint = Resources.DefaultBlueprint;
+                FileOpened(null);
                 return;
             }
             var fileContent = File.ReadAllText(fileName);
 
             // Blueprint validity should be checked inside the Designed.
             Designer.Blueprint = fileContent;
-            FileName = fileName;
+            FileOpened(fileName);
         }
 
         public void SaveBlueprint(string fileName = null)
@@ -213,7 +226,13 @@ namespace GoodAI.Arnold
                 return;
             }
 
+            FileOpened(fileName);
+        }
+
+        private void FileOpened(string fileName)
+        {
             FileName = fileName;
+            AppSettings.SaveSettings(settings => settings.LastOpenedFile = fileName);
         }
 
         public void NewBlueprint()

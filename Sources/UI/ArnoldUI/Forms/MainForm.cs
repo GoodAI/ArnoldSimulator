@@ -47,6 +47,11 @@ namespace GoodAI.Arnold
             UpdateButtons();
         }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            m_uiMain.Initialize();
+        }
+
         private void UpdateButtons()
         {
             if (m_uiMain.Conductor.CoreState == CoreState.CommandInProgress)

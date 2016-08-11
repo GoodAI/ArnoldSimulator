@@ -29,13 +29,13 @@ namespace GoodAI.Arnold
             UnhandledExceptionCatcher.Log = log;
             log.Debug("Container configured");
 
+            NullLogger.Instance.FailOnUse = true;
+
             // This should not fail as the container configuration verifies the setup.
             var mainForm = container.GetInstance<MainForm>();
 
             // NOTE(HonzaS): Consider this.
             //container.Dispose();
-
-            NullLogger.Instance.FailOnUse = true;
 
             log.Info("Application set up, starting");
             Application.Run(mainForm);

@@ -15,8 +15,6 @@ namespace GoodAI.Arnold.Forms
 {
     public partial class JsonEditForm : DockContent
     {
-        private static readonly string m_defaultBlueprint = Resources.DefaultBlueprint;
-
         private readonly IDesigner m_designer;
 
         public JsonEditForm(IDesigner designer)
@@ -27,7 +25,7 @@ namespace GoodAI.Arnold.Forms
             InitializeComponent();
 
             content.TextChanged += OnTextChanged;
-            content.Text = m_defaultBlueprint;
+            content.Text = m_designer.Blueprint;
 
             content.Lexer = Lexer.Cpp;
 
