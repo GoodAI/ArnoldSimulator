@@ -43,7 +43,7 @@ public:
 
     struct ChangeThresholdArgs
     {
-        double delta;
+        double average;
     };
 
     void RequestThreshold(Direction direction, NeuronId sender);
@@ -60,6 +60,7 @@ protected:
     double mAccumulatedActivation;
     size_t mReceivedSpikeCount;
     size_t mSentSpikeCount;
+    bool mWasTriggered;
 };
 
 template<typename Arguments>
