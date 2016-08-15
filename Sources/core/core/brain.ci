@@ -46,8 +46,8 @@ module brain
         entry void SimulateAllTopologyChangesDelivered();
         entry void SimulateBodySimulate();
         entry void SimulateBodySimulateDone();
-        entry void SimulateRegionReportTriggeredNeurons();
-        entry [reductiontarget] void SimulateRegionReportTriggeredNeuronsDone(size_t triggeredNeurons);
+        entry void SimulateRegionPrepareToSimulate();
+        entry [reductiontarget] void SimulateRegionPrepareToSimulateDone(size_t triggeredNeurons);
         entry void SimulateRegionSimulate();
         entry [reductiontarget] void SimulateRegionSimulateDone(CkReductionMsg *msg);
         entry void SimulateAllSpikesDelivered();

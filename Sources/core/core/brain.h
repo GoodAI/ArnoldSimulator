@@ -210,8 +210,8 @@ public:
     void SimulateAllTopologyChangesDelivered();
     void SimulateBodySimulate();
     void SimulateBodySimulateDone();
-    void SimulateRegionReportTriggeredNeurons();
-    void SimulateRegionReportTriggeredNeuronsDone(size_t triggeredNeurons);
+    void SimulateRegionPrepareToSimulate();
+    void SimulateRegionPrepareToSimulateDone(size_t triggeredNeurons);
     void SimulateRegionSimulate();
     void SimulateRegionSimulateDone(CkReductionMsg *msg);
     void SimulateAllSpikesDelivered();

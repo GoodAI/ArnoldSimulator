@@ -252,9 +252,9 @@ void NeuronBase::AdoptAsChild(NeuronId neuronId, bool cloneSynapses)
         Synapse::Data data;
         {
             if (cloneSynapses) {
-                Synapse::Initialize(Synapse::GetType(it->second), data);
-            } else {
                 Synapse::Clone(it->second, data);
+            } else {
+                Synapse::Initialize(Synapse::GetType(it->second), data);
             }
         }
         RequestSynapseAddition(Direction::Forward, it->first, GetId(), data);
@@ -264,9 +264,9 @@ void NeuronBase::AdoptAsChild(NeuronId neuronId, bool cloneSynapses)
         Synapse::Data data;
         {
             if (cloneSynapses) {
-                Synapse::Initialize(Synapse::GetType(it->second), data);
-            } else {
                 Synapse::Clone(it->second, data);
+            } else {
+                Synapse::Initialize(Synapse::GetType(it->second), data);
             }
         }
         RequestSynapseAddition(Direction::Forward, GetId(), it->first, data);
@@ -446,19 +446,21 @@ bool NeuronBase::AdaptPosition()
 
 void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
 {
-    RegionIndex destRegIdx = GetRegionIndex(receiver);
-    if (destRegIdx == BRAIN_REGION_INDEX) {
-        gCompletionDetector.ckLocalBranch()->produce();
-        gRegions[thisIndex.x].EnqueueSensoMotoricSpike(receiver, data);
-    } else {
-        if (destRegIdx != thisIndex.x) {
+    if (AccessInputSynapse(receiver) || AccessOutputSynapse(receiver)) {
+        RegionIndex destRegIdx = GetRegionIndex(receiver);
+        if (destRegIdx == BRAIN_REGION_INDEX) {
             gCompletionDetector.ckLocalBranch()->produce();
-            gRegions[destRegIdx].TriggerRemotelyTriggeredNeuron(receiver);
+            gRegions[thisIndex.x].EnqueueSensoMotoricSpike(receiver, data);
         } else {
-            mNeuronsTriggered.insert(receiver);
+            if (destRegIdx != thisIndex.x) {
+                gCompletionDetector.ckLocalBranch()->produce();
+                gRegions[destRegIdx].TriggerRemotelyTriggeredNeuron(receiver);
+            } else {
+                mNeuronsTriggered.insert(receiver);
+            }
+            gCompletionDetector.ckLocalBranch()->produce();
+            gNeurons(destRegIdx, GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
         }
-        gCompletionDetector.ckLocalBranch()->produce();
-        gNeurons(destRegIdx, GetNeuronIndex(receiver)).EnqueueSpike(direction, data);
     }
 }
 
@@ -504,7 +506,7 @@ void NeuronBase::Unlink()
             gNeurons(GetRegionIndex(it->first), GetNeuronIndex(it->first)).RemoveInputSynapse(
                 GetNeuronId(thisIndex.x, thisIndex.y));
         }
-        mInputSynapses.clear();
+        mOutputSynapses.clear();
     }
 
     gCompletionDetector.ckLocalBranch()->done();
@@ -596,7 +598,7 @@ void NeuronBase::Simulate(SimulateMsg *msg)
     ObserverResults observerResults;
 
     if (doProgress) {
-        bool wasSpiked = !mForwardSpikesCurrent->empty() || mBackwardSpikesCurrent->empty();
+        bool wasSpiked = !mForwardSpikesCurrent->empty() || !mBackwardSpikesCurrent->empty();
 
         for (auto it = mForwardSpikesCurrent->begin(); it != mForwardSpikesCurrent->end(); ++it) {
             if (mNeuron) Spike::Edit(*it)->Accept(Direction::Forward, *mNeuron, *it);

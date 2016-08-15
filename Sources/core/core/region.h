@@ -106,11 +106,11 @@ public:
     void UntriggerNeurons(const NeuronsTriggered &neurons);
 
     NeuronId RequestNeuronAddition(const NeuronType &type, const NeuronParams &params);
-    void RequestNeuronRemoval(NeuronId neuronId);
-    void RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data);
-    void RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to);
-    void RequestChildAddition(NeuronId parent, NeuronId child);
-    void RequestChildRemoval(NeuronId parent, NeuronId child);
+    void RequestNeuronRemoval(NeuronId neuronId, bool unrestricted = false);
+    void RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data, bool unrestricted = false);
+    void RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to, bool unrestricted = false);
+    void RequestChildAddition(NeuronId parent, NeuronId child, bool unrestricted = false);
+    void RequestChildRemoval(NeuronId parent, NeuronId child, bool unrestricted = false);
 
     void CreateInput(const ConnectorName &name, const NeuronType &neuronType, const NeuronParams &neuronParams, size_t neuronCount);
     void DeleteInput(const ConnectorName &name);
@@ -134,8 +134,8 @@ public:
     void Unlink();
     void PrepareTopologyChange(size_t brainStep, bool doProgress);
     void CommitTopologyChange();
-    void ReportTriggeredNeurons();
-    void Simulate(SimulateMsg *msg);
+    void PrepareToSimulate(SimulateMsg *msg);
+    void Simulate();
 
     void NeuronFlipSpikeQueuesDone(CkReductionMsg *msg);
     void NeuronSimulateDone(CkReductionMsg *msg);
@@ -159,6 +159,7 @@ private:
 
     NeuronIndex mNeuronIdxCounter;
     NeuronIndices mNeuronIndices;
+    NeuronsProtected mNeuronsProtected;
 
     Connectors mInputConnectors;
     Connectors mOutputConnectors;
@@ -172,6 +173,9 @@ private:
 
     Spike::BrainSink mBrainSink;
     NeuronsTriggered mNeuronsTriggered;
+
+    bool mNeuronSectionFillWithTriggered;
+    bool mNeuronSectionFillWithAll;
 
     bool mNeuronSectionFilled;
     CProxySection_NeuronBase mNeuronSection;

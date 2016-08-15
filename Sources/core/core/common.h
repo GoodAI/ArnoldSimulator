@@ -230,6 +230,7 @@ typedef std::vector<NeuronId> NeuronRemovals;
 typedef std::vector<ChildLink> ChildLinks;
 
 typedef std::unordered_set<NeuronId> NeuronsTriggered;
+typedef std::unordered_set<NeuronId> NeuronsProtected;
 typedef std::unordered_set<NeuronIndex> NeuronIndices;
 typedef std::unordered_set<RegionIndex> RegionIndices;
 

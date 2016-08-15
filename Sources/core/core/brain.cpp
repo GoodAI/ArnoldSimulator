@@ -853,6 +853,7 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped, bool runToBo
     }
 
     if (!mIsSimulationLoopActive) {
+        mIsSimulationLoopActive = true;
         mSimulationWallTime = CmiWallTimer();
         thisProxy[thisIndex].Simulate();
     }
@@ -913,6 +914,7 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
     mDoFullViewportUpdateNext = full || mViewportUpdateOverflowed;
     mViewportUpdateOverflowed = false;
     if (!mIsSimulationLoopActive) {
+        mIsSimulationLoopActive = true;
         mDoSimulationProgressNext = false;
         mSimulationWallTime = CmiWallTimer();
         thisProxy[thisIndex].Simulate();
@@ -1286,19 +1288,27 @@ void BrainBase::SimulateBodySimulate()
 
 void BrainBase::SimulateBodySimulateDone()
 {
-    this->SimulateRegionReportTriggeredNeurons();
+    this->SimulateRegionPrepareToSimulate();
 }
 
-void BrainBase::SimulateRegionReportTriggeredNeurons()
+void BrainBase::SimulateRegionPrepareToSimulate()
 {
     if (!mRegionIndices.empty()) {
-        gRegions.ReportTriggeredNeurons();
+        SimulateMsg *simulateMsg = new SimulateMsg();
+        simulateMsg->doUpdate = mDoViewportUpdate;
+        simulateMsg->doFullUpdate = mDoFullViewportUpdate;
+        simulateMsg->doProgress = mDoSimulationProgress;
+        simulateMsg->brainStep = mBrainStep;
+        simulateMsg->roiBoxes = mRoiBoxes;
+        simulateMsg->observers = mObservers;
+
+        gRegions.PrepareToSimulate(simulateMsg);
     } else {
-        this->SimulateRegionReportTriggeredNeuronsDone(0);
+        this->SimulateRegionPrepareToSimulateDone(0);
     }
 }
 
-void BrainBase::SimulateRegionReportTriggeredNeuronsDone(size_t triggeredNeurons)
+void BrainBase::SimulateRegionPrepareToSimulateDone(size_t triggeredNeurons)
 {
     mTriggeredNeurons = triggeredNeurons;
     this->SimulateRegionSimulate();
@@ -1318,15 +1328,7 @@ void BrainBase::SimulateRegionSimulate()
     }
 
     if (!mRegionIndices.empty()) {
-        SimulateMsg *simulateMsg = new SimulateMsg();
-        simulateMsg->doUpdate = mDoViewportUpdate;
-        simulateMsg->doFullUpdate = mDoFullViewportUpdate;
-        simulateMsg->doProgress = mDoSimulationProgress;
-        simulateMsg->brainStep = mBrainStep;
-        simulateMsg->roiBoxes = mRoiBoxes;
-        simulateMsg->observers = mObservers;
-
-        gRegions.Simulate(simulateMsg);
+        gRegions.Simulate();
     } else {
         this->SimulateRegionSimulateDone(nullptr);
     }

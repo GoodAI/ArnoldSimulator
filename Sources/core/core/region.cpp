@@ -64,7 +64,8 @@ Region *RegionBase::CreateRegion(const RegionType &type, RegionBase &base, json 
 RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box3D &box, const RegionParams &params) :
     mName(name), mBoxChanged(false), mPosition(box.first), mSize(box.second),
     mUnlinking(false), mDoUpdate(false), mDoFullUpdate(false), mDoProgress(false), mBrainStep(0),
-    mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFilled(false), mRegion(nullptr)
+    mNeuronIdxCounter(NEURON_INDEX_MIN), mNeuronSectionFillWithTriggered(false), 
+    mNeuronSectionFillWithAll(false), mNeuronSectionFilled(false), mRegion(nullptr)
 {
     json p;
     try {
@@ -168,7 +169,7 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
                         Synapse::Initialize(Synapse::ParseType(synapseType), synapse);
                         NeuronId from = cluster.at(randClusterIdx(engine));
                         NeuronId to = cluster.at(randClusterIdx(engine));
-                        RequestSynapseAddition(Direction::Forward, from, to, synapse);
+                        RequestSynapseAddition(Direction::Forward, from, to, synapse, true);
                     }
                     clusterContent.insert(std::make_pair(clusterName, cluster));
                 }
@@ -225,7 +226,7 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
                             Synapse::Initialize(Synapse::ParseType(synapseType), synapse);
                             NeuronId from = srcCluster->at(randSrcClusterIdx(engine));
                             NeuronId to = dstCluster->at(randDstClusterIdx(engine));
-                            RequestSynapseAddition(srcDirection, from, to, synapse);
+                            RequestSynapseAddition(srcDirection, from, to, synapse, true);
                         }
                     }
                 }
@@ -238,7 +239,8 @@ RegionBase::RegionBase(const RegionName &name, const RegionType &type, const Box
 
 RegionBase::RegionBase(CkMigrateMessage *msg) :
     mBoxChanged(false), mUnlinking(false), mDoUpdate(false), mDoFullUpdate(false), mDoProgress(false),
-    mBrainStep(0), mNeuronIdxCounter(0), mNeuronSectionFilled(false), mRegion(nullptr)
+    mBrainStep(0), mNeuronIdxCounter(0), mNeuronSectionFillWithTriggered(false), 
+    mNeuronSectionFillWithAll(false), mNeuronSectionFilled(false), mRegion(nullptr)
 {
 }
 
@@ -284,12 +286,22 @@ void RegionBase::pup(PUP::er &p)
 
     p | mBrainSink;
 
+    p | mNeuronSectionFillWithTriggered;
+    p | mNeuronSectionFillWithAll;
+
     if (p.isUnpacking()) {
         size_t neuronIndicesCount; p | neuronIndicesCount;
         mNeuronIndices.reserve(neuronIndicesCount);
         for (size_t i = 0; i < neuronIndicesCount; ++i) {
             NeuronIndex index; p | index;
             mNeuronIndices.insert(index);
+        }
+
+        size_t protectedCount; p | protectedCount;
+        mNeuronsProtected.reserve(protectedCount);
+        for (size_t i = 0; i < protectedCount; ++i) {
+            NeuronId protect; p | protect;
+            mNeuronsProtected.insert(protect);
         }
 
         size_t inputConnectorsCount; p | inputConnectorsCount;
@@ -322,6 +334,11 @@ void RegionBase::pup(PUP::er &p)
         size_t neuronIndicesCount = mNeuronIndices.size(); p | neuronIndicesCount;
         for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
             NeuronIndex index = *it; p | index;
+        }
+
+        size_t protectedCount = mNeuronsProtected.size(); p | protectedCount;
+        for (auto it = mNeuronsProtected.begin(); it != mNeuronsProtected.end(); ++it) {
+            NeuronId protect = *it; p | protect;
         }
 
         size_t inputConnectorsCount = mInputConnectors.size(); p | inputConnectorsCount;
@@ -371,7 +388,7 @@ NeuronIndex RegionBase::GetNewNeuronIndex()
     return mNeuronIdxCounter++;
 }
 
-const NeuronIndices & RegionBase::GetNeuronIndices()
+const NeuronIndices &RegionBase::GetNeuronIndices()
 {
     return mNeuronIndices;
 }
@@ -450,29 +467,64 @@ NeuronId RegionBase::RequestNeuronAddition(const NeuronType &type, const NeuronP
     return neuronId;
 }
 
-void RegionBase::RequestNeuronRemoval(NeuronId neuronId)
+void RegionBase::RequestNeuronRemoval(NeuronId neuronId, bool unrestricted)
 {
-    mNeuronRemovals.push_back(neuronId);
+    bool valid = true;
+    if (!unrestricted) {
+        valid = (mNeuronsProtected.find(neuronId) == mNeuronsProtected.end());
+    }
+
+    if (valid) {
+        mNeuronRemovals.push_back(neuronId);
+    }
 }
 
-void RegionBase::RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data)
+void RegionBase::RequestSynapseAddition(Direction direction, NeuronId from, NeuronId to, const Synapse::Data &data, bool unrestricted)
 {
-    mSynapseAdditions.push_back(std::make_tuple(direction, from, to, data));
+    bool valid = true;
+    if (!unrestricted) {
+        valid = (thisIndex == GetRegionIndex(from)) && (thisIndex == GetRegionIndex(to));
+    }
+
+    if (valid) {
+        mSynapseAdditions.push_back(std::make_tuple(direction, from, to, data));
+    }
 }
 
-void RegionBase::RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to)
+void RegionBase::RequestSynapseRemoval(Direction direction, NeuronId from, NeuronId to, bool unrestricted)
 {
-    mSynapseRemovals.push_back(std::make_tuple(direction, from, to));
+    bool valid = true;
+    if (!unrestricted) {
+        valid = (thisIndex == GetRegionIndex(from)) && (thisIndex == GetRegionIndex(to));
+    }
+
+    if (valid) {
+        mSynapseRemovals.push_back(std::make_tuple(direction, from, to));
+    }
 }
 
-void RegionBase::RequestChildAddition(NeuronId parent, NeuronId child)
+void RegionBase::RequestChildAddition(NeuronId parent, NeuronId child, bool unrestricted)
 {
-    mChildAdditions.push_back(std::make_pair(parent, child));
+    bool valid = true;
+    if (!unrestricted) {
+        valid = (thisIndex == GetRegionIndex(parent)) && (thisIndex == GetRegionIndex(child));
+    }
+
+    if (valid) {
+        mChildAdditions.push_back(std::make_pair(parent, child));
+    }
 }
 
-void RegionBase::RequestChildRemoval(NeuronId parent, NeuronId child)
+void RegionBase::RequestChildRemoval(NeuronId parent, NeuronId child, bool unrestricted)
 {
-    mChildRemovals.push_back(std::make_pair(parent, child));
+    bool valid = true;
+    if (!unrestricted) {
+        valid = (thisIndex == GetRegionIndex(parent)) && (thisIndex == GetRegionIndex(child));
+    }
+
+    if (valid) {
+        mChildRemovals.push_back(std::make_pair(parent, child));
+    }
 }
 
 void RegionBase::CreateInput(const ConnectorName &name,
@@ -483,8 +535,9 @@ void RegionBase::CreateInput(const ConnectorName &name,
         Connector connector;
         connector.name = name;
         for (size_t i = 0; i < neuronCount; ++i) {
-            connector.neurons.push_back(
-                RequestNeuronAddition(neuronType, neuronParams));
+            NeuronId neuronId = RequestNeuronAddition(neuronType, neuronParams);
+            connector.neurons.push_back(neuronId);
+            mNeuronsProtected.insert(neuronId);
         }
         mInputConnectors.insert(std::make_pair(name, connector));
     }
@@ -511,7 +564,8 @@ void RegionBase::DeleteInput(const ConnectorName &name)
         }
 
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
-            RequestNeuronRemoval(*it);
+            mNeuronsProtected.erase(*it);
+            RequestNeuronRemoval(*it, true);
         }
 
         mInputConnectors.erase(name);
@@ -570,7 +624,7 @@ void RegionBase::ConnectInputNeurons(const ConnectorName &name, NeuronId destFir
         Synapse::Initialize(SynapseEditorCache::GetInstance()->GetToken("Weighted"), synapse);
         NeuronId destNeuronId = destFirstNeuron;
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
-            RequestSynapseAddition(Direction::Forward, destNeuronId++, *it, synapse);
+            RequestSynapseAddition(Direction::Forward, destNeuronId++, *it, synapse, true);
         }
     }
 
@@ -584,7 +638,7 @@ void RegionBase::DisconnectInputNeurons(const ConnectorName &name, NeuronId dest
         Connector &connector = itConn->second;
         NeuronId destNeuronId = destFirstNeuron;
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
-            RequestSynapseRemoval(Direction::Forward, destNeuronId++, *it);
+            RequestSynapseRemoval(Direction::Forward, destNeuronId++, *it, true);
         }
     }
 
@@ -599,8 +653,9 @@ void RegionBase::CreateOutput(const ConnectorName &name,
         Connector connector;
         connector.name = name;
         for (size_t i = 0; i < neuronCount; ++i) {
-            connector.neurons.push_back(
-                RequestNeuronAddition(neuronType, neuronParams));
+            NeuronId neuronId = RequestNeuronAddition(neuronType, neuronParams);
+            connector.neurons.push_back(neuronId);
+            mNeuronsProtected.insert(neuronId);
         }
         mOutputConnectors.insert(std::make_pair(name, connector));
     }
@@ -627,7 +682,8 @@ void RegionBase::DeleteOutput(const ConnectorName &name)
         }
 
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
-            RequestNeuronRemoval(*it);
+            mNeuronsProtected.erase(*it);
+            RequestNeuronRemoval(*it, true);
         }
 
         mOutputConnectors.erase(name);
@@ -686,7 +742,7 @@ void RegionBase::ConnectOutputNeurons(const ConnectorName &name, NeuronId destFi
         Synapse::Initialize(SynapseEditorCache::GetInstance()->GetToken("Weighted"), synapse);
         NeuronId destNeuronId = destFirstNeuron;
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
-            RequestSynapseAddition(Direction::Forward, *it, destNeuronId++, synapse);
+            RequestSynapseAddition(Direction::Forward, *it, destNeuronId++, synapse, true);
         }
     }
 
@@ -700,7 +756,7 @@ void RegionBase::DisconnectOutputNeurons(const ConnectorName &name, NeuronId des
         Connector &connector = itConn->second;
         NeuronId destNeuronId = destFirstNeuron;
         for (auto it = connector.neurons.begin(); it != connector.neurons.end(); ++it) {
-            RequestSynapseRemoval(Direction::Forward, *it, destNeuronId++);
+            RequestSynapseRemoval(Direction::Forward, *it, destNeuronId++, true);
         }
     }
 
@@ -791,6 +847,9 @@ void RegionBase::PrepareTopologyChange(size_t brainStep, bool doProgress)
 
 void RegionBase::CommitTopologyChange()
 {
+    std::unordered_set<NeuronId> deletedNeurons;
+    deletedNeurons.insert(mNeuronRemovals.begin(), mNeuronRemovals.end());
+
     if (!mNeuronAdditions.empty()) {
         gNeurons.beginInserting();
         for (auto it = mNeuronAdditions.begin(); it != mNeuronAdditions.end(); ++it) {
@@ -807,34 +866,46 @@ void RegionBase::CommitTopologyChange()
         for (auto it = mSynapseAdditions.begin(); it != mSynapseAdditions.end(); ++it) {
             NeuronId from = std::get<0>(*it) == Direction::Forward ? std::get<1>(*it) : std::get<2>(*it);
             NeuronId to = std::get<0>(*it) == Direction::Forward ? std::get<2>(*it) : std::get<1>(*it);
-            if (GetRegionIndex(from) != BRAIN_REGION_INDEX) {
-                gCompletionDetector.ckLocalBranch()->produce();
-                gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).AddOutputSynapse(to, std::get<3>(*it));
-            }
-            if (GetRegionIndex(to) != BRAIN_REGION_INDEX) {
-                gCompletionDetector.ckLocalBranch()->produce();
-                gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).AddInputSynapse(from, std::get<3>(*it));
+            bool fromWillBeDeleted = (deletedNeurons.find(from) != deletedNeurons.end());
+            bool toWillBeDeleted = (deletedNeurons.find(to) != deletedNeurons.end());
+            if (!fromWillBeDeleted && !toWillBeDeleted) {
+                if (GetRegionIndex(from) != BRAIN_REGION_INDEX) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).AddOutputSynapse(to, std::get<3>(*it));
+                }
+                if (GetRegionIndex(to) != BRAIN_REGION_INDEX) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).AddInputSynapse(from, std::get<3>(*it));
+                }
             }
         }
     }
 
     if (!mChildAdditions.empty()) {
         for (auto it = mChildAdditions.begin(); it != mChildAdditions.end(); ++it) {
-            gCompletionDetector.ckLocalBranch()->produce(2);
             NeuronId parent = std::get<0>(*it);
             NeuronId child = std::get<1>(*it);
-            gNeurons(GetRegionIndex(parent), GetNeuronIndex(parent)).AddChild(child);
-            gNeurons(GetRegionIndex(child), GetNeuronIndex(child)).SetParent(parent);
+            bool parentWillBeDeleted = (deletedNeurons.find(parent) != deletedNeurons.end());
+            bool childWillBeDeleted = (deletedNeurons.find(child) != deletedNeurons.end());
+            if (!parentWillBeDeleted && !childWillBeDeleted) {
+                gCompletionDetector.ckLocalBranch()->produce(2);
+                gNeurons(GetRegionIndex(parent), GetNeuronIndex(parent)).AddChild(child);
+                gNeurons(GetRegionIndex(child), GetNeuronIndex(child)).SetParent(parent);
+            }
         }
     }
 
     if (!mChildRemovals.empty()) {
         for (auto it = mChildRemovals.begin(); it != mChildRemovals.end(); ++it) {
-            gCompletionDetector.ckLocalBranch()->produce(2);
             NeuronId parent = std::get<0>(*it);
             NeuronId child = std::get<1>(*it);
-            gNeurons(GetRegionIndex(parent), GetNeuronIndex(parent)).RemoveChild(child);
-            gNeurons(GetRegionIndex(child), GetNeuronIndex(child)).UnsetParent();
+            bool parentWillBeDeleted = (deletedNeurons.find(parent) != deletedNeurons.end());
+            bool childWillBeDeleted = (deletedNeurons.find(child) != deletedNeurons.end());
+            if (!parentWillBeDeleted && !childWillBeDeleted) {
+                gCompletionDetector.ckLocalBranch()->produce(2);
+                gNeurons(GetRegionIndex(parent), GetNeuronIndex(parent)).RemoveChild(child);
+                gNeurons(GetRegionIndex(child), GetNeuronIndex(child)).UnsetParent();
+            }
         }
     }
 
@@ -842,33 +913,27 @@ void RegionBase::CommitTopologyChange()
         for (auto it = mSynapseRemovals.begin(); it != mSynapseRemovals.end(); ++it) {
             NeuronId from = std::get<0>(*it) == Direction::Forward ? std::get<1>(*it) : std::get<2>(*it);
             NeuronId to = std::get<0>(*it) == Direction::Forward ? std::get<2>(*it) : std::get<1>(*it);
-            if (GetRegionIndex(from) != BRAIN_REGION_INDEX) {
-                gCompletionDetector.ckLocalBranch()->produce();
-                gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).RemoveOutputSynapse(to);
-            }
-            if (GetRegionIndex(to) != BRAIN_REGION_INDEX) {
-                gCompletionDetector.ckLocalBranch()->produce();
-                gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).RemoveInputSynapse(from);
+            bool fromWillBeDeleted = (deletedNeurons.find(from) != deletedNeurons.end());
+            bool toWillBeDeleted = (deletedNeurons.find(to) != deletedNeurons.end());
+            if (!fromWillBeDeleted && !toWillBeDeleted) {
+                if (GetRegionIndex(from) != BRAIN_REGION_INDEX) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gNeurons(GetRegionIndex(from), GetNeuronIndex(from)).RemoveOutputSynapse(to);
+                }
+                if (GetRegionIndex(to) != BRAIN_REGION_INDEX) {
+                    gCompletionDetector.ckLocalBranch()->produce();
+                    gNeurons(GetRegionIndex(to), GetNeuronIndex(to)).RemoveInputSynapse(from);
+                }
             }
         }
     }
 
     if (!mNeuronRemovals.empty()) {
-        gCompletionDetector.ckLocalBranch()->produce(mNeuronRemovals.size());
-        CkVec<CkArrayIndex2D> deletedNeuronIndices;
-        {
-            std::unordered_set<NeuronId> deletedNeurons;
-            deletedNeurons.insert(mNeuronRemovals.begin(), mNeuronRemovals.end());
-            for (auto it = deletedNeurons.begin(); it != deletedNeurons.end(); ++it) {
-                CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
-                deletedNeuronIndices.push_back(index);
-                mNeuronsTriggered.erase(*it);
-            }
+        gCompletionDetector.ckLocalBranch()->produce(deletedNeurons.size());
+        for (auto it = deletedNeurons.begin(); it != deletedNeurons.end(); ++it) {
+            mNeuronsTriggered.erase(*it);
+            gNeurons(GetRegionIndex(*it), GetNeuronIndex(*it)).Unlink();
         }
-        CProxySection_NeuronBase neuronSection = CProxySection_NeuronBase::ckNew(
-            gNeurons.ckGetArrayID(), deletedNeuronIndices.getVec(), deletedNeuronIndices.size());
-        neuronSection.ckSectionDelegate(CProxy_CkMulticastMgr(gMulticastGroupId).ckLocalBranch());
-        neuronSection.Unlink();
     }
 
     gCompletionDetector.ckLocalBranch()->done();
@@ -877,14 +942,7 @@ void RegionBase::CommitTopologyChange()
     contribute(cb);
 }
 
-void RegionBase::ReportTriggeredNeurons()
-{
-    CkCallback cb(CkReductionTarget(BrainBase, SimulateRegionReportTriggeredNeuronsDone), gBrain[0]);
-    size_t triggeredNeuronCount = mNeuronsTriggered.size();
-    contribute(sizeof(size_t), &triggeredNeuronCount, CkReduction::sum_ulong_long, cb);
-}
-
-void RegionBase::Simulate(SimulateMsg *msg)
+void RegionBase::PrepareToSimulate(SimulateMsg *msg)
 {
     mDoUpdate = msg->doUpdate;
     mDoFullUpdate = msg->doFullUpdate;
@@ -894,7 +952,7 @@ void RegionBase::Simulate(SimulateMsg *msg)
 
     Boxes intersection;
     Box3D commonBox;
-    Box3D regionBox(mPosition, mSize);    
+    Box3D regionBox(mPosition, mSize);
     for (auto it = msg->roiBoxes.begin(); it != msg->roiBoxes.end(); ++it) {
         if (GetIntersection(regionBox, *it, commonBox)) {
             TranslateAndScaleToUnit(commonBox.first, commonBox.second, regionBox);
@@ -915,24 +973,41 @@ void RegionBase::Simulate(SimulateMsg *msg)
 
     mRoiTransformedBoxesLast = mRoiTransformedBoxes;
     mRoiTransformedBoxes = intersection;
-    
+
     if (!mNeuronRemovals.empty()) {
         std::unordered_set<NeuronId> deletedNeurons;
         deletedNeurons.insert(mNeuronRemovals.begin(), mNeuronRemovals.end());
         for (auto it = deletedNeurons.begin(); it != deletedNeurons.end(); ++it) {
-            mNeuronIndices.erase(*it);
+            mNeuronIndices.erase(GetNeuronIndex(*it));
             gNeurons(GetRegionIndex(*it), GetNeuronIndex(*it)).ckDestroy();
         }
     }
 
-    CkVec<CkArrayIndex2D> sectionNeuronIndices;
+    size_t triggeredNeuronCount = 0;
+    mNeuronSectionFillWithAll = false;
+    mNeuronSectionFillWithTriggered = false;
     if ((mDoFullUpdate || !almostSameIntersection) && !mNeuronIndices.empty()) {
+        mNeuronSectionFillWithAll = true;
+        triggeredNeuronCount = mNeuronIndices.size();
+    } else if (mDoProgress && !mNeuronsTriggered.empty()) {
+        mNeuronSectionFillWithTriggered = true;
+        triggeredNeuronCount = mNeuronsTriggered.size();
+    }
+
+    CkCallback cb(CkReductionTarget(BrainBase, SimulateRegionPrepareToSimulateDone), gBrain[0]);
+    contribute(sizeof(size_t), &triggeredNeuronCount, CkReduction::sum_ulong_long, cb);
+}
+
+void RegionBase::Simulate()
+{
+    CkVec<CkArrayIndex2D> sectionNeuronIndices;
+    if (mNeuronSectionFillWithAll) {
         sectionNeuronIndices.reserve(mNeuronIndices.size());
         for (auto it = mNeuronIndices.begin(); it != mNeuronIndices.end(); ++it) {
-            CkArrayIndex2D index(thisIndex, GetNeuronIndex(*it));
+            CkArrayIndex2D index(thisIndex, *it);
             sectionNeuronIndices.push_back(index);
         }
-    } else if (mDoProgress && !mNeuronsTriggered.empty()) {
+    } else if (mNeuronSectionFillWithTriggered) {
         sectionNeuronIndices.reserve(mNeuronsTriggered.size());
         for (auto it = mNeuronsTriggered.begin(); it != mNeuronsTriggered.end(); ++it) {
             CkArrayIndex2D index(GetRegionIndex(*it), GetNeuronIndex(*it));
@@ -1123,16 +1198,8 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                 NeuronRemovals tmpNeuronRemovals; p | tmpNeuronRemovals;
                 mNeuronRemovals.reserve(mNeuronRemovals.size() + tmpNeuronRemovals.size());
                 for (auto it = tmpNeuronRemovals.begin(); it != tmpNeuronRemovals.end(); ++it) {
-                    bool validRequest = true;
-                    for (auto itConn = mInputConnectors.begin(); itConn != mInputConnectors.end(); ++itConn) {
-                        size_t connectorSize = itConn->second.neurons.size();
-                        if (connectorSize > 0) {
-                            NeuronId firstNeuronId = itConn->second.neurons.at(0);
-                            bool isWithinConnector = ((*it >= firstNeuronId) && (*it < firstNeuronId + connectorSize));
-                            validRequest = validRequest && !isWithinConnector;
-                        }
-                    }
-                    if (validRequest) tmpNeuronRemovals.push_back(*it);
+                    bool validRequest = (mNeuronsProtected.find(*it) == mNeuronsProtected.end());
+                    if (validRequest) mNeuronRemovals.push_back(*it);
                 }
 
                 Synapse::Additions tmpSynapseAdditions; p | tmpSynapseAdditions;
@@ -1146,13 +1213,18 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                     if (GetRegionIndex(toNeuronId) == TEMP_REGION_INDEX) {
                         std::get<2>(*it) = tempNeuronIdMap[toNeuronId];
                     }
-                    mSynapseAdditions.push_back(*it);
+                    bool validRequest = (thisIndex == GetRegionIndex(std::get<1>(*it)))
+                        && (thisIndex == GetRegionIndex(std::get<2>(*it)));
+                    if (validRequest) mSynapseAdditions.push_back(*it);
                 }
 
                 Synapse::Removals tmpSynapseRemovals; p | tmpSynapseRemovals;
                 mSynapseRemovals.reserve(mSynapseRemovals.size() + tmpSynapseRemovals.size());
-                mSynapseRemovals.insert(mSynapseRemovals.end(),
-                    tmpSynapseRemovals.begin(), tmpSynapseRemovals.end());
+                for (auto it = tmpSynapseRemovals.begin(); it != tmpSynapseRemovals.end(); ++it) {
+                    bool validRequest = (thisIndex == GetRegionIndex(std::get<1>(*it)))
+                        && (thisIndex == GetRegionIndex(std::get<2>(*it)));
+                    if (validRequest) mSynapseRemovals.push_back(*it);
+                }
 
                 ChildLinks tmpChildAdditions; p | tmpChildAdditions;
                 mChildAdditions.reserve(mChildAdditions.size() + tmpChildAdditions.size());
@@ -1165,13 +1237,18 @@ void RegionBase::NeuronSimulateDone(CkReductionMsg *msg)
                     if (GetRegionIndex(childNeuronId) == TEMP_REGION_INDEX) {
                         std::get<1>(*it) = tempNeuronIdMap[childNeuronId];
                     }
-                    mChildAdditions.push_back(*it);
+                    bool validRequest = (thisIndex == GetRegionIndex(std::get<0>(*it)))
+                        && (thisIndex == GetRegionIndex(std::get<1>(*it)));
+                    if (validRequest) mChildAdditions.push_back(*it);
                 }
 
                 ChildLinks tmpChildRemovals; p | tmpChildRemovals;
                 mChildRemovals.reserve(mChildRemovals.size() + tmpChildRemovals.size());
-                mChildRemovals.insert(mChildRemovals.end(),
-                    tmpChildRemovals.begin(), tmpChildRemovals.end());
+                for (auto it = tmpChildRemovals.begin(); it != tmpChildRemovals.end(); ++it) {
+                    bool validRequest = (thisIndex == GetRegionIndex(std::get<0>(*it)))
+                        && (thisIndex == GetRegionIndex(std::get<1>(*it)));
+                    if (validRequest) mChildRemovals.push_back(*it);
+                }
             }
 
             bool skipTopologyReport; p | skipTopologyReport;
