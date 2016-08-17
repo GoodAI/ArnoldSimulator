@@ -446,7 +446,10 @@ bool NeuronBase::AdaptPosition()
 
 void NeuronBase::SendSpike(NeuronId receiver, Direction direction, const Spike::Data &data)
 {
-    if (AccessInputSynapse(receiver) || AccessOutputSynapse(receiver)) {
+    bool isThereLink = AccessInputSynapse(receiver) || AccessOutputSynapse(receiver) ||
+        (receiver == mParent) || (mChildren.find(receiver) != mChildren.end());
+
+    if (isThereLink) {
         RegionIndex destRegIdx = GetRegionIndex(receiver);
         if (destRegIdx == BRAIN_REGION_INDEX) {
             gCompletionDetector.ckLocalBranch()->produce();
