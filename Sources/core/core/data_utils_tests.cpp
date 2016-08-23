@@ -92,3 +92,54 @@ SCENARIO("Convert byte vector to float vector", "[data-utils]")
         }
     }
 }
+
+SCENARIO("Copy memory with buffer size check", "[data-utils]")
+{
+    GIVEN("A byte array to copy")
+    {
+        uint8_t source[] = { 3, 4, 5, 6 };
+        uint8_t dest[] = { 0, 0, 0, 0, 0, 0 };
+
+        REQUIRE(sizeof(dest) == 6);
+
+        const int dataSize = sizeof(source);
+
+        WHEN("I copy data to an exact size buffer")
+        {
+            CheckedMemCopy(dest, source, dataSize, dataSize, __func__);
+
+            THEN("Data are copied correctly")
+            {
+                for (int i = 0; i < dataSize; i++) {
+                    REQUIRE(dest[i] == source[i]);
+                }
+            }
+        }
+        AND_WHEN("The destination buffer is larger")
+        {
+            CheckedMemCopy(dest, source, dataSize, dataSize + 2, __func__);
+
+            THEN("Data are copied even then")
+            {
+                for (int i = 0; i < dataSize; i++) {
+                    REQUIRE(dest[i] == source[i]);
+                }
+
+                REQUIRE(dest[dataSize] == 0);
+            }
+        }
+        AND_WHEN("I try to copy data to a buffer that is too short")
+        {
+            uint8_t shortBuf[] = { 0, 0 };
+            CheckedMemCopy(shortBuf, source, dataSize, sizeof(shortBuf), __func__);
+
+            THEN("No data are actually copied")
+            {
+                REQUIRE(shortBuf[0] == 0);
+                REQUIRE(shortBuf[1] == 0);
+            }
+        }
+
+        
+    }
+}

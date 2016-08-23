@@ -1,8 +1,9 @@
 #include "neuron.h"
 #include "log.h"
+#include "components.h"
 
 #include "spike.h"
-#include "components.h"
+#include "data_utils.h"
 
 Spike::Type Spike::ParseType(const std::string &type)
 {
@@ -218,16 +219,12 @@ size_t BinarySpike::AllBytes(const Spike::Data &data) const
 
 void BinarySpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(buffer, &data.bits64, size);
-    }
+    CheckedMemCopy(buffer, &data.bits64, AllBytes(data), size, __func__);
 }
 
 void DiscreteSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(&data.bits64, buffer, size);
-    }
+    CheckedMemCopy(&data.bits64, buffer, AllBytes(data), size, __func__);
 }
 
 void DiscreteSpike::Initialize(Spike::Data &data, size_t allocCount)
@@ -248,9 +245,7 @@ size_t DiscreteSpike::AllBytes(const Spike::Data &data) const
 
 void DiscreteSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(buffer, &data.bits64, size);
-    }
+    CheckedMemCopy(buffer, &data.bits64, AllBytes(data), size, __func__);
 }
 
 uint64_t DiscreteSpike::GetIntensity(const Spike::Data &data) const
@@ -285,16 +280,12 @@ size_t ContinuousSpike::AllBytes(const Spike::Data &data) const
 
 void ContinuousSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(buffer, &data.bits64, size);
-    }
+    CheckedMemCopy(buffer, &data.bits64, AllBytes(data), size, __func__);
 }
 
 void ContinuousSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(&data.bits64, buffer, size);
-    }
+    CheckedMemCopy(&data.bits64, buffer, AllBytes(data), size, __func__);
 }
 
 void ContinuousSpike::Initialize(Spike::Data &data, size_t allocCount)
@@ -335,16 +326,12 @@ size_t VisualSpike::AllBytes(const Spike::Data &data) const
 
 void VisualSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(buffer, &data.bits64, size);
-    }
+    CheckedMemCopy(buffer, &data.bits64, AllBytes(data), size, __func__);
 }
 
 void VisualSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
 {
-    if (size == AllBytes(data)) {
-        std::memcpy(&data.bits64, buffer, size);
-    }
+    CheckedMemCopy(&data.bits64, buffer, AllBytes(data), size, __func__);
 }
 
 void VisualSpike::Initialize(Spike::Data &data, size_t allocCount)
@@ -467,24 +454,14 @@ size_t MultiByteSpike::AllBytes(const Spike::Data &data) const
 
 void MultiByteSpike::ExportAll(Spike::Data &data, void *buffer, size_t size) const
 {
-    if (size != AllBytes(data)) {
-        Log(LogLevel::Warn, "s: invalid size argument (%d)", __func__, size);
-        return;
-    }
-
     uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
-    std::memcpy(buffer, values, size);
+    CheckedMemCopy(buffer, values, AllBytes(data), size, __func__);
 }
 
 void MultiByteSpike::ImportAll(Spike::Data &data, const void *buffer, size_t size)
 {
-    if (size != AllBytes(data)) {
-        Log(LogLevel::Warn, "s: invalid size argument (%d)", __func__, size);
-        return;
-    }
-
     uint8_t *values = reinterpret_cast<uint8_t*>(data.bits64);
-    std::memcpy(values, buffer, size);
+    CheckedMemCopy(values, buffer, AllBytes(data), size, __func__);
 }
 
 void MultiByteSpike::GetValues(const Spike::Data &data, uint8_t *values, size_t count) const
