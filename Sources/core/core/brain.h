@@ -187,6 +187,9 @@ public:
     void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
     void RequestSimulationState(RequestId requestId, bool immediately, bool flushRequests);
     void RequestViewportUpdate(RequestId requestId, bool full, bool flushRequests);
+    void EnableRegularCheckpoints(const std::string &directoryName, size_t brainStepInterval);
+    void DisableRegularCheckpoints();
+    void RequestOneTimeCheckpoint(const std::string &directoryName);
 
     void Simulate();
     void SimulateBrainControl();
@@ -217,6 +220,8 @@ public:
     void SimulateAllSpikesDelivered();
     bool IsSimulationRunning();
     void SimulateDone();
+    void SimulateCheckpoint();
+    void SimulateCheckpointDone();
 
 private:
     BrainName mName;
@@ -229,6 +234,13 @@ private:
     bool mViewportUpdateOverflowed;
     bool mIsSimulationLoopActive;
     bool mUnloadRequested;
+
+    bool mCheckpointInProgress;
+    bool mDoOneTimeCheckpoint;
+    std::string mOneTimeCheckpointDirectoryName;
+    bool mDoRegularCheckpoints;
+    std::string mRegularCheckpointsDirectoryName;
+    size_t mRegularCheckpointsBrainStepInterval;
 
     bool mRegionCommitTopologyChangeDone;
     bool mRegionSimulateDone;

@@ -135,6 +135,10 @@ private:
     RequestId mRequestIdCounter;
     std::unordered_map<RequestId, CkCcsRequestMsg *> mRequests;
 
+    bool mKeyControlEnabled;
+    bool mKeyControlRegularCheckpointsEnabled;
+    size_t mKeyControlBrainStepsPerBodyStep;
+
     // TODO(HonzaS): Remove this stub once it's not needed.
     void SendStubModel(const Communication::GetModelRequest *getModelRequest, RequestId requestId);
 };

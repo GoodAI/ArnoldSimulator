@@ -113,8 +113,18 @@ obtain_charm()
     cat src/ck-core/charm++.h | sed '/void operator delete(void\* ptr) { CkFreeMsg(ptr); }/i    static void dealloc(void *ptr) { CkFreeMsg(ptr); }' > src/ck-core/charm++.h.tmp
     mv -f src/ck-core/charm++.h.tmp src/ck-core/charm++.h
     
-    ./build charm++ net-win64 smp --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
-    ./build charm++ net-win64 smp --destination=net-release --with-production -j8 | tee net-release.log
+    cat src/libs/ck-libs/completion/completion.ci | sed 's/group CompletionDetector {/group [migratable] CompletionDetector {/g' > src/libs/ck-libs/completion/completion.ci.tmp
+    mv -f src/libs/ck-libs/completion/completion.ci.tmp src/libs/ck-libs/completion/completion.ci
+    cat src/libs/ck-libs/completion/completion.h | sed '/CompletionDetector();/i    CompletionDetector(CkMigrateMessage *m);' > src/libs/ck-libs/completion/completion.h.tmp
+    mv -f src/libs/ck-libs/completion/completion.h.tmp src/libs/ck-libs/completion/completion.h
+    cat src/libs/ck-libs/completion/completion.h | sed '/CompletionDetector();/i    void pup(PUP::er &p) {}' > src/libs/ck-libs/completion/completion.h.tmp
+    mv -f src/libs/ck-libs/completion/completion.h.tmp src/libs/ck-libs/completion/completion.h
+    cat src/libs/ck-libs/completion/completion.C | sed '/CompletionDetector::CompletionDetector()/i CompletionDetector::CompletionDetector(CkMigrateMessage *m) : CBase_CompletionDetector(m) { init(); }' > src/libs/ck-libs/completion/completion.C.tmp
+    mv -f src/libs/ck-libs/completion/completion.C.tmp src/libs/ck-libs/completion/completion.C
+    
+    CHARM_COMMON_FLAGS=--enable-lbuserdata
+    ./build charm++ net-win64 smp $CHARM_COMMON_FLAGS --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
+    ./build charm++ net-win64 smp $CHARM_COMMON_FLAGS --destination=net-release --with-production -j8 | tee net-release.log
 
     cd ..
 }

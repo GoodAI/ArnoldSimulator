@@ -279,10 +279,13 @@ Brain *BrainBase::CreateBrain(const BrainType &type, BrainBase &base, json &para
 BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainParams &params) :
     mName(name), mDoViewportUpdate(true), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
-    mIsSimulationLoopActive(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
-    mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
-    mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
-    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
+    mIsSimulationLoopActive(false), mUnloadRequested(false), mCheckpointInProgress(false),
+    mDoOneTimeCheckpoint(false), mOneTimeCheckpointDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
+    mDoRegularCheckpoints(false), mRegularCheckpointsDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
+    mRegularCheckpointsBrainStepInterval(DEFAULT_BRAIN_STEPS_PER_CHECKPOINT),
+    mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), 
+    mAllSpikesDelivered(false), mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0),
+    mBrainStepsToRun(0), mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -485,10 +488,13 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
 BrainBase::BrainBase(CkMigrateMessage *msg) :
     mDoViewportUpdate(true), mDoFullViewportUpdate(false), mDoFullViewportUpdateNext(false),
     mDoSimulationProgress(false), mDoSimulationProgressNext(false), mViewportUpdateOverflowed(false),
-    mIsSimulationLoopActive(false), mUnloadRequested(false), mRegionCommitTopologyChangeDone(false), 
-    mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), mAllSpikesDelivered(false),
-    mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0), mBrainStepsToRun(0),
-    mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
+    mIsSimulationLoopActive(false), mUnloadRequested(false), mCheckpointInProgress(false),
+    mDoOneTimeCheckpoint(false), mOneTimeCheckpointDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY), 
+    mDoRegularCheckpoints(false), mRegularCheckpointsDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
+    mRegularCheckpointsBrainStepInterval(DEFAULT_BRAIN_STEPS_PER_CHECKPOINT),
+    mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), 
+    mAllSpikesDelivered(false), mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0),
+    mBrainStepsToRun(0), mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
     mNeuronIdxCounter(NEURON_INDEX_MIN), mRegionIdxCounter(REGION_INDEX_MIN), mTerminalIdCounter(0),
     mBody(nullptr), mBrain(nullptr)
 {
@@ -531,8 +537,15 @@ void BrainBase::pup(PUP::er &p)
     p | mDoSimulationProgress;
     p | mDoSimulationProgressNext;
     p | mViewportUpdateOverflowed;
-    p | mIsSimulationLoopActive;
+    //p | mIsSimulationLoopActive;
     p | mUnloadRequested;
+
+    //p | mCheckpointInProgress;
+    p | mDoOneTimeCheckpoint;
+    p | mOneTimeCheckpointDirectoryName;
+    p | mDoRegularCheckpoints;
+    p | mRegularCheckpointsDirectoryName;
+    p | mRegularCheckpointsBrainStepInterval;
 
     p | mRegionCommitTopologyChangeDone;
     p | mRegionSimulateDone;
@@ -855,7 +868,9 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped, bool runToBo
     if (!mIsSimulationLoopActive) {
         mIsSimulationLoopActive = true;
         mSimulationWallTime = CmiWallTimer();
-        thisProxy[thisIndex].Simulate();
+        if (!mCheckpointInProgress) {
+            thisProxy[thisIndex].Simulate();
+        }
     }
 }
 
@@ -917,7 +932,32 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
         mIsSimulationLoopActive = true;
         mDoSimulationProgressNext = false;
         mSimulationWallTime = CmiWallTimer();
-        thisProxy[thisIndex].Simulate();
+        if (!mCheckpointInProgress) {
+            thisProxy[thisIndex].Simulate();
+        }
+    }
+}
+
+void BrainBase::EnableRegularCheckpoints(const std::string &directoryName, size_t brainStepInterval)
+{
+    mDoRegularCheckpoints = true;
+    mRegularCheckpointsDirectoryName = 
+        !directoryName.empty() ? directoryName : DEFAULT_CHECKPOINT_DIRECTORY;
+    mRegularCheckpointsBrainStepInterval = 
+        (brainStepInterval > 0) ? brainStepInterval : DEFAULT_BRAIN_STEPS_PER_CHECKPOINT;
+}
+
+void BrainBase::DisableRegularCheckpoints()
+{
+    mDoRegularCheckpoints = false;
+}
+
+void BrainBase::RequestOneTimeCheckpoint(const std::string &directoryName)
+{
+    mDoOneTimeCheckpoint = true;
+    mOneTimeCheckpointDirectoryName = directoryName;
+    if (!mIsSimulationLoopActive && !mCheckpointInProgress) {
+        this->SimulateCheckpoint();
     }
 }
 
@@ -1543,9 +1583,7 @@ void BrainBase::SimulateDone()
         if (mBrainStepsToRun != SIZE_MAX && mBrainStepsToRun != 0) {
             --mBrainStepsToRun;
         }
-        if (mBrainStepsToRun > 0) {
-            thisProxy[thisIndex].Simulate();
-        } else {
+        if (mBrainStepsToRun == 0) {
             CkPrintf("Simulation took %f seconds.\n", CmiWallTimer() - mSimulationWallTime);
             mIsSimulationLoopActive = false;
         }
@@ -1562,6 +1600,32 @@ void BrainBase::SimulateDone()
 
     if (mUnloadRequested) {
         gRegions.Unload();
+    }
+
+    this->SimulateCheckpoint();
+}
+
+void BrainBase::SimulateCheckpoint()
+{
+    mCheckpointInProgress = !mUnloadRequested && (mDoOneTimeCheckpoint ||
+        (mDoRegularCheckpoints && !(mBrainStep % mRegularCheckpointsBrainStepInterval)));
+    if (mCheckpointInProgress) {
+        std::string directoryName = mDoOneTimeCheckpoint ?
+            mOneTimeCheckpointDirectoryName : mRegularCheckpointsDirectoryName;
+        mDoOneTimeCheckpoint = false;
+        CkStartCheckpoint(directoryName.c_str(), 
+            CkCallback(CkIndex_BrainBase::SimulateCheckpointDone(), thisProxy[thisIndex]));
+    } else {
+        this->SimulateCheckpointDone();
+    }
+}
+
+void BrainBase::SimulateCheckpointDone()
+{
+    mCheckpointInProgress = false;
+
+    if (mIsSimulationLoopActive) {
+        thisProxy[thisIndex].Simulate();
     }
 }
 

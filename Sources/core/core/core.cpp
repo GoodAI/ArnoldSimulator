@@ -38,8 +38,9 @@ Core *GetCoreLocalPtr()
 }
 
 Core::Core(CkArgMsg *msg) : 
-    mStartTime(0.0), mBrainLoaded(false),
-    mBrainIsUnloading(false), mIsShuttingDown(false), mRequestIdCounter(0)
+    mStartTime(0.0), mBrainLoaded(false), mBrainIsUnloading(false), mIsShuttingDown(false),
+    mRequestIdCounter(0), mKeyControlEnabled(false), mKeyControlRegularCheckpointsEnabled(false),
+    mKeyControlBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP)
 {
     mStartTime = CmiWallTimer();
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -100,6 +101,7 @@ Core::Core(CkArgMsg *msg) :
     auto blueprintString = blueprintContent.str();
     if (!blueprintString.empty() && TryLoadBrain(blueprintString)) {
         std::thread input(&Core::DetectKeyPress, this);
+        mKeyControlEnabled = true;
         input.detach();
     }
 
@@ -107,9 +109,13 @@ Core::Core(CkArgMsg *msg) :
 }
 
 Core::Core(CkMigrateMessage *msg) :
-    mStartTime(0.0), mBrainLoaded(false),
-    mBrainIsUnloading(false), mIsShuttingDown(false), mRequestIdCounter(0)
+    mStartTime(0.0), mBrainLoaded(false), mBrainIsUnloading(false), mIsShuttingDown(false), 
+    mRequestIdCounter(0), mKeyControlEnabled(false), mKeyControlRegularCheckpointsEnabled(false),
+    mKeyControlBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP)
 {
+    CkPrintf("Running on %d processors...\n", CkNumPes());
+
+    CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 }
 
 bool Core::TryLoadBrain(const std::string &blueprintString)
@@ -162,6 +168,9 @@ void Core::pup(PUP::er &p)
     p | mBrainIsUnloading;
     p | mIsShuttingDown;
     p | mRequestIdCounter;
+    p | mKeyControlEnabled;
+    p | mKeyControlRegularCheckpointsEnabled;
+    p | mKeyControlBrainStepsPerBodyStep;
 
     if (p.isUnpacking()) {
         size_t requestsCount; p | requestsCount;
@@ -177,6 +186,11 @@ void Core::pup(PUP::er &p)
             CkCcsRequestMsg *messagePtr = it->second; messagePtr->pup(p);
         }
     }
+
+    if (p.isUnpacking() && mKeyControlEnabled) {
+        std::thread input(&Core::DetectKeyPress, this);
+        input.detach();
+    }
 }
 
 void Core::Exit()
@@ -187,7 +201,6 @@ void Core::Exit()
 
 void Core::DetectKeyPress()
 {
-    static size_t brainStepsPerBodyStep = DEFAULT_BRAIN_STEPS_PER_BODY_STEP;
     while (true) {
         char c = getchar();
         if (c == 'b') {
@@ -206,25 +219,42 @@ void Core::DetectKeyPress()
             if (IsBrainLoaded()) {
                 gBrain[0].RunSimulation(1, false, false);
             }
+        } else if (c == 'c') {
+            if (IsBrainLoaded()) {
+                gBrain[0].RequestOneTimeCheckpoint(DEFAULT_CHECKPOINT_DIRECTORY);
+            }
+        } else if (c == 'h') {
+            if (IsBrainLoaded()) {
+                if (mKeyControlRegularCheckpointsEnabled) {
+                    mKeyControlRegularCheckpointsEnabled = false;
+                    CkPrintf("DisableRegularCheckpoints");
+                    gBrain[0].DisableRegularCheckpoints();
+                } else {
+                    mKeyControlRegularCheckpointsEnabled = true;
+                    CkPrintf("EnableRegularCheckpoints");
+                    gBrain[0].EnableRegularCheckpoints(
+                        DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_BRAIN_STEPS_PER_CHECKPOINT);
+                }
+            }
         } else if (c == 'i') {
             if (IsBrainLoaded()) {
-                if (brainStepsPerBodyStep == 1) {
-                    brainStepsPerBodyStep = 5;
+                if (mKeyControlBrainStepsPerBodyStep == 1) {
+                    mKeyControlBrainStepsPerBodyStep = 5;
                 } else {
-                    brainStepsPerBodyStep += 5;
+                    mKeyControlBrainStepsPerBodyStep += 5;
                 }
-                CkPrintf("SetBrainStepsPerBodyStep: %u\n", brainStepsPerBodyStep);
-                gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
+                CkPrintf("SetBrainStepsPerBodyStep: %u\n", mKeyControlBrainStepsPerBodyStep);
+                gBrain[0].SetBrainStepsPerBodyStep(mKeyControlBrainStepsPerBodyStep);
             }
         } else if (c == 'd') {
             if (IsBrainLoaded()) {
-                if (brainStepsPerBodyStep <= 5) {
-                    brainStepsPerBodyStep = 1;
+                if (mKeyControlBrainStepsPerBodyStep <= 5) {
+                    mKeyControlBrainStepsPerBodyStep = 1;
                 } else {
-                    brainStepsPerBodyStep -= 5;
+                    mKeyControlBrainStepsPerBodyStep -= 5;
                 }
-                CkPrintf("SetBrainStepsPerBodyStep: %u\n", brainStepsPerBodyStep);
-                gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
+                CkPrintf("SetBrainStepsPerBodyStep: %u\n", mKeyControlBrainStepsPerBodyStep);
+                gBrain[0].SetBrainStepsPerBodyStep(mKeyControlBrainStepsPerBodyStep);
             }
         } else if (c == 'q') {
             mIsShuttingDown = true;

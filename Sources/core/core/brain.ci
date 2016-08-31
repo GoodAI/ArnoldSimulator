@@ -23,6 +23,9 @@ module brain
         entry void UpdateRegionBox(RegionIndex regIdx, Box3D box);
         entry void RequestSimulationState(RequestId requestId, bool immediately, bool flushRequests);
         entry void RequestViewportUpdate(RequestId requestId, bool full, bool flushRequests);
+        entry void EnableRegularCheckpoints(std::string directoryName, size_t brainStepInterval);
+        entry void DisableRegularCheckpoints();
+        entry void RequestOneTimeCheckpoint(std::string directoryName);
 
         entry void Simulate();
         entry void SimulateBrainControl();
@@ -52,5 +55,7 @@ module brain
         entry [reductiontarget] void SimulateRegionSimulateDone(CkReductionMsg *msg);
         entry void SimulateAllSpikesDelivered();
         entry void SimulateDone();
+        entry void SimulateCheckpoint();
+        entry void SimulateCheckpointDone();
     };   	
 };
