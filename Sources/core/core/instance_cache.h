@@ -11,9 +11,9 @@ class InstanceCache : public Registration<InstanceCache<TInstance, TToken>, TTok
 {
     using Base = Registration<InstanceCache<TInstance, TToken>, TToken>;
 public:
-    TToken Register(const std::string &name, TInstance * component)
+    TToken Register(const std::string &name, TInstance * component, const size_t salt = 0)
     {
-        TToken token = Base::GetNewToken(name);
+        TToken token = Base::GetNewToken(name, salt);
         mInstances[token].reset(component);
 
         return token;

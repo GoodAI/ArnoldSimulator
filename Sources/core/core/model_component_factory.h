@@ -14,9 +14,9 @@ class ModelComponentFactory : public Registration<ModelComponentFactory<TCompone
     using Base = Registration<ModelComponentFactory<TComponent, TBase, TToken>, TToken>;
     using Function = FactoryFunction<TComponent, TBase, TToken>;
 public:
-    TToken Register(const std::string &name, Function create)
+    TToken Register(const std::string &name, Function create, const size_t salt = 0)
     {
-        TToken token = Base::GetNewToken(name);
+        TToken token = Base::GetNewToken(name, salt);
         mFactoryFunctions[token] = create;
         return token;
     }

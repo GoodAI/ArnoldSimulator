@@ -315,10 +315,12 @@ inline void operator|(er &p, std::tuple<A, B, C, D, E, F> &t)
 }
 
 template<typename T>
-void hash_combine(std::size_t &seed, T const &key)
+std::size_t hash_combine(std::size_t seed, T const &key)
 {
     std::hash<T> hasher;
     seed ^= hasher(key) + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+
+    return seed;
 }
 
 namespace std 
@@ -328,8 +330,8 @@ namespace std
     {
         std::size_t operator()(std::pair<T1, T2> const &p) const {
             std::size_t seed(0);
-            ::hash_combine(seed, p.first);
-            ::hash_combine(seed, p.second);
+            seed = ::hash_combine(seed, p.first);
+            seed = ::hash_combine(seed, p.second);
             return seed;
         }
     };

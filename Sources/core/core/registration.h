@@ -2,19 +2,29 @@
 #include <cstdint>
 #include <unordered_map>
 #include "log.h"
+#include "common.h"
 
 typedef uint64_t Token64;
 typedef uint8_t Token8;
+
+#define RESERVED_TOKEN_MAX  0
 
 template<typename T, typename TToken>
 class Registration
 {
 public:
-    Registration() : mNextToken(1)
+    Registration()
     {
         if (std::numeric_limits<TToken>::is_signed) {
-            Log(LogLevel::Error, "Token type is signed (%s)", typeid(mNextToken).name());
+            TToken foo;
+            Log(LogLevel::Error, "Token type is signed (%s)", typeid(foo).name());
             throw std::invalid_argument("Token type must be unsigned");
+        }
+
+        if (RESERVED_TOKEN_MAX > (std::numeric_limits<TToken>::max)() / 2) {
+            const char * message = "RESERVED_TOKEN_MAX is too high";
+            Log(LogLevel::Error, message);
+            throw std::invalid_argument(message);
         }
     }
 
@@ -42,25 +52,57 @@ public:
     {
         return &mInstance;
     }
+
 protected:
-    TToken GetNewToken(const std::string &name)
+    TToken GetNewToken(const std::string &name, const size_t salt = 0)
     {
         if (mTokens.find(name) != mTokens.end()) {
             Log(LogLevel::Error, "Name '%s' is already registered", name);
             throw std::invalid_argument("Name already registered");
         }
 
-        if (mNextToken == 0) {
-            Log(LogLevel::Error, "Token pool has been exhausted");
-            throw std::overflow_error("Token pool has been exhausted");
+        TToken token = GenerateToken(name, salt);
+        if (mNames.find(token) != mNames.end()) {
+            std::ostringstream message;
+            message << "Component registration: Generated token for '"
+                << name << "' collides, please use this 'salt' value: " << SuggestHashSeed(name);
+
+            Log(LogLevel::Error, message.str().c_str());
+            throw std::overflow_error(message.str());
         }
 
-        TToken token = mNextToken++;
+        //printf("-- Generated token %X (%u) of size %u for '%s'.\n", token, token, sizeof(token), name.c_str());
+
         mTokens[name] = token;
         mNames[token] = name;
+
         return token;
     }
 private:
+    TToken GenerateToken(const std::string &name, const size_t salt)
+    {
+        auto hash = hash_combine(salt, name);
+
+        TToken token = static_cast<TToken>(hash);
+
+        // Do not move all tokens that collide with reserved tokens to one item; distribute them.
+        if (token <= RESERVED_TOKEN_MAX)
+            token += RESERVED_TOKEN_MAX + 1;
+
+        return token;
+    }
+
+    size_t SuggestHashSeed(const std::string &name)
+    {
+        for (size_t salt = 1; salt < 1000000; salt++) {
+            if (mNames.find(GenerateToken(name, salt)) == mNames.end())
+                return salt;
+        }
+
+        throw std::overflow_error("Component registration: Generated token collides and no salt found!");
+    }
+
+
     TToken mNextToken;
     std::unordered_map<std::string, TToken> mTokens;
     std::unordered_map<TToken, std::string> mNames;

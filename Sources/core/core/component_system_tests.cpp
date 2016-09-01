@@ -10,19 +10,20 @@ public:
     ModelComponent(const std::string name) : Name(name)
     {
     }
+
     std::string Name;
 };
 
 class TestRegistration : public Registration<ModelComponent, Token8>
 {
 public:
-    Token8 Register(const std::string name)
+    Token8 Register(const std::string name, const size_t salt = 0)
     {
-        return GetNewToken(name);
+        return GetNewToken(name, salt);
     }
 };
 
-TEST_CASE("Registration book-keeps tokens")
+SCENARIO("Registration book-keeps tokens")
 {
     GIVEN("A registration singleton")
     {
@@ -30,7 +31,7 @@ TEST_CASE("Registration book-keeps tokens")
 
         WHEN("A token is requested")
         {
-            Token8 token = registration.Register("foo");
+            auto token = registration.Register("foo");
 
             THEN("Its name can be retrieved")
             {
@@ -52,7 +53,38 @@ TEST_CASE("Registration book-keeps tokens")
     }
 }
 
-TEST_CASE("Component system registers factory functions")
+SCENARIO("Registration hash-collision detection")
+{
+    GIVEN("A registration full of items")
+    {
+        TestRegistration registration;
+
+        const int firstCollidingNameAsInt = 86;  // Depends on the hash function used.
+        
+        for (int number = 0; number < firstCollidingNameAsInt; number++) {
+            registration.Register(std::to_string(number));
+        }
+
+        std::string collidingName = std::to_string(firstCollidingNameAsInt);
+
+        THEN("Item that yields colliding token throws exception")
+        {
+            REQUIRE_THROWS(registration.Register(collidingName));
+        }
+
+        AND_WHEN("The colliding name is registered with a different 'salt' value")
+        {
+            auto token = registration.Register(collidingName, 1);
+
+            THEN("I can retrieve the right token in the normal way")
+            {
+                REQUIRE(registration.GetToken(collidingName) == token);
+            }
+        }
+    }
+}
+
+SCENARIO("Component system registers factory functions")
 {
     GIVEN("A model component factory")
     {
@@ -89,7 +121,7 @@ TEST_CASE("Component system registers factory functions")
     }
 }
 
-TEST_CASE("Components cache registers instances")
+SCENARIO("Components cache registers instances")
 {
     GIVEN("An instance cache")
     {
