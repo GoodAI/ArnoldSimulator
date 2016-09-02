@@ -37,7 +37,7 @@ namespace GoodAI.Arnold.Core
         private const int CorePort = 46324; // GodAI
 
         private static readonly string CoreProcessParameters =
-            $"core +p4 ++ppn 4 +setcpuaffinity +noisomalloc +cs +ss ++verbose ++server ++server-port {CorePort}";
+            $"core +p4 ++ppn 4 +setcpuaffinity +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbose ++server ++server-port {CorePort}";
 
         private readonly Process m_process;
 
