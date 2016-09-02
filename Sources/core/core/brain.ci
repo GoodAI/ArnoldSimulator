@@ -26,6 +26,9 @@ module brain
         entry void EnableRegularCheckpoints(std::string directoryName, size_t brainStepInterval);
         entry void DisableRegularCheckpoints();
         entry void RequestOneTimeCheckpoint(std::string directoryName);
+        entry void EnableRegularLoadBalancing(double secondsInterval);
+        entry void DisableRegularLoadBalancing();
+        entry void RequestOneTimeLoadBalancing();
 
         entry void Simulate();
         entry void SimulateBrainControl();

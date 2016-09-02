@@ -137,6 +137,7 @@ private:
 
     bool mKeyControlEnabled;
     bool mKeyControlRegularCheckpointsEnabled;
+    bool mKeyControlRegularLoadBalancingEnabled;
     size_t mKeyControlBrainStepsPerBodyStep;
 
     // TODO(HonzaS): Remove this stub once it's not needed.

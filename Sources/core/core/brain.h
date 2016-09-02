@@ -190,6 +190,9 @@ public:
     void EnableRegularCheckpoints(const std::string &directoryName, size_t brainStepInterval);
     void DisableRegularCheckpoints();
     void RequestOneTimeCheckpoint(const std::string &directoryName);
+    void EnableRegularLoadBalancing(double secondsInterval);
+    void DisableRegularLoadBalancing();
+    void RequestOneTimeLoadBalancing();
 
     void Simulate();
     void SimulateBrainControl();
@@ -241,6 +244,11 @@ private:
     bool mDoRegularCheckpoints;
     std::string mRegularCheckpointsDirectoryName;
     size_t mRegularCheckpointsBrainStepInterval;
+
+    bool mDoOneTimeLoadBalancing;
+    bool mDoRegularLoadBalancing;
+    double mRegularLoadBalancingLastTimeStamp;
+    double mRegularLoadBalancingSecondsInterval;
 
     bool mRegionCommitTopologyChangeDone;
     bool mRegionSimulateDone;

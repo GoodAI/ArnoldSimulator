@@ -283,6 +283,8 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
     mDoOneTimeCheckpoint(false), mOneTimeCheckpointDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
     mDoRegularCheckpoints(false), mRegularCheckpointsDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
     mRegularCheckpointsBrainStepInterval(DEFAULT_BRAIN_STEPS_PER_CHECKPOINT),
+    mDoOneTimeLoadBalancing(false), mDoRegularLoadBalancing(false), mRegularLoadBalancingLastTimeStamp(0.0),
+    mRegularLoadBalancingSecondsInterval(DEFAULT_SECONDS_PER_LOAD_BALANCING),
     mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), 
     mAllSpikesDelivered(false), mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0),
     mBrainStepsToRun(0), mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
@@ -492,6 +494,8 @@ BrainBase::BrainBase(CkMigrateMessage *msg) :
     mDoOneTimeCheckpoint(false), mOneTimeCheckpointDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY), 
     mDoRegularCheckpoints(false), mRegularCheckpointsDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
     mRegularCheckpointsBrainStepInterval(DEFAULT_BRAIN_STEPS_PER_CHECKPOINT),
+    mDoOneTimeLoadBalancing(false), mDoRegularLoadBalancing(false), mRegularLoadBalancingLastTimeStamp(0.0),
+    mRegularLoadBalancingSecondsInterval(DEFAULT_SECONDS_PER_LOAD_BALANCING),
     mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), 
     mAllSpikesDelivered(false), mDeletedNeurons(0), mTriggeredNeurons(0), mBodyStep(0), mBrainStep(0),
     mBrainStepsToRun(0), mBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP), mSimulationWallTime(0.0),
@@ -546,6 +550,10 @@ void BrainBase::pup(PUP::er &p)
     p | mDoRegularCheckpoints;
     p | mRegularCheckpointsDirectoryName;
     p | mRegularCheckpointsBrainStepInterval;
+    p | mDoOneTimeLoadBalancing;
+    p | mDoRegularLoadBalancing;
+    p | mRegularLoadBalancingLastTimeStamp;
+    p | mRegularLoadBalancingSecondsInterval;
 
     p | mRegionCommitTopologyChangeDone;
     p | mRegionSimulateDone;
@@ -868,6 +876,7 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped, bool runToBo
     if (!mIsSimulationLoopActive) {
         mIsSimulationLoopActive = true;
         mSimulationWallTime = CmiWallTimer();
+        mRegularLoadBalancingLastTimeStamp = CmiWallTimer();
         if (!mCheckpointInProgress) {
             thisProxy[thisIndex].Simulate();
         }
@@ -932,6 +941,7 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
         mIsSimulationLoopActive = true;
         mDoSimulationProgressNext = false;
         mSimulationWallTime = CmiWallTimer();
+        mRegularLoadBalancingLastTimeStamp = CmiWallTimer();
         if (!mCheckpointInProgress) {
             thisProxy[thisIndex].Simulate();
         }
@@ -961,6 +971,22 @@ void BrainBase::RequestOneTimeCheckpoint(const std::string &directoryName)
     }
 }
 
+void BrainBase::EnableRegularLoadBalancing(double secondsInterval)
+{
+    mDoRegularLoadBalancing = true;
+    mRegularLoadBalancingSecondsInterval = secondsInterval;
+}
+
+void BrainBase::DisableRegularLoadBalancing()
+{
+    mDoRegularLoadBalancing = false;
+}
+
+void BrainBase::RequestOneTimeLoadBalancing()
+{
+    mDoOneTimeLoadBalancing = true;
+}
+
 void BrainBase::Simulate()
 {
     mDoSimulationProgress = mDoSimulationProgressNext;
@@ -968,7 +994,17 @@ void BrainBase::Simulate()
     mDoFullViewportUpdateNext = false;
     mDoViewportUpdate = mDoFullViewportUpdate || !mViewportUpdateOverflowed;
     mIsSimulationLoopActive = true;
-    this->SimulateBrainControl();
+
+    bool doLoadBalancing = (mDoOneTimeLoadBalancing || (mDoRegularLoadBalancing && 
+        (mRegularLoadBalancingLastTimeStamp + mRegularLoadBalancingSecondsInterval < CmiWallTimer())));
+    if (doLoadBalancing) {
+        mDoOneTimeLoadBalancing = false;
+        mRegularLoadBalancingLastTimeStamp = CmiWallTimer();
+        CkStartLB();
+        CkStartQD(CkCallback(CkIndex_BrainBase::SimulateBrainControl(), thisProxy[thisIndex]));
+    } else {
+        this->SimulateBrainControl();
+    }
 }
 
 void BrainBase::SimulateBrainControl()

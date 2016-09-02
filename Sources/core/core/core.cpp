@@ -40,6 +40,7 @@ Core *GetCoreLocalPtr()
 Core::Core(CkArgMsg *msg) : 
     mStartTime(0.0), mBrainLoaded(false), mBrainIsUnloading(false), mIsShuttingDown(false),
     mRequestIdCounter(0), mKeyControlEnabled(false), mKeyControlRegularCheckpointsEnabled(false),
+    mKeyControlRegularLoadBalancingEnabled(false),
     mKeyControlBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP)
 {
     mStartTime = CmiWallTimer();
@@ -111,6 +112,7 @@ Core::Core(CkArgMsg *msg) :
 Core::Core(CkMigrateMessage *msg) :
     mStartTime(0.0), mBrainLoaded(false), mBrainIsUnloading(false), mIsShuttingDown(false), 
     mRequestIdCounter(0), mKeyControlEnabled(false), mKeyControlRegularCheckpointsEnabled(false),
+    mKeyControlRegularLoadBalancingEnabled(false),
     mKeyControlBrainStepsPerBodyStep(DEFAULT_BRAIN_STEPS_PER_BODY_STEP)
 {
     CkPrintf("Running on %d processors...\n", CkNumPes());
@@ -170,6 +172,7 @@ void Core::pup(PUP::er &p)
     p | mRequestIdCounter;
     p | mKeyControlEnabled;
     p | mKeyControlRegularCheckpointsEnabled;
+    p | mKeyControlRegularLoadBalancingEnabled;
     p | mKeyControlBrainStepsPerBodyStep;
 
     if (p.isUnpacking()) {
@@ -227,13 +230,30 @@ void Core::DetectKeyPress()
             if (IsBrainLoaded()) {
                 if (mKeyControlRegularCheckpointsEnabled) {
                     mKeyControlRegularCheckpointsEnabled = false;
-                    CkPrintf("DisableRegularCheckpoints");
+                    CkPrintf("DisableRegularCheckpoints\n");
                     gBrain[0].DisableRegularCheckpoints();
                 } else {
                     mKeyControlRegularCheckpointsEnabled = true;
-                    CkPrintf("EnableRegularCheckpoints");
+                    CkPrintf("EnableRegularCheckpoints\n");
                     gBrain[0].EnableRegularCheckpoints(
                         DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_BRAIN_STEPS_PER_CHECKPOINT);
+                }
+            }
+        } else if (c == 'l') {
+            if (IsBrainLoaded()) {
+                CkPrintf("RequestOneTimeLoadBalancing\n");
+                gBrain[0].RequestOneTimeLoadBalancing();
+            }
+        } else if (c == 'n') {
+            if (IsBrainLoaded()) {
+                if (mKeyControlRegularLoadBalancingEnabled) {
+                    mKeyControlRegularLoadBalancingEnabled = false;
+                    CkPrintf("DisableRegularLoadBalancing\n");
+                    gBrain[0].DisableRegularLoadBalancing();
+                } else {
+                    mKeyControlRegularLoadBalancingEnabled = true;
+                    CkPrintf("EnableRegularLoadBalancing\n");
+                    gBrain[0].EnableRegularLoadBalancing(DEFAULT_SECONDS_PER_LOAD_BALANCING);
                 }
             }
         } else if (c == 'i') {
