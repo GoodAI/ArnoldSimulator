@@ -151,7 +151,7 @@ obtain_tbb()
 {
     echo "Building TBB"
     local TBB_VERSION=44_20160526
-    local TBB_LINK="https://www.threadingbuildingblocks.org/sites/default/files/software_releases/windows/tbb${TBB_VERSION}oss_win.zip"
+    local TBB_LINK="https://www.threadingbuildingblocks.org/sites/default/files/software_releases/windows/tbb${TBB_VERSION}oss_win_0.zip"
 
     download_and_unpack "$TBB_LINK" "tbb" "$TBB_VERSION" "tbb${TBB_VERSION}oss"
 
