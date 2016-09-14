@@ -117,6 +117,8 @@ Core::Core(CkMigrateMessage *msg) :
 {
     CkPrintf("Running on %d processors...\n", CkNumPes());
 
+    gCore = thisProxy;
+
     CcsRegisterHandler("request", CkCallback(CkIndex_Core::HandleRequestFromClient(nullptr), thisProxy));
 }
 

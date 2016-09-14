@@ -122,6 +122,20 @@ obtain_charm()
     cat src/libs/ck-libs/completion/completion.C | sed '/CompletionDetector::CompletionDetector()/i CompletionDetector::CompletionDetector(CkMigrateMessage *m) : CBase_CompletionDetector(m) { init(); }' > src/libs/ck-libs/completion/completion.C.tmp
     mv -f src/libs/ck-libs/completion/completion.C.tmp src/libs/ck-libs/completion/completion.C
     
+    cat src/ck-ldb/DistributedLB.h | sed '/DistributedLB(const CkLBOptions &);/i    void DistributedLB_init(const CkLBOptions &); virtual void pup(PUP::er &p);' > src/ck-ldb/DistributedLB.h.tmp
+    mv -f src/ck-ldb/DistributedLB.h.tmp src/ck-ldb/DistributedLB.h
+    cat src/ck-ldb/DistributedLB.C | sed '/DistributedLB::DistributedLB(const CkLBOptions &opt) : CBase_DistributedLB(opt) {/i void DistributedLB::pup(PUP::er &p) { if (p.isUnpacking()) DistributedLB_init(CkLBOptions(0)); }' > src/ck-ldb/DistributedLB.C.tmp
+    mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
+    cat src/ck-ldb/DistributedLB.C | sed 's/\(DistributedLB::DistributedLB(const CkLBOptions &opt) : CBase_DistributedLB(opt) {\)/\1 DistributedLB_init(opt); } void DistributedLB::DistributedLB_init(const CkLBOptions \&opt) { /g' > src/ck-ldb/DistributedLB.C.tmp
+    mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
+    
+    cat src/ck-ldb/DistBaseLB.h | sed '/DistBaseLB(const CkLBOptions &);/i    void DistBaseLB_init(const CkLBOptions &); virtual void pup(PUP::er &p);' > src/ck-ldb/DistBaseLB.h.tmp
+    mv -f src/ck-ldb/DistBaseLB.h.tmp src/ck-ldb/DistBaseLB.h
+    cat src/ck-ldb/DistBaseLB.C | sed '/DistBaseLB::DistBaseLB(const CkLBOptions &opt): CBase_DistBaseLB(opt) {/i void DistBaseLB::pup(PUP::er &p) { if (p.isUnpacking()) DistBaseLB_init(CkLBOptions(0)); }' > src/ck-ldb/DistBaseLB.C.tmp
+    mv -f src/ck-ldb/DistBaseLB.C.tmp src/ck-ldb/DistBaseLB.C
+    cat src/ck-ldb/DistBaseLB.C | sed 's/\(DistBaseLB::DistBaseLB(const CkLBOptions &opt): CBase_DistBaseLB(opt) {\)/\1  DistBaseLB_init(opt); } void DistBaseLB::DistBaseLB_init(const CkLBOptions \&opt) { /g' > src/ck-ldb/DistBaseLB.C.tmp
+    mv -f src/ck-ldb/DistBaseLB.C.tmp src/ck-ldb/DistBaseLB.C
+    
     CHARM_COMMON_FLAGS=--enable-lbuserdata
     ./build charm++ net-win64 smp $CHARM_COMMON_FLAGS --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ net-win64 smp $CHARM_COMMON_FLAGS --destination=net-release --with-production -j8 | tee net-release.log

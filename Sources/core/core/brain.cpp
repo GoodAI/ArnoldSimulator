@@ -1645,7 +1645,7 @@ void BrainBase::SimulateCheckpoint()
 {
     mCheckpointInProgress = !mUnloadRequested && (mDoOneTimeCheckpoint ||
         (mDoRegularCheckpoints && !(mBrainStep % mRegularCheckpointsBrainStepInterval)));
-    if (mCheckpointInProgress) {
+    if (mDoSimulationProgress && mCheckpointInProgress) {
         std::string directoryName = mDoOneTimeCheckpoint ?
             mOneTimeCheckpointDirectoryName : mRegularCheckpointsDirectoryName;
         mDoOneTimeCheckpoint = false;
