@@ -187,7 +187,7 @@ public:
     void UpdateRegionBox(RegionIndex regIdx, Box3D &box);
     void RequestSimulationState(RequestId requestId, bool immediately, bool flushRequests);
     void RequestViewportUpdate(RequestId requestId, bool full, bool flushRequests);
-    void EnableRegularCheckpoints(const std::string &directoryName, size_t brainStepInterval);
+    void EnableRegularCheckpoints(const std::string &directoryName, double secondsInterval);
     void DisableRegularCheckpoints();
     void RequestOneTimeCheckpoint(const std::string &directoryName);
     void EnableRegularLoadBalancing(double secondsInterval);
@@ -243,7 +243,8 @@ private:
     std::string mOneTimeCheckpointDirectoryName;
     bool mDoRegularCheckpoints;
     std::string mRegularCheckpointsDirectoryName;
-    size_t mRegularCheckpointsBrainStepInterval;
+    double mRegularCheckpointsLastTimeStamp;
+    double mRegularCheckpointsSecondsInterval;
 
     bool mDoOneTimeLoadBalancing;
     bool mDoRegularLoadBalancing;

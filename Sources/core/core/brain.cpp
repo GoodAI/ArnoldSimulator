@@ -282,7 +282,7 @@ BrainBase::BrainBase(const BrainType &name, const BrainType &type, const BrainPa
     mIsSimulationLoopActive(false), mUnloadRequested(false), mCheckpointInProgress(false),
     mDoOneTimeCheckpoint(false), mOneTimeCheckpointDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
     mDoRegularCheckpoints(false), mRegularCheckpointsDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
-    mRegularCheckpointsBrainStepInterval(DEFAULT_BRAIN_STEPS_PER_CHECKPOINT),
+    mRegularCheckpointsLastTimeStamp(0.0), mRegularCheckpointsSecondsInterval(DEFAULT_SECONDS_PER_CHECKPOINT),
     mDoOneTimeLoadBalancing(false), mDoRegularLoadBalancing(false), mRegularLoadBalancingLastTimeStamp(0.0),
     mRegularLoadBalancingSecondsInterval(DEFAULT_SECONDS_PER_LOAD_BALANCING),
     mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), 
@@ -493,7 +493,7 @@ BrainBase::BrainBase(CkMigrateMessage *msg) :
     mIsSimulationLoopActive(false), mUnloadRequested(false), mCheckpointInProgress(false),
     mDoOneTimeCheckpoint(false), mOneTimeCheckpointDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY), 
     mDoRegularCheckpoints(false), mRegularCheckpointsDirectoryName(DEFAULT_CHECKPOINT_DIRECTORY),
-    mRegularCheckpointsBrainStepInterval(DEFAULT_BRAIN_STEPS_PER_CHECKPOINT),
+    mRegularCheckpointsLastTimeStamp(0.0), mRegularCheckpointsSecondsInterval(DEFAULT_SECONDS_PER_CHECKPOINT),
     mDoOneTimeLoadBalancing(false), mDoRegularLoadBalancing(false), mRegularLoadBalancingLastTimeStamp(0.0),
     mRegularLoadBalancingSecondsInterval(DEFAULT_SECONDS_PER_LOAD_BALANCING),
     mRegionCommitTopologyChangeDone(false), mRegionSimulateDone(false), mAllTopologyChangesDelivered(false), 
@@ -549,7 +549,8 @@ void BrainBase::pup(PUP::er &p)
     p | mOneTimeCheckpointDirectoryName;
     p | mDoRegularCheckpoints;
     p | mRegularCheckpointsDirectoryName;
-    p | mRegularCheckpointsBrainStepInterval;
+    p | mRegularCheckpointsLastTimeStamp;
+    p | mRegularCheckpointsSecondsInterval;
     p | mDoOneTimeLoadBalancing;
     p | mDoRegularLoadBalancing;
     p | mRegularLoadBalancingLastTimeStamp;
@@ -876,6 +877,7 @@ void BrainBase::RunSimulation(size_t brainSteps, bool untilStopped, bool runToBo
     if (!mIsSimulationLoopActive) {
         mIsSimulationLoopActive = true;
         mSimulationWallTime = CmiWallTimer();
+        mRegularCheckpointsLastTimeStamp = CmiWallTimer();
         mRegularLoadBalancingLastTimeStamp = CmiWallTimer();
         if (!mCheckpointInProgress) {
             thisProxy[thisIndex].Simulate();
@@ -941,6 +943,7 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
         mIsSimulationLoopActive = true;
         mDoSimulationProgressNext = false;
         mSimulationWallTime = CmiWallTimer();
+        mRegularCheckpointsLastTimeStamp = CmiWallTimer();
         mRegularLoadBalancingLastTimeStamp = CmiWallTimer();
         if (!mCheckpointInProgress) {
             thisProxy[thisIndex].Simulate();
@@ -948,13 +951,13 @@ void BrainBase::RequestViewportUpdate(RequestId requestId, bool full, bool flush
     }
 }
 
-void BrainBase::EnableRegularCheckpoints(const std::string &directoryName, size_t brainStepInterval)
+void BrainBase::EnableRegularCheckpoints(const std::string &directoryName, double secondsInterval)
 {
     mDoRegularCheckpoints = true;
     mRegularCheckpointsDirectoryName = 
         !directoryName.empty() ? directoryName : DEFAULT_CHECKPOINT_DIRECTORY;
-    mRegularCheckpointsBrainStepInterval = 
-        (brainStepInterval > 0) ? brainStepInterval : DEFAULT_BRAIN_STEPS_PER_CHECKPOINT;
+    mRegularLoadBalancingSecondsInterval =
+        (secondsInterval > 0.0) ? secondsInterval : DEFAULT_SECONDS_PER_CHECKPOINT;
 }
 
 void BrainBase::DisableRegularCheckpoints()
@@ -974,7 +977,8 @@ void BrainBase::RequestOneTimeCheckpoint(const std::string &directoryName)
 void BrainBase::EnableRegularLoadBalancing(double secondsInterval)
 {
     mDoRegularLoadBalancing = true;
-    mRegularLoadBalancingSecondsInterval = secondsInterval;
+    mRegularLoadBalancingSecondsInterval =
+        (secondsInterval > 0.0) ? secondsInterval : DEFAULT_SECONDS_PER_LOAD_BALANCING;
 }
 
 void BrainBase::DisableRegularLoadBalancing()
@@ -1643,12 +1647,13 @@ void BrainBase::SimulateDone()
 
 void BrainBase::SimulateCheckpoint()
 {
-    mCheckpointInProgress = !mUnloadRequested && (mDoOneTimeCheckpoint ||
-        (mDoRegularCheckpoints && !(mBrainStep % mRegularCheckpointsBrainStepInterval)));
+    mCheckpointInProgress = !mUnloadRequested && (mDoOneTimeCheckpoint || (mDoRegularCheckpoints && 
+        (mRegularCheckpointsLastTimeStamp + mRegularCheckpointsSecondsInterval < CmiWallTimer())));
     if (mDoSimulationProgress && mCheckpointInProgress) {
         std::string directoryName = mDoOneTimeCheckpoint ?
             mOneTimeCheckpointDirectoryName : mRegularCheckpointsDirectoryName;
         mDoOneTimeCheckpoint = false;
+        mRegularCheckpointsLastTimeStamp = CmiWallTimer();
         CkStartCheckpoint(directoryName.c_str(), 
             CkCallback(CkIndex_BrainBase::SimulateCheckpointDone(), thisProxy[thisIndex]));
     } else {

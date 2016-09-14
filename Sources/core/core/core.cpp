@@ -238,7 +238,7 @@ void Core::DetectKeyPress()
                     mKeyControlRegularCheckpointsEnabled = true;
                     CkPrintf("EnableRegularCheckpoints\n");
                     gBrain[0].EnableRegularCheckpoints(
-                        DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_BRAIN_STEPS_PER_CHECKPOINT);
+                        DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_SECONDS_PER_CHECKPOINT);
                 }
             }
         } else if (c == 'l') {
@@ -466,7 +466,7 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         // TODO(Premek): ensure this is consistent with default state of UI controls
         gBrain[0].EnableRegularLoadBalancing(DEFAULT_SECONDS_PER_LOAD_BALANCING);
         gBrain[0].EnableRegularCheckpoints(
-            DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_BRAIN_STEPS_PER_CHECKPOINT);
+            DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_SECONDS_PER_CHECKPOINT);
     } else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Run command failed: brain not loaded\n");
