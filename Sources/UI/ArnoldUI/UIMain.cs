@@ -108,11 +108,10 @@ namespace GoodAI.Arnold
 
         public async Task LoadBlueprintAsync()
         {
-            var configuration = new JObject {{"brainStepsPerBodyStep", 10}};
             try
             {
                 await Conductor.LoadBlueprintAsync(Designer.Blueprint);
-                await Conductor.SendConfigurationAsync(new CoreConfiguration(configuration.ToString()));
+                await Conductor.UpdateConfigurationAsync(coreConfig => coreConfig.System.BrainStepsPerBodyStep = 10);
             }
             catch (Exception ex)
             {

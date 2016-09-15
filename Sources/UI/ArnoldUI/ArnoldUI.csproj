@@ -110,6 +110,7 @@
     <Compile Include="Composition\CoreProcessFactory.cs" />
     <Compile Include="Core\LockingModelUpdater.cs" />
     <Compile Include="Core\ModelFilter.cs" />
+    <Compile Include="Core\SystemConfiguration.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\WinFormsExtensions.cs" />

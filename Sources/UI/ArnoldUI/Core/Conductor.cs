@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.Core
         void Disconnect();
         Task ShutdownAsync();
         Task LoadBlueprintAsync(string blueprint);
-        Task SendConfigurationAsync(CoreConfiguration coreConfiguration);
+        Task UpdateConfigurationAsync(Action<CoreConfiguration> updateConfig);
         Task StartSimulationAsync(uint stepsToRun = 0);
         Task PauseSimulationAsync();
         Task ClearBlueprintAsync();
@@ -54,6 +54,8 @@ namespace GoodAI.Arnold.Core
         public IModelProvider ModelProvider { get; }
 
         private readonly ICoreControllerFactory m_coreControllerFactory;
+
+        private readonly CoreConfiguration m_coreConfig = new CoreConfiguration(new SystemConfiguration());
 
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
             ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory,
@@ -203,10 +205,17 @@ namespace GoodAI.Arnold.Core
             await CoreProxy.LoadBlueprintAsync(blueprint);
         }
 
-        public async Task SendConfigurationAsync(CoreConfiguration coreConfiguration)
+        private async Task SendConfigurationAsync(CoreConfiguration coreConfiguration)
         {
             Log.Info("Sending core configuration");
             await CoreProxy.SendConfigurationAsync(coreConfiguration);
+        }
+
+        public async Task UpdateConfigurationAsync(Action<CoreConfiguration> updateConfig)
+        {
+            updateConfig(m_coreConfig);
+
+            await SendConfigurationAsync(m_coreConfig);
         }
 
         private void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)

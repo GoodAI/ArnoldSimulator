@@ -39,6 +39,10 @@
       <HintPath>..\..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\AdamsLair.OpenTK.1.1.6.0\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -84,6 +88,7 @@
     <Compile Include="CoreControllerTests.cs" />
     <Compile Include="CoreLinkTests.cs" />
     <Compile Include="CoreResponseParserTests.cs" />
+    <Compile Include="Core\SystemConfigurationTests.cs" />
     <Compile Include="MathTestHelpers.cs" />
     <Compile Include="MessageTests.cs" />
     <Compile Include="ModelBaseTests.cs" />

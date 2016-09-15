@@ -486,15 +486,18 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         gBrain[0].PauseSimulation();
         sendCommandInProgress = true;
     } else if (commandType == Communication::CommandType_Configure) {
-        json configuration;
+        uint32_t brainStepsPerBodyStep;
+
         try {
-            configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
-        }
-        catch (std::invalid_argument &) {
-            CkPrintf("Invalid configuration.");
+            auto configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
+            brainStepsPerBodyStep = configuration["BrainStepsPerBodyStep"].get<uint32_t>();
+        } catch (std::exception &ex) {
+            Log(LogLevel::Error, "Invalid configuration: '%s'\n Message: %s.",
+                commandRequest->configuration()->systemConfiguration()->c_str(), ex.what());
+            SendErrorResponse(requestId, "Configure command failed: invalid configuration\n");
+            return;
         }
 
-        uint32_t brainStepsPerBodyStep = configuration["brainStepsPerBodyStep"].get<uint32_t>();
         gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
     } else if (commandType == Communication::CommandType_Clear) {
         UnloadBrain();

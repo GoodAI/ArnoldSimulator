@@ -26,7 +26,8 @@ namespace GoodAI.Arnold.Communication
 
     public static class CommandRequestBuilder
     {
-        public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, bool runToBodyStep = false, string blueprint = null, CoreConfiguration configuration = null)
+        public static RequestMessage Build(CommandType commandType, uint stepsToRun = 0, bool runToBodyStep = false,
+            string blueprint = null, CoreConfiguration configuration = null)
         {
             if ((stepsToRun > 0) && runToBodyStep)
                 throw new InvalidOperationException("Cannot combine stepsToRun with runToBodyStep");
@@ -40,7 +41,7 @@ namespace GoodAI.Arnold.Communication
             Offset<Configuration>? configurationOffset = null;
             if (configuration != null)
             {
-                StringOffset systemConfigurationOffset = builder.CreateString(configuration.SystemConfiguration);
+                StringOffset systemConfigurationOffset = builder.CreateString(configuration.SystemConfigString);
                 configurationOffset = Configuration.CreateConfiguration(builder, systemConfigurationOffset);
             }
 

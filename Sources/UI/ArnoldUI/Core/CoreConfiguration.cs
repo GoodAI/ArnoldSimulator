@@ -8,11 +8,14 @@ namespace GoodAI.Arnold.Core
 {
     public class CoreConfiguration
     {
-        public string SystemConfiguration { get; set; }
+        public string SystemConfigString => System.ToString();
 
-        public CoreConfiguration(string systemConfiguration)
+        public readonly SystemConfiguration System;
+
+        public CoreConfiguration(SystemConfiguration systemConfig)
         {
-            SystemConfiguration = systemConfiguration;
+            System = systemConfig;
         }
+
     }
 }

@@ -52,12 +52,12 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public void WritesReadsConfigurationCommand()
         {
-            var configContent = "foo";
-            var message = CommandRequestBuilder.Build(CommandType.Configure, configuration: new CoreConfiguration(configContent));
+            var systemConfig = new SystemConfiguration() {BrainStepsPerBodyStep = 13};
+            var message = CommandRequestBuilder.Build(CommandType.Configure, configuration: new CoreConfiguration(systemConfig));
 
             CommandRequest commandRequest = message.GetRequest(new CommandRequest());
             Assert.Equal(CommandType.Configure, commandRequest.Command);
-            Assert.Equal(configContent, commandRequest.Configuration.SystemConfiguration);
+            Assert.Equal(systemConfig.ToString(), commandRequest.Configuration.SystemConfiguration);
         }
 
         [Fact]
