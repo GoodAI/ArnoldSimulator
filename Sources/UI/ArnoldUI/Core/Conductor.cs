@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using GoodAI.Arnold.Communication;
@@ -219,19 +220,29 @@ namespace GoodAI.Arnold.Core
 
         public async Task UpdateConfigurationAsync(Action<CoreConfiguration> updateConfig)
         {
-            // TODO(Premek): Do nothing when core not connected. (Or just shedule config update.)
-
             // TODO(Premek): Backup settings and keep old value when request fails.
             updateConfig(CoreConfig);
+
+            if (CoreState == CoreState.Disconnected || CoreState == CoreState.ShuttingDown)
+                return;
 
             await SendConfigurationAsync(CoreConfig);
         }
 
-        private void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
+        private async void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
         {
             Log.Debug("Core state changed: {previousState} -> {currentState}", stateChangedEventArgs.PreviousState, stateChangedEventArgs.CurrentState);
 
             StateChanged?.Invoke(this, stateChangedEventArgs);
+
+            var newState = stateChangedEventArgs.CurrentState;
+            if (stateChangedEventArgs.PreviousState == CoreState.Disconnected
+                && (newState == CoreState.Empty || newState == CoreState.Paused || newState == CoreState.Running))
+            {
+                // TODO(Premek): Maybe do it only when some chenges are pending?
+                Log.Debug("Updating core configuration after connecting");
+                await SendConfigurationAsync(CoreConfig);
+            }
         }
 
         private void OnCoreStateChangeFailed(object sender, StateChangeFailedEventArgs stateChangeFailedEventArgs)

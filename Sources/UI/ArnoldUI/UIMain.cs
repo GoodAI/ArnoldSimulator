@@ -137,7 +137,15 @@ namespace GoodAI.Arnold
 
         public async Task UpdateCoreConfig(Action<CoreConfiguration> updateConfig)
         {
-            await Conductor.UpdateConfigurationAsync(updateConfig);
+            try
+            {
+                await Conductor.UpdateConfigurationAsync(updateConfig);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Core configuration update failed.");
+                throw;
+            }
         }
 
         public void Disconnect()

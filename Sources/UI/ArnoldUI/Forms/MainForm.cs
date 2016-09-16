@@ -256,10 +256,19 @@ namespace GoodAI.Arnold
 
         private async void regularCheckpointingButton_Click(object sender, EventArgs e)
         {
-            await m_uiMain.UpdateCoreConfig(coreConfig =>
+            try
             {
-                coreConfig.System.RegularCheckpointingEnabled = regularCheckpointingButton.Checked;
-            });
+                await m_uiMain.UpdateCoreConfig(coreConfig =>
+                {
+                    coreConfig.System.RegularCheckpointingEnabled = regularCheckpointingButton.Checked;
+                });
+
+            }
+            catch (Exception)
+            {
+                regularCheckpointingButton.Checked = m_uiMain.Conductor.CoreConfig.System.RegularCheckpointingEnabled;
+                // (Already logged.)
+            }
         }
     }
 }
