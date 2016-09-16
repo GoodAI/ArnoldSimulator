@@ -14,13 +14,18 @@ namespace GoodAI.Arnold.UI.Tests.Core
         [Fact]
         public void ConvertsToJsonAsExpected()
         {
-            var systemConfig = new SystemConfiguration() {BrainStepsPerBodyStep = 7};
+            var systemConfig = new SystemConfiguration()
+            {
+                BrainStepsPerBodyStep = 7,
+                RegularCheckpointingEnabled = true
+            };
 
             var configString = systemConfig.ToString();
 
             var jObject = JObject.Parse(configString);
 
             Assert.Equal(systemConfig.BrainStepsPerBodyStep, (int)jObject["BrainStepsPerBodyStep"]);
+            Assert.Equal(systemConfig.RegularCheckpointingEnabled, (bool)jObject["RegularCheckpointingEnabled"]);
         }
     }
 }

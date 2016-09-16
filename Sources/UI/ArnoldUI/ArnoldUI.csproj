@@ -305,6 +305,7 @@
     <None Include="Resources\ScriptError_16x.png" />
     <None Include="Resources\Script_16x.png" />
     <None Include="Resources\observer_icon.png" />
+    <Content Include="Resources\Autosave.png" />
     <Content Include="Resources\BasicNeuron.png" />
     <None Include="Resources\Disconnect_16x.png" />
     <None Include="Resources\Connect_16x.png" />

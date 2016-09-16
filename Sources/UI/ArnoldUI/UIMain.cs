@@ -135,6 +135,11 @@ namespace GoodAI.Arnold
             await Conductor.RunToBodyStepAsync();
         }
 
+        public async Task UpdateCoreConfig(Action<CoreConfiguration> updateConfig)
+        {
+            await Conductor.UpdateConfigurationAsync(updateConfig);
+        }
+
         public void Disconnect()
         {
             // TODO(HonzaS): Change this to Disconnect when we allow that.

@@ -67,6 +67,8 @@
             this.bodyStepButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.showVisualizationButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.regularCheckpointingButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
@@ -178,7 +180,9 @@
             this.brainStepButton,
             this.bodyStepButton,
             this.toolStripSeparator2,
-            this.showVisualizationButton});
+            this.showVisualizationButton,
+            this.toolStripSeparator6,
+            this.regularCheckpointingButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(963, 25);
@@ -341,6 +345,23 @@
             this.showVisualizationButton.Text = "Show visualization";
             this.showVisualizationButton.CheckedChanged += new System.EventHandler(this.showVisualizationButton_CheckedChanged);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(6, 25);
+            // 
+            // regularCheckpointingButton
+            // 
+            this.regularCheckpointingButton.CheckOnClick = true;
+            this.regularCheckpointingButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.regularCheckpointingButton.Image = global::GoodAI.Arnold.Properties.Resources.Autosave;
+            this.regularCheckpointingButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.regularCheckpointingButton.Name = "regularCheckpointingButton";
+            this.regularCheckpointingButton.Size = new System.Drawing.Size(23, 22);
+            this.regularCheckpointingButton.Text = "toolStripButton1";
+            this.regularCheckpointingButton.ToolTipText = "Regular checkpointing enabled/disabled";
+            this.regularCheckpointingButton.Click += new System.EventHandler(this.regularCheckpointingButton_Click);
+            // 
             // statusStrip
             // 
             this.statusStrip.Location = new System.Drawing.Point(0, 534);
@@ -412,6 +433,8 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripButton regularCheckpointingButton;
     }
 }
 

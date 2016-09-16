@@ -465,8 +465,6 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
 
         // TODO(Premek): ensure this is consistent with default state of UI controls
         gBrain[0].EnableRegularLoadBalancing(DEFAULT_SECONDS_PER_LOAD_BALANCING);
-        gBrain[0].EnableRegularCheckpoints(
-            DEFAULT_CHECKPOINT_DIRECTORY, DEFAULT_SECONDS_PER_CHECKPOINT);
     } else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Run command failed: brain not loaded\n");
@@ -487,10 +485,12 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         sendCommandInProgress = true;
     } else if (commandType == Communication::CommandType_Configure) {
         uint32_t brainStepsPerBodyStep;
+        bool regularCheckpointingEnabled;
 
         try {
             auto configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
             brainStepsPerBodyStep = configuration["BrainStepsPerBodyStep"].get<uint32_t>();
+            regularCheckpointingEnabled = configuration["RegularCheckpointingEnabled"].get<bool>();
         } catch (std::exception &ex) {
             Log(LogLevel::Error, "Invalid configuration: '%s'\n Message: %s.",
                 commandRequest->configuration()->systemConfiguration()->c_str(), ex.what());
@@ -499,6 +499,12 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         }
 
         gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
+
+        if (regularCheckpointingEnabled)
+            gBrain[0].EnableRegularCheckpoints("", 0.0);  // TODO(Premek): Pass real values.
+        else
+            gBrain[0].DisableRegularCheckpoints();
+
     } else if (commandType == Communication::CommandType_Clear) {
         UnloadBrain();
     }

@@ -94,6 +94,8 @@ namespace GoodAI.Arnold
 
             showVisualizationButton.Enabled = m_uiMain.Conductor.CoreState != CoreState.Disconnected;
             showVisualizationButton.Checked = (VisualizationForm != null) && !VisualizationForm.IsDisposed;
+
+            regularCheckpointingButton.Checked = m_uiMain.Conductor.CoreConfig.System.RegularCheckpointingEnabled;
         }
 
         private void DisableCommandButtons()
@@ -250,6 +252,14 @@ namespace GoodAI.Arnold
         {
             if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
                 m_uiMain.SaveBlueprint(saveFileDialog.FileName);
+        }
+
+        private async void regularCheckpointingButton_Click(object sender, EventArgs e)
+        {
+            await m_uiMain.UpdateCoreConfig(coreConfig =>
+            {
+                coreConfig.System.RegularCheckpointingEnabled = regularCheckpointingButton.Checked;
+            });
         }
     }
 }

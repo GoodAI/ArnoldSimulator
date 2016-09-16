@@ -31,6 +31,8 @@ namespace GoodAI.Arnold.Core
 
         CoreState CoreState { get; }
 
+        CoreConfiguration CoreConfig { get; }
+
         IModelProvider ModelProvider { get; }
     }
 
@@ -42,6 +44,17 @@ namespace GoodAI.Arnold.Core
         public event EventHandler<StateChangedEventArgs> StateChanged;
         public event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
 
+        public ICoreProxy CoreProxy { get; private set; }
+        public IModelProvider ModelProvider { get; }
+
+        public bool IsConnected => CoreProxy != null;
+
+        public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
+
+        public CoreConfiguration CoreConfig { get; } = new CoreConfiguration(new SystemConfiguration());
+
+        private readonly ICoreControllerFactory m_coreControllerFactory;
+
         private readonly ICoreProcessFactory m_coreProcessFactory;
         private ICoreProcess m_process;
 
@@ -49,13 +62,6 @@ namespace GoodAI.Arnold.Core
 
         private readonly ICoreProxyFactory m_coreProxyFactory;
         private readonly IModelUpdaterFactory m_modelUpdaterFactory;
-
-        public ICoreProxy CoreProxy { get; private set; }
-        public IModelProvider ModelProvider { get; }
-
-        private readonly ICoreControllerFactory m_coreControllerFactory;
-
-        private readonly CoreConfiguration m_coreConfig = new CoreConfiguration(new SystemConfiguration());
 
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
             ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory,
@@ -213,9 +219,12 @@ namespace GoodAI.Arnold.Core
 
         public async Task UpdateConfigurationAsync(Action<CoreConfiguration> updateConfig)
         {
-            updateConfig(m_coreConfig);
+            // TODO(Premek): Do nothing when core not connected. (Or just shedule config update.)
 
-            await SendConfigurationAsync(m_coreConfig);
+            // TODO(Premek): Backup settings and keep old value when request fails.
+            updateConfig(CoreConfig);
+
+            await SendConfigurationAsync(CoreConfig);
         }
 
         private void OnCoreStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
@@ -260,10 +269,6 @@ namespace GoodAI.Arnold.Core
             Log.Info("Clearing blueprint");
             await CoreProxy.ClearAsync();
         }
-
-        public bool IsConnected => CoreProxy != null;
-
-        public CoreState CoreState => CoreProxy?.State ?? CoreState.Disconnected;
 
         public async Task PerformBrainStepAsync()
         {
