@@ -1,0 +1,3 @@
+group main
+    host KOUPY-PC.keenswh.com
+    host SWE-TEST.keenswh.com

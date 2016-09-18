@@ -1,0 +1,13 @@
+netsh advfirewall firewall delete rule name="core" program="C:\arnold\core.exe"
+netsh advfirewall firewall delete rule name="charmrun" program="C:\arnold\charmrun.exe"
+netsh advfirewall firewall delete rule name="charmrun-notify" program="C:\arnold\charmrun-notify.exe"
+netsh advfirewall firewall delete rule name="charmrun-silent" program="C:\arnold\charmrun-silent.exe"
+netsh advfirewall firewall delete rule name="charmd" program="C:\arnold\charmd.exe"
+netsh advfirewall firewall delete rule name="charmd_faceless" program="C:\arnold\charmd_faceless.exe"
+
+netsh advfirewall firewall add rule dir=in action=allow profile=any protocol=any name="core" program="C:\arnold\core.exe"
+netsh advfirewall firewall add rule dir=in action=allow profile=any protocol=any name="charmrun" program="C:\arnold\charmrun.exe"
+netsh advfirewall firewall add rule dir=in action=allow profile=any protocol=any name="charmrun-notify" program="C:\arnold\charmrun-notify.exe"
+netsh advfirewall firewall add rule dir=in action=allow profile=any protocol=any name="charmrun-silent" program="C:\arnold\charmrun-silent.exe"
+netsh advfirewall firewall add rule dir=in action=allow profile=any protocol=any name="charmd" program="C:\arnold\charmd.exe"
+netsh advfirewall firewall add rule dir=in action=allow profile=any protocol=any name="charmd_faceless" program="C:\arnold\charmd_faceless.exe"
