@@ -486,11 +486,13 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
     } else if (commandType == Communication::CommandType_Configure) {
         uint32_t brainStepsPerBodyStep;
         bool regularCheckpointingEnabled;
+        double checkpointingIntervalSeconds;
 
         try {
             auto configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
             brainStepsPerBodyStep = configuration["BrainStepsPerBodyStep"].get<uint32_t>();
             regularCheckpointingEnabled = configuration["RegularCheckpointingEnabled"].get<bool>();
+            checkpointingIntervalSeconds = configuration["CheckpointingIntervalSeconds"].get<double>();
         } catch (std::exception &ex) {
             Log(LogLevel::Error, "Invalid configuration: '%s'\n Message: %s.",
                 commandRequest->configuration()->systemConfiguration()->c_str(), ex.what());
@@ -498,10 +500,14 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
             return;
         }
 
+        Log(LogLevel::Info, "Applying new configuration:\n"
+            "  BrainStepsPerBodyStep: %d\n  RegularCheckpointingEnabled: %d\n  CheckpointingIntervalSeconds: %.2f",
+            brainStepsPerBodyStep, regularCheckpointingEnabled, checkpointingIntervalSeconds);
+
         gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
 
         if (regularCheckpointingEnabled)
-            gBrain[0].EnableRegularCheckpoints("", 0.0);  // TODO(Premek): Pass real values.
+            gBrain[0].EnableRegularCheckpoints("", checkpointingIntervalSeconds);
         else
             gBrain[0].DisableRegularCheckpoints();
 

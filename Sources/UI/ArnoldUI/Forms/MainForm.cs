@@ -258,9 +258,14 @@ namespace GoodAI.Arnold
         {
             try
             {
+                float? checkpointingIntervalSeconds = ParseCheckpointingIntervalInSeconds();
+
                 await m_uiMain.UpdateCoreConfig(coreConfig =>
                 {
                     coreConfig.System.RegularCheckpointingEnabled = regularCheckpointingButton.Checked;
+
+                    if (checkpointingIntervalSeconds.HasValue)
+                        coreConfig.System.CheckpointingIntervalSeconds = checkpointingIntervalSeconds.Value;
                 });
 
             }
@@ -269,6 +274,16 @@ namespace GoodAI.Arnold
                 regularCheckpointingButton.Checked = m_uiMain.Conductor.CoreConfig.System.RegularCheckpointingEnabled;
                 // (Already logged.)
             }
+        }
+
+        private float? ParseCheckpointingIntervalInSeconds()
+        {
+            uint intervalMs;
+
+            if (!UInt32.TryParse(checkpointingIntervalTextBox.Text, out intervalMs))
+                return null;
+
+            return intervalMs/1000.0f;
         }
     }
 }
