@@ -437,6 +437,37 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
     delete requestMessage;
 }
 
+bool Core::TryApplyConfiguration(const std::string &systemConfigurationString)
+{
+    uint32_t brainStepsPerBodyStep;
+    bool regularCheckpointingEnabled;
+    double checkpointingIntervalSeconds;
+
+    try {
+        auto configuration = json::parse(systemConfigurationString);
+        brainStepsPerBodyStep = configuration["BrainStepsPerBodyStep"].get<uint32_t>();
+        regularCheckpointingEnabled = configuration["RegularCheckpointingEnabled"].get<bool>();
+        checkpointingIntervalSeconds = configuration["CheckpointingIntervalSeconds"].get<double>();
+    } catch (std::exception &ex) {
+        Log(LogLevel::Error, "Invalid configuration: '%s'\n Exception: %s.",
+            systemConfigurationString, ex.what());
+        return false;
+    }
+
+    Log(LogLevel::Info, "Applying new configuration:\n"
+        "  BrainStepsPerBodyStep: %d\n  RegularCheckpointingEnabled: %d\n  CheckpointingIntervalSeconds: %.2f",
+        brainStepsPerBodyStep, regularCheckpointingEnabled, checkpointingIntervalSeconds);
+
+    gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
+
+    if (regularCheckpointingEnabled)
+        gBrain[0].EnableRegularCheckpoints("", checkpointingIntervalSeconds);
+    else
+        gBrain[0].DisableRegularCheckpoints();
+
+    return true;
+}
+
 void Core::ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId)
 {
     Communication::CommandType commandType = commandRequest->command();
@@ -484,32 +515,10 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
         gBrain[0].PauseSimulation();
         sendCommandInProgress = true;
     } else if (commandType == Communication::CommandType_Configure) {
-        uint32_t brainStepsPerBodyStep;
-        bool regularCheckpointingEnabled;
-        double checkpointingIntervalSeconds;
-
-        try {
-            auto configuration = json::parse(commandRequest->configuration()->systemConfiguration()->str());
-            brainStepsPerBodyStep = configuration["BrainStepsPerBodyStep"].get<uint32_t>();
-            regularCheckpointingEnabled = configuration["RegularCheckpointingEnabled"].get<bool>();
-            checkpointingIntervalSeconds = configuration["CheckpointingIntervalSeconds"].get<double>();
-        } catch (std::exception &ex) {
-            Log(LogLevel::Error, "Invalid configuration: '%s'\n Message: %s.",
-                commandRequest->configuration()->systemConfiguration()->c_str(), ex.what());
+        if (!TryApplyConfiguration(commandRequest->configuration()->systemConfiguration()->str())) {
             SendErrorResponse(requestId, "Configure command failed: invalid configuration\n");
             return;
         }
-
-        Log(LogLevel::Info, "Applying new configuration:\n"
-            "  BrainStepsPerBodyStep: %d\n  RegularCheckpointingEnabled: %d\n  CheckpointingIntervalSeconds: %.2f",
-            brainStepsPerBodyStep, regularCheckpointingEnabled, checkpointingIntervalSeconds);
-
-        gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
-
-        if (regularCheckpointingEnabled)
-            gBrain[0].EnableRegularCheckpoints("", checkpointingIntervalSeconds);
-        else
-            gBrain[0].DisableRegularCheckpoints();
 
     } else if (commandType == Communication::CommandType_Clear) {
         UnloadBrain();

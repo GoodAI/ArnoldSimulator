@@ -69,13 +69,13 @@ public:
 
 protected:
     void SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuilder &builder);
-
     void ProcessCommandRequest(const Communication::CommandRequest *commandRequest, RequestId requestId);
     void SendCompleteStateResponse(const Communication::GetStateRequest *getStateRequest, RequestId requestId);
     void ProcessGetModelRequest(const Communication::GetModelRequest *getModelRequest, RequestId requestId);
     void SendCommandInProgress(RequestId requestId);
 
     bool TryLoadBrain(const std::string &blueprintString);
+    bool TryApplyConfiguration(const std::string &systemConfigurationString);
 
     void SendErrorResponse(RequestId requestId, const std::string &message);
 
