@@ -956,7 +956,7 @@ void BrainBase::EnableRegularCheckpoints(const std::string &directoryName, doubl
     mDoRegularCheckpoints = true;
     mRegularCheckpointsDirectoryName = 
         !directoryName.empty() ? directoryName : DEFAULT_CHECKPOINT_DIRECTORY;
-    mRegularLoadBalancingSecondsInterval =
+    mRegularCheckpointsSecondsInterval =
         (secondsInterval > 0.0) ? secondsInterval : DEFAULT_SECONDS_PER_CHECKPOINT;
 }
 
