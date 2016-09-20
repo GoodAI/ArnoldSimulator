@@ -276,14 +276,28 @@ namespace GoodAI.Arnold
             }
         }
 
+        private void checkpointingIntervalTextBox_TextChanged(object sender, EventArgs e)
+        {
+            uint foo;
+
+            checkpointingIntervalTextBox.ForeColor = TryParseCheckpointingInterval(out foo)
+                ? DefaultForeColor
+                : Color.DarkRed;
+        }
+
         private float? ParseCheckpointingIntervalInSeconds()
         {
             uint intervalMs;
 
-            if (!UInt32.TryParse(checkpointingIntervalTextBox.Text, out intervalMs))
+            if (!TryParseCheckpointingInterval(out intervalMs))
                 return null;
 
             return intervalMs/1000.0f;
+        }
+
+        private bool TryParseCheckpointingInterval(out uint intervalMs)
+        {
+            return UInt32.TryParse(checkpointingIntervalTextBox.Text, out intervalMs);
         }
     }
 }

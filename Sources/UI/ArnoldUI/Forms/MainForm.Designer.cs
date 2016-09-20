@@ -372,6 +372,7 @@
             this.checkpointingIntervalTextBox.Text = "10000";
             this.checkpointingIntervalTextBox.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.checkpointingIntervalTextBox.ToolTipText = "Regular checkpointing interval in milliseconds";
+            this.checkpointingIntervalTextBox.TextChanged += new System.EventHandler(this.checkpointingIntervalTextBox_TextChanged);
             // 
             // statusStrip
             // 
