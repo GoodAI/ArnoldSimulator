@@ -57,7 +57,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             CommandRequest commandRequest = message.GetRequest(new CommandRequest());
             Assert.Equal(CommandType.Configure, commandRequest.Command);
-            Assert.Equal(systemConfig.ToString(), commandRequest.Configuration.SystemConfiguration);
+            Assert.Equal(systemConfig.ToJsonString(), commandRequest.Configuration.SystemConfiguration);
         }
 
         [Fact]

@@ -8,7 +8,7 @@ namespace GoodAI.Arnold.Core
 {
     public class CoreConfiguration
     {
-        public string SystemConfigString => System.ToString();
+        public string SystemConfigString => System.ToJsonString();
 
         public readonly SystemConfiguration System;
 

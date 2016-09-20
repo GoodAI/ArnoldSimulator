@@ -20,7 +20,7 @@ namespace GoodAI.Arnold.UI.Tests.Core
                 RegularCheckpointingEnabled = true
             };
 
-            var configString = systemConfig.ToString();
+            var configString = systemConfig.ToJsonString();
 
             var jObject = JObject.Parse(configString);
 

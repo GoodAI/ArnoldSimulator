@@ -15,7 +15,7 @@ namespace GoodAI.Arnold.Core
 
         public float CheckpointingIntervalSeconds { get; set; } = 10.0f;
 
-        public override string ToString()
+        public string ToJsonString()
         {
             return JsonConvert.SerializeObject(this);
         }
