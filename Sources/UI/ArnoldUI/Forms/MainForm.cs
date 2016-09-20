@@ -256,6 +256,11 @@ namespace GoodAI.Arnold
 
         private async void regularCheckpointingButton_Click(object sender, EventArgs e)
         {
+            await UpdateCheckpointingSettings();
+        }
+
+        private async Task UpdateCheckpointingSettings()
+        {
             try
             {
                 float? checkpointingIntervalSeconds = ParseCheckpointingIntervalInSeconds();
@@ -267,12 +272,19 @@ namespace GoodAI.Arnold
                     if (checkpointingIntervalSeconds.HasValue)
                         coreConfig.System.CheckpointingIntervalSeconds = checkpointingIntervalSeconds.Value;
                 });
-
             }
             catch (Exception)
             {
                 regularCheckpointingButton.Checked = m_uiMain.Conductor.CoreConfig.System.RegularCheckpointingEnabled;
                 // (Already logged.)
+            }
+        }
+
+        private async void checkpointingIntervalTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                await UpdateCheckpointingSettings();
             }
         }
 
@@ -287,17 +299,18 @@ namespace GoodAI.Arnold
 
         private float? ParseCheckpointingIntervalInSeconds()
         {
-            uint intervalMs;
+            uint intervalSeconds;
 
-            if (!TryParseCheckpointingInterval(out intervalMs))
+            if (!TryParseCheckpointingInterval(out intervalSeconds))
                 return null;
 
-            return intervalMs/1000.0f;
+            return intervalSeconds;
         }
 
-        private bool TryParseCheckpointingInterval(out uint intervalMs)
+        private bool TryParseCheckpointingInterval(out uint intervalSeconds)
         {
-            return UInt32.TryParse(checkpointingIntervalTextBox.Text, out intervalMs);
+            return UInt32.TryParse(checkpointingIntervalTextBox.Text, out intervalSeconds);
         }
+
     }
 }
