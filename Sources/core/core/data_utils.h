@@ -46,5 +46,5 @@ inline void CheckedMemCopy(void *destination, const void *source, size_t dataSiz
         return;
     }
 
-    std::memcpy(destination, source, dataSize);
+    memcpy(destination, source, dataSize);
 }

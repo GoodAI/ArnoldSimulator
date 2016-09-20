@@ -55,8 +55,8 @@ void fillLabelStream(std::ostream &labels)
 
     uint8_t data[10];
 
-    std::memcpy(data, &magicNumber, 4);
-    std::memcpy(data + 4, &labelCount, 4);
+    memcpy(data, &magicNumber, 4);
+    memcpy(data + 4, &labelCount, 4);
     data[8] = LABEL_1;
     data[9] = LABEL_2;
 
@@ -110,7 +110,7 @@ TEST_CASE("MNISTReader reads digits", "[bodies]")
                 REQUIRE(success);
 
                 uint32_t digitData1;
-                std::memcpy(&digitData1, &digit1[0], 4);
+                memcpy(&digitData1, &digit1[0], 4);
                 REQUIRE(SwapEndian(digitData1) == DIGIT_1);
                 REQUIRE(label1 == LABEL_1);
 
@@ -118,7 +118,7 @@ TEST_CASE("MNISTReader reads digits", "[bodies]")
                 REQUIRE(success);
 
                 uint32_t digitData2;
-                std::memcpy(&digitData2, &digit2[0], 4);
+                memcpy(&digitData2, &digit2[0], 4);
                 REQUIRE(SwapEndian(digitData2) == DIGIT_2);
                 REQUIRE(label2 == LABEL_2);
             }
@@ -140,9 +140,9 @@ TEST_CASE("MNISTReader reads digits", "[bodies]")
                 REQUIRE(success);
 
                 uint32_t digitData1;
-                std::memcpy(&digitData1, &digit1[0], 4);
+                memcpy(&digitData1, &digit1[0], 4);
                 uint32_t digitData3;
-                std::memcpy(&digitData3, &digit3[0], 4);
+                memcpy(&digitData3, &digit3[0], 4);
 
                 REQUIRE(digitData1 == digitData3);
                 REQUIRE(label1 == label3);

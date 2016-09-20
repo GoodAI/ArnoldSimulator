@@ -77,23 +77,23 @@ void ThresholdRegion::AcceptContributionFromNeuron(
         const uint8_t *cur = contribution;
 
         bool wasTriggered = false;
-        std::memcpy(&wasTriggered, cur, sizeof(bool));
+        memcpy(&wasTriggered, cur, sizeof(bool));
         cur += sizeof(bool);
 
         size_t receivedSpikeCount = 0;
-        std::memcpy(&receivedSpikeCount, cur, sizeof(size_t));
+        memcpy(&receivedSpikeCount, cur, sizeof(size_t));
         cur += sizeof(size_t);
 
         size_t sentSpikeCount = 0;
-        std::memcpy(&sentSpikeCount, cur, sizeof(size_t));
+        memcpy(&sentSpikeCount, cur, sizeof(size_t));
         cur += sizeof(size_t);
 
         size_t inputSynapseCount = 0;
-        std::memcpy(&inputSynapseCount, cur, sizeof(size_t));
+        memcpy(&inputSynapseCount, cur, sizeof(size_t));
         cur += sizeof(size_t);
 
         size_t outputSynapseCount = 0;
-        std::memcpy(&outputSynapseCount, cur, sizeof(size_t));
+        memcpy(&outputSynapseCount, cur, sizeof(size_t));
         //cur += sizeof(size_t);
 
         if (wasTriggered) {
@@ -117,31 +117,31 @@ size_t ThresholdRegion::ContributeToBrain(uint8_t *&contribution)
     uint8_t *cur = contribution;
 
     size_t addedNeurons = mBase.GetNeuronAdditions().size();
-    std::memcpy(cur, &addedNeurons, sizeof(size_t));
+    memcpy(cur, &addedNeurons, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t removedNeurons = mBase.GetNeuronRemovals().size();
-    std::memcpy(cur, &removedNeurons, sizeof(size_t));
+    memcpy(cur, &removedNeurons, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t addedSynapses = mBase.GetSynapseAdditions().size();
-    std::memcpy(cur, &addedSynapses, sizeof(size_t));
+    memcpy(cur, &addedSynapses, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t removedSynapses = mBase.GetSynapseRemovals().size();
-    std::memcpy(cur, &removedSynapses, sizeof(size_t));
+    memcpy(cur, &removedSynapses, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t addedChildLinks = mBase.GetChildAdditions().size();
-    std::memcpy(cur, &addedChildLinks, sizeof(size_t));
+    memcpy(cur, &addedChildLinks, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t removedChildLinks = mBase.GetChildRemovals().size();
-    std::memcpy(cur, &removedChildLinks, sizeof(size_t));
+    memcpy(cur, &removedChildLinks, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t triggeredNeurons = mBase.GetTriggeredNeurons().size();
-    std::memcpy(cur, &triggeredNeurons, sizeof(size_t));
+    memcpy(cur, &triggeredNeurons, sizeof(size_t));
     //cur += sizeof(size_t);
 
     return size;

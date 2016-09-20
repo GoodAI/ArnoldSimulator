@@ -240,7 +240,7 @@ size_t GenSpecNeuron::ContributeToRegion(uint8_t *&contribution)
 {
     size_t size = sizeof(float) + 1;
     contribution = new uint8_t[size];
-    std::memcpy(contribution, &mGenFactor, sizeof(float));
+    memcpy(contribution, &mGenFactor, sizeof(float));
 
     const auto &children = mBase.GetChildren();
     bool hasNoChildren = children.empty();

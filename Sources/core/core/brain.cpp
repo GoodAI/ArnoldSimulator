@@ -51,46 +51,46 @@ void *SimulateMsg::pack(SimulateMsg *msg)
     char *buf = static_cast<char *>(CkAllocBuffer(msg, size));
     char *cur = buf;
 
-    std::memcpy(cur, &msg->_cookie, sizeof(CkSectionInfo));
+    memcpy(cur, &msg->_cookie, sizeof(CkSectionInfo));
     cur += sizeof(CkSectionInfo);
 
-    std::memcpy(cur, &msg->magic, sizeof(char));
+    memcpy(cur, &msg->magic, sizeof(char));
     cur += sizeof(char);
 
-    std::memcpy(cur, &msg->ep, sizeof(unsigned short));
+    memcpy(cur, &msg->ep, sizeof(unsigned short));
     cur += sizeof(unsigned short);
 
-    std::memcpy(cur, &msg->dtorsCalled, sizeof(bool));
+    memcpy(cur, &msg->dtorsCalled, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(cur, &msg->doUpdate, sizeof(bool));
+    memcpy(cur, &msg->doUpdate, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(cur, &msg->doFullUpdate, sizeof(bool));
+    memcpy(cur, &msg->doFullUpdate, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(cur, &msg->doProgress, sizeof(bool));
+    memcpy(cur, &msg->doProgress, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(cur, &msg->brainStep, sizeof(size_t));
+    memcpy(cur, &msg->brainStep, sizeof(size_t));
     cur += sizeof(size_t);
 
-    std::memcpy(cur, &boxCnt, sizeof(size_t));
+    memcpy(cur, &boxCnt, sizeof(size_t));
     cur += sizeof(size_t);
 
-    std::memcpy(cur, msg->roiBoxes.data(), sizeof(Box3D) * boxCnt);
+    memcpy(cur, msg->roiBoxes.data(), sizeof(Box3D) * boxCnt);
     cur += sizeof(Box3D) * boxCnt;
 
-    std::memcpy(cur, &boxLastCnt, sizeof(size_t));
+    memcpy(cur, &boxLastCnt, sizeof(size_t));
     cur += sizeof(size_t);
 
-    std::memcpy(cur, msg->roiBoxesLast.data(), sizeof(Box3D) * boxLastCnt);
+    memcpy(cur, msg->roiBoxesLast.data(), sizeof(Box3D) * boxLastCnt);
     cur += sizeof(Box3D) * boxLastCnt;
 
-    std::memcpy(cur, &observerCnt, sizeof(size_t));
+    memcpy(cur, &observerCnt, sizeof(size_t));
     cur += sizeof(size_t);
 
-    std::memcpy(cur, msg->observers.data(), sizeof(Observer) * observerCnt);
+    memcpy(cur, msg->observers.data(), sizeof(Observer) * observerCnt);
     //cur += sizeof(ObserverResult);
 
     delete msg;
@@ -103,52 +103,52 @@ SimulateMsg *SimulateMsg::unpack(void *buf)
     SimulateMsg *msg = static_cast<SimulateMsg *>(CkAllocBuffer(buf, sizeof(SimulateMsg)));
     msg = new (static_cast<void *>(msg)) SimulateMsg();
 
-    std::memcpy(&msg->_cookie, cur, sizeof(CkSectionInfo));
+    memcpy(&msg->_cookie, cur, sizeof(CkSectionInfo));
     cur += sizeof(CkSectionInfo);
 
-    std::memcpy(&msg->magic, cur, sizeof(char));
+    memcpy(&msg->magic, cur, sizeof(char));
     cur += sizeof(char);
 
-    std::memcpy(&msg->ep, cur, sizeof(unsigned short));
+    memcpy(&msg->ep, cur, sizeof(unsigned short));
     cur += sizeof(unsigned short);
 
-    std::memcpy(&msg->dtorsCalled, cur, sizeof(bool));
+    memcpy(&msg->dtorsCalled, cur, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(&msg->doUpdate, cur, sizeof(bool));
+    memcpy(&msg->doUpdate, cur, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(&msg->doFullUpdate, cur, sizeof(bool));
+    memcpy(&msg->doFullUpdate, cur, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(&msg->doProgress, cur, sizeof(bool));
+    memcpy(&msg->doProgress, cur, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(&msg->brainStep, cur, sizeof(size_t));
+    memcpy(&msg->brainStep, cur, sizeof(size_t));
     cur += sizeof(size_t);
 
     size_t boxCnt = 0;
-    std::memcpy(&boxCnt, cur, sizeof(size_t));
+    memcpy(&boxCnt, cur, sizeof(size_t));
     cur += sizeof(size_t);
 
     msg->roiBoxes.resize(boxCnt);
-    std::memcpy(msg->roiBoxes.data(), cur, sizeof(Box3D) * boxCnt);
+    memcpy(msg->roiBoxes.data(), cur, sizeof(Box3D) * boxCnt);
     cur += sizeof(Box3D) * boxCnt;
 
     size_t boxLastCnt = 0;
-    std::memcpy(&boxLastCnt, cur, sizeof(size_t));
+    memcpy(&boxLastCnt, cur, sizeof(size_t));
     cur += sizeof(size_t);
 
     msg->roiBoxesLast.resize(boxLastCnt);
-    std::memcpy(msg->roiBoxesLast.data(), cur, sizeof(Box3D) * boxLastCnt);
+    memcpy(msg->roiBoxesLast.data(), cur, sizeof(Box3D) * boxLastCnt);
     cur += sizeof(Box3D) * boxLastCnt;
 
     size_t observerCnt = 0;
-    std::memcpy(&observerCnt, cur, sizeof(size_t));
+    memcpy(&observerCnt, cur, sizeof(size_t));
     cur += sizeof(size_t);
 
     msg->observers.resize(observerCnt);
-    std::memcpy(msg->observers.data(), cur, sizeof(Observer) * observerCnt);
+    memcpy(msg->observers.data(), cur, sizeof(Observer) * observerCnt);
     //cur += sizeof(ObserverResult) * observerCnt;
 
     CkFreeMsg(buf);

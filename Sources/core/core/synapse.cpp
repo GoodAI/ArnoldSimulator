@@ -36,7 +36,7 @@ Synapse::Data::Data(const Data &other)
     Editor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
-        std::memcpy(reinterpret_cast<unsigned char *>(bits64), 
+        memcpy(reinterpret_cast<unsigned char *>(bits64), 
             reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
     } else {
         bits64 = other.bits64;
@@ -69,7 +69,7 @@ Synapse::Data &Synapse::Data::operator=(const Data &other)
         Editor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
-            std::memcpy(reinterpret_cast<unsigned char *>(bits64),
+            memcpy(reinterpret_cast<unsigned char *>(bits64),
                 reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
         } else {
             bits64 = other.bits64;
@@ -417,7 +417,7 @@ void MultiWeightedSynapse::GetWeights(const Synapse::Data &data, float *weights,
         return;
     }
 
-    std::memcpy(weights, reinterpret_cast<float*>(data.bits64), count * sizeof(float));
+    memcpy(weights, reinterpret_cast<float*>(data.bits64), count * sizeof(float));
 }
 
 float * MultiWeightedSynapse::GetWeights(const Synapse::Data &data) const
@@ -432,7 +432,7 @@ void MultiWeightedSynapse::SetWeights(Synapse::Data &data, const float *weights,
         return;
     }
 
-    std::memcpy(reinterpret_cast<float*>(data.bits64), weights, count * sizeof(float));
+    memcpy(reinterpret_cast<float*>(data.bits64), weights, count * sizeof(float));
 }
 
 size_t MultiWeightedSynapse::GetWeightCount(const Synapse::Data &data) const

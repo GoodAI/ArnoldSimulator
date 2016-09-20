@@ -39,7 +39,7 @@ void GenSpecInputNeuron::HandleSpike(Direction direction, MultiByteSpike &spike,
     const NeuronBase::Synapses &outputSynapses = mBase.GetOutputSynapses();
 
     const uint8_t *spikeValues = spike.GetValues(spikeData);
-    std::memcpy(mLastInput.get(), spikeValues, spike.GetValueCount(spikeData));
+    memcpy(mLastInput.get(), spikeValues, spike.GetValueCount(spikeData));
 
     int i = 0;
     for (const auto &entry : outputSynapses) {
@@ -69,7 +69,7 @@ void GenSpecInputNeuron::HandleSpike(Direction direction, MultiByteSpike &spike,
                 // Put them into the spike, 1 and 0 values only.
                 neuronValues[toDataStart + x] = spikeValues[fromDataStart + x] > 0 ? 1 : 0;
             }
-            //std::memcpy(neuronValues + toDataStart, spikeValues + fromDataStart, mNeuronInputSizeX);
+            //memcpy(neuronValues + toDataStart, spikeValues + fromDataStart, mNeuronInputSizeX);
         }
 
         SendMultiByteSpike(Direction::Forward, generalist, neuronValues, neuronValuesCount);

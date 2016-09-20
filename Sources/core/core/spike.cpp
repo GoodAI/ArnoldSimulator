@@ -41,7 +41,7 @@ Spike::Data::Data(const Data &other)
     Editor *ed = Edit(*this);
     if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
         bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
-        std::memcpy(reinterpret_cast<unsigned char *>(bits64),
+        memcpy(reinterpret_cast<unsigned char *>(bits64),
             reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
     } else {
         bits64 = other.bits64;
@@ -76,7 +76,7 @@ Spike::Data &Spike::Data::operator=(const Data &other)
         Editor *ed = Edit(*this);
         if (ed->ExtraBytes(*this) > 0 && other.bits64 != 0) {
             bits64 = reinterpret_cast<uintptr_t>(ed->AllocateExtra(*this));
-            std::memcpy(reinterpret_cast<unsigned char *>(bits64),
+            memcpy(reinterpret_cast<unsigned char *>(bits64),
                 reinterpret_cast<unsigned char *>(other.bits64), ed->ExtraBytes(*this));
         } else {
             bits64 = other.bits64;
@@ -394,7 +394,7 @@ void FunctionalSpike::GetArguments(const Spike::Data &data, void *arguments, siz
 {
     if (ExtraBytes(data) > 0 && ExtraBytes(data) == size) {
         void *extra = reinterpret_cast<void *>(data.bits64);
-        std::memcpy(arguments, extra, size);
+        memcpy(arguments, extra, size);
     }
 }
 
@@ -404,7 +404,7 @@ void FunctionalSpike::SetArguments(Spike::Data &data, const void *arguments, siz
         data.bits16 = size;
         data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
         void *extra = reinterpret_cast<void *>(data.bits64);
-        std::memcpy(extra, arguments, size);
+        memcpy(extra, arguments, size);
     }
 }
 
@@ -469,7 +469,7 @@ void MultiByteSpike::GetValues(const Spike::Data &data, uint8_t *values, size_t 
     size_t size = count * sizeof(uint8_t);
     if (ExtraBytes(data) > 0 && ExtraBytes(data) == size) {
         void *extra = reinterpret_cast<void *>(data.bits64);
-        std::memcpy(values, extra, size);
+        memcpy(values, extra, size);
     }
 }
 
@@ -490,7 +490,7 @@ void MultiByteSpike::SetValues(Spike::Data &data, const uint8_t *values, size_t 
         data.bits16 = size;
         data.bits64 = reinterpret_cast<uintptr_t>(AllocateExtra(data));
         void *extra = reinterpret_cast<void *>(data.bits64);
-        std::memcpy(extra, values, size);
+        memcpy(extra, values, size);
     }
 }
 

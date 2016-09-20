@@ -198,19 +198,19 @@ size_t ThresholdNeuron::ContributeToRegion(uint8_t *&contribution)
     contribution = new uint8_t[size];
     uint8_t *cur = contribution;
 
-    std::memcpy(cur, &mWasTriggered, sizeof(bool));
+    memcpy(cur, &mWasTriggered, sizeof(bool));
     cur += sizeof(bool);
 
-    std::memcpy(cur, &mReceivedSpikeCount, sizeof(size_t));
+    memcpy(cur, &mReceivedSpikeCount, sizeof(size_t));
     cur += sizeof(size_t);  
 
-    std::memcpy(cur, &mSentSpikeCount, sizeof(size_t));
+    memcpy(cur, &mSentSpikeCount, sizeof(size_t));
     cur += sizeof(size_t);
 
-    std::memcpy(cur, &inputSynapseCount, sizeof(size_t));
+    memcpy(cur, &inputSynapseCount, sizeof(size_t));
     cur += sizeof(size_t);
 
-    std::memcpy(cur, &outputSynapseCount, sizeof(size_t));
+    memcpy(cur, &outputSynapseCount, sizeof(size_t));
     //cur += sizeof(size_t);
 
     mWasTriggered = false;

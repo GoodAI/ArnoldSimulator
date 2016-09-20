@@ -152,7 +152,7 @@ void RandomBody::Simulate(
         for (size_t i = 0; i < elemCount; ++i) {
             uint8_t *dataPtr = data.data() + i * elemSize;
             double rd = randDouble(engine);
-            std::memcpy(dataPtr, &rd, elemSize);
+            memcpy(dataPtr, &rd, elemSize);
         }
 
         pushSensoMotoricData(it->first, data);

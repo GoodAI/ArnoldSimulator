@@ -180,7 +180,7 @@ void GenSpecRegion::AcceptContributionFromNeuron(NeuronId neuronId, const uint8_
 
         if (isLeaf) {
             float value;
-            std::memcpy(&value, contribution, size-1);
+            memcpy(&value, contribution, size-1);
             mGenValues[neuronId] = value;
         } else {
             // If the neuron stopped being a leaf node, discard his previous values.

@@ -48,37 +48,37 @@ void ThresholdBrain::AcceptContributionFromRegion(
         const uint8_t *cur = contribution;
 
         size_t addedNeurons = 0;
-        std::memcpy(&addedNeurons, cur, sizeof(size_t));
+        memcpy(&addedNeurons, cur, sizeof(size_t));
         cur += sizeof(size_t);
         mAddedNeurons += addedNeurons;
 
         size_t removedNeurons = 0;
-        std::memcpy(&removedNeurons, cur, sizeof(size_t));
+        memcpy(&removedNeurons, cur, sizeof(size_t));
         cur += sizeof(size_t);
         mRemovedNeurons += removedNeurons;
 
         size_t addedSynapses = 0;
-        std::memcpy(&addedSynapses, cur, sizeof(size_t));
+        memcpy(&addedSynapses, cur, sizeof(size_t));
         cur += sizeof(size_t);
         mAddedSynapses += addedSynapses;
 
         size_t removedSynapses = 0;
-        std::memcpy(&removedSynapses, cur, sizeof(size_t));
+        memcpy(&removedSynapses, cur, sizeof(size_t));
         cur += sizeof(size_t);
         mRemovedSynapses += removedSynapses;
 
         size_t addedChildLinks = 0;
-        std::memcpy(&addedChildLinks, cur, sizeof(size_t));
+        memcpy(&addedChildLinks, cur, sizeof(size_t));
         cur += sizeof(size_t);
         mAddedChildLinks += addedChildLinks;
 
         size_t removedChildLinks = 0;
-        std::memcpy(&removedChildLinks, cur, sizeof(size_t));
+        memcpy(&removedChildLinks, cur, sizeof(size_t));
         cur += sizeof(size_t);
         mRemovedChildLinks += removedChildLinks;
 
         size_t triggeredNeurons = 0;
-        std::memcpy(&triggeredNeurons, cur, sizeof(size_t));
+        memcpy(&triggeredNeurons, cur, sizeof(size_t));
         //cur += sizeof(size_t);
         mTriggeredNeurons += triggeredNeurons;
     }
