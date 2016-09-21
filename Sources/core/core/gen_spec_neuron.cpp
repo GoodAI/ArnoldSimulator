@@ -24,7 +24,7 @@ GenSpecNeuron::GenSpecNeuron(NeuronBase &base, json &params) : Neuron(base, para
 
     mLastInputPtr = std::unique_ptr<uint8_t[]>(new uint8_t[mInputSize]);
     // Fill with zeros for input difference calculation.
-    std::memset(mLastInputPtr.get(), 0, mInputSize);
+    memset(mLastInputPtr.get(), 0, mInputSize);
 
     const json &accumulatorId = params["accumulatorId"];
     // accumulatorId would be empty for the generalist that is parent of the first layer.
