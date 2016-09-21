@@ -210,9 +210,6 @@ obtain_flatbuffers()
     local FLATBUFFERS_LINK="https://github.com/google/flatbuffers/archive/v${FLATBUFFERS_VERSION}.zip"
     
     download_and_unpack "$FLATBUFFERS_LINK" "flatbuffers" "$FLATBUFFERS_VERSION"
-
-    echo "...more cleaning"
-    rm -r -f bin
     
     cd flatbuffers
     
@@ -257,7 +254,7 @@ download_and_unpack()
     if [ "$ARCHIVE_TYPE" == 'zip' ]
     then
         unzip -q -n "$ARCHIVE_NAME"  || die
-    elif [ "$ARCHIVE_TYPE" == 'tar.gz' ]
+    elif [ "$ARCHIVE_TYPE" == 'tar.gz' ] || [ "$ARCHIVE_TYPE" == 'tgz' ]
     then
         tar --extract --gzip --file="$ARCHIVE_NAME"
     else
@@ -313,7 +310,7 @@ get_archive_extension()
 
     local EXT=$( echo "$DOUBLE_EXT" | cut -d \. -f 2 )
 
-    if [ "$EXT" == 'zip' ]
+    if [ "$EXT" == 'zip' ] || [ "$EXT" == 'tgz' ]
     then
         echo "$EXT"
     fi
