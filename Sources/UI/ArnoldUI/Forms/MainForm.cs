@@ -165,6 +165,11 @@ namespace GoodAI.Arnold
             {
                 await asyncAction();
             }
+            catch (Exception ex)
+            {
+                // TODO(Premek): Use UI specific logger, don't push it to the Log.
+                Log.Error($"Button action failed: {ex.Message}");
+            }
             finally
             {
                 UpdateButtons();
