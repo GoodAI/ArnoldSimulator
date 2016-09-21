@@ -3,6 +3,7 @@
 /// @file
 
 #include <vector>
+#include <climits>
 
 #include "log.h"
 
