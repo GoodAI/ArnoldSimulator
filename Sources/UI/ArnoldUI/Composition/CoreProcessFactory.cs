@@ -9,16 +9,16 @@ namespace GoodAI.Arnold.Core
 {
     public interface ICoreProcessFactory
     {
-        ICoreProcess Create();
+        ICoreProcess Create(CoreProcessParameters parameters);
     }
 
     public class CoreProcessFactory : PropertyInjectingFactory, ICoreProcessFactory
     {
         public CoreProcessFactory(Container container) : base(container) { }
 
-        public ICoreProcess Create()
+        public ICoreProcess Create(CoreProcessParameters parameters)
         {
-            return InjectProperties(new CoreProcess());
+            return InjectProperties(new CoreProcess(parameters));
         }
     }
 }

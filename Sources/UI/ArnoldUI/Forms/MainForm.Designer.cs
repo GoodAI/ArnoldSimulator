@@ -83,6 +83,7 @@
             this.dockPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.dockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dockPanel.DockBottomPortion = 0.35D;
+            this.dockPanel.DockRightPortion = 0.3D;
             this.dockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
             this.dockPanel.Location = new System.Drawing.Point(0, 49);
             this.dockPanel.Name = "dockPanel";

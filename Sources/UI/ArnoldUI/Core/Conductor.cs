@@ -17,7 +17,7 @@ namespace GoodAI.Arnold.Core
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         event EventHandler<StateChangedEventArgs> StateChanged;
 
-        Task ConnectToCoreAsync(EndPoint endPoint = null);
+        Task ConnectToCoreAsync(EndPoint endPoint = null, CoreProcessParameters parameters = null);
         void Disconnect();
         Task ShutdownAsync();
         Task LoadBlueprintAsync(string blueprint);
@@ -77,7 +77,8 @@ namespace GoodAI.Arnold.Core
             ModelProvider = modelProviderFactory.Create(this);
         }
 
-        public async Task ConnectToCoreAsync(EndPoint endPoint = null)
+        // TODO(Premek): consider splitting this to separate calls for local / remote core
+        public async Task ConnectToCoreAsync(EndPoint endPoint = null, CoreProcessParameters parameters = null)
         {
             if (CoreProxy != null)
             {
@@ -90,9 +91,15 @@ namespace GoodAI.Arnold.Core
             {
                 if (m_process == null)
                 {
+                    if (parameters == null)
+                    {
+                        throw new ArgumentNullException(nameof(parameters),
+                            $"must not be null when {nameof(endPoint)} is null");
+                    }
+
                     // TODO(HonzaS): Move this elsewhere when we have finer local process control.
                     Log.Info("Starting a local core process");
-                    m_process = m_coreProcessFactory.Create();
+                    m_process = m_coreProcessFactory.Create(parameters);
                 }
 
                 endPoint = m_process.EndPoint;

@@ -174,7 +174,7 @@ namespace GoodAI.Arnold
         private async void connectButton_Click(object sender, EventArgs e)
         {
             // TODO(HonzaS): Handle the core type (local/remote).
-            await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync());
+            await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync(SettingsForm.CoreProcessParameters));
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)

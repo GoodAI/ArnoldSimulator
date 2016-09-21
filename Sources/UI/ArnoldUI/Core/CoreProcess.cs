@@ -9,6 +9,18 @@ using System.Threading.Tasks;
 
 namespace GoodAI.Arnold.Core
 {
+    public class CoreProcessParameters
+    {
+        public string WorkingDirectory { get; }
+        public string Arguments { get; }
+
+        public CoreProcessParameters(string workingDirectory, string arguments)
+        {
+            WorkingDirectory = workingDirectory;
+            Arguments = arguments;
+        }
+    }
+
     public class EndPoint
     {
         public string Hostname { get; private set; }
@@ -30,31 +42,31 @@ namespace GoodAI.Arnold.Core
     {
         public const int ShutdownTimeoutMs = 5000;
 
-        private static readonly string CoreProcessDirectory = Path.GetFullPath("../../../../core/core/debug");
+        //private static readonly string CoreProcessDirectory = Path.GetFullPath("../../../../core/core/debug");
         //private static readonly string CoreProcessDirectory = Path.GetFullPath("C:/arnold");
 
         private const string CoreProcessExecutable = "charmrun.exe";
         private const string CoreHostname = "localhost";
         private const int CorePort = 46324;
 
-        private static readonly string CoreProcessParameters =
-            $"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbose ++server ++server-port {CorePort}";
+        //private static readonly string CoreProcessParameters =
+            //$"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbose ++server ++server-port {CorePort}";
             //$"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +restart checkpoint +cs +ss ++verbose ++server ++server-port {CorePort}";
             //$"core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt +cs +ss ++verbose ++server ++server-port {CorePort}";
             //$"core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt +restart checkpoint +cs +ss ++verbose ++server ++server-port {CorePort}";
 
         private readonly Process m_process;
 
-        public CoreProcess()
+        public CoreProcess(CoreProcessParameters parameters)
         {
             m_process = new Process
             {
                 StartInfo =
                 {
                     CreateNoWindow = !Debugger.IsAttached,
-                    WorkingDirectory = CoreProcessDirectory,
+                    WorkingDirectory = Path.GetFullPath(parameters.WorkingDirectory),
                     FileName = CoreProcessExecutable,
-                    Arguments = CoreProcessParameters
+                    Arguments = parameters.Arguments
                 }
             };
             m_process.Start();

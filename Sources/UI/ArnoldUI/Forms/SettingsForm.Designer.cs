@@ -72,7 +72,7 @@
             this.CoreProcessArgumentsTextBox.Size = new System.Drawing.Size(430, 60);
             this.CoreProcessArgumentsTextBox.TabIndex = 3;
             this.CoreProcessArgumentsTextBox.Text = "core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbos" +
-    "e ++server ++server-port 46324\"";
+    "e ++server ++server-port 46324";
             // 
             // SettingsForm
             // 

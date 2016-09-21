@@ -87,10 +87,10 @@ namespace GoodAI.Arnold
                 CloseObserver(handle.Definition);
         }
 
-        public async Task ConnectToCoreAsync()
+        public async Task ConnectToCoreAsync(CoreProcessParameters parameters)
         {
             // TODO(HonzaS): endPoint = null means local.
-            await Conductor.ConnectToCoreAsync(endPoint: null);
+            await Conductor.ConnectToCoreAsync(endPoint: null, parameters: parameters);
         }
 
         public async Task StartSimulationAsync()

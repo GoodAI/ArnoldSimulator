@@ -16,6 +16,7 @@ namespace GoodAI.Arnold.UI.Tests
         private readonly Mock<ICoreProcess> m_coreProcessMock;
         private readonly Mock<ICoreProxy> m_coreProxyMock;
         private readonly Conductor m_conductor;
+        private readonly CoreProcessParameters m_coreProcessParameters = new CoreProcessParameters("dir", "args");
 
         public ConductorTests()
         {
@@ -47,7 +48,7 @@ namespace GoodAI.Arnold.UI.Tests
                     new StateChangedEventArgs(CoreState.Empty, CoreState.ShuttingDown));
 
             var coreProcessFactoryMock = new Mock<ICoreProcessFactory>();
-            coreProcessFactoryMock.Setup(factory => factory.Create())
+            coreProcessFactoryMock.Setup(factory => factory.Create(m_coreProcessParameters))
                 .Returns(m_coreProcessMock.Object);
 
             var coreLinkFactoryMock = new Mock<ICoreLinkFactory>();
@@ -80,7 +81,7 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void ConductorSetsUpAndTearsDown()
         {
-            await m_conductor.ConnectToCoreAsync();
+            await m_conductor.ConnectToCoreAsync(parameters: m_coreProcessParameters);
 
             Assert.Equal(m_coreProxyMock.Object, m_conductor.CoreProxy);
 
@@ -91,7 +92,7 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void DoubleSetupFails()
         {
-            await m_conductor.ConnectToCoreAsync();
+            await m_conductor.ConnectToCoreAsync(parameters: m_coreProcessParameters);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync());
         }
@@ -101,7 +102,8 @@ namespace GoodAI.Arnold.UI.Tests
         {
             m_coreProcessMock.Setup(process => process.EndPoint).Returns(null as EndPoint);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => m_conductor.ConnectToCoreAsync(parameters: m_coreProcessParameters));
         }
     }
 }
