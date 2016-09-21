@@ -1,4 +1,6 @@
 ﻿#pragma once
+
+#include "components.h"
 #include "neuron.h"
 
 namespace ThresholdModel

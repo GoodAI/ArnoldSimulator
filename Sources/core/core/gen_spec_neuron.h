@@ -1,5 +1,6 @@
 #pragma once
 
+#include "components.h"
 #include "neuron.h"
 #include <queue>
 
