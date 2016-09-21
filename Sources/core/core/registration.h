@@ -32,7 +32,7 @@ public:
     {
         auto tokenIt = mTokens.find(name);
         if (tokenIt == mTokens.end()) {
-            Log(LogLevel::Error, "Item with name %s was not registered", name);
+            Log(LogLevel::Error, "Item with name %s was not registered", name.c_str());
             throw std::invalid_argument("Name not registered");
         }
         return tokenIt->second;
@@ -57,7 +57,7 @@ protected:
     TToken GetNewToken(const std::string &name, const size_t salt = 0)
     {
         if (mTokens.find(name) != mTokens.end()) {
-            Log(LogLevel::Error, "Name '%s' is already registered", name);
+            Log(LogLevel::Error, "Name '%s' is already registered", name.c_str());
             throw std::invalid_argument("Name already registered");
         }
 
