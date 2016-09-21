@@ -9,7 +9,7 @@ SHASH_DIR = ../libs/sparsehash
 JSON_DIR = ../libs/json
 FLATBUF_DIR = ../libs/flatbuffers
 CATCH_DIR = ../libs/catch
-COMMON_INC_DIRS = -I$(TBB_DIR)/include -I$(SHASH_DIR)/src -I$(JSON_DIR)/src -I$(FLATBUF_DIR)/include -I$(CATCH_DIR)/single_include
+COMMON_INC_DIRS = -I. -I$(TBB_DIR)/include -I$(SHASH_DIR)/src -I$(JSON_DIR)/src -I$(FLATBUF_DIR)/include -I$(CATCH_DIR)/single_include
 FLATC = $(FLATBUF_DIR)/bin/flatc
 
 #
