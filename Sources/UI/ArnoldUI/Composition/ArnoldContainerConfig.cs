@@ -53,6 +53,7 @@ namespace GoodAI.Arnold
             container.RegisterSingleton<LogForm>();
             container.RegisterSingleton<GraphForm>();
             container.RegisterSingleton<JsonEditForm>();
+            container.RegisterSingleton<SettingsForm>();
 
             container.RegisterSingleton<MainForm>();
         }

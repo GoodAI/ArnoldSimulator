@@ -22,12 +22,16 @@ namespace GoodAI.Arnold
 
         private readonly UIMain m_uiMain;
         private string m_originalTitle;
-        public LogForm LogForm { get; }
-        public GraphForm GraphForm { get; }
-        public VisualizationForm VisualizationForm { get; set; }
-        public JsonEditForm JsonEditForm { get; set; }
 
-        public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm, JsonEditForm jsonEditForm)
+        private LogForm LogForm { get; }
+        //private GraphForm GraphForm { get; }
+        private VisualizationForm VisualizationForm { get; set; }
+        private JsonEditForm JsonEditForm { get; }
+        private SettingsForm SettingsForm { get; }
+
+
+    public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm, JsonEditForm jsonEditForm,
+        SettingsForm settingsForm)
         {
             InitializeComponent();
 
@@ -45,6 +49,9 @@ namespace GoodAI.Arnold
 
             JsonEditForm = jsonEditForm;
             JsonEditForm.Show(dockPanel, DockState.Document);
+
+            SettingsForm = settingsForm;
+            SettingsForm.Show(dockPanel, DockState.DockRight);
 
             SubscribeToUiMain();
 

@@ -35,7 +35,7 @@ namespace GoodAI.Arnold.Core
 
         private const string CoreProcessExecutable = "charmrun.exe";
         private const string CoreHostname = "localhost";
-        private const int CorePort = 46324; // GodAI
+        private const int CorePort = 46324;
 
         private static readonly string CoreProcessParameters =
             $"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbose ++server ++server-port {CorePort}";
