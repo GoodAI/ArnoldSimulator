@@ -41,7 +41,10 @@ static void WriteLogTimestamp(std::ostringstream &stream)
     tm *localTime = localtime(&nowTimeT);
     
     // NOTE(Premek): This prints one hour less even if localTime->tm_isdst == 1
-    stream << std::put_time(localTime, "%F %H:%M:%S");
+    char timeString[32];
+    if (0 < strftime(timeString, sizeof(timeString), "%F %H:%M:%S", localTime)) {
+        stream << timeString;
+    }
 
     std::chrono::system_clock::time_point timeRoundedToSeconds =
         std::chrono::system_clock::from_time_t(mktime(localTime));
