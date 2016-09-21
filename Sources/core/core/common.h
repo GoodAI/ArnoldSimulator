@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <cfloat>
 #include <unordered_set>
 
 #include <pup.h>
