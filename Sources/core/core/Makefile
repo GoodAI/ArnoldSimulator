@@ -92,9 +92,9 @@ test: debug-build
 $(DBG_BIN): $(DBG_FBSS) $(DBG_DCLS) $(DBG_DEFS) $(DBG_OBJS)
 	$(DBG_CHARMC) $(DBG_LFLAGS) -o $@ $(DBG_OBJS)
 	@mv -f $(RUN) $(DBG_RUN)
-	@cp -f $(TBB_DIR)/bin/tbb_debug.* $(DBG_DIR)
-	@cp -f $(TBB_DIR)/bin/tbbmalloc_debug.* $(DBG_DIR)
-	@cp -f $(TBB_DIR)/bin/tbbmalloc_proxy_debug.* $(DBG_DIR)
+	@cp -f $(TBB_DIR)/bin/*tbb_debug.* $(DBG_DIR)
+	@cp -f $(TBB_DIR)/bin/*tbbmalloc_debug.* $(DBG_DIR)
+	@cp -f $(TBB_DIR)/bin/*tbbmalloc_proxy_debug.* $(DBG_DIR)
 
 $(DBG_DIR)/%_generated.h: $(MSG_DIR)/%.fbs
 	cd $(DBG_DIR) && ../$(FLATC) --cpp ../$<
@@ -131,9 +131,9 @@ release-rebuild: release-clean release-build
 $(RLS_BIN): $(RLS_FBSS) $(RLS_DCLS) $(RLS_DEFS) $(RLS_OBJS)
 	$(RLS_CHARMC) $(RLS_LFLAGS) -o $@ $(RLS_OBJS)
 	@mv -f $(RUN) $(RLS_RUN)
-	@cp -f $(TBB_DIR)/bin/tbb.* $(RLS_DIR)
-	@cp -f $(TBB_DIR)/bin/tbbmalloc.* $(RLS_DIR)
-	@cp -f $(TBB_DIR)/bin/tbbmalloc_proxy.* $(RLS_DIR)
+	@cp -f $(TBB_DIR)/bin/*tbb.* $(RLS_DIR)
+	@cp -f $(TBB_DIR)/bin/*tbbmalloc.* $(RLS_DIR)
+	@cp -f $(TBB_DIR)/bin/*tbbmalloc_proxy.* $(RLS_DIR)
 
 $(RLS_DIR)/%_generated.h: $(MSG_DIR)/%.fbs
 	cd $(RLS_DIR) && ../$(FLATC) --cpp ../$<
