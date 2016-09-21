@@ -450,7 +450,7 @@ bool Core::TryApplyConfiguration(const std::string &systemConfigurationString)
         checkpointingIntervalSeconds = configuration["CheckpointingIntervalSeconds"].get<double>();
     } catch (std::exception &ex) {
         Log(LogLevel::Error, "Invalid configuration: '%s'\n Exception: %s.",
-            systemConfigurationString, ex.what());
+            systemConfigurationString.c_str(), ex.what());
         return false;
     }
 
