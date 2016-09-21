@@ -80,7 +80,7 @@ protected:
     void SendErrorResponse(RequestId requestId, const std::string &message);
 
     flatbuffers::Offset<Communication::Position> CreatePosition(flatbuffers::FlatBufferBuilder &builder, Point3D lowerBound);
-    flatbuffers::Offset<Communication::NeuronId> Core::CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const;
+    flatbuffers::Offset<Communication::NeuronId> CommunicationNeuronId(flatbuffers::FlatBufferBuilder &builder, NeuronId neuronId) const;
 
     void BuildCompleteStateResponse(bool isSimulationRunning, size_t atBrainStep, 
         size_t atBodyStep, size_t brainStepsPerBodyStep, flatbuffers::FlatBufferBuilder &builder) const;
@@ -94,17 +94,17 @@ protected:
 
     Communication::Direction CommunicationDirection(Direction direction) const;
 
-    void Core::BuildConnectorOffsets(
+    void BuildConnectorOffsets(
         flatbuffers::FlatBufferBuilder &builder,
         const ConnectorAdditionReports &connectors,
         std::vector<flatbuffers::Offset<Communication::Connector>> &connectorOffsets) const;
 
-    void Core::BuildConnectorRemovalOffsets(
+    void BuildConnectorRemovalOffsets(
         flatbuffers::FlatBufferBuilder &builder,
         const ConnectorRemovals &connectors,
         std::vector<flatbuffers::Offset<Communication::ConnectorRemoval>> &connectorOffsets) const;
 
-    void Core::BuildConnectionOffsets(
+    void BuildConnectionOffsets(
         flatbuffers::FlatBufferBuilder &builder,
         const Connections &connections,
         std::vector<flatbuffers::Offset<Communication::Connection>> &connectionOffsets) const;
@@ -114,7 +114,7 @@ protected:
         const NeuronAdditionReports &regions,
         std::vector<flatbuffers::Offset<Communication::Neuron>> &regionOffsets) const;
 
-    void Core::BuildSynapseOffsets(
+    void BuildSynapseOffsets(
         flatbuffers::FlatBufferBuilder &builder,
         const Synapse::Links &synapses,
         std::vector<flatbuffers::Offset<Communication::Synapse>> &synapseOffsets) const;
