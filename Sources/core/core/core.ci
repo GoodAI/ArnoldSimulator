@@ -25,8 +25,6 @@ mainmodule core
         entry Core(CkArgMsg *msg);
         entry void Exit();
 
-        entry [threaded] void HandleKeyPress();
-
         entry void HandleRequestFromClient(CkCcsRequestMsg *msg);
         
         entry void RunTests(std::vector<std::string> args);

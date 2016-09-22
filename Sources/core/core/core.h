@@ -52,7 +52,7 @@ public:
     void Exit();
 
     void DetectKeyPress();
-    void HandleKeyPress();
+    static void HandleKeyPress(void *core, double unused);
 
     void HandleRequestFromClient(CkCcsRequestMsg *msg);
     
