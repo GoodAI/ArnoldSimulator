@@ -1,4 +1,7 @@
-#include <future>
+#include <atomic>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <sstream>
 #include <fstream>
 
@@ -12,6 +15,12 @@
 
 #include "core_tests.h"
 #include "init.h"
+
+std::atomic_bool gKeyPressConsumed(false);
+std::atomic_char gKeyPressCharacter(0);
+std::mutex gKeyPressMutex;
+std::condition_variable gKeyPressCondVar;
+CthThread gKeyPressHandlerThread;
 
 CkGroupID gMulticastGroupId;
 CProxy_CompletionDetector gCompletionDetector;
@@ -101,6 +110,7 @@ Core::Core(CkArgMsg *msg) :
 
     auto blueprintString = blueprintContent.str();
     if (!blueprintString.empty() && TryLoadBrain(blueprintString)) {
+        thisProxy.HandleKeyPress();
         std::thread input(&Core::DetectKeyPress, this);
         mKeyControlEnabled = true;
         input.detach();
@@ -193,6 +203,7 @@ void Core::pup(PUP::er &p)
     }
 
     if (p.isUnpacking() && mKeyControlEnabled) {
+        thisProxy.HandleKeyPress();
         std::thread input(&Core::DetectKeyPress, this);
         input.detach();
     }
@@ -208,6 +219,27 @@ void Core::DetectKeyPress()
 {
     while (true) {
         char c = getchar();
+
+        gKeyPressCharacter.store(c, std::memory_order_release);
+        gKeyPressConsumed.store(false, std::memory_order_release);
+        CthAwaken(gKeyPressHandlerThread);
+        
+        std::unique_lock<std::mutex> lock(gKeyPressMutex);
+        while (!gKeyPressConsumed.load(std::memory_order_acquire)) gKeyPressCondVar.wait(lock);
+        lock.unlock();
+        
+        if (c == 'q') break;
+    }
+}
+
+void Core::HandleKeyPress()
+{
+    gKeyPressHandlerThread = CthSelf();
+
+    while (true) {
+        CthSuspend();
+        char c = gKeyPressCharacter.load(std::memory_order_acquire);
+
         if (c == 'b') {
             if (IsBrainLoaded()) {
                 gBrain[0].RunSimulation(10, false, false);
@@ -285,8 +317,14 @@ void Core::DetectKeyPress()
             } else {
                 Exit();
             }
-            break;
         }
+
+        std::unique_lock<std::mutex> lock(gKeyPressMutex);
+        gKeyPressConsumed.store(true, std::memory_order_release);
+        gKeyPressCondVar.notify_all();
+        lock.unlock();
+
+        if (c == 'q') break;
     }
 }
 
