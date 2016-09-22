@@ -88,6 +88,7 @@
     <Compile Include="CoreControllerTests.cs" />
     <Compile Include="CoreLinkTests.cs" />
     <Compile Include="CoreResponseParserTests.cs" />
+    <Compile Include="Core\CoreProcessParametersTests.cs" />
     <Compile Include="Core\SystemConfigurationTests.cs" />
     <Compile Include="MathTestHelpers.cs" />
     <Compile Include="MessageTests.cs" />

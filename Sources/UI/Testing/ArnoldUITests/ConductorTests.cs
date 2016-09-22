@@ -16,7 +16,7 @@ namespace GoodAI.Arnold.UI.Tests
         private readonly Mock<ICoreProcess> m_coreProcessMock;
         private readonly Mock<ICoreProxy> m_coreProxyMock;
         private readonly Conductor m_conductor;
-        private readonly CoreProcessParameters m_coreProcessParameters = new CoreProcessParameters("dir", "args");
+        private readonly CoreProcessParameters m_coreProcessParameters = new CoreProcessParameters("dir", "args", null);
 
         public ConductorTests()
         {

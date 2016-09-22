@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,11 +17,45 @@ namespace GoodAI.Arnold.Forms
     {
         public CoreProcessParameters CoreProcessParameters => new CoreProcessParameters(
             workingDirectory: coreProcessDirectoryTextBox.Text,
-            arguments: CoreProcessArgumentsTextBox.Text);
+            rawArguments: coreProcessArgumentsTextBox.Text,
+            maybePort: MaybeParseCorePort());
 
         public SettingsForm()
         {
             InitializeComponent();
+
+            UpdateSubstitutedArguments();
+        }
+
+        private int? MaybeParseCorePort()
+        {
+            uint port;
+            if (!UInt32.TryParse(portTextBox.Text, out port))
+                return null;
+
+            if (port > IPEndPoint.MaxPort)
+                return null;
+
+            return (int)port;
+        }
+
+        private void UpdateSubstitutedArguments()
+        {
+            substitutedArgumentsTextBox.Text = CoreProcessParameters.SubstitutedArguments;
+        }
+
+        private void portTextBox_TextChanged(object sender, EventArgs e)
+        {
+            portTextBox.ForeColor = MaybeParseCorePort().HasValue
+                ? DefaultForeColor
+                : Color.DarkRed;
+              
+            UpdateSubstitutedArguments();
+        }
+
+        private void coreProcessArgumentsTextBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateSubstitutedArguments();
         }
     }
 }

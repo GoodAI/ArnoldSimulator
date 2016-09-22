@@ -9,18 +9,6 @@ using System.Threading.Tasks;
 
 namespace GoodAI.Arnold.Core
 {
-    public class CoreProcessParameters
-    {
-        public string WorkingDirectory { get; }
-        public string Arguments { get; }
-
-        public CoreProcessParameters(string workingDirectory, string arguments)
-        {
-            WorkingDirectory = workingDirectory;
-            Arguments = arguments;
-        }
-    }
-
     public class EndPoint
     {
         public string Hostname { get; private set; }
@@ -47,7 +35,8 @@ namespace GoodAI.Arnold.Core
 
         private const string CoreProcessExecutable = "charmrun.exe";
         private const string CoreHostname = "localhost";
-        private const int CorePort = 46324;
+
+        private readonly int m_corePort;
 
         //private static readonly string CoreProcessParameters =
             //$"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbose ++server ++server-port {CorePort}";
@@ -59,6 +48,11 @@ namespace GoodAI.Arnold.Core
 
         public CoreProcess(CoreProcessParameters parameters)
         {
+            if (!parameters.MaybePort.HasValue)
+                throw new ArgumentException("Port must not be null", nameof(parameters.MaybePort));
+
+            m_corePort = parameters.MaybePort.Value;
+
             m_process = new Process
             {
                 StartInfo =
@@ -66,7 +60,7 @@ namespace GoodAI.Arnold.Core
                     CreateNoWindow = !Debugger.IsAttached,
                     WorkingDirectory = Path.GetFullPath(parameters.WorkingDirectory),
                     FileName = CoreProcessExecutable,
-                    Arguments = parameters.Arguments
+                    Arguments = parameters.SubstitutedArguments
                 }
             };
             m_process.Start();
@@ -80,6 +74,6 @@ namespace GoodAI.Arnold.Core
             m_process.Dispose();
         }
 
-        public EndPoint EndPoint => new EndPoint(CoreHostname, CorePort);
+        public EndPoint EndPoint => new EndPoint(CoreHostname, m_corePort);
     }
 }

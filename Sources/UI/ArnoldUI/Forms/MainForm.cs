@@ -178,6 +178,13 @@ namespace GoodAI.Arnold
 
         private async void connectButton_Click(object sender, EventArgs e)
         {
+            if (!SettingsForm.CoreProcessParameters.IsValid)
+            {
+                // TODO(Premek): Use a user log.
+                Log.Error("Connect button action aborted: Please check core process parameters in Settings.");
+                return;
+            }
+
             // TODO(HonzaS): Handle the core type (local/remote).
             await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync(SettingsForm.CoreProcessParameters));
         }
@@ -275,7 +282,7 @@ namespace GoodAI.Arnold
         {
             try
             {
-                float? checkpointingIntervalSeconds = ParseCheckpointingIntervalInSeconds();
+                float? checkpointingIntervalSeconds = MaybeParseCheckpointingIntervalInSeconds();
 
                 await m_uiMain.UpdateCoreConfig(coreConfig =>
                 {
@@ -309,7 +316,7 @@ namespace GoodAI.Arnold
                 : Color.DarkRed;
         }
 
-        private float? ParseCheckpointingIntervalInSeconds()
+        private float? MaybeParseCheckpointingIntervalInSeconds()
         {
             uint intervalSeconds;
 
