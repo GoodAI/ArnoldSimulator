@@ -154,7 +154,7 @@
             this.groupBox2.Controls.Add(this.loadBalancingEnabledCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(3, 249);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(422, 100);
+            this.groupBox2.Size = new System.Drawing.Size(422, 75);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Core Runtime Options";
@@ -183,6 +183,8 @@
             // loadBalancingEnabledCheckBox
             // 
             this.loadBalancingEnabledCheckBox.AutoSize = true;
+            this.loadBalancingEnabledCheckBox.Checked = true;
+            this.loadBalancingEnabledCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.loadBalancingEnabledCheckBox.Location = new System.Drawing.Point(9, 20);
             this.loadBalancingEnabledCheckBox.Name = "loadBalancingEnabledCheckBox";
             this.loadBalancingEnabledCheckBox.Size = new System.Drawing.Size(136, 17);

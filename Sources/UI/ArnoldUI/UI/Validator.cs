@@ -14,7 +14,6 @@ namespace GoodAI.Arnold.UI
             uint number;
 
             return UInt32.TryParse(text, out number) ? number : (uint?) null;
-
         }
 
         public static bool TryParseUInt(string text)

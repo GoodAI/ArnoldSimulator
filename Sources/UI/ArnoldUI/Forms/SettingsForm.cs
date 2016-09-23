@@ -29,6 +29,8 @@ namespace GoodAI.Arnold.Forms
         {
             m_uiMain = uiMain;
 
+            m_uiMain.SimulationStateChanged += SimulationOnStateChanged;
+
             InitializeComponent();
 
             UpdateSubstitutedArguments();
@@ -49,6 +51,17 @@ namespace GoodAI.Arnold.Forms
         private void coreProcessArgumentsTextBox_TextChanged(object sender, EventArgs e)
         {
             UpdateSubstitutedArguments();
+        }
+
+        private void UpdateControls()
+        {
+            loadBalancingEnabledCheckBox.Checked = m_uiMain.Conductor.CoreConfig.System.LoadBalancingEnabled;
+        }
+
+        private void SimulationOnStateChanged(object sender, StateChangedEventArgs stateChangedEventArgs)
+        {
+            if (!IsDisposed)
+                Invoke((MethodInvoker)UpdateControls);
         }
 
         private async Task UpdateLoadBalancingSettings()
