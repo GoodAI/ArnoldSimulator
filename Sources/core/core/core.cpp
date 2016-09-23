@@ -466,14 +466,24 @@ void Core::SendResponseToClient(RequestId requestId, flatbuffers::FlatBufferBuil
 bool Core::TryApplyConfiguration(const std::string &systemConfigurationString)
 {
     uint32_t brainStepsPerBodyStep;
+
     bool regularCheckpointingEnabled;
     double checkpointingIntervalSeconds;
 
+    bool loadBalancingEnabled;
+    double loadBalancingIntervalSeconds;
+
     try {
         auto configuration = json::parse(systemConfigurationString);
+
         brainStepsPerBodyStep = configuration["BrainStepsPerBodyStep"].get<uint32_t>();
+
         regularCheckpointingEnabled = configuration["RegularCheckpointingEnabled"].get<bool>();
         checkpointingIntervalSeconds = configuration["CheckpointingIntervalSeconds"].get<double>();
+
+        loadBalancingEnabled = configuration["LoadBalancingEnabled"].get<bool>();
+        loadBalancingIntervalSeconds = configuration["LoadBalancingIntervalSeconds"].get<double>();
+
     } catch (std::exception &ex) {
         Log(LogLevel::Error, "Invalid configuration: '%s'\n Exception: %s.",
             systemConfigurationString.c_str(), ex.what());
@@ -481,8 +491,12 @@ bool Core::TryApplyConfiguration(const std::string &systemConfigurationString)
     }
 
     Log(LogLevel::Info, "Applying new configuration:\n"
-        "  BrainStepsPerBodyStep: %d\n  RegularCheckpointingEnabled: %d\n  CheckpointingIntervalSeconds: %.2f",
-        brainStepsPerBodyStep, regularCheckpointingEnabled, checkpointingIntervalSeconds);
+        "  BrainStepsPerBodyStep: %d\n"
+        "  RegularCheckpointingEnabled: %d\n  CheckpointingIntervalSeconds: %.2f\n"
+        "  LoadBalancingEnabled: %d\n  LoadBalancingIntervalSeconds: %.2f",
+        brainStepsPerBodyStep,
+        regularCheckpointingEnabled, checkpointingIntervalSeconds,
+        loadBalancingEnabled, loadBalancingIntervalSeconds);
 
     gBrain[0].SetBrainStepsPerBodyStep(brainStepsPerBodyStep);
 
@@ -490,6 +504,11 @@ bool Core::TryApplyConfiguration(const std::string &systemConfigurationString)
         gBrain[0].EnableRegularCheckpoints("", checkpointingIntervalSeconds);
     else
         gBrain[0].DisableRegularCheckpoints();
+
+    if (loadBalancingEnabled)
+        gBrain[0].EnableRegularLoadBalancing(loadBalancingIntervalSeconds);
+    else
+        gBrain[0].DisableRegularLoadBalancing();
 
     return true;
 }
@@ -519,9 +538,6 @@ void Core::ProcessCommandRequest(const Communication::CommandRequest *commandReq
             SendErrorResponse(requestId, "Load command failed: invalid blueprint\n");
             return;
         }
-
-        // TODO(Premek): ensure this is consistent with default state of UI controls
-        gBrain[0].EnableRegularLoadBalancing(DEFAULT_SECONDS_PER_LOAD_BALANCING);
     } else if (commandType == Communication::CommandType_Run) {
         if (!IsBrainLoaded()) {
             SendErrorResponse(requestId, "Run command failed: brain not loaded\n");
