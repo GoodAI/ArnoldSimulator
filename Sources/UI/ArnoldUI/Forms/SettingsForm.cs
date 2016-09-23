@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GoodAI.Arnold.Core;
+using GoodAI.Arnold.UI;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace GoodAI.Arnold.Forms
@@ -19,6 +20,8 @@ namespace GoodAI.Arnold.Forms
             workingDirectory: coreProcessDirectoryTextBox.Text,
             rawArguments: coreProcessArgumentsTextBox.Text,
             maybePort: MaybeParseCorePort());
+
+        private readonly ColorTextControlValidator m_textControlValidator = new ColorTextControlValidator();
 
         public SettingsForm()
         {
@@ -56,6 +59,11 @@ namespace GoodAI.Arnold.Forms
         private void coreProcessArgumentsTextBox_TextChanged(object sender, EventArgs e)
         {
             UpdateSubstitutedArguments();
+        }
+
+        private void loadBalancingIntervalTextBox_TextChanged(object sender, EventArgs e)
+        {
+            m_textControlValidator.ValidateAndColorControl(loadBalancingIntervalTextBox, Validator.TryParseUInt);
         }
     }
 }

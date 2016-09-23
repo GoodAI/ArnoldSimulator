@@ -40,7 +40,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.loadBalancingCheckBox = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.loadBalancingIntervalTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -49,9 +49,9 @@
             // 
             this.coreProcessDirectoryTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.coreProcessDirectoryTextBox.Location = new System.Drawing.Point(149, 22);
+            this.coreProcessDirectoryTextBox.Location = new System.Drawing.Point(81, 22);
             this.coreProcessDirectoryTextBox.Name = "coreProcessDirectoryTextBox";
-            this.coreProcessDirectoryTextBox.Size = new System.Drawing.Size(261, 20);
+            this.coreProcessDirectoryTextBox.Size = new System.Drawing.Size(329, 20);
             this.coreProcessDirectoryTextBox.TabIndex = 0;
             this.coreProcessDirectoryTextBox.Text = "../../../../core/core/debug";
             // 
@@ -118,13 +118,12 @@
             // 
             // portTextBox
             // 
-            this.portTextBox.Location = new System.Drawing.Point(149, 48);
+            this.portTextBox.Location = new System.Drawing.Point(81, 48);
             this.portTextBox.MaxLength = 10;
             this.portTextBox.Name = "portTextBox";
-            this.portTextBox.Size = new System.Drawing.Size(55, 20);
+            this.portTextBox.Size = new System.Drawing.Size(50, 20);
             this.portTextBox.TabIndex = 6;
             this.portTextBox.Text = "46324";
-            this.portTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.portTextBox.TextChanged += new System.EventHandler(this.portTextBox_TextChanged);
             // 
             // groupBox1
@@ -151,7 +150,7 @@
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.textBox1);
+            this.groupBox2.Controls.Add(this.loadBalancingIntervalTextBox);
             this.groupBox2.Controls.Add(this.loadBalancingCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(3, 249);
             this.groupBox2.Name = "groupBox2";
@@ -179,15 +178,16 @@
             this.label5.TabIndex = 9;
             this.label5.Text = "Load Balancing Interval (s)";
             // 
-            // textBox1
+            // loadBalancingIntervalTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(149, 40);
-            this.textBox1.MaxLength = 10;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(55, 20);
-            this.textBox1.TabIndex = 8;
-            this.textBox1.Text = "15";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.loadBalancingIntervalTextBox.Location = new System.Drawing.Point(151, 40);
+            this.loadBalancingIntervalTextBox.MaxLength = 10;
+            this.loadBalancingIntervalTextBox.Name = "loadBalancingIntervalTextBox";
+            this.loadBalancingIntervalTextBox.Size = new System.Drawing.Size(55, 20);
+            this.loadBalancingIntervalTextBox.TabIndex = 8;
+            this.loadBalancingIntervalTextBox.Text = "15";
+            this.loadBalancingIntervalTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.loadBalancingIntervalTextBox.TextChanged += new System.EventHandler(this.loadBalancingIntervalTextBox_TextChanged);
             // 
             // SettingsForm
             // 
@@ -221,7 +221,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox loadBalancingIntervalTextBox;
         private System.Windows.Forms.CheckBox loadBalancingCheckBox;
     }
 }

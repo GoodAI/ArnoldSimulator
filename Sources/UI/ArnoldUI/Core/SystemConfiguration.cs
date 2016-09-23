@@ -15,6 +15,10 @@ namespace GoodAI.Arnold.Core
 
         public float CheckpointingIntervalSeconds { get; set; } = 10.0f;
 
+        public bool LoadBalancingEnabled { get; set; }
+
+        public float LoadBalancingIntervalSeconds { get; set; } = 15.0f;
+
         public string ToJsonString()
         {
             return JsonConvert.SerializeObject(this);

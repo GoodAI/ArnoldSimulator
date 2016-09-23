@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using GoodAI.Arnold.Core;
 using GoodAI.Arnold.Forms;
 using GoodAI.Arnold.Project;
+using GoodAI.Arnold.UI;
 using GoodAI.Logging;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -28,10 +29,11 @@ namespace GoodAI.Arnold
         private VisualizationForm VisualizationForm { get; set; }
         private JsonEditForm JsonEditForm { get; }
         private SettingsForm SettingsForm { get; }
+        
+        private readonly ColorTextControlValidator m_textControlValidator = new ColorTextControlValidator();
 
-
-    public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm, JsonEditForm jsonEditForm,
-        SettingsForm settingsForm)
+        public MainForm(UIMain uiMain, LogForm logForm, GraphForm graphForm, JsonEditForm jsonEditForm,
+            SettingsForm settingsForm)
         {
             InitializeComponent();
 
@@ -282,7 +284,7 @@ namespace GoodAI.Arnold
         {
             try
             {
-                float? checkpointingIntervalSeconds = MaybeParseCheckpointingIntervalInSeconds();
+                var checkpointingIntervalSeconds = (float?) Validator.MaybeParseUInt(checkpointingIntervalTextBox.Text);
 
                 await m_uiMain.UpdateCoreConfig(coreConfig =>
                 {
@@ -309,27 +311,7 @@ namespace GoodAI.Arnold
 
         private void checkpointingIntervalTextBox_TextChanged(object sender, EventArgs e)
         {
-            uint foo;
-
-            checkpointingIntervalTextBox.ForeColor = TryParseCheckpointingInterval(out foo)
-                ? DefaultForeColor
-                : Color.DarkRed;
+            m_textControlValidator.ValidateAndColorControl(checkpointingIntervalTextBox, Validator.TryParseUInt);
         }
-
-        private float? MaybeParseCheckpointingIntervalInSeconds()
-        {
-            uint intervalSeconds;
-
-            if (!TryParseCheckpointingInterval(out intervalSeconds))
-                return null;
-
-            return intervalSeconds;
-        }
-
-        private bool TryParseCheckpointingInterval(out uint intervalSeconds)
-        {
-            return UInt32.TryParse(checkpointingIntervalTextBox.Text, out intervalSeconds);
-        }
-
     }
 }
