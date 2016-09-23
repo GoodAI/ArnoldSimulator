@@ -136,6 +136,15 @@ obtain_charm()
     cat src/ck-ldb/DistBaseLB.C | sed 's/\(DistBaseLB::DistBaseLB(const CkLBOptions &opt): CBase_DistBaseLB(opt) {\)/\1  DistBaseLB_init(opt); } void DistBaseLB::DistBaseLB_init(const CkLBOptions \&opt) { /g' > src/ck-ldb/DistBaseLB.C.tmp
     mv -f src/ck-ldb/DistBaseLB.C.tmp src/ck-ldb/DistBaseLB.C
     
+    cat src/ck-ldb/DistributedLB.C | sed '/rand_nbor1 = rand() % CkNumPes();/i    if (CkNumPes() <= 1) break;' > src/ck-ldb/DistributedLB.C.tmp
+    mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
+    cat src/ck-ldb/DistributedLB.C | sed '/rand_nbor2 = rand() % CkNumPes();/i    if (CkNumPes() <= 2) break;' > src/ck-ldb/DistributedLB.C.tmp
+    mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
+    cat src/ck-ldb/DistributedLB.C | sed '/thisProxy\[rand_nbor1\].GossipLoadInfo(req_hop, CkMyPe(), info_count, p, l);/i    if (CkNumPes() > 1)' > src/ck-ldb/DistributedLB.C.tmp
+    mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
+    cat src/ck-ldb/DistributedLB.C | sed '/thisProxy\[rand_nbor2\].GossipLoadInfo(req_hop, CkMyPe(), info_count, p, l);/i    if (CkNumPes() > 2)' > src/ck-ldb/DistributedLB.C.tmp
+    mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
+    
     CHARM_COMMON_FLAGS=--enable-lbuserdata
     ./build charm++ net-win64 smp $CHARM_COMMON_FLAGS --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ net-win64 smp $CHARM_COMMON_FLAGS --destination=net-release --with-production -j8 | tee net-release.log
