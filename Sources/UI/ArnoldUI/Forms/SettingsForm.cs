@@ -19,7 +19,7 @@ namespace GoodAI.Arnold.Forms
         public CoreProcessParameters CoreProcessParameters => new CoreProcessParameters(
             workingDirectory: coreProcessDirectoryTextBox.Text,
             rawArguments: coreProcessArgumentsTextBox.Text,
-            maybePort: MaybeParseCorePort());
+            maybePort: Validator.MaybeParsePortNumber(portTextBox.Text));
 
         private readonly UIMain m_uiMain;
 
@@ -34,18 +34,6 @@ namespace GoodAI.Arnold.Forms
             UpdateSubstitutedArguments();
         }
 
-        private int? MaybeParseCorePort()
-        {
-            uint port;
-            if (!UInt32.TryParse(portTextBox.Text, out port))
-                return null;
-
-            if (port > IPEndPoint.MaxPort)
-                return null;
-
-            return (int)port;
-        }
-
         private void UpdateSubstitutedArguments()
         {
             substitutedArgumentsTextBox.Text = CoreProcessParameters.SubstitutedArguments;
@@ -53,9 +41,7 @@ namespace GoodAI.Arnold.Forms
 
         private void portTextBox_TextChanged(object sender, EventArgs e)
         {
-            portTextBox.ForeColor = MaybeParseCorePort().HasValue
-                ? DefaultForeColor
-                : Color.DarkRed;
+            m_textControlValidator.ValidateAndColorControl(portTextBox, Validator.TryParsePortNumber);
               
             UpdateSubstitutedArguments();
         }
