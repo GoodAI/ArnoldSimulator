@@ -38,9 +38,9 @@
             this.portTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.loadBalancingCheckBox = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.loadBalancingIntervalTextBox = new System.Windows.Forms.TextBox();
+            this.loadBalancingEnabledCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -151,23 +151,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.loadBalancingIntervalTextBox);
-            this.groupBox2.Controls.Add(this.loadBalancingCheckBox);
+            this.groupBox2.Controls.Add(this.loadBalancingEnabledCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(3, 249);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(422, 100);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Core Runtime Options";
-            // 
-            // loadBalancingCheckBox
-            // 
-            this.loadBalancingCheckBox.AutoSize = true;
-            this.loadBalancingCheckBox.Location = new System.Drawing.Point(9, 20);
-            this.loadBalancingCheckBox.Name = "loadBalancingCheckBox";
-            this.loadBalancingCheckBox.Size = new System.Drawing.Size(136, 17);
-            this.loadBalancingCheckBox.TabIndex = 0;
-            this.loadBalancingCheckBox.Text = "Enable Load Balancing";
-            this.loadBalancingCheckBox.UseVisualStyleBackColor = true;
             // 
             // label5
             // 
@@ -188,6 +178,18 @@
             this.loadBalancingIntervalTextBox.Text = "15";
             this.loadBalancingIntervalTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.loadBalancingIntervalTextBox.TextChanged += new System.EventHandler(this.loadBalancingIntervalTextBox_TextChanged);
+            this.loadBalancingIntervalTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.loadBalancingIntervalTextBox_KeyDown);
+            // 
+            // loadBalancingEnabledCheckBox
+            // 
+            this.loadBalancingEnabledCheckBox.AutoSize = true;
+            this.loadBalancingEnabledCheckBox.Location = new System.Drawing.Point(9, 20);
+            this.loadBalancingEnabledCheckBox.Name = "loadBalancingEnabledCheckBox";
+            this.loadBalancingEnabledCheckBox.Size = new System.Drawing.Size(136, 17);
+            this.loadBalancingEnabledCheckBox.TabIndex = 0;
+            this.loadBalancingEnabledCheckBox.Text = "Enable Load Balancing";
+            this.loadBalancingEnabledCheckBox.UseVisualStyleBackColor = true;
+            this.loadBalancingEnabledCheckBox.CheckedChanged += new System.EventHandler(this.loadBalancingEnabledCheckBox_CheckedChanged);
             // 
             // SettingsForm
             // 
@@ -222,6 +224,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox loadBalancingIntervalTextBox;
-        private System.Windows.Forms.CheckBox loadBalancingCheckBox;
+        private System.Windows.Forms.CheckBox loadBalancingEnabledCheckBox;
     }
 }

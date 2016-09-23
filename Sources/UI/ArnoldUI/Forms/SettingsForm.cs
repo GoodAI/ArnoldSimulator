@@ -21,10 +21,14 @@ namespace GoodAI.Arnold.Forms
             rawArguments: coreProcessArgumentsTextBox.Text,
             maybePort: MaybeParseCorePort());
 
-        private readonly ColorTextControlValidator m_textControlValidator = new ColorTextControlValidator();
+        private readonly UIMain m_uiMain;
 
-        public SettingsForm()
+        private readonly ColorTextControlValidator m_textControlValidator = new ColorTextControlValidator();
+        
+        public SettingsForm(UIMain uiMain)
         {
+            m_uiMain = uiMain;
+
             InitializeComponent();
 
             UpdateSubstitutedArguments();
@@ -61,9 +65,43 @@ namespace GoodAI.Arnold.Forms
             UpdateSubstitutedArguments();
         }
 
+        private async Task UpdateLoadBalancingSettings()
+        {
+            try
+            {
+                var loadBalancingIntervalSeconds = (float?)Validator.MaybeParseUInt(loadBalancingIntervalTextBox.Text);
+
+                await m_uiMain.UpdateCoreConfig(coreConfig =>
+                {
+                    coreConfig.System.LoadBalancingEnabled = loadBalancingEnabledCheckBox.Checked;
+
+                    if (loadBalancingIntervalSeconds.HasValue)
+                        coreConfig.System.LoadBalancingIntervalSeconds = loadBalancingIntervalSeconds.Value;
+                });
+            }
+            catch (Exception)
+            {
+                loadBalancingEnabledCheckBox.Checked = m_uiMain.Conductor.CoreConfig.System.RegularCheckpointingEnabled;
+                // (Already logged.)
+            }
+        }
+
+        private async void loadBalancingEnabledCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            await UpdateLoadBalancingSettings();
+        }
+
         private void loadBalancingIntervalTextBox_TextChanged(object sender, EventArgs e)
         {
             m_textControlValidator.ValidateAndColorControl(loadBalancingIntervalTextBox, Validator.TryParseUInt);
+        }
+
+        private async void loadBalancingIntervalTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                await UpdateLoadBalancingSettings();
+            }
         }
     }
 }

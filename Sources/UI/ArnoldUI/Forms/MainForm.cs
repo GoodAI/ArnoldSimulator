@@ -22,7 +22,7 @@ namespace GoodAI.Arnold
         public ILog Log { get; set; } = NullLogger.Instance;
 
         private readonly UIMain m_uiMain;
-        private string m_originalTitle;
+        private readonly string m_originalTitle;
 
         private LogForm LogForm { get; }
         //private GraphForm GraphForm { get; }
