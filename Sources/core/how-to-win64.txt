@@ -18,7 +18,7 @@
 - run Cygwin via cygwin.bat (not via Desktop or Start menu shortcuts)
     e.g. C:\cygwin64\cygwin.bat
 - in the Cygwin commnad prompt, execute the following commands:
-    cd /cygdrive/c/somedir/arnold/libs
+    cd /cygdrive/c/somedir/uba/Arnold/Sources/core/libs/
     ./build-libs-win64.sh all
 - note: fatal errors during charm++ compilation are expected (it tries to compile memory allocation and threading implementations opportunistically even for different platforms)
 
@@ -31,6 +31,36 @@
 - built binaries and their dependencies are to be found under the following directories:
     .\core\debug
     .\core\release
+- to run from Visual Studio, go to menu 'Debug - core Properties'
+    - select either Debug or Release Configuration
+    - go to 'Configuration Properties - Debugging' in the left panel
+    - set 'Command arguments' to:
+    +p5 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ..\..\..\..\Blueprints\random_blueprint.json
+- to run from command line, change either to debug or release directory and run the following command:
+    core +p5 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ..\..\..\..\..\Blueprints\random_blueprint.json
+- commands above will run single core process on single machine and the specified ammount of cores (e.g. +p3 +ppn 2 to run on just two cores instead of four)
+- for multi-machine scenario, refer to uba/Arnold/Sources/BootstrapArnold/HowToRun.txt
+
+6) Run simulation
+- keyboard controls:
+    'b'     Run a few brain steps of simulation as a benchmark.
+    'r'     Run the simulation until paused.
+    'p'     Pause the simulation.
+    's'     Run single brain step of the simulation.
+    'c'     Request checkpoint to be made next brain step.
+    'h'     Enable/disable regular creation of checkpoint every few seconds.
+    'l'     Request load balancing to be made next brain step.
+    'n'     Enable/disable regular load balancing every few seconds.
+    'i'     Increase number of brain steps per body step.
+    'd'     Decrease number of brain steps per body step.
+    'q'     Quit the core.
+
+7) Restart simulation
+- in case the previous run created the checkpoint and you want to continue from it:
+    - change Visual Studio command:
+    +p5 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +restart checkpoint ..\..\..\..\Blueprints\random_blueprint.json
+    - change command line command:
+    core +p5 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +restart checkpoint ..\..\..\..\..\Blueprints\random_blueprint.json
 
 Assumptions:
 - Path to this directory does not contain any spaces (copy the scripts elsewhere if it does).
