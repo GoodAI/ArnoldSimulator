@@ -1,0 +1,67 @@
+1) Install CentOS 7 from DVD ISO (https://www.centos.org/download/)
+- in the installation wizard, set the Base Environment to GNOME Desktop and tick installation of the following Add-Ons:
+    GNOME Applications, Development Tools
+- in case you already have a machine with CentOS installed, but without Development Tools, run the following command from shell:
+    sudo yum group install "Development Tools"
+
+2) Install additional development tools
+- run the following commands from shell:
+    sudo yum install imake
+    sudo yum install cmake
+- in case you also want to use UI interface for git:
+    sudo yum install git-gui
+
+3) Build dependencies
+- execute the following commands from shell:
+    cd /somedir/uba/Arnold/Sources/core/libs/
+    sh build-libs-linux64.sh all
+- note: fatal errors during charm++ compilation are expected (it tries to compile memory allocation and threading implementations opportunistically even for different platforms)
+
+4) Build solution
+- execute the following commands from shell:
+    cd /somedir/uba/Arnold/Sources/core/core/
+    make -j4 debug-build
+    make -j4 release-build
+- to clean the solution, either delete debug and release directory or use the following commands:
+    make debug-clean
+    make release-clean
+
+5) Launch binaries
+- built binaries and their dependencies are to be found under the following directories:
+    ./core/debug
+    ./core/release
+- go to either one of the directories and run for example the following command:
+    LD_LIBRARY_PATH=. ./core +p4 +ppn 4 +isomalloc_sync +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
+- command above will run single core process on single machine and the specified ammount of cores (e.g. +p2 +ppn 2 to run on just two cores instead of four)
+- for multi-machine scenario, refer to uba/Arnold/Sources/BootstrapArnold/HowToRun.txt
+- to do debugging, run the core via the following command:
+    LD_LIBRARY_PATH=. gdb --args ./core +p4 +ppn 4 +isomalloc_sync +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
+
+6) Run simulation
+- keyboard controls:
+    'b'     Run a few brain steps of simulation as a benchmark.
+    'r'     Run the simulation until paused.
+    'p'     Pause the simulation.
+    's'     Run single brain step of the simulation.
+    'c'     Request checkpoint to be made next brain step.
+    'h'     Enable/disable regular creation of checkpoint every few seconds.
+    'l'     Request load balancing to be made next brain step.
+    'n'     Enable/disable regular load balancing every few seconds.
+    'i'     Increase number of brain steps per body step.
+    'd'     Decrease number of brain steps per body step.
+    'q'     Quit the core.
+
+7) Restart simulation
+- in case the previous run created the checkpoint and you want to continue from it:
+    LD_LIBRARY_PATH=. ./core +p4 +ppn 4 +isomalloc_sync +LBCommOff +balancer DistributedLB +restart checkpoint ../../../../../Blueprints/random_blueprint.json
+
+Assumptions:
+- Path to this directory does not contain any spaces (copy the scripts elsewhere if it does).
+- Internet connection available to download additional packages.
+
+Notes:
+- Scripts are otherwise self-sufficient and will download everything they need.
+- Scripts work solely in this directory, do not install anything and do not change the system in any way.
+- In case the script cannot download some dependency from Internet, download it manually from backup at [1], put it to this directory and run the script again.
+
+[1] https://drive.google.com/a/keenswh.com/folderview?id=0B8ONJ7bRxkISdDlVM01vVEFWRjg&usp=sharing
