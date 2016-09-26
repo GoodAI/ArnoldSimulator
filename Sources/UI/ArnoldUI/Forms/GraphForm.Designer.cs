@@ -28,15 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            Graph.Compatibility.AlwaysCompatible alwaysCompatible5 = new Graph.Compatibility.AlwaysCompatible();
+            Graph.Compatibility.AlwaysCompatible alwaysCompatible1 = new Graph.Compatibility.AlwaysCompatible();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GraphForm));
             this.graphControl = new Graph.GraphControl();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.addRegionButton = new System.Windows.Forms.Button();
-            this.addInputButton = new System.Windows.Forms.Button();
-            this.removeInputButton = new System.Windows.Forms.Button();
-            this.addOutputButton = new System.Windows.Forms.Button();
             this.removeOutputButton = new System.Windows.Forms.Button();
+            this.addOutputButton = new System.Windows.Forms.Button();
+            this.removeInputButton = new System.Windows.Forms.Button();
+            this.addInputButton = new System.Windows.Forms.Button();
+            this.addRegionButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -47,7 +47,7 @@
             // 
             this.graphControl.AllowDrop = true;
             this.graphControl.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.graphControl.CompatibilityStrategy = alwaysCompatible5;
+            this.graphControl.CompatibilityStrategy = alwaysCompatible1;
             this.graphControl.ConnectorSafeBounds = 0;
             resources.ApplyResources(this.graphControl, "graphControl");
             this.graphControl.FocusElement = null;
@@ -78,26 +78,12 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.graphControl);
             // 
-            // addRegionButton
+            // removeOutputButton
             // 
-            resources.ApplyResources(this.addRegionButton, "addRegionButton");
-            this.addRegionButton.Name = "addRegionButton";
-            this.addRegionButton.UseVisualStyleBackColor = true;
-            this.addRegionButton.Click += new System.EventHandler(this.addRegionButton_Click);
-            // 
-            // addInputButton
-            // 
-            resources.ApplyResources(this.addInputButton, "addInputButton");
-            this.addInputButton.Name = "addInputButton";
-            this.addInputButton.UseVisualStyleBackColor = true;
-            this.addInputButton.Click += new System.EventHandler(this.addInputButton_Click);
-            // 
-            // removeInputButton
-            // 
-            resources.ApplyResources(this.removeInputButton, "removeInputButton");
-            this.removeInputButton.Name = "removeInputButton";
-            this.removeInputButton.UseVisualStyleBackColor = true;
-            this.removeInputButton.Click += new System.EventHandler(this.removeInputButton_Click);
+            resources.ApplyResources(this.removeOutputButton, "removeOutputButton");
+            this.removeOutputButton.Name = "removeOutputButton";
+            this.removeOutputButton.UseVisualStyleBackColor = true;
+            this.removeOutputButton.Click += new System.EventHandler(this.removeOutputButton_Click);
             // 
             // addOutputButton
             // 
@@ -106,12 +92,26 @@
             this.addOutputButton.UseVisualStyleBackColor = true;
             this.addOutputButton.Click += new System.EventHandler(this.addOutputButton_Click);
             // 
-            // removeOutputButton
+            // removeInputButton
             // 
-            resources.ApplyResources(this.removeOutputButton, "removeOutputButton");
-            this.removeOutputButton.Name = "removeOutputButton";
-            this.removeOutputButton.UseVisualStyleBackColor = true;
-            this.removeOutputButton.Click += new System.EventHandler(this.removeOutputButton_Click);
+            resources.ApplyResources(this.removeInputButton, "removeInputButton");
+            this.removeInputButton.Name = "removeInputButton";
+            this.removeInputButton.UseVisualStyleBackColor = true;
+            this.removeInputButton.Click += new System.EventHandler(this.removeInputButton_Click);
+            // 
+            // addInputButton
+            // 
+            resources.ApplyResources(this.addInputButton, "addInputButton");
+            this.addInputButton.Name = "addInputButton";
+            this.addInputButton.UseVisualStyleBackColor = true;
+            this.addInputButton.Click += new System.EventHandler(this.addInputButton_Click);
+            // 
+            // addRegionButton
+            // 
+            resources.ApplyResources(this.addRegionButton, "addRegionButton");
+            this.addRegionButton.Name = "addRegionButton";
+            this.addRegionButton.UseVisualStyleBackColor = true;
+            this.addRegionButton.Click += new System.EventHandler(this.addRegionButton_Click);
             // 
             // GraphForm
             // 

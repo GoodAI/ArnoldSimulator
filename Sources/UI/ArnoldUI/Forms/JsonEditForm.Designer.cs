@@ -40,17 +40,17 @@
             this.content.Location = new System.Drawing.Point(0, 0);
             this.content.Name = "content";
             this.content.ScrollWidth = 800;
-            this.content.Size = new System.Drawing.Size(829, 651);
+            this.content.Size = new System.Drawing.Size(967, 751);
             this.content.TabIndex = 0;
             this.content.UseTabs = false;
             // 
             // JsonEditForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(829, 651);
+            this.ClientSize = new System.Drawing.Size(967, 751);
             this.Controls.Add(this.content);
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "JsonEditForm";
             this.Text = "Blueprint Editor";
             this.ResumeLayout(false);

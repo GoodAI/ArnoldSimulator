@@ -42,7 +42,7 @@
             this.clearButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(891, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1039, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -64,7 +64,7 @@
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.panel1.Size = new System.Drawing.Size(891, 332);
+            this.panel1.Size = new System.Drawing.Size(1039, 387);
             this.panel1.TabIndex = 2;
             // 
             // logContent
@@ -74,18 +74,18 @@
             this.logContent.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.logContent.Location = new System.Drawing.Point(3, 0);
             this.logContent.Name = "logContent";
-            this.logContent.Size = new System.Drawing.Size(885, 332);
+            this.logContent.Size = new System.Drawing.Size(1033, 387);
             this.logContent.TabIndex = 0;
             this.logContent.Text = "";
             // 
             // LogForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(891, 357);
+            this.ClientSize = new System.Drawing.Size(1039, 412);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.toolStrip1);
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "LogForm";
             this.Text = "LogForm";
             this.toolStrip1.ResumeLayout(false);

@@ -87,7 +87,7 @@
             this.dockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
             this.dockPanel.Location = new System.Drawing.Point(0, 49);
             this.dockPanel.Name = "dockPanel";
-            this.dockPanel.Size = new System.Drawing.Size(1194, 735);
+            this.dockPanel.Size = new System.Drawing.Size(1395, 774);
             dockPanelGradient1.EndColor = System.Drawing.SystemColors.ControlLight;
             dockPanelGradient1.StartColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
             autoHideStripSkin1.DockStripGradient = dockPanelGradient1;
@@ -143,7 +143,8 @@
             this.fileMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1194, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(1395, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -189,7 +190,7 @@
             this.checkpointingIntervalTextBox});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1194, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1395, 25);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -370,7 +371,7 @@
             // 
             this.checkpointingIntervalTextBox.MaxLength = 7;
             this.checkpointingIntervalTextBox.Name = "checkpointingIntervalTextBox";
-            this.checkpointingIntervalTextBox.Size = new System.Drawing.Size(40, 25);
+            this.checkpointingIntervalTextBox.Size = new System.Drawing.Size(46, 25);
             this.checkpointingIntervalTextBox.Text = "10";
             this.checkpointingIntervalTextBox.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.checkpointingIntervalTextBox.ToolTipText = "Regular checkpointing interval in seconds";
@@ -379,9 +380,10 @@
             // 
             // statusStrip
             // 
-            this.statusStrip.Location = new System.Drawing.Point(0, 784);
+            this.statusStrip.Location = new System.Drawing.Point(0, 823);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1194, 22);
+            this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
+            this.statusStrip.Size = new System.Drawing.Size(1395, 22);
             this.statusStrip.TabIndex = 3;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -397,13 +399,14 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1194, 806);
+            this.ClientSize = new System.Drawing.Size(1395, 845);
             this.Controls.Add(this.dockPanel);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "Brain designer";

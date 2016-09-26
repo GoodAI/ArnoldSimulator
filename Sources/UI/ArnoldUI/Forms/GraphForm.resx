@@ -126,7 +126,7 @@
     <value>0, 0</value>
   </data>
   <data name="graphControl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>999, 606</value>
+    <value>1165, 699</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="graphControl.TabIndex" type="System.Int32, mscorlib">
@@ -154,10 +154,10 @@
     <value>0, 0</value>
   </data>
   <data name="removeOutputButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 188</value>
+    <value>3, 217</value>
   </data>
   <data name="removeOutputButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 40</value>
+    <value>71, 46</value>
   </data>
   <data name="removeOutputButton.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -178,10 +178,10 @@
     <value>0</value>
   </data>
   <data name="addOutputButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 143</value>
+    <value>3, 165</value>
   </data>
   <data name="addOutputButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 39</value>
+    <value>71, 45</value>
   </data>
   <data name="addOutputButton.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -202,10 +202,10 @@
     <value>1</value>
   </data>
   <data name="removeInputButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 97</value>
+    <value>3, 112</value>
   </data>
   <data name="removeInputButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 40</value>
+    <value>71, 46</value>
   </data>
   <data name="removeInputButton.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -226,10 +226,10 @@
     <value>2</value>
   </data>
   <data name="addInputButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 49</value>
+    <value>3, 57</value>
   </data>
   <data name="addInputButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 42</value>
+    <value>71, 48</value>
   </data>
   <data name="addInputButton.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -253,7 +253,7 @@
     <value>3, 3</value>
   </data>
   <data name="addRegionButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 40</value>
+    <value>71, 46</value>
   </data>
   <data name="addRegionButton.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -298,10 +298,13 @@
     <value>1</value>
   </data>
   <data name="splitContainer1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1070, 606</value>
+    <value>1248, 699</value>
   </data>
   <data name="splitContainer1.SplitterDistance" type="System.Int32, mscorlib">
-    <value>67</value>
+    <value>78</value>
+  </data>
+  <data name="splitContainer1.SplitterWidth" type="System.Int32, mscorlib">
+    <value>5</value>
   </data>
   <data name="splitContainer1.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -322,13 +325,13 @@
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 13</value>
+    <value>7, 15</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>1070, 606</value>
+    <value>1248, 699</value>
   </data>
   <data name="$this.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Microsoft Sans Serif, 8.25pt</value>
+    <value>Segoe UI, 9pt</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Design</value>
