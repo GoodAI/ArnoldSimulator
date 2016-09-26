@@ -220,7 +220,7 @@
     <Compile Include="Visualization\Models\SimulationModel.cs" />
     <Compile Include="Core\CoreProxy.cs" />
     <Compile Include="Visualization\Scene.cs" />
-    <Compile Include="UIMain.cs" />
+    <Compile Include="UI\UIMain.cs" />
     <EmbeddedResource Include="Forms\GraphForm.resx">
       <DependentUpon>GraphForm.cs</DependentUpon>
       <SubType>Designer</SubType>
