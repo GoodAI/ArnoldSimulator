@@ -82,28 +82,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CameraTests.cs" />
-    <Compile Include="ConductorTests.cs" />
-    <Compile Include="ConfigurationTests.cs" />
-    <Compile Include="CoreControllerTests.cs" />
-    <Compile Include="CoreLinkTests.cs" />
-    <Compile Include="CoreResponseParserTests.cs" />
+    <Compile Include="Visualisation\CameraTests.cs" />
+    <Compile Include="Core\ConductorTests.cs" />
+    <Compile Include="Composition\ConfigurationTests.cs" />
+    <Compile Include="Core\CoreControllerTests.cs" />
+    <Compile Include="Communication\CoreLinkTests.cs" />
+    <Compile Include="Communication\CoreResponseParserTests.cs" />
     <Compile Include="Core\CoreProcessParametersTests.cs" />
     <Compile Include="Core\SystemConfigurationTests.cs" />
-    <Compile Include="MathTestHelpers.cs" />
-    <Compile Include="MessageTests.cs" />
-    <Compile Include="ModelBaseTests.cs" />
-    <Compile Include="ModelDiffApplierTests.cs" />
-    <Compile Include="ModelTests.cs" />
-    <Compile Include="ModelUpdaterTests.cs" />
+    <Compile Include="TestHelpers\MathTestHelpers.cs" />
+    <Compile Include="Communication\MessageTests.cs" />
+    <Compile Include="Visualisation\ModelBaseTests.cs" />
+    <Compile Include="Core\ModelDiffApplierTests.cs" />
+    <Compile Include="Core\ModelTests.cs" />
+    <Compile Include="Core\ModelUpdaterTests.cs" />
     <Compile Include="Observation\DimensionsTests.cs" />
     <Compile Include="Observation\MetadataReaderTests.cs" />
     <Compile Include="Observation\ValueScalerTests.cs" />
     <Compile Include="Observation\PainterTests.cs" />
-    <Compile Include="PickRayTests.cs" />
+    <Compile Include="Visualisation\PickRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CoreProxyTests.cs" />
-    <Compile Include="TaskExtensionTests.cs" />
+    <Compile Include="Core\CoreProxyTests.cs" />
+    <Compile Include="Extensions\TaskExtensionTests.cs" />
     <Compile Include="UI\ValidatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
