@@ -1,3 +1,8 @@
 group main
+    host localhost
+group windows
     host KOUPY-PC.keenswh.com
     host SWE-TEST.keenswh.com
+group linux
+    host swe-centos-vm1.localdomain
+    host swe-centos-vm2.localdomain

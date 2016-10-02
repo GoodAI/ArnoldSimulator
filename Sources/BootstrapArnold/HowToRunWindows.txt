@@ -1,0 +1,78 @@
+Cluster Setup
+-------------
+
+Testing was done on the following setup (use as an inspiration for a more advanced setup):
+
+1) Company Windows domain network (keenswh.com domain) with properly working DHCP and DNS server.
+2) Machine KOUPY-PC.keenswh.com (4-core CPU, 16GB RAM, Windows 7 (64-bit)):
+- properly joined to domain and fully updated
+- Hyper-V features disabled (Control Panel - Programs and Features - Turn Windows features on or off)
+- VirtualBox installed including Bridged networking support (https://www.virtualbox.org/wiki/Downloads)
+- will be used to host HTCondor central manager virtual machine, to serve as a worker node, HTCondor job submitter and charmrun server
+- will be used to run ArnoldUI (which connects to the localhost, where the charmrun listens)
+3) Machine SWE-TEST.keenswh.com (4-core CPU, 8GB RAM, Windows 7 (64-bit)):
+- properly joined to domain and fully updated
+- this machine will be used just as a worker node
+4) Virtual machine 'HTCONDOR-CM.keenswh.com' (1-core CPU, 2GB RAM, 2TB HDD, Windows Server 2008 R2 (64-bit)):
+- enable single network adapter in the virtual machine settings (Settings - Network):
+    Adapter 1 - Attached to: Bridged Adapter
+- properly joined to domain and fully updated
+- this machine will be used as HTCondor central manager
+5) Install and configure HTCondor on all 3 machines according to the following guide:
+https://sites.google.com/a/keenswh.com/ai/projects/brain-simulator/brain-simulator-cloud-solution/batch-processing
+- backup copy at uba/Arnold/docs/HTCondorGuide.pdf (might not be up to date)
+- do server installation on HTCONDOR-CM and client installation on the worker nodes
+6) Copy and run FirewallExceptions.cmd with admin privileges on all worker machines.
+7) Ensure it is possible to use C:\arnold directory on all worker machines.
+
+Scenario Preparation
+--------------------
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. KOUPY-PC):
+1) Choose a subset of worker machines for the scenario and edit Inputs\nodelist.txt accordingly.
+2) Edit also 'requirements' section and 'queue' command within BootstrapArnoldWindows.condor to match machine names and machine count from Inputs\nodelist.txt.
+3) Build dependencies and the release build of Arnold core, as described in uba\Arnold\Sources\core\how-to-win64.txt.
+4) Ensure Results\checkpoint directory exists and is empty.
+
+Scenario Execution
+------------------
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. KOUPY-PC):
+1) Run command line console and change the directory to the directory where this text file is located (i.e. BootstrapArnold).
+2) Submit the Condor job to the cluster via the following command:
+condor_submit -name HTCONDOR-CM -spool BootstrapArnoldWindows.condor
+3) Take a note of what ID the job was given (let's assume 38 for this tutorial).
+4) Using condor_status command, wait until all worker machines mentioned in Inputs\nodelist.txt becomes Claimed and Busy. This means that core binaries and checkpoint files were successfully copied there and charmd is running on each of them.
+5) Launch charmrun manually the following way (optional if ArnoldUI will run on the same machine as charmrun):
+    cd C:\arnold
+    charmrun core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt +cs +ss ++verbose ++server ++server-port 46324
+- arguments +p and ++ppn shall correspond to the characteristics of machines within nodelist.txt (e.g. to maximally utilize 2 machines each having 2 cores, arguments shall be '+p4 ++ppn 2' to run 4 Charm workers split into 2 processes each having 2 threads)
+
+On the machine used to run ArnoldUI (i.e. KOUPY-PC):
+6) Open, build and run ..\UI\ArnoldUI.sln and ensure its binding to core is configured as follows:
+[if ArnoldUI runs on the same machine as charmrun]
+- core binary directory shall be set to C:\arnold
+- core command shall contain '++nodelist nodelist.txt ++nodegroup windows' among its arguments
+- core command +p and ++ppn arguments shall correspond to the characteristics of machines within nodelist.txt (e.g. to maximally utilize 2 machines each having 4 cores, arguments shall be '+p8 ++ppn 4' to run 8 Charm workers split into 2 processes each having 4 threads)
+- example command: core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt +cs +ss ++verbose ++server ++server-port {CorePort}
+- spawn and connect to the core via a corresponding button, see the charmrun console window whether it properly initilized and if so, start the simulation and let it run for a while (at least until the first checkpoint is generated)
+[if ArnoldUI runs on the different machine than charmrun, or if it was launched in step 5)]
+- core hostname shall correspond to hostname or IP address where charmrun is listening (so in our example, that would be localhost)
+- core port shall correspond to the port on which charmrun is listening (i.e. 46324)
+- connect to the core via a corresponding button, see the charmrun console window (on the charmrun machine) whether it properly initilized and if so, start the simulation and let it run for a while (at least until the first checkpoint is generated)
+7) Pause the simulation, disconnect from and shutdown the core via a corresponding button in UI, and close the ArnoldUI.
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. KOUPY-PC):
+8) In order to terminate charmd on worker machines and gather all parts of the checkpoint to the Condor server, use the following command:
+condor_vacate_job -name HTCONDOR-CM 38
+9) Use the following helper script to download and merge the checkpoint parts from the Condor server (third argument is the number of worker machines mentioned in Inputs\nodelist.txt):
+GatherCheckpoint.cmd HTCONDOR-CM 38 2
+10) Note that the job was forcefully vacated, so to remove it from the queue of scheduled jobs and let future jobs run, it is necessary to use the following command:
+condor_rm -name HTCONDOR-CM 38
+
+Scenario Restarting
+-------------------
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. KOUPY-PC):
+1) Results\checkpoint shall now contain a checkpoint from the previous run.
+2) Now you can repeatedly go through steps 1) to 10) from the previous section, each time resuming the simulation from the last checkpoint. The only difference is to append '+restart checkpoint' to charmrun command.

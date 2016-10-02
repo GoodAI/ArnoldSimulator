@@ -41,8 +41,8 @@ namespace GoodAI.Arnold.Core
         //private static readonly string CoreProcessParameters =
             //$"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +cs +ss ++verbose ++server ++server-port {CorePort}";
             //$"core +p4 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB +restart checkpoint +cs +ss ++verbose ++server ++server-port {CorePort}";
-            //$"core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt +cs +ss ++verbose ++server ++server-port {CorePort}";
-            //$"core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt +restart checkpoint +cs +ss ++verbose ++server ++server-port {CorePort}";
+            //$"core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt ++nodegroup windows +cs +ss ++verbose ++server ++server-port {CorePort}";
+            //$"core +p8 ++ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt ++nodegroup windows +restart checkpoint +cs +ss ++verbose ++server ++server-port {CorePort}";
 
         private readonly Process m_process;
 

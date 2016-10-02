@@ -25,18 +25,17 @@ initialdir = Results
 # Custom macros for input file paths on the submit machine. Shall be either absolute or relative to the initialdir.
 CORE_DIR = ../../core/core/release
 CHARMD_DIR = ../../core/libs/charm/net-release/bin
-SCRIPT_DIR = ../Scripts
 INPUT_DIR = ../Inputs
 
 log = log.$(Cluster).$(Process).txt
 
-transfer_executable = False
+transfer_executable = True
 
 # Input files to be transferred from submit machine to the flat scratch directory on the worker machine. 
 # Paths shall be either absolute or relative to the initialdir. If directory path ends with '/', only its
 # contents are transferred to scratch directory, otherwise the directory itself is transferred as well.
 # Special care must be taken to avoid naming conflicts when files are copied into scratch directory.
-transfer_input_files = $(CORE_DIR)/, $(CHARMD_DIR)/, $(SCRIPT_DIR)/, $(INPUT_DIR)/, checkpoint
+transfer_input_files = $(CORE_DIR)/, $(CHARMD_DIR)/, $(INPUT_DIR)/, checkpoint
 
 # Output files to be transferred from scratch directory on the worker machine to the initialdir on
 # the submit machine. Same rules apply as with transfer_input_files. Additionally, if you leave it
