@@ -17,7 +17,7 @@
 3) Build dependencies
 - run Cygwin via cygwin.bat (not via Desktop or Start menu shortcuts)
     e.g. C:\cygwin64\cygwin.bat
-- in the Cygwin commnad prompt, execute the following commands:
+- in the Cygwin command prompt, execute the following commands:
     cd /cygdrive/c/somedir/uba/Arnold/Sources/core/libs/
     ./build-libs-win64.sh all
 - note: fatal errors during charm++ compilation are expected (it tries to compile memory allocation and threading implementations opportunistically even for different platforms)
