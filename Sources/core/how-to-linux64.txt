@@ -3,6 +3,7 @@
     GNOME Applications, Development Tools
 - in case you already have a machine with CentOS installed, but without Development Tools, run the following command from shell:
     sudo yum group install "Development Tools"
+- after installation, install all available updates (Applications - System Tools - Software Update)
 
 2) Install additional development tools
 - run the following commands from shell:
@@ -31,11 +32,11 @@
     ./core/debug
     ./core/release
 - go to either one of the directories and run for example the following command:
-    LD_LIBRARY_PATH=. ./core +p4 +ppn 4 +isomalloc_sync +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
+    LD_LIBRARY_PATH=. ./core +p4 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
 - command above will run single core process on single machine and the specified ammount of cores (e.g. +p2 +ppn 2 to run on just two cores instead of four)
 - for multi-machine scenario, refer to uba/Arnold/Sources/BootstrapArnold/HowToRun.txt
 - to do debugging, run the core via the following command:
-    LD_LIBRARY_PATH=. gdb --args ./core +p4 +ppn 4 +isomalloc_sync +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
+    LD_LIBRARY_PATH=. gdb --args ./core +p4 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
 
 6) Run simulation
 - keyboard controls:
