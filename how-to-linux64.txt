@@ -1,0 +1,4 @@
+For single machine scenario, go to uba\Arnold\Sources\core\how-to-linux64.txt.
+For multi machine scenario, go to uba\Arnold\Sources\BootstrapArnold\HowToRunLinux.txt.
+
+It is currently not possible to use UI for single machine scenario.

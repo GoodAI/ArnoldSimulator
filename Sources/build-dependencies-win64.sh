@@ -39,9 +39,9 @@ build_flatc()
 copy_headers()
 {
     cd network/flatbuffers
-	
-	rm -r -f ../../UI/Libs/3rd/FlatBuffers
-	cp -r net/FlatBuffers ../../UI/Libs/3rd/FlatBuffers
+    
+    rm -r -f ../../UI/Libs/3rd/FlatBuffers
+    cp -r net/FlatBuffers ../../UI/Libs/3rd/FlatBuffers
     
     cd ../..
 }
@@ -89,6 +89,10 @@ do
             build_corelibs
         ;;
         messages)
+            build_messages
+        ;;
+        ui)
+            build_flatc
             build_messages
         ;;
         all)

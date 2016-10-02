@@ -1,51 +1,15 @@
-1) Install Visual Studio 2015 (https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx)
-- in the installation wizard, allow installation of the following components:
-    Programming Languages - Visual C++ - Common Tools for Visual C++ 2015
-    Windows and Web Development - Universal Windows App Development Tools - Windows 10 SDK
-- after installation, launch Visual Studio and go to options to change the default C++ indenting behaviour to use spaces instead of tabs:
-    Tools - Options - Text Editor - C/C++ - Tab - Insert spaces
+For single machine scenario, go to uba\Arnold\Sources\core\how-to-win64.txt.
+For multi machine scenario, go to uba\Arnold\Sources\BootstrapArnold\HowToRunWindows.txt.
 
-2) Install Cygwin (https://cygwin.com/setup-x86_64.exe)
-- in the installation wizard, ensure there are no spaces in the path to Root Install Directory
-- in the installation wizard, allow installation of the following components:
-    Archive - unzip, Web - wget, Devel - make, Devel - makedepend, Devel - gcc-core
-- after installation, go to Cygwin installation directory, open cygwin.bat and insert following line just under @echo off
-    call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall" amd64
-- add Cygwin bin directory to the system Path variable (e.g. C:\cygwin64\bin)
-    Control panel - System - Advanced system settings - Environment Variables - System variables
-
-3) Build dependencies
+To use UI for single machine scenario, additionally to the above, do the following:
+1) Build UI dependencies
 - run Cygwin via cygwin.bat (not via Desktop or Start menu shortcuts)
     e.g. C:\cygwin64\cygwin.bat
-- in the Cygwin commnad prompt, execute the following commands:
-    cd /cygdrive/c/somedir/Arnold/Sources
-    ./build-dependencies-win64.sh all
-- note: fatal errors during charm++ compilation are expected (it tries to compile memory allocation and threading implementations opportunistically even for different platforms)
-
-4) Build core solution
+- in the Cygwin command prompt, execute the following commands:
+    cd /cygdrive/c/somedir/uba/Arnold/Sources
+    ./build-dependencies-win64.sh ui
+2) Build UI
 - open the following solution file in Visual Studio:
-    .\core\core.sln
+    uba\Arnold\Sources\UI\ArnoldUI.sln
 - in Visual Studio, select Debug/Release configuration, go to menu 'Build - Build solution' and wait until the compilation succeeds
-
-5) Launch core binaries
-- built binaries and their dependencies are to be found under the following directories:
-    .\core\debug
-    .\core\release
-
-6) Build UI
-- open the following solution file in Visual Studio:
-	.\UI\ArnoldUI.sln
-- in Visual Studio, select Debug/Release configuration, go to menu 'Build - Build solution' and wait until the compilation succeeds
-
-7) Launch UI from Visual Studio
-
-Assumptions:
-- Path to this directory does not contain any spaces (copy the scripts elsewhere if it does).
-- Internet connection available to download additional packages.
-
-Notes:
-- Scripts are otherwise self-sufficient and will download everything they need.
-- Scripts work solely in this directory, do not install anything and do not change the system in any way.
-- In case the script cannot download some dependency from Internet, download it manually from backup at [1], put it to this directory and run the script again.
-
-[1] https://drive.google.com/a/keenswh.com/folderview?id=0B8ONJ7bRxkISdDlVM01vVEFWRjg&usp=sharing
+3) Launch UI from Visual Studio
