@@ -171,8 +171,6 @@ download_and_unpack()
     local VERSION="$3"
     local UNPACKED_DIR="$4"  # Optional.
 
-    [ -n "$UNPACKED_DIR" ] || UNPACKED_DIR="${TARGET_DIR}-${VERSION}"
-
     local ARCHIVE_NAME=$( get_archive_file_name "$LINK" "$TARGET_DIR" "$VERSION" )
     local ARCHIVE_TYPE=$( get_archive_extension "$ARCHIVE_NAME" )
     [ -n "$ARCHIVE_TYPE" ] || die "Unknown archive type '${ARCHIVE_TYPE}' or wrong archive name '${ARCHIVE_NAME}'"
@@ -192,7 +190,12 @@ download_and_unpack()
     else
         die "Unexpected archive type: ${ARCHIVE_TYPE}."
     fi
-    
+
+    if [ -d "${TARGET_DIR}-${VERSION}" ] || [ -z "$UNPACKED_DIR" ]
+    then
+        UNPACKED_DIR="${TARGET_DIR}-${VERSION}"
+    fi
+
     if [ "$UNPACKED_DIR" != "$TARGET_DIR" ]
     then
         mv "$UNPACKED_DIR" "$TARGET_DIR" || die
