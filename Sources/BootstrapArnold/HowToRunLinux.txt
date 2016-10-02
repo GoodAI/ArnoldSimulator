@@ -1,0 +1,143 @@
+Cluster Setup
+-------------
+
+Testing was done on the following setup (use as an inspiration for a more advanced setup):
+
+1) Host machine (4-core hyper-threading CPU, 8GB RAM, Windows 10 (64-bit)):
+- Hyper-V features disabled (Control Panel - Programs and Features - Turn Windows features on or off)
+- VirtualBox installed including Bridged networking support (https://www.virtualbox.org/wiki/Downloads)
+- will be used to host entire virtual Linux cluster (virtual network with 4 virtual machines - virtual router, HTCondor central manager and two worker nodes)
+- will be used to run ArnoldUI (which connects to the WAN interface of the virtual router, gets NAT forwarded to one of the worker nodes where the charmrun listens)
+2) Virtual router 'pfSense' (1-core CPU, 512MB RAM, 8GB HDD, FreeBSD (64-bit)):
+- enable two network adapters in the virtual machine settings (Settings - Network):
+    Adapter 1 - Attached to: Bridged Adapter
+    Adapter 2 - Attached to: Internal Network, Name: intnet
+- download 'AMD64 (64-bit) - CD image (ISO) Installer' from https://www.pfsense.org/download/
+- unpack the ISO, insert it into virtual machine and boot from it
+- wait and let the ISO auto boot to the installer (blue screen), use the following settings during the installation:
+    Configure Console - Accept these Settings
+    Select Task - Quick/Easy Install
+    Install Kernel - Standard Kernel
+- Reboot and unmount the ISO just before the machine restarts
+- let the router boot until you see control menu and configuration overview:
+    WAN (wan) -> em0 -> v4/DHCP4: a.b.c.d/e
+    LAN (lan) -> em1 -> v4: e.f.g.h/i
+- WAN interface should not need any additional configuration (should have IP obtained from DHCP server of the physical router on your network)
+- assuming most of the local area networks use 192.x.x.x or 10.x.x.x addresses, let's use 172.x.x.x for the virtual network to avoid confusion of the router's firewall:
+    Set interface(s) IP address (2)
+    LAN (2)
+    LAN IPv4 address: 172.16.0.138
+    LAN IPv4 subnet bit count: 16
+    DHCP server on LAN: y
+        start address: 172.16.0.1
+        end address:   172.16.0.64
+    HTTP as the webConfigurator protocol: n
+3) Virtual machine 'htcondor-cm-centos' (1-core CPU, 1GB RAM, 64GB HDD, RedHat (64-bit)):
+- this machine will be used as HTCondor central manager
+- enable single network adapter in the virtual machine settings (Settings - Network):
+    Adapter 1 - Attached to: Internal Network, Name: intnet
+- install CentOS 7 from DVD ISO (https://www.centos.org/download/), go through the installation wizard and change the following:
+    Base Environment: GNOME Desktop
+    Add-Ons: GNOME Applications, Development Tools
+    Hostname: htcondor-cm-centos
+- during installation, create accounts for root user and your own user (with administrative privileges)
+- after installation, open Firefox (Applications - Internet - Firefox) and log into the router web configurator:
+    https://172.16.0.138
+        Username: admin
+        Password: pfsense
+- change the following settings in the router web configurator:
+    System - General Setup - pfSense.localdomain
+    Interfaces - WAN - (untick) Block private networks and loopback addresses 
+    Services - DNS Resolver - (tick) Register DHCP leases in the DNS Resolver
+    Services - DNS Resolver - (tick) Register DHCP static mappings in the DNS Resolver
+- install all available updates (Applications - System Tools - Software Update) and restart
+- it is recommended to install VirtualBox Guest Additions (Devices - Insert Guest Additions CD image...) and restart
+- to use VirtualBox Shared Folders feature, open Terminal and execute the following command with your username:
+    sudo usermod -a -G vboxsf <username>
+- it is recommended to tweak the OS configuration in the following way (Applications - System Tools - Settings):
+    Network - Wired - Identity - Connect automatically
+    Power - Blank Screen - Never
+    Privacy - Screen Lock - Off
+4) Virtual machine 'swe-centos-vm1' (2-core CPU, 2GB RAM, 64GB HDD, RedHat (64-bit)):
+- install the same way as 'htcondor-cm-centos', but skip the router configuration part
+- this machine will be used as a worker node, HTCondor job submitter and charmrun server
+- in order to make charmrun visible from the host machine, it is necessary to configure NAT port forwarding:
+    https://172.16.0.138
+        Username: admin
+        Password: pfsense
+    Services - DHCP Server - DHCP Static Mappings - Add
+        MAC Address - click Copy My MAC
+        IP Address - set outside DHCP range (e.g. 172.16.0.65)
+        Hostname - swe-centos-vm1
+    Firewall - NAT - Port Forward - Add
+        Protocol - TCP/UDP
+        Destination port range - 46324
+        Redirect target IP - same as above (e.g. 172.16.0.65)
+        Redirect target port - 46324
+5) Virtual machine 'swe-centos-vm2' (2-core CPU, 2GB RAM, 64GB HDD, RedHat (64-bit)):
+- install the same way as 'htcondor-cm-centos', but skip the router configuration part
+- this machine will be used just as a worker node
+6) Install and configure HTCondor on all 3 machines according to the following guide:
+https://sites.google.com/a/keenswh.com/ai/projects/brain-simulator/brain-simulator-cloud-solution/batch-processing
+- backup copy at uba/Arnold/docs/HTCondorGuide.pdf (might not be up to date)
+- do server installation on htcondor-cm-centos and client installation on the worker nodes
+- carefully go through all the steps, including the firewall port opening (as this is also necessary for Charm binaries)
+- for this example, use localdomain instead of keenswh.com domain (change all the occurences in the guide)
+7) Setup password-less SSH access from charmrun machine to all worker nodes:
+- this assumes you have a user with the same username on all worker nodes
+- for this particular setup, it is necessary to setup access from swe-centos-vm1 to itself and from swe-centos-vm1 to swe-centos-vm2
+- from Terminal on swe-centos-vm1, execute the following commands:
+    ssh-keygen -t rsa
+    ssh-copy-id swe-centos-vm1
+    ssh swe-centos-vm1
+    exit
+    ssh-keygen -t rsa
+    ssh-copy-id swe-centos-vm2
+    ssh swe-centos-vm2
+    exit
+8) Ensure it is possible to use /tmp/arnold directory on all worker machines.
+
+Scenario Preparation
+--------------------
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. swe-centos-vm1):
+1) Choose a subset of worker machines for the scenario and edit Inputs/nodelist.txt accordingly.
+2) Edit also 'requirements' section and 'queue' command within BootstrapArnoldLinux.condor to match machine names and machine count from Inputs/nodelist.txt.
+3) Build dependencies and the release build of Arnold core, as described in uba/Arnold/Sources/core/how-to-linux64.txt.
+4) Ensure Results/checkpoint directory exists and is empty.
+
+Scenario Execution
+------------------
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. swe-centos-vm1):
+1) Run command line console and change the directory to the directory where this text file is located (i.e. BootstrapArnold).
+2) Submit the Condor job to the cluster via the following command:
+condor_submit -name htcondor-cm-centos -spool BootstrapArnoldLinux.condor
+3) Take a note of what ID the job was given (let's assume 38 for this tutorial).
+4) Using condor_status command, wait until all worker machines mentioned in Inputs/nodelist.txt becomes Claimed and Busy. This means that core binaries and checkpoint files were successfully copied there and charmd is running on each of them.
+5) Launch charmrun manually the following way:
+    cd /tmp/arnold
+    ./charmrun core +p4 ++ppn 2 +noisomalloc +LBCommOff +balancer DistributedLB ++nodelist nodelist.txt ++nodegroup linux ++runscript ./LaunchCore.sh +cs +ss ++verbose ++server ++server-port 46324
+- arguments +p and ++ppn shall correspond to the characteristics of machines within nodelist.txt (e.g. to maximally utilize 2 machines each having 2 cores, arguments shall be '+p4 ++ppn 2' to run 4 Charm workers split into 2 processes each having 2 threads)
+
+On the machine used to run ArnoldUI (i.e. Windows host):
+6) Open, build and run ..\UI\ArnoldUI.sln and ensure its binding to core is configured as follows:
+- core hostname shall correspond to hostname or IP address where charmrun is listening (so in our example, that would be IP address of the pfSense router WAN interface)
+- core port shall correspond to the port on which charmrun is listening (i.e. 46324)
+- connect to the core via a corresponding button, see the charmrun console window (on the charmrun machine) whether it properly initilized and if so, start the simulation and let it run for a while (at least until the first checkpoint is generated)
+7) Pause the simulation, disconnect from and shutdown the core via a corresponding button in UI, and close the ArnoldUI.
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. swe-centos-vm1):
+8) In order to terminate charmd on worker machines and gather all parts of the checkpoint to the Condor server, use the following command:
+condor_vacate_job -name htcondor-cm-centos 38
+9) Use the following helper script to download and merge the checkpoint parts from the Condor server (third argument is the number of worker machines mentioned in Inputs/nodelist.txt):
+sh GatherCheckpoint.sh htcondor-cm-centos 38 2
+10) Note that the job was forcefully vacated, so to remove it from the queue of scheduled jobs and let future jobs run, it is necessary to use the following command:
+condor_rm -name htcondor-cm-centos 38
+
+Scenario Restarting
+-------------------
+
+On the machine used as a HTCondor job submitter and charmrun server (i.e. swe-centos-vm1):
+1) Results/checkpoint shall now contain a checkpoint from the previous run.
+2) Now you can repeatedly go through steps 1) to 10) from the previous section, each time resuming the simulation from the last checkpoint. The only difference is to append '+restart checkpoint' to charmrun command.
