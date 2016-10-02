@@ -9,7 +9,7 @@ namespace GoodAI.Arnold.Core
 {
     public class SystemConfiguration
     {
-        public int BrainStepsPerBodyStep { get; set; } = 1;
+        public int BrainStepsPerBodyStep { get; set; } = 10;
 
         public bool RegularCheckpointingEnabled { get; set; }
 
