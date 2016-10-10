@@ -41,8 +41,18 @@
             this.label5 = new System.Windows.Forms.Label();
             this.loadBalancingIntervalTextBox = new System.Windows.Forms.TextBox();
             this.loadBalancingEnabledCheckBox = new System.Windows.Forms.CheckBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.localCoreRadioButton = new System.Windows.Forms.RadioButton();
+            this.remoteCoreRadioButton = new System.Windows.Forms.RadioButton();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.remoteCoreHostTextBox = new System.Windows.Forms.TextBox();
+            this.remoteCorePortTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // coreProcessDirectoryTextBox
@@ -137,12 +147,12 @@
             this.groupBox1.Controls.Add(this.substitutedArgumentsTextBox);
             this.groupBox1.Controls.Add(this.coreProcessArgumentsTextBox);
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Location = new System.Drawing.Point(3, 6);
+            this.groupBox1.Location = new System.Drawing.Point(3, 92);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(492, 275);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Core process options";
+            this.groupBox1.Text = "Local core options";
             // 
             // groupBox2
             // 
@@ -151,7 +161,7 @@
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.loadBalancingIntervalTextBox);
             this.groupBox2.Controls.Add(this.loadBalancingEnabledCheckBox);
-            this.groupBox2.Location = new System.Drawing.Point(3, 287);
+            this.groupBox2.Location = new System.Drawing.Point(3, 470);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(492, 87);
             this.groupBox2.TabIndex = 9;
@@ -192,12 +202,101 @@
             this.loadBalancingEnabledCheckBox.UseVisualStyleBackColor = true;
             this.loadBalancingEnabledCheckBox.CheckedChanged += new System.EventHandler(this.loadBalancingEnabledCheckBox_CheckedChanged);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox3.Controls.Add(this.remoteCoreRadioButton);
+            this.groupBox3.Controls.Add(this.localCoreRadioButton);
+            this.groupBox3.Location = new System.Drawing.Point(3, 3);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(492, 83);
+            this.groupBox3.TabIndex = 9;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Core mode";
+            // 
+            // localCoreRadioButton
+            // 
+            this.localCoreRadioButton.AutoSize = true;
+            this.localCoreRadioButton.Checked = true;
+            this.localCoreRadioButton.Location = new System.Drawing.Point(10, 22);
+            this.localCoreRadioButton.Name = "localCoreRadioButton";
+            this.localCoreRadioButton.Size = new System.Drawing.Size(128, 19);
+            this.localCoreRadioButton.TabIndex = 10;
+            this.localCoreRadioButton.TabStop = true;
+            this.localCoreRadioButton.Text = "Local machine core";
+            this.localCoreRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // remoteCoreRadioButton
+            // 
+            this.remoteCoreRadioButton.AutoSize = true;
+            this.remoteCoreRadioButton.Location = new System.Drawing.Point(10, 45);
+            this.remoteCoreRadioButton.Name = "remoteCoreRadioButton";
+            this.remoteCoreRadioButton.Size = new System.Drawing.Size(151, 19);
+            this.remoteCoreRadioButton.TabIndex = 11;
+            this.remoteCoreRadioButton.Text = "Connect to remote core";
+            this.remoteCoreRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Controls.Add(this.label6);
+            this.groupBox4.Controls.Add(this.label7);
+            this.groupBox4.Controls.Add(this.remoteCoreHostTextBox);
+            this.groupBox4.Controls.Add(this.remoteCorePortTextBox);
+            this.groupBox4.Location = new System.Drawing.Point(3, 373);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(492, 91);
+            this.groupBox4.TabIndex = 8;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Remote core options";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(7, 29);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(32, 15);
+            this.label6.TabIndex = 1;
+            this.label6.Text = "Host";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(7, 59);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(29, 15);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "Port";
+            // 
+            // remoteCoreHostTextBox
+            // 
+            this.remoteCoreHostTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.remoteCoreHostTextBox.Location = new System.Drawing.Point(94, 25);
+            this.remoteCoreHostTextBox.Name = "remoteCoreHostTextBox";
+            this.remoteCoreHostTextBox.Size = new System.Drawing.Size(383, 23);
+            this.remoteCoreHostTextBox.TabIndex = 0;
+            // 
+            // remoteCorePortTextBox
+            // 
+            this.remoteCorePortTextBox.Location = new System.Drawing.Point(94, 55);
+            this.remoteCorePortTextBox.MaxLength = 10;
+            this.remoteCorePortTextBox.Name = "remoteCorePortTextBox";
+            this.remoteCorePortTextBox.Size = new System.Drawing.Size(58, 23);
+            this.remoteCorePortTextBox.TabIndex = 6;
+            this.remoteCorePortTextBox.Text = "46324";
+            this.remoteCorePortTextBox.TextChanged += new System.EventHandler(this.portTextBox_TextChanged);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(502, 571);
+            this.ClientSize = new System.Drawing.Size(502, 566);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox1);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.HideOnClose = true;
@@ -207,6 +306,10 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -226,5 +329,13 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox loadBalancingIntervalTextBox;
         private System.Windows.Forms.CheckBox loadBalancingEnabledCheckBox;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.RadioButton remoteCoreRadioButton;
+        private System.Windows.Forms.RadioButton localCoreRadioButton;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox remoteCoreHostTextBox;
+        private System.Windows.Forms.TextBox remoteCorePortTextBox;
     }
 }

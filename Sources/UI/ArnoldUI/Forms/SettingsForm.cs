@@ -14,6 +14,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace GoodAI.Arnold.Forms
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public partial class SettingsForm : DockContent
     {
         public CoreProcessParameters CoreProcessParameters => new CoreProcessParameters(
