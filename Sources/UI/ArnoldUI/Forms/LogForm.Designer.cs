@@ -87,7 +87,7 @@
             this.Controls.Add(this.toolStrip1);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "LogForm";
-            this.Text = "LogForm";
+            this.Text = "Log";
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);

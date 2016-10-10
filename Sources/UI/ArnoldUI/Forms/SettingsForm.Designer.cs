@@ -102,9 +102,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(7, 178);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(160, 15);
+            this.label3.Size = new System.Drawing.Size(159, 15);
             this.label3.TabIndex = 4;
-            this.label3.Text = "Arguments after Substitution";
+            this.label3.Text = "Arguments after substitution";
             // 
             // label4
             // 
@@ -142,7 +142,7 @@
             this.groupBox1.Size = new System.Drawing.Size(492, 275);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Core Process Options";
+            this.groupBox1.Text = "Core process options";
             // 
             // groupBox2
             // 
@@ -156,7 +156,7 @@
             this.groupBox2.Size = new System.Drawing.Size(492, 87);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Core Runtime Options";
+            this.groupBox2.Text = "Core runtime options";
             // 
             // label5
             // 
@@ -165,7 +165,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(146, 15);
             this.label5.TabIndex = 9;
-            this.label5.Text = "Load Balancing Interval (s)";
+            this.label5.Text = "Load balancing interval (s)";
             // 
             // loadBalancingIntervalTextBox
             // 
@@ -186,9 +186,9 @@
             this.loadBalancingEnabledCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.loadBalancingEnabledCheckBox.Location = new System.Drawing.Point(10, 23);
             this.loadBalancingEnabledCheckBox.Name = "loadBalancingEnabledCheckBox";
-            this.loadBalancingEnabledCheckBox.Size = new System.Drawing.Size(145, 19);
+            this.loadBalancingEnabledCheckBox.Size = new System.Drawing.Size(142, 19);
             this.loadBalancingEnabledCheckBox.TabIndex = 0;
-            this.loadBalancingEnabledCheckBox.Text = "Enable Load Balancing";
+            this.loadBalancingEnabledCheckBox.Text = "Enable load balancing";
             this.loadBalancingEnabledCheckBox.UseVisualStyleBackColor = true;
             this.loadBalancingEnabledCheckBox.CheckedChanged += new System.EventHandler(this.loadBalancingEnabledCheckBox_CheckedChanged);
             // 

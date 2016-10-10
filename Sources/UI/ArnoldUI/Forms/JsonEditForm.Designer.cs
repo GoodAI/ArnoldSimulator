@@ -52,7 +52,7 @@
             this.Controls.Add(this.content);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "JsonEditForm";
-            this.Text = "Blueprint Editor";
+            this.Text = "Blueprint editor";
             this.ResumeLayout(false);
 
         }
