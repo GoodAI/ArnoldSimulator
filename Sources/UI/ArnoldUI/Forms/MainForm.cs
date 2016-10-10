@@ -180,15 +180,15 @@ namespace GoodAI.Arnold
 
         private async void connectButton_Click(object sender, EventArgs e)
         {
-            if (!SettingsForm.CoreProcessParameters.IsValid)
+            if (!SettingsForm.CoreConnectionParams.IsValid)  // TODO(Premek): Tell user what exactly is wrong (via an exception).
             {
                 // TODO(Premek): Use a user log.
-                Log.Error("Connect button action aborted: Please check core process parameters in Settings.");
+                Log.Error("Connect button action aborted: Please check core connection parameters in Settings.");
                 return;
             }
 
             // TODO(HonzaS): Handle the core type (local/remote).
-            await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync(SettingsForm.CoreProcessParameters));
+            await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync(SettingsForm.CoreConnectionParams));
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)

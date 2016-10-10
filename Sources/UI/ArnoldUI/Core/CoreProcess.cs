@@ -46,7 +46,7 @@ namespace GoodAI.Arnold.Core
 
         private readonly Process m_process;
 
-        public CoreProcess(CoreProcessParameters parameters)
+        public CoreProcess(CoreProcessParams parameters)
         {
             m_corePort = parameters.Port;
 

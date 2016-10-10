@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GoodAI.Arnold.Core
 {
-    public class CoreProcessParameters
+    public class CoreProcessParams
     {
         public bool IsValid => (MaybeSubstituteArguments() != null);
 
@@ -22,7 +22,7 @@ namespace GoodAI.Arnold.Core
 
         private readonly bool m_portIsValid;
 
-        public CoreProcessParameters(string workingDirectory, string rawArguments, int? maybePort)
+        public CoreProcessParams(string workingDirectory, string rawArguments, int? maybePort)
         {
             if (maybePort.HasValue &&
                 ((maybePort.Value > IPEndPoint.MaxPort) || (maybePort.Value < IPEndPoint.MinPort)))

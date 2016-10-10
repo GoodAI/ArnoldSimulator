@@ -16,7 +16,7 @@ namespace GoodAI.Arnold.UI.Tests
         private readonly Mock<ICoreProcess> m_coreProcessMock;
         private readonly Mock<ICoreProxy> m_coreProxyMock;
         private readonly Conductor m_conductor;
-        private readonly CoreProcessParameters m_coreProcessParameters = new CoreProcessParameters("dir", "args", null);
+        private readonly CoreConnectionParamsBase m_coreProcessParams = new LocalCoreConnectionParams("dir", "args", null);
 
         public ConductorTests()
         {
@@ -48,7 +48,7 @@ namespace GoodAI.Arnold.UI.Tests
                     new StateChangedEventArgs(CoreState.Empty, CoreState.ShuttingDown));
 
             var coreProcessFactoryMock = new Mock<ICoreProcessFactory>();
-            coreProcessFactoryMock.Setup(factory => factory.Create(m_coreProcessParameters))
+            coreProcessFactoryMock.Setup(factory => factory.Create(m_coreProcessParams.CoreProcessParams))
                 .Returns(m_coreProcessMock.Object);
 
             var coreLinkFactoryMock = new Mock<ICoreLinkFactory>();
@@ -81,7 +81,7 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void ConductorSetsUpAndTearsDown()
         {
-            await m_conductor.ConnectToCoreAsync(parameters: m_coreProcessParameters);
+            await m_conductor.ConnectToCoreAsync(m_coreProcessParams);
 
             Assert.Equal(m_coreProxyMock.Object, m_conductor.CoreProxy);
 
@@ -92,9 +92,9 @@ namespace GoodAI.Arnold.UI.Tests
         [Fact]
         public async void DoubleSetupFails()
         {
-            await m_conductor.ConnectToCoreAsync(parameters: m_coreProcessParameters);
+            await m_conductor.ConnectToCoreAsync(m_coreProcessParams);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => m_conductor.ConnectToCoreAsync(m_coreProcessParams));
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace GoodAI.Arnold.UI.Tests
             m_coreProcessMock.Setup(process => process.EndPoint).Returns(null as EndPoint);
 
             await Assert.ThrowsAsync<InvalidOperationException>(
-                () => m_conductor.ConnectToCoreAsync(parameters: m_coreProcessParameters));
+                () => m_conductor.ConnectToCoreAsync(m_coreProcessParams));
         }
     }
 }

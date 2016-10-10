@@ -13,7 +13,7 @@ namespace GoodAI.Arnold.UI.Tests.Core
         [Fact]
         public void SubstituesPort()
         {
-            var coreParams = new CoreProcessParameters("dir", "--port {Port}", 80);
+            var coreParams = new CoreProcessParams("dir", "--port {Port}", 80);
 
             Assert.True(coreParams.IsValid);
             Assert.Equal("--port 80", coreParams.SubstitutedArguments);
@@ -22,7 +22,7 @@ namespace GoodAI.Arnold.UI.Tests.Core
         [Fact]
         public void DoesNotRequirePortWhenTheMacroIsNotThere()
         {
-            var coreParams = new CoreProcessParameters("dir", "--some --args", null);
+            var coreParams = new CoreProcessParams("dir", "--some --args", null);
 
             Assert.True(coreParams.IsValid);
         }
@@ -32,12 +32,12 @@ namespace GoodAI.Arnold.UI.Tests.Core
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var p = new CoreProcessParameters("dir", "args", -1);
+                var p = new CoreProcessParams("dir", "args", -1);
             });
 
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var p = new CoreProcessParameters("dir", "args", 1000000);
+                var p = new CoreProcessParams("dir", "args", 1000000);
             });
         }
     }

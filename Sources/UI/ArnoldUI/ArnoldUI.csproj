@@ -106,9 +106,10 @@
     <Compile Include="Composition\ModelUpdaterFactory.cs" />
     <Compile Include="Composition\PropertyInjectingFactory.cs" />
     <Compile Include="Core\Conductor.cs" />
+    <Compile Include="Core\CoreConnectionParams.cs" />
     <Compile Include="Core\CoreProcess.cs" />
     <Compile Include="Composition\CoreProcessFactory.cs" />
-    <Compile Include="Core\CoreProcessParameters.cs" />
+    <Compile Include="Core\CoreProcessParams.cs" />
     <Compile Include="Core\LockingModelUpdater.cs" />
     <Compile Include="Core\ModelFilter.cs" />
     <Compile Include="Core\SystemConfiguration.cs" />

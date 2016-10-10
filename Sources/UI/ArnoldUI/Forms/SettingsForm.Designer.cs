@@ -42,8 +42,8 @@
             this.loadBalancingIntervalTextBox = new System.Windows.Forms.TextBox();
             this.loadBalancingEnabledCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.localCoreRadioButton = new System.Windows.Forms.RadioButton();
             this.remoteCoreRadioButton = new System.Windows.Forms.RadioButton();
+            this.localCoreRadioButton = new System.Windows.Forms.RadioButton();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -215,6 +215,16 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Core mode";
             // 
+            // remoteCoreRadioButton
+            // 
+            this.remoteCoreRadioButton.AutoSize = true;
+            this.remoteCoreRadioButton.Location = new System.Drawing.Point(10, 45);
+            this.remoteCoreRadioButton.Name = "remoteCoreRadioButton";
+            this.remoteCoreRadioButton.Size = new System.Drawing.Size(151, 19);
+            this.remoteCoreRadioButton.TabIndex = 11;
+            this.remoteCoreRadioButton.Text = "Connect to remote core";
+            this.remoteCoreRadioButton.UseVisualStyleBackColor = true;
+            // 
             // localCoreRadioButton
             // 
             this.localCoreRadioButton.AutoSize = true;
@@ -226,16 +236,6 @@
             this.localCoreRadioButton.TabStop = true;
             this.localCoreRadioButton.Text = "Local machine core";
             this.localCoreRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // remoteCoreRadioButton
-            // 
-            this.remoteCoreRadioButton.AutoSize = true;
-            this.remoteCoreRadioButton.Location = new System.Drawing.Point(10, 45);
-            this.remoteCoreRadioButton.Name = "remoteCoreRadioButton";
-            this.remoteCoreRadioButton.Size = new System.Drawing.Size(151, 19);
-            this.remoteCoreRadioButton.TabIndex = 11;
-            this.remoteCoreRadioButton.Text = "Connect to remote core";
-            this.remoteCoreRadioButton.UseVisualStyleBackColor = true;
             // 
             // groupBox4
             // 
@@ -278,6 +278,7 @@
             this.remoteCoreHostTextBox.Name = "remoteCoreHostTextBox";
             this.remoteCoreHostTextBox.Size = new System.Drawing.Size(383, 23);
             this.remoteCoreHostTextBox.TabIndex = 0;
+            this.remoteCoreHostTextBox.Text = "localhost";
             // 
             // remoteCorePortTextBox
             // 

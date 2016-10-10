@@ -17,7 +17,7 @@ namespace GoodAI.Arnold.Core
         event EventHandler<StateChangeFailedEventArgs> StateChangeFailed;
         event EventHandler<StateChangedEventArgs> StateChanged;
 
-        Task ConnectToCoreAsync(EndPoint endPoint = null, CoreProcessParameters parameters = null);
+        Task ConnectToCoreAsync(ICoreConnectionParams connectionParams);
         void Disconnect();
         Task ShutdownAsync();
         Task LoadBlueprintAsync(string blueprint);
@@ -64,6 +64,8 @@ namespace GoodAI.Arnold.Core
         private readonly ICoreProxyFactory m_coreProxyFactory;
         private readonly IModelUpdaterFactory m_modelUpdaterFactory;
 
+        private bool m_isCoreLocal;
+
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
             ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory,
             IModelUpdaterFactory modelUpdaterFactory, IModelProviderFactory modelProviderFactory)
@@ -77,9 +79,10 @@ namespace GoodAI.Arnold.Core
             ModelProvider = modelProviderFactory.Create(this);
         }
 
-        // TODO(Premek): consider splitting this to separate calls for local / remote core
-        public async Task ConnectToCoreAsync(EndPoint endPoint = null, CoreProcessParameters parameters = null)
+        public async Task ConnectToCoreAsync(ICoreConnectionParams connectionParams)
         {
+            EndPoint endPoint = connectionParams.EndPoint;
+
             if (CoreProxy != null)
             {
                 Log.Error("Cannot connect to core, there is still a core proxy present");
@@ -87,19 +90,14 @@ namespace GoodAI.Arnold.Core
                     "There is still a core proxy present");
             }
 
-            if (endPoint == null)
+            if (connectionParams.IsCoreLocal)
             {
                 if (m_process == null)
                 {
-                    if (parameters == null)
-                    {
-                        throw new ArgumentNullException(nameof(parameters),
-                            $"must not be null when {nameof(endPoint)} is null");
-                    }
 
                     // TODO(HonzaS): Move this elsewhere when we have finer local process control.
                     Log.Info("Starting a local core process");
-                    m_process = m_coreProcessFactory.Create(parameters);
+                    m_process = m_coreProcessFactory.Create(connectionParams.CoreProcessParams);
                 }
 
                 endPoint = m_process.EndPoint;
@@ -110,6 +108,8 @@ namespace GoodAI.Arnold.Core
                 Log.Error("Endpoint not set up, cannot connect to core");
                 throw new InvalidOperationException("Endpoint not set");
             }
+
+            m_isCoreLocal = connectionParams.IsCoreLocal;
 
             Log.Info("Connecting to Core running at {hostname:l}:{port}", endPoint.Hostname, endPoint.Port);
             ICoreLink coreLink = m_coreLinkFactory.Create(endPoint);
@@ -162,7 +162,7 @@ namespace GoodAI.Arnold.Core
                 return;
             }
 
-            if (CoreProxy != null)
+            if ((CoreProxy != null) && m_isCoreLocal)
             {
                 Log.Info("Shutting down the core");
                 await CoreProxy.ShutdownAsync();

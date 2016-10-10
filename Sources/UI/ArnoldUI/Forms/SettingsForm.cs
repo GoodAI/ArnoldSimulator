@@ -17,10 +17,14 @@ namespace GoodAI.Arnold.Forms
     // ReSharper disable once ClassNeverInstantiated.Global
     public partial class SettingsForm : DockContent
     {
-        public CoreProcessParameters CoreProcessParameters => new CoreProcessParameters(
-            workingDirectory: coreProcessDirectoryTextBox.Text,
-            rawArguments: coreProcessArgumentsTextBox.Text,
-            maybePort: Validator.MaybeParsePortNumber(portTextBox.Text));
+        public ICoreConnectionParams CoreConnectionParams => localCoreRadioButton.Checked
+            ? (ICoreConnectionParams) new LocalCoreConnectionParams(
+                workingDirectory: coreProcessDirectoryTextBox.Text,
+                rawArguments: coreProcessArgumentsTextBox.Text,
+                maybePort: Validator.MaybeParsePortNumber(portTextBox.Text))
+            : new RemoteCoreConnectionParams(
+                remoteCoreHostTextBox.Text,
+                Validator.MaybeParsePortNumber(remoteCorePortTextBox.Text));
 
         private readonly UIMain m_uiMain;
 
@@ -39,7 +43,7 @@ namespace GoodAI.Arnold.Forms
 
         private void UpdateSubstitutedArguments()
         {
-            substitutedArgumentsTextBox.Text = CoreProcessParameters.SubstitutedArguments;
+            substitutedArgumentsTextBox.Text = CoreConnectionParams.CoreProcessParams.SubstitutedArguments;
         }
 
         private void portTextBox_TextChanged(object sender, EventArgs e)
