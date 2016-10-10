@@ -16,9 +16,11 @@ namespace GoodAI.Arnold.Core
         public string SubstitutedArguments =>
             MaybeSubstituteArguments() ?? "Invalid arguments, please check Port setting.";
 
-        public int? MaybePort { get; }
+        public int Port { get; }
 
         private readonly string m_rawArguments;
+
+        private readonly bool m_portIsValid;
 
         public CoreProcessParameters(string workingDirectory, string rawArguments, int? maybePort)
         {
@@ -31,17 +33,19 @@ namespace GoodAI.Arnold.Core
 
             WorkingDirectory = workingDirectory;
             m_rawArguments = rawArguments;
-            MaybePort = maybePort;
+            m_portIsValid = maybePort.HasValue;
+
+            Port = maybePort ?? -1;
         }
 
         private string MaybeSubstituteArguments()
         {
             if (m_rawArguments.Contains("{Port}"))
             {
-                if (!MaybePort.HasValue)
+                if (!m_portIsValid)
                     return null;
 
-                return m_rawArguments.Replace("{Port}", MaybePort.Value.ToString());
+                return m_rawArguments.Replace("{Port}", Port.ToString());
             }
 
             return m_rawArguments;  // Nothing to substitute.

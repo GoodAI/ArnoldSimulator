@@ -48,10 +48,7 @@ namespace GoodAI.Arnold.Core
 
         public CoreProcess(CoreProcessParameters parameters)
         {
-            if (!parameters.MaybePort.HasValue)
-                throw new ArgumentException("Port must not be null", nameof(parameters.MaybePort));
-
-            m_corePort = parameters.MaybePort.Value;
+            m_corePort = parameters.Port;
 
             m_process = new Process
             {
