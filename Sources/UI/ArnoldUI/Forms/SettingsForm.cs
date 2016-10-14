@@ -29,7 +29,8 @@ namespace GoodAI.Arnold.Forms
         private readonly UIMain m_uiMain;
 
         private readonly ColorTextControlValidator m_textControlValidator = new ColorTextControlValidator();
-        
+        private int m_runtimeOptionsGroupMargin;
+
         public SettingsForm(UIMain uiMain)
         {
             m_uiMain = uiMain;
@@ -39,6 +40,46 @@ namespace GoodAI.Arnold.Forms
             InitializeComponent();
 
             UpdateSubstitutedArguments();
+        }
+
+        private void SettingsForm_Load(object sender, EventArgs e)
+        {
+            InitCoreOptionsUiSwitch();
+        }
+
+        private void localCoreRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            SwitchCoreOptionsUiToRemoteOrLocal();
+        }
+
+        private void remoteCoreRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            SwitchCoreOptionsUiToRemoteOrLocal();
+        }
+
+        private void InitCoreOptionsUiSwitch()
+        {
+            m_runtimeOptionsGroupMargin = runtimeOptionsGroupBox.Top - remoteOptionsGroupBox.Top -
+                                          remoteOptionsGroupBox.Height;
+
+            remoteOptionsGroupBox.Top = localOptionsGroupBox.Top;
+
+            SwitchCoreOptionsUiToRemoteOrLocal();
+        }
+
+        private void SwitchCoreOptionsUiToRemoteOrLocal()
+        {
+            bool doShowRemote = remoteCoreRadioButton.Checked;
+
+            if (remoteOptionsGroupBox.Visible == doShowRemote)
+                return;  // Already done.
+
+            remoteOptionsGroupBox.Visible = doShowRemote;
+            localOptionsGroupBox.Visible = !remoteOptionsGroupBox.Visible;
+
+            int visibleGroupHeight = doShowRemote ? remoteOptionsGroupBox.Height : localOptionsGroupBox.Height;
+
+            runtimeOptionsGroupBox.Top = remoteOptionsGroupBox.Top + visibleGroupHeight + m_runtimeOptionsGroupMargin;
         }
 
         private void UpdateSubstitutedArguments()
@@ -99,6 +140,7 @@ namespace GoodAI.Arnold.Forms
         {
             m_textControlValidator.ValidateAndColorControl(loadBalancingIntervalTextBox, Validator.TryParseUInt);
         }
+
 
         private async void loadBalancingIntervalTextBox_KeyDown(object sender, KeyEventArgs e)
         {
