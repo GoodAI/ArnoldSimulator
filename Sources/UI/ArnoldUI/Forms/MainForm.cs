@@ -187,7 +187,6 @@ namespace GoodAI.Arnold
                 return;
             }
 
-            // TODO(HonzaS): Handle the core type (local/remote).
             await RunButtonActionAsync(() => m_uiMain.ConnectToCoreAsync(SettingsForm.CoreConnectionParams));
         }
 
