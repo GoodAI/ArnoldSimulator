@@ -39,6 +39,7 @@
 - to run from command line, change either to debug or release directory and run the following command:
     core +p5 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ..\..\..\..\..\Blueprints\random_blueprint.json
 - commands above will run single core process on single machine and the specified ammount of cores (e.g. +p3 +ppn 2 to run on just two cores instead of four)
+	- note: there's a bug when run without charmrun on Windows, the +p param number needs to be one higher than the actual number of cores you want
 - for multi-machine scenario, refer to uba/Arnold/Sources/BootstrapArnold/HowToRun.txt
 
 6) Run simulation

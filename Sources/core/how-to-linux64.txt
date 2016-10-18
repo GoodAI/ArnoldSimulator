@@ -33,7 +33,8 @@
     ./core/release
 - go to either one of the directories and run for example the following command:
     LD_LIBRARY_PATH=. ./core +p4 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json
-- command above will run single core process on single machine and the specified ammount of cores (e.g. +p2 +ppn 2 to run on just two cores instead of four)
+    - command above will run single core process on single machine and the specified ammount of cores (e.g. +p2 +ppn 2 to run on just two cores instead of four)
+    - +noisomalloc switches off an archaic feature that tried to allocate object on the same addresses on different machines; keeping this feature ON on Linux would cause crashes
 - for multi-machine scenario, refer to uba/Arnold/Sources/BootstrapArnold/HowToRun.txt
 - to do debugging, run the core via the following command:
     LD_LIBRARY_PATH=. gdb --args ./core +p4 +ppn 4 +noisomalloc +LBCommOff +balancer DistributedLB ../../../../../Blueprints/random_blueprint.json

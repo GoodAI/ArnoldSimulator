@@ -90,11 +90,10 @@ https://sites.google.com/a/keenswh.com/ai/projects/brain-simulator/brain-simulat
     ssh-keygen -t rsa
     ssh-copy-id swe-centos-vm1
     ssh swe-centos-vm1
-    exit
-    ssh-keygen -t rsa
+    exit  # or just press Ctrl-D to logout
     ssh-copy-id swe-centos-vm2
     ssh swe-centos-vm2
-    exit
+    exit  # or Ctrl-D
 8) Ensure it is possible to use /tmp/arnold directory on all worker machines.
 
 Scenario Preparation
