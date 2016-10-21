@@ -20,7 +20,9 @@ namespace GoodAI.Arnold.Core
         public ILog Log { get; set; } = NullLogger.Instance;
 
         private Process m_charmdProcess;
-        private readonly string CharmdExecutable = "charmd.exe";
+
+        /// '.exe' not necessary and breaks detection of already running process, @see IsAnyCharmProcessRunning()
+        private readonly string CharmdExecutable = "charmd";
 
         public async Task StartIfNotRunningAndWaitAsync(string charmdPath, int waitTimeMs)
         {
@@ -32,7 +34,11 @@ namespace GoodAI.Arnold.Core
                 m_charmdProcess.Dispose();
             }
 
-            // TODO(Premek): Check if ANY charmd process is already running!
+            if (IsAnyCharmdProcessRunning())
+            {
+                Log.Debug($"Some {CharmdExecutable} detected. We will not run a new one.");
+                return;
+            }
 
             m_charmdProcess = new Process
             {
@@ -43,6 +49,8 @@ namespace GoodAI.Arnold.Core
                     FileName = CharmdExecutable
                 }
             };
+
+            Log.Info($"Starting {CharmdExecutable}");
 
             try
             {
@@ -65,6 +73,12 @@ namespace GoodAI.Arnold.Core
                 m_charmdProcess.Kill();
 
             m_charmdProcess.Dispose();
+        }
+
+        private bool IsAnyCharmdProcessRunning()
+        {
+            // Note: ProcessName does not contain the '.exe' extension
+            return Process.GetProcesses().Any(p => p.ProcessName.Contains(CharmdExecutable));
         }
     }
 }
