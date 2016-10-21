@@ -72,4 +72,4 @@ Notes:
 - Scripts work solely in this directory, do not install anything and do not change the system in any way.
 - In case the script cannot download some dependency from Internet, download it manually from backup at [1], put it to this directory and run the script again.
 
-[1] https://drive.google.com/a/keenswh.com/folderview?id=0B8ONJ7bRxkISdDlVM01vVEFWRjg&usp=sharing
+[1] \\DISKSTATION\GoodAI\Swe\Arnold Packages or https://drive.google.com/drive/folders/0B4J0k2HtwD3TdG9MUi1LM1JldUk?usp=sharing
