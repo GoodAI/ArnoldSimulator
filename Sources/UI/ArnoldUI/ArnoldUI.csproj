@@ -99,6 +99,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CharmdRunner.cs" />
     <Compile Include="Core\CoreConfiguration.cs" />
     <Compile Include="Communication\Messages\CommonMessages.cs" />
     <Compile Include="Communication\Messages\RequestMessages.cs" />

@@ -75,7 +75,7 @@ namespace GoodAI.Arnold.UI.Tests
 
             m_conductor = new Conductor(coreProcessFactoryMock.Object, coreLinkFactoryMock.Object,
                 coreControllerFactoryMock.Object, coreProxyFactoryMock.Object, new Mock<IModelUpdaterFactory>().Object,
-                new Mock<IModelProviderFactory>().Object);
+                new Mock<IModelProviderFactory>().Object, new Mock<ICharmdRunner>().Object);
         }
 
         [Fact]

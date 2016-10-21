@@ -42,6 +42,8 @@ namespace GoodAI.Arnold
             container.RegisterSingleton<ICoreProcessFactory, CoreProcessFactory>();
             container.RegisterSingleton<ICoreProxyFactory, CoreProxyFactory>();
 
+            container.RegisterSingleton<ICharmdRunner, CharmdRunner>();
+
             container.RegisterSingleton<IModelDiffApplier, ModelDiffApplier>();
             container.RegisterSingleton<IModelUpdaterFactory, ModelUpdaterFactory>();
             container.RegisterSingleton<IModelProviderFactory, ModelProviderFactory>();

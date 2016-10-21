@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -64,17 +65,23 @@ namespace GoodAI.Arnold.Core
         private readonly ICoreProxyFactory m_coreProxyFactory;
         private readonly IModelUpdaterFactory m_modelUpdaterFactory;
 
+        private readonly ICharmdRunner m_charmdRunner;
+        private const int CharmdStartWaitMs = 250;
+        private readonly string CharmdRelativePath = "../../libs/charm/net-debug/bin";  // TODO(Premek): Pass from UI or a config file.
+
         private bool m_isCoreLocal;
 
         public Conductor(ICoreProcessFactory coreProcessFactory, ICoreLinkFactory coreLinkFactory,
             ICoreControllerFactory coreControllerFactory, ICoreProxyFactory coreProxyFactory,
-            IModelUpdaterFactory modelUpdaterFactory, IModelProviderFactory modelProviderFactory)
+            IModelUpdaterFactory modelUpdaterFactory, IModelProviderFactory modelProviderFactory,
+            ICharmdRunner charmdRunner)
         {
             m_coreProcessFactory = coreProcessFactory;
             m_coreLinkFactory = coreLinkFactory;
             m_coreControllerFactory = coreControllerFactory;
             m_coreProxyFactory = coreProxyFactory;
             m_modelUpdaterFactory = modelUpdaterFactory;
+            m_charmdRunner = charmdRunner;
 
             ModelProvider = modelProviderFactory.Create(this);
         }
@@ -94,6 +101,9 @@ namespace GoodAI.Arnold.Core
             {
                 if (m_process == null)
                 {
+                    await m_charmdRunner.StartIfNotRunningAndWaitAsync(
+                        Path.Combine(connectionParams.CoreProcessParams.WorkingDirectory, CharmdRelativePath),
+                        CharmdStartWaitMs);
 
                     // TODO(HonzaS): Move this elsewhere when we have finer local process control.
                     Log.Info("Starting a local core process");
@@ -315,6 +325,8 @@ namespace GoodAI.Arnold.Core
             {
                 Disconnect();
             }
+
+            m_charmdRunner?.Dispose();
         }
     }
 }
