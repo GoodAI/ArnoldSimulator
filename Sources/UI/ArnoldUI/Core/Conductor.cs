@@ -313,6 +313,10 @@ namespace GoodAI.Arnold.Core
         public async void Dispose()
         {
             Log.Debug("Disposing conductor");
+
+            // Note: this does not get called when run after shutdown (and charmd is not needed anymore anyway). TODO(Premek): Find out why.
+            m_charmdRunner?.Dispose();
+
             if (m_process != null)
             {
                 await ShutdownAsync();
@@ -326,7 +330,6 @@ namespace GoodAI.Arnold.Core
                 Disconnect();
             }
 
-            m_charmdRunner?.Dispose();
         }
     }
 }
