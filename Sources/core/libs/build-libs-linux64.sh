@@ -71,6 +71,7 @@ obtain_charm()
     mv -f src/ck-ldb/DistributedLB.C.tmp src/ck-ldb/DistributedLB.C
     
     CHARM_COMMON_FLAGS=--enable-lbuserdata
+    # the parallel build flag (-j8) is ignored by the build script for the debug build and cannot be enabled for some specific reason of the debug build
     ./build charm++ netlrts-linux-x86_64 smp $CHARM_COMMON_FLAGS --destination=net-debug -g -no-optimize 2>&1 | tee net-debug.log
     ./build charm++ netlrts-linux-x86_64 smp $CHARM_COMMON_FLAGS --destination=net-release --with-production -j8 | tee net-release.log
 
