@@ -1,0 +1,40 @@
+# Ignore NuGet Packages
+*.nupkg
+# Ignore the packages folder
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/packages/repositories.config
+
+*.opensdf
+*.suo
+*.sdf
+bin
+obj
+*.pdb
+debug
+Debug
+release
+Release
+*.user
+doc.xml
+
+/Sources/packages
+*.DotSettings
+*.opendb
+Sources/Libs/ConverseSharpTests/Asserts/
+Sources/core/libs/catch/
+Sources/core/libs/charm/
+Sources/core/libs/._charm-*
+Sources/core/libs/tbb/
+Sources/core/libs/json/
+Sources/core/libs/sparsehash/
+Sources/core/libs/flatbuffers/
+Sources/network/flatbuffers/
+*.db
+*.gz
+*.zip
+Sources/core/libs/projections/
+Sources/core/libs/charmdebug/
+*.tgz
