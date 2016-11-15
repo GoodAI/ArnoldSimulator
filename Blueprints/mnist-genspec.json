@@ -1,0 +1,118 @@
+{
+    "brain": {
+        "name": "GenSpec#1",
+        "type": "GenSpecBrain",
+        "params": {
+            "body": {
+                "type": "MNISTBinaryBody",
+                "params": {
+                    "sensors": [
+                        {
+                            "name": "Digit",
+                            "spikeType": "MultiByte",
+                            "spikeAllocCount": 784,
+                            "size": 1
+                        }
+                    ],
+                    "actuators": [
+                        {
+                            "name": "NextDigit",
+                            "spikeType": "Binary",
+                            "size": 1
+                        }
+                    ],
+                    "imagesFile": "train-images.idx3-ubyte",
+                    "labelsFile": "train-labels.idx1-ubyte"
+                }
+            },
+            "regions": [
+                {
+                    "name": "FirstLayer",
+                    "type": "GenSpecRegion",
+                    "position": [0.0, 0.0, 0.0],
+                    "size": [20.0, 20.0, 50.0],
+                    "params": {
+                        "inputs": [ 
+                            {
+                                "name": "Input",
+                                "neuronType": "GenSpecInputNeuron",
+                                "neuronParams": {
+                                    "inputSizeX": 28,
+                                    "inputSizeY": 28,
+                                    "neuronCountX": 2,
+                                    "neuronCountY": 1,
+                                    "neuronInputSizeX": 28,
+                                    "neuronInputSizeY": 28,
+                                    "neuronInputStrideX": 0,
+                                    "neuronInputStrideY": 0,
+                                    "position": {
+                                        "x": 0,
+                                        "y": 0.5,
+                                        "z": 0.5
+                                    }
+                                },
+                                "neuronCount": 1
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "name": "Output",
+                                "neuronType": "GenSpecOutputNeuron",
+                                "neuronParams": {
+                                    "position": {
+                                        "x": 1,
+                                        "y": 0.5,
+                                        "z": 0.5
+                                    }
+                                },
+                                "neuronCount": 1
+                            },
+                            {
+                                "name": "NextDigit",
+                                "neuronType": "GenSpecNextDigitNeuron",
+                                "neuronParams": {
+                                    "position": {
+                                        "x": 1,
+                                        "y": 0.5,
+                                        "z": 0.7
+                                    }
+                                },
+                                "neuronCount": 1
+                            }
+                        ],
+                        "generalists": {
+                            "neuronParams": {
+                                "synapseThreshold": 0.5,
+                                "inputSizeX": 28,
+                                "inputSizeY": 28,
+                                "generalizationValueCountLimit": 100
+                            },
+                            "neuronCountX": 2,
+                            "neuronCountY": 1,
+                            "inputSizeX": 28,
+                            "inputSizeY": 28
+                        },
+                        "brainStepsPerEvolution": 50,
+                        "specialistCount": 2,
+                        "specializingGeneralistCount": 1,
+                        "layerCountLimit": 6
+                    }
+                }
+            ],
+            "connections": [
+                {
+                    "fromRegion": "",
+                    "fromConnector": "Digit",
+                    "toRegion": "FirstLayer",
+                    "toConnector": "Input"
+                },
+                {
+                    "fromRegion": "FirstLayer",
+                    "fromConnector": "NextDigit",
+                    "toRegion": "",
+                    "toConnector": "NextDigit"
+                }
+            ]
+        }
+    }
+}
