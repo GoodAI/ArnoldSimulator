@@ -44,6 +44,21 @@ To better understand how blueprint is supposed to work, first look at the high-l
 
 First, carefully study the simulation loop diagram. It is slightly simplified in certain aspects with respect to the actual implementation but gives a good high-level idea of how the responsibility is divided among the objects, where the flow of control forks and joins, and where user-defined code gets executed (orange boxes). In the actual implementation, this is the execution order of user-defined methods: `Brain::Control`, `Body::Simulate`, `Region::Control`, `Neuron::Control`, `Neuron::ContributeToRegion`, `Neuron::CalculateObserver`, `Region::AcceptContributionFromNeuron`, `Region::ContributeToBrain`, `Brain::AcceptContributionFromRegion`.
 
+#Code organization
+Our build chain requires all the source code and headers to be located flat in the core folder. For organization of various models in the solution, use filters. Your own models should implement at least a `Brain` class, which will spawn regions and neurons during initialization.
+
+The various components of models need to be registered in the core. Neurons, Regions and Brains have to be registered inside the `NeuronFactory`, `RegionFactory` and `BrainFactory`, while SynapseEditors and SpikeEditors belong to the `SynapseEditorCache` and `SpikeEditorCache`. This registration is done in Core\init.cpp, ideally through an initialization function which is separate for each model. There is currently no mechanism for automatic discovery/registration.
+
+#Example models
+
 ##Threshold model (threshold_\*.cpp)
 
 A random spiking neural network, which should stress test various features and aspects of the simulation infrastructure. Shall also serve as a reference implementation of how to use the infrastructure. Of a particular interest to a reader should be the example usage of a `FunctionalSpike` to establish a communication protocol between Neurons to negotiate an average spiking threshold. Note decisions made in the `ContributeTo*`, `AcceptContributionFrom*` and `Control` methods with regard to when to grow or shrink the entire network.
+
+##Generalist/Specialist model (gen_spec\*.cpp)
+
+A simple growing neural algorithm created for the purpose of testing the growing mechanisms and observation of the system, which might be used as a basis for a [MNIST](http://yann.lecun.com/exdb/mnist/ "MNIST") classifier. To run this model, you have to put the MNIST data files in the folder where core is compiled. The *training* label/image files will work out of the box if you use the blueprint in mnist-genspec.json, otherwise you have to change the relevant values in the blueprint to point to the files.
+
+#UI
+
+The UI client (MS Windows only) is used for blueprint setup, core instance control and model visualization/observation.
