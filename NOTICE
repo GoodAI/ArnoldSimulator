@@ -26,3 +26,8 @@ where this file is.
 
 This source repository includes one or more copyrighted 3rd-party libraries.
 See the Sources/UI/Libs/3rd directory. Their licenses are in the Licenses directory.
+
+NOTE: Arnold Simulator is based on Charm++ (http://charmplusplus.org/) which
+restricts some uses of Arnold Simulator. The license of Charm++ allows to use
+the library for research and internal business purposes without a fee, but
+commercial use requires a special agreement. See the Charm++ license for details.
