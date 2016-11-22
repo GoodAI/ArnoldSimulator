@@ -61,7 +61,7 @@ A simple growing neural algorithm created for the purpose of testing the growing
 
 #UI
 
-The UI client (MS Windows only) is used for blueprint setup, core instance control and model visualization/observation. See the [introduction video](https://www.youtube.com/watch?v=02MiOANARIM "introduction video").
+The UI client (MS Windows only) is used for blueprint setup, core instance control and model visualization/observation. See the [introduction video](https://www.youtube.com/watch?v=I9K4z7pA2ws "introduction video").
 
 #License
 
